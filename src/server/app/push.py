@@ -43,8 +43,8 @@ def delete_subscription(conn: sqlite3.Connection, endpoint: str) -> None:
 
 
 class Pusher:
-    def __init__(self, conn: sqlite3.Connection, settings: Settings, sender=webpush):
-        self.conn, self.s, self._send = conn, settings, sender
+    def __init__(self, conn: sqlite3.Connection, settings: Settings, sender=webpush, llm=None):
+        self.conn, self.s, self._send, self.llm = conn, settings, sender, llm
 
     def _claims(self) -> dict:
         if not (self.s.vapid_private_key and self.s.vapid_subject.startswith(("mailto:", "https://"))):
@@ -94,6 +94,8 @@ class Pusher:
         """Engine.tick 훅. 새로 '입항 중'이 된 배 묶음으로 알림 한 건."""
         est = species.estimate(self.conn, new, vt.month)
         title, body = brief.template(new, est)
+        body, how = await brief.polish(self.llm, self.s.openai_model, body)
+        log.info("알림 문장(%s): %s", how, body)
         await self.notify(vt, title, body, est, [a["ship_id"] for a in new])
 
 

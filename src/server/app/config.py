@@ -36,6 +36,14 @@ class Settings:
     http_timeout_s: float = 15.0
 
 
+def _vapid_subject(raw: str) -> str:
+    """'team@example.com' 처럼 주소만 넣어도 동작하게 mailto: 를 붙인다."""
+    raw = raw.strip()
+    if raw and "@" in raw and not raw.startswith(("mailto:", "https://")):
+        return "mailto:" + raw
+    return raw
+
+
 def load_settings() -> Settings:
     feed = os.getenv("FEED", "sim").strip().lower()
     if feed not in ("sim", "live"):
@@ -47,7 +55,7 @@ def load_settings() -> Settings:
         openai_model=os.getenv("OPENAI_MODEL", "gpt-6.1-sol").strip(),
         vapid_public_key=os.getenv("VAPID_PUBLIC_KEY", "").strip(),
         vapid_private_key=os.getenv("VAPID_PRIVATE_KEY", "").strip(),
-        vapid_subject=os.getenv("VAPID_SUBJECT", "").strip(),
+        vapid_subject=_vapid_subject(os.getenv("VAPID_SUBJECT", "")),
         sim_admin_token=os.getenv("SIM_ADMIN_TOKEN", "").strip(),
         feed=feed,
         db_path=_resolve(os.getenv("DB_PATH", "./data/app.db").strip()),

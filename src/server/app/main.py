@@ -65,14 +65,14 @@ async def lifespan(app: FastAPI):
     engine = Engine(app.state.db, app.state.eum, app.state.place, settings.feed)
     engine.reload_fleet()
     app.state.engine = engine
-    app.state.pusher = pushmod.Pusher(app.state.db, settings)
-    engine.hooks.append(app.state.pusher.on_new_arrivals)
     app.state.llm = None
     if settings.openai_api_key:
         from openai import AsyncOpenAI
         app.state.llm = AsyncOpenAI(api_key=settings.openai_api_key, timeout=30.0, max_retries=1)
     else:
-        log.warning("OPENAI_API_KEY 가 없어 질문창은 간단 모드로만 답합니다.")
+        log.warning("OPENAI_API_KEY 가 없어 질문창은 간단 모드로, 알림은 템플릿으로만 만듭니다.")
+    app.state.pusher = pushmod.Pusher(app.state.db, settings, llm=app.state.llm)
+    engine.hooks.append(app.state.pusher.on_new_arrivals)
     sched = AsyncIOScheduler()
     # 실제 3초마다 가상 시계를 확인하고, 10분(가상) 경계를 넘었을 때만 기록·알림한다.
     sched.add_job(engine.tick, "interval", seconds=3, max_instances=1, coalesce=True)

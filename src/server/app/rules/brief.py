@@ -1,7 +1,13 @@
 """알림 문장(설계 §5.3). 숫자는 룰 결과를 그대로 쓴다. LLM 문장은 이후 단계에서 덧붙이고, 실패하면 이 템플릿을 쓴다."""
 from __future__ import annotations
 
+import asyncio
+import logging
+import re
 from collections import Counter
+from typing import Any
+
+log = logging.getLogger(__name__)
 
 AUCTION_DEFAULT = "09:00"
 
@@ -35,3 +41,48 @@ def matches(cond: dict, est: dict) -> bool:
     if not want:
         return True
     return any(s["name"] == want and s["share"] >= 0.2 for s in est.get("overall", []))
+
+
+NUM_RE = re.compile(r"\d+(?::\d+)?")
+POLISH_PROMPT = """아래 입항 알림 문장을 횟집 사장이 잠금 화면에서 한눈에 읽게 다듬어라.
+- 한 문장, 70자 이내, 존댓말 없이 간결하게.
+- 숫자·시각·어종·'가능성'·'(기본값)'을 하나도 바꾸거나 빼거나 더하지 마라.
+- 다듬은 문장만 출력하라."""
+
+
+def numbers(text: str) -> list[str]:
+    return sorted(NUM_RE.findall(text))
+
+
+def accept(template_body: str, candidate: str) -> bool:
+    """LLM 문장이 템플릿의 숫자를 정확히 같은 집합으로 담고, 길이·어종이 지켜졌을 때만 쓴다."""
+    c = candidate.strip()
+    if not c or len(c) > 90 or "\n" in c:
+        return False
+    if numbers(c) != numbers(template_body):
+        return False
+    return "가능성" in c if "가능성" in template_body else True
+
+
+async def polish(client: Any, model: str, template_body: str, timeout_s: float = 8.0) -> tuple[str, str]:
+    """(본문, 'llm'|'template'). 실패·검증 탈락이면 템플릿 그대로."""
+    if client is None:
+        return template_body, "template"
+    from ..agent import chat  # 크레딧 소진 쿨다운을 질문창과 공유
+    import time
+    if time.monotonic() < chat._cooldown_until:
+        return template_body, "template"
+    try:
+        r = await asyncio.wait_for(client.responses.create(
+            model=model, reasoning={"effort": "low"}, max_output_tokens=300,
+            input=[{"role": "system", "content": POLISH_PROMPT}, {"role": "user", "content": template_body}]), timeout_s)
+        out = (r.output_text or "").strip().strip('"')
+    except Exception as e:
+        log.warning("알림 문장 다듬기 실패, 템플릿 사용: %s", type(e).__name__)
+        if type(e).__name__ in ("RateLimitError", "AuthenticationError", "PermissionDeniedError"):
+            chat._cooldown_until = time.monotonic() + chat.COOLDOWN_S
+        return template_body, "template"
+    if accept(template_body, out):
+        return out, "llm"
+    log.info("알림 문장 검증 탈락(숫자·길이), 템플릿 사용: %r", out[:100])
+    return template_body, "template"

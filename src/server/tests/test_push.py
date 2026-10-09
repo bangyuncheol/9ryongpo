@@ -85,3 +85,39 @@ def test_recent_notifications_hides_future_and_duplicates(conn):
     asyncio.run(p.notify(VT.replace(hour=5), "t", "나중 장면", EST, []))
     got = push.recent_notifications(conn, VT.replace(minute=30))
     assert [g["body"] for g in got] == ["같은 장면"]
+
+
+def test_vapid_subject_accepts_bare_email():
+    from app.config import _vapid_subject
+    assert _vapid_subject("team@example.com") == "mailto:team@example.com"
+    assert _vapid_subject("mailto:a@b.c") == "mailto:a@b.c"
+    assert _vapid_subject("") == ""
+
+
+TEMPLATE = "04:25~04:35 자망선 3척 입항 예정 · 붉은대게·골뱅이 가능성. 경매 09:00(기본값)"
+
+
+def test_accept_keeps_numbers_exact():
+    assert brief.accept(TEMPLATE, "자망선 3척 04:25~04:35 입항 예정, 붉은대게·골뱅이 가능성. 경매 09:00(기본값)")
+    assert not brief.accept(TEMPLATE, "자망선 4척 04:25~04:35 입항 예정, 붉은대게 가능성. 경매 09:00")  # 숫자 바뀜
+    assert not brief.accept(TEMPLATE, "자망선 3척 입항 예정, 붉은대게 가능성. 경매 09:00")              # 시각 빠짐
+    assert not brief.accept(TEMPLATE, "04:25~04:35 자망선 3척, 붉은대게 확실. 경매 09:00")              # '가능성' 빠짐
+
+
+class _R:
+    def __init__(self, text): self.output_text = text
+
+
+class _Client:
+    def __init__(self, text): self.text = text; self.responses = self
+
+    async def create(self, **kw): return _R(self.text)
+
+
+def test_polish_falls_back_on_bad_llm_output(monkeypatch):
+    from app.agent import chat
+    monkeypatch.setattr(chat, "_cooldown_until", 0.0)
+    good = "04:25~04:35 자망선 3척 입항 예정 · 붉은대게·골뱅이 가능성 · 경매 09:00(기본값)"
+    assert asyncio.run(brief.polish(_Client(good), "m", TEMPLATE)) == (good, "llm")
+    assert asyncio.run(brief.polish(_Client("자망선 5척 곧 입항!"), "m", TEMPLATE)) == (TEMPLATE, "template")
+    assert asyncio.run(brief.polish(None, "m", TEMPLATE)) == (TEMPLATE, "template")
