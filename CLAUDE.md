@@ -63,7 +63,8 @@
 - `testing.md` — 테스트 작성 규칙
 - `error-handling.md` — 에러 처리·사용자 문구 규칙 (항상 적용)
 - `git-workflow.md` — 브랜치·커밋 규칙 (항상 적용)
-- `ui-design.md` — UI 컴포넌트·스타일 규칙
+- `ui-design.md` — UI 컴포넌트·스타일 규칙 (기준 디자인 언어: 삼성 One UI)
+- `samsung-one-ui.md` — 삼성 One UI 공개 자료 카탈로그(비공식, 출처 포함). `src/web/` 작업 때만 로드, ui-design.md가 여기서 골라 쓴다
 
 **`.claude/skills/`** — 상세 스펙·절차·추적·아카이브. 필요할 때만 로드.
 - `db-schema` — 테이블·컬럼·접근 정책 스펙
