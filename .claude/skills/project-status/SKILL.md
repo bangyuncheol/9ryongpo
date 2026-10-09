@@ -17,10 +17,11 @@ description: 미구현·보류·기술부채·진행 중 과제의 현재 상태
 **끝난 것**
 - 서버 뼈대 `src/server/` (uv, Python 3.12, FastAPI). 기동 시 위판장 좌표·어선 명부 202척·교통 센서 11대·위판 실적(`data/auction/`) 적재.
 - API: `/api/health` `/api/place` `/api/fleet` `/api/sensors` `/api/traffic/now` (목록은 requirements 스킬 `flows-and-pages.md`).
-- 테스트 12개 (`cd src/server && uv run pytest`). 외부 호출 없이 `tests/fixtures/`의 실제 응답 일부로 돈다.
+- 시뮬레이터 `app/feed/sim.py`(시각의 순수 함수, 대본 6척 + 실제 위치 44척, 시드 고정), 가상 시계 `app/feed/clock.py`, 실데이터 `app/feed/live.py`. 대본은 `KEY_SHIPS`.
+- 테스트 19개 (`cd src/server && uv run pytest`). 외부 호출 없이 `tests/fixtures/`의 실제 응답 일부로 돈다.
 
 **다음 할 일 (설계 §10 순서)**
-1. 시뮬레이터 v0 `app/feed/sim.py` + 가상 시계 `app/feed/clock.py` → `ships_pos` 적재. 핵심 배는 대본(§1-13).
+1. 시뮬레이터·시계를 서버에 연결: 10분(가상) 틱마다 `ships_pos` 적재, `/sim/*`(관리자 토큰).
 2. 입항 판정 `app/rules/arrival.py`(§5.1) → `forecast`, 어종 추정 `app/rules/species.py`(§5.2, 4개년 10월 평균).
 3. `/api/today`(입항 카드 + 어종 + 교통 현황) — 화면이 붙을 API.
 4. 화면 뼈대 `src/web/` (Vite + React + Tailwind + Leaflet).
