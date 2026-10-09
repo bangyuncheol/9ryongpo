@@ -178,3 +178,15 @@ def sim_feed(request: Request, mode: str = Query(..., pattern="^(sim|live)$")) -
     e = request.app.state.engine
     e.set_feed(mode)
     return {**e.clock.state(), "feed": e.feed}
+
+
+# --- 화면(Vite 빌드 결과) 정적 서빙. API 라우트보다 뒤에 둔다. ---
+from fastapi.staticfiles import StaticFiles  # noqa: E402
+
+from .config import REPO_ROOT  # noqa: E402
+
+WEB_DIST = REPO_ROOT / "src" / "web" / "dist"
+if WEB_DIST.is_dir():
+    app.mount("/", StaticFiles(directory=WEB_DIST, html=True), name="web")
+else:
+    log.info("화면 빌드(src/web/dist)가 없어 API만 제공합니다. 화면은 'cd src/web && npm run build'.")

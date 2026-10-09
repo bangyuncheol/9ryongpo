@@ -95,3 +95,11 @@ def test_estimate_group(conn):
     assert e["by_biz"][0]["biz"] == "연안자망어업" and e["by_biz"][0]["count"] == 2
     names = [x["name"] for x in e["overall"]]
     assert names[0] == "살오징어" and "붉은대게" in names
+
+
+def test_category_only_ship_does_not_dilute(conn):
+    # 근해자망은 10월 1위 어종이 해마다 바뀌어 '범주만'. 43톤이 섞여도 자망 3척의 붉은대게 비율이 유지돼야 한다.
+    ships = [{"biz": "연안자망어업", "gt": 5.0}, {"biz": "연안자망어업", "gt": 10.0}, {"biz": "근해자망어업", "gt": 43.0}]
+    e = species.estimate(conn, ships, 10)
+    assert e["overall"][0]["name"] == "붉은대게" and e["overall"][0]["share"] > 0.7
+    assert "근해자망어업" in e["category_only_biz"]

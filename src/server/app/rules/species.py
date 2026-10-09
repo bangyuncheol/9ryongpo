@@ -57,14 +57,23 @@ def estimate(conn: sqlite3.Connection, ships: list[dict], month: int) -> dict:
     groups: dict[str, list[dict]] = defaultdict(list)
     for s in ships:
         groups[s.get("biz") or "업종 미상"].append(s)
-    by_biz, mix = [], defaultdict(float)
+    by_biz = []
     total_gt = sum((s.get("gt") or 0) for s in ships) or 0.0
+    known: list[tuple[float, list[dict]]] = []
     for biz, members in sorted(groups.items(), key=lambda kv: -len(kv[1])):
         gt = sum((s.get("gt") or 0) for s in members)
         dist = biz_distribution(conn, biz, month)
         by_biz.append({"biz": biz, "count": len(members), "gt": round(gt, 1), **{k: dist[k] for k in ("species", "basis", "category_only")}})
-        if total_gt and not dist["category_only"]:
-            for sp in dist["species"]:
-                mix[sp["name"]] += sp["share"] * gt / total_gt
+        if not dist["category_only"] and dist["species"]:
+            known.append((gt, dist["species"]))
+    # 어종을 말할 수 있는 업종끼리만 톤수 가중한다. '범주만' 업종의 톤수가 분모에 들어가면 비율이 희석된다(10/9 화면에서 확인).
+    known_gt = sum(g for g, _ in known)
+    mix: dict[str, float] = defaultdict(float)
+    for gt, sps in known:
+        w = gt / known_gt if known_gt else 1 / len(known)
+        for sp in sps:
+            mix[sp["name"]] += sp["share"] * w
     overall = sorted(({"name": k, "share": round(v, 3)} for k, v in mix.items() if v >= MIN_SHARE), key=lambda x: -x["share"])
-    return {"by_biz": by_biz, "overall": overall, "ships": len(ships), "total_gt": round(total_gt, 1)}
+    unknown = [b["biz"] for b in by_biz if b["category_only"] or not b["species"]]
+    return {"by_biz": by_biz, "overall": overall, "ships": len(ships), "total_gt": round(total_gt, 1),
+            "category_only_biz": unknown}

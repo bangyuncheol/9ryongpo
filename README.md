@@ -61,6 +61,17 @@ uv run uvicorn app.main:app --reload --port 8000
 
 브라우저에서 `http://localhost:8000/api/health` → `fleet`이 202면 정상. DB(`data/app.db`)는 기동 때 API·CSV로 다시 채워지므로 지워도 된다.
 
+화면 (처음 한 번 [Node.js](https://nodejs.org/) LTS 설치):
+
+```
+cd src/web
+npm install
+npm run build      # 결과(dist/)를 서버가 http://localhost:8000/ 에서 보여 준다
+npm run dev        # 화면만 고칠 때. http://localhost:5173 (API는 8000으로 자동 연결)
+```
+
+데모 진행 막대는 주소 끝에 `?admin=1`을 붙이면 나온다. 토큰은 `.env`의 `SIM_ADMIN_TOKEN`.
+
 테스트: `cd src/server` 후 `uv run pytest`.
 
 이어받는 사람은 `.claude/skills/project-status/SKILL.md`의 "다음 할 일"부터 본다.
