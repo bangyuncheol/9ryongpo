@@ -157,3 +157,23 @@ def test_species_question_answers_about_that_species(ctx):
     ctx.engine.clock.seek("04:30")
     ans = collect(chat.answer(None, "m", ctx, "오늘 오징어 있어?"))[-1]["text"]
     assert "제33성한호" in ans and "살오징어" in ans
+
+
+def test_live_stale_positions_give_no_forecast_or_push(ctx):
+    e = ctx.engine
+    e.set_feed("live")
+    e._live_rows = [{"ship_id": 1, "ts": "2025-04-27T14:07:38+09:00", "lat": 35.99, "lon": 129.60, "course": 270.0,
+                     "speed": 8.0, "rcv_ts": "2025-04-27T14:07:38+09:00", "source": "live"}]
+    from app.feed.clock import real_now
+    e._live_at = real_now()  # 다시 부르지 않게
+    pushed = []
+
+    async def hook(t, new):
+        pushed.append(new)
+    e.hooks.append(hook)
+    today = asyncio.run(e.today())
+    assert today["arriving"] == [] and "2025-04-27" in today["notice"]
+    ships = asyncio.run(e.ships())
+    assert ships["ships"][0]["status"] == "미갱신"
+    asyncio.run(e.tick())
+    assert pushed == []

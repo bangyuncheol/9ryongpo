@@ -7,6 +7,7 @@ const COLOR: Record<Ship['status'], string> = {
   '입항 중': 'var(--color-arriving)',
   '입항': 'var(--color-arrived)',
   '조업·대기': 'var(--color-idle)',
+  '미갱신': 'var(--color-idle)',
 }
 
 const placeIcon = L.divIcon({
@@ -45,7 +46,7 @@ export default function ShipMap({ place, sensors, ships, arriving }: Props) {
         <CircleMarker
           key={s.ship_id}
           center={[s.lat, s.lon]}
-          radius={s.status === '조업·대기' ? 4 : 7}
+          radius={s.status === '입항 중' || s.status === '입항' ? 7 : 4}
           pathOptions={{ color: COLOR[s.status], fillColor: COLOR[s.status], fillOpacity: 0.85, weight: 1 }}
         >
           <Tooltip permanent={s.status === '입항 중'} direction="top" offset={[0, -6]}>

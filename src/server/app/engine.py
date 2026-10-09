@@ -68,26 +68,38 @@ class Engine:
         f = live_feed.freshness(self._live_rows)
         return {"feed": "live", "label": "실시간" if not f["stale"] else "미갱신", **f}
 
+    STALE_NOTICE = "선박 위치가 {latest} 이후 갱신되지 않아 입항 예보를 낼 수 없습니다. 위치는 마지막 수신값입니다."
+
+    def _judge(self, cur: list[dict], prev: list[dict], t: datetime) -> tuple[dict, str | None]:
+        """멈춘 실데이터로 예보하면 엉터리 ETA와 알림이 나간다(10/9 확인). 24시간 넘게 미갱신이면 판정하지 않는다."""
+        if self.feed == "live":
+            badge = self.source_badge()
+            if badge["stale"]:
+                latest = (badge["latest"] or "알 수 없음")[:10]
+                return {"arriving": [], "arrived": []}, self.STALE_NOTICE.format(latest=latest)
+        return arrival.judge(cur, prev, self.fleet, t, self.place), None
+
     # --- 화면용 ---
     async def today(self) -> dict:
         t = self.clock.now()
         cur, prev = await self.snapshots(t)
-        judged = arrival.judge(cur, prev, self.fleet, t, self.place)
+        judged, notice = self._judge(cur, prev, t)
         est = species.estimate(self.conn, judged["arriving"], t.month)
-        return {"clock": self.clock.state(), "source": self.source_badge(), **judged, "species": est}
+        return {"clock": self.clock.state(), "source": self.source_badge(), **judged, "species": est, "notice": notice}
 
     async def ships(self) -> dict:
         t = self.clock.now()
         cur, prev = await self.snapshots(t)
-        judged = arrival.judge(cur, prev, self.fleet, t, self.place)
+        judged, notice = self._judge(cur, prev, t)
         status = {s["ship_id"]: s["status"] for s in judged["arriving"] + judged["arrived"]}
+        idle = "미갱신" if notice else "조업·대기"
         out = []
         for p in cur:
             info = self.fleet.get(p["ship_id"], {})
             out.append({"ship_id": p["ship_id"], "name": info.get("name"), "biz": info.get("biz"), "gt": info.get("gt"),
                         "lat": p["lat"], "lon": p["lon"], "course": p.get("course"), "speed": p.get("speed"),
-                        "status": status.get(p["ship_id"], "조업·대기")})
-        return {"clock": self.clock.state(), "source": self.source_badge(), "ships": out}
+                        "status": status.get(p["ship_id"], idle)})
+        return {"clock": self.clock.state(), "source": self.source_badge(), "ships": out, "notice": notice}
 
     # --- 제어 ---
     def set_feed(self, feed: str) -> None:
@@ -112,7 +124,9 @@ class Engine:
                 return
         self._last_tick = t
         cur, prev = await self.snapshots(t)
-        judged = arrival.judge(cur, prev, self.fleet, t, self.place)
+        judged, notice = self._judge(cur, prev, t)
+        if notice:  # 멈춘 데이터로는 기록·알림하지 않는다
+            return
         ts = t.isoformat(timespec="seconds")
         with tx(self.conn):
             self.conn.executemany(

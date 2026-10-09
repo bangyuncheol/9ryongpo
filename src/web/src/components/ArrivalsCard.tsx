@@ -9,7 +9,8 @@ export default function ArrivalsCard({ today, mode }: { today: Today | null; mod
   const arrived = today?.arrived ?? []
   return (
     <Card title="오늘 입항 예보" aside={today ? `${hhmm(today.clock.now)} 기준` : undefined}>
-      {arriving.length === 0 && <p className="text-sm text-muted">지금 항구로 향하는 배가 없습니다.</p>}
+      {today?.notice && <p role="status" className="mb-2 rounded bg-sea-soft p-2 text-sm">{today.notice}</p>}
+      {!today?.notice && arriving.length === 0 && <p className="text-sm text-muted">지금 항구로 향하는 배가 없습니다.</p>}
       {mode === 'boss' ? (
         <ul className="divide-y divide-line">
           {arriving.map((a) => (

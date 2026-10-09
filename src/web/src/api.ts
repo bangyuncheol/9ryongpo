@@ -11,7 +11,7 @@ export type Arrival = {
 }
 
 export type Today = {
-  clock: Clock; source: Source; arriving: Arrival[]; arrived: Arrival[]
+  clock: Clock; source: Source; arriving: Arrival[]; arrived: Arrival[]; notice: string | null
   species: {
     ships: number; total_gt: number; overall: Species[]; category_only_biz: string[]
     by_biz: { biz: string; count: number; gt: number; species: Species[]; category_only: boolean
@@ -22,7 +22,7 @@ export type Today = {
 export type Ship = {
   ship_id: number; name: string | null; biz: string | null; gt: number | null
   lat: number; lon: number; course: number | null; speed: number | null
-  status: '입항 중' | '입항' | '조업·대기'
+  status: '입항 중' | '입항' | '조업·대기' | '미갱신'
 }
 
 export type Sensor = { id: number; name: string; nickname: string | null; lat: number; lon: number; dist_m: number }
