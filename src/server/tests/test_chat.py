@@ -177,3 +177,32 @@ def test_live_stale_positions_give_no_forecast_or_push(ctx):
     assert ships["ships"][0]["status"] == "미갱신"
     asyncio.run(e.tick())
     assert pushed == []
+
+
+def test_fast_play_processes_every_10min_bucket(ctx):
+    e = ctx.engine
+    seen = []
+
+    async def hook(t, new):
+        seen.append((t.strftime("%H:%M"), sorted(a["ship_id"] for a in new)))
+    e.hooks.append(hook)
+    e.clock.seek("03:00")
+    e.reset_tick()
+    asyncio.run(e.tick())                 # 03:00
+    e.clock.seek("03:40")                 # 600배로 3초 = 30분 넘게 지난 상황
+    asyncio.run(e.tick())
+    assert seen[0] == ("03:10", [3, 7, 17])  # 03:10 경계를 건너뛰지 않는다
+    assert ("03:30", [1]) in seen
+
+
+def test_inbox_shows_only_after_last_reset(ctx):
+    from app import push
+    from dataclasses import replace
+    e = ctx.engine
+    p = push.Pusher(e.conn, replace(settings, vapid_subject="mailto:a@b.c", vapid_private_key="x"), sender=lambda **kw: None)
+    vt = e.clock.now().replace(hour=3, minute=10)
+    asyncio.run(p.notify(vt, "t", "이전 리허설", {"overall": []}, []))
+    e.reset_tick()
+    asyncio.run(p.notify(vt, "t", "이번 재생", {"overall": []}, []))
+    got = push.recent_notifications(e.conn, vt.replace(hour=4))
+    assert [g["body"] for g in got] == ["이번 재생"]

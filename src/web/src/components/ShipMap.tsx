@@ -1,5 +1,6 @@
 import L from 'leaflet'
-import { CircleMarker, MapContainer, Marker, TileLayer, Tooltip } from 'react-leaflet'
+import { useEffect, useRef } from 'react'
+import { CircleMarker, MapContainer, Marker, TileLayer, Tooltip, useMap } from 'react-leaflet'
 import type { Arrival, Place, Sensor, Ship } from '../api'
 import { hhmm } from '../api'
 
@@ -12,7 +13,7 @@ const COLOR: Record<Ship['status'], string> = {
 
 const placeIcon = L.divIcon({
   className: '',
-  html: '<div aria-label="위판장" style="font-size:22px;line-height:22px;color:var(--color-sea)">★</div>',
+  html: '<div aria-label="위판장" style="font-size:22px;line-height:22px;color:var(--color-primary-dark)">★</div>',
   iconSize: [22, 22], iconAnchor: [11, 11],
 })
 const sensorIcon = L.divIcon({
@@ -21,17 +22,30 @@ const sensorIcon = L.divIcon({
   iconSize: [12, 12], iconAnchor: [6, 6],
 })
 
+/** 처음 데이터가 오면 한 번만 위판장과 배 전체가 보이게 맞춘다. 이후엔 사용자가 움직인 화면을 존중한다. */
+function FitOnce({ points }: { points: [number, number][] }) {
+  const map = useMap()
+  const done = useRef(false)
+  useEffect(() => {
+    if (done.current || points.length < 2) return
+    map.fitBounds(L.latLngBounds(points), { padding: [24, 24] })
+    done.current = true
+  }, [map, points])
+  return null
+}
+
 type Props = { place: Place | null; sensors: Sensor[]; ships: Ship[]; arriving: Arrival[] }
 
 export default function ShipMap({ place, sensors, ships, arriving }: Props) {
   const center: [number, number] = place ? [place.lat, place.lon + 0.045] : [35.99, 129.6]
   const eta = new Map(arriving.map((a) => [a.ship_id, a.eta]))
   return (
-    <MapContainer center={center} zoom={12} scrollWheelZoom={false} className="h-72 w-full rounded-xl md:h-96">
+    <MapContainer center={center} zoom={12} scrollWheelZoom={false} className="h-72 w-full rounded-card md:h-[440px]">
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
+      <FitOnce points={place && ships.length ? [[place.lat, place.lon], ...ships.map((s) => [s.lat, s.lon] as [number, number])] : []} />
       {place && (
         <Marker position={[place.lat, place.lon]} icon={placeIcon}>
           <Tooltip>{place.name}</Tooltip>

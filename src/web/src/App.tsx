@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
-import { api, hhmm } from './api'
+import { api } from './api'
 import type { Place, Sensor } from './api'
 import { usePoll } from './usePoll'
+import AppHeader from './components/AppHeader'
+import BottomBar from './components/BottomBar'
 import ShipMap from './components/ShipMap'
 import ArrivalsCard from './components/ArrivalsCard'
 import SpeciesCard from './components/SpeciesCard'
@@ -14,6 +16,11 @@ import { ErrorLine } from './components/Card'
 
 type Mode = 'boss' | 'visitor'
 
+/*
+ * 배치(One UI): 위 = 보는 영역(AppHeader), 아래 = 누르는 영역(카드·입력, 폰은 하단 바).
+ * 폰: 한 줄(지도 → 알림함 → 예보 → 어종 → 교통 → 질문 → 알림 받기).
+ * 600px 이상: 두 칸 42:58, 960px 이상 38:62(대형 화면 분할비). 왼쪽 = 예보·어종·교통, 오른쪽 = 지도·질문·알림.
+ */
 export default function App() {
   const [mode, setMode] = useState<Mode>('boss')
   const [place, setPlace] = useState<Place | null>(null)
@@ -33,37 +40,29 @@ export default function App() {
 
   const src = today.data?.source
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-3 p-3">
-      <header className="flex items-center gap-2">
-        <h1 className="text-lg font-extrabold text-sea">위판 당직</h1>
-        <span className="text-sm tabular-nums text-muted">{hhmm(today.data?.clock.now)}</span>
-        <div className="ml-auto flex overflow-hidden rounded-lg border border-line text-sm" role="group" aria-label="보기 모드">
-          {(['boss', 'visitor'] as const).map((m) => (
-            <button key={m} onClick={() => setMode(m)} aria-pressed={mode === m}
-              className={`px-3 py-1 ${mode === m ? 'bg-sea text-white' : 'bg-card'}`}>
-              {m === 'boss' ? '사장' : '구경'}
-            </button>
-          ))}
+    <div className="mx-auto min-h-screen max-w-6xl pb-24 sm:pb-10">
+      <AppHeader today={today.data} mode={mode} setMode={setMode} />
+      {admin && <div className="mb-4"><AdminBar clock={today.data?.clock ?? null} feed={src?.feed ?? null} /></div>}
+      <main className="flex flex-col gap-4 px-[var(--spacing-side)] sm:grid sm:grid-cols-[42fr_58fr] sm:items-start lg:grid-cols-[38fr_62fr]">
+        <div className="contents sm:flex sm:flex-col sm:gap-4">
+          <div className="order-2"><InboxCard items={inbox.data ?? []} /></div>
+          <div className="order-3"><ArrivalsCard today={today.data} mode={mode} /></div>
+          <div className="order-4"><SpeciesCard today={today.data} mode={mode} /></div>
+          <div className="order-5"><TrafficCard traffic={traffic.data} error={traffic.error} advice={visit.data?.advice ?? null} /></div>
         </div>
-        {src && (
-          <span title={src.latest ? `마지막 수신 ${src.latest}` : undefined}
-            className={`rounded-full px-2 py-0.5 text-xs font-bold text-white ${src.feed === 'sim' ? 'bg-sim' : src.stale ? 'bg-idle' : 'bg-live'}`}>
-            ● {src.feed} {src.feed === 'live' && src.stale ? `미갱신(마지막 ${src.latest?.slice(0, 10)})` : ''}
-          </span>
-        )}
-      </header>
-      {admin && <AdminBar clock={today.data?.clock ?? null} feed={src?.feed ?? null} />}
-      <ShipMap place={place} sensors={sensors} ships={ships.data?.ships ?? []} arriving={today.data?.arriving ?? []} />
-      <ErrorLine message={today.error ?? ships.error} />
-      <InboxCard items={inbox.data ?? []} />
-      <ArrivalsCard today={today.data} mode={mode} />
-      <SpeciesCard today={today.data} mode={mode} />
-      <TrafficCard traffic={traffic.data} error={traffic.error} advice={visit.data?.advice ?? null} />
-      <ChatCard onSubscribe={(species) => setSubPreset({ species, at: Date.now() })} />
-      <SubscribeCard preset={subPreset} />
-      <footer className="pb-6 text-center text-xs text-muted">
-        선박 움직임은 {src?.feed === 'sim' ? '시뮬레이션' : '실데이터'} · 어선 명부·위판장·교통·위판 실적은 실데이터
+        <div className="contents sm:flex sm:flex-col sm:gap-4">
+          <div className="order-1">
+            <ShipMap place={place} sensors={sensors} ships={ships.data?.ships ?? []} arriving={today.data?.arriving ?? []} />
+            <ErrorLine message={today.error ?? ships.error} />
+          </div>
+          <div className="order-6"><ChatCard onSubscribe={(species) => setSubPreset({ species, at: Date.now() })} /></div>
+          <div className="order-7"><SubscribeCard preset={subPreset} /></div>
+        </div>
+      </main>
+      <footer className="mt-8 px-[var(--spacing-side)] text-center text-small text-muted">
+        선박 움직임은 {src?.feed === 'sim' ? '시뮬레이션' : '실데이터'}입니다. 어선 명부·위판장·교통·위판 실적은 실데이터입니다.
       </footer>
+      <BottomBar />
     </div>
   )
 }

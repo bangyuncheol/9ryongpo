@@ -1,22 +1,78 @@
 @import "tailwindcss";
 
-/* 디자인 토큰(ui-design 규칙: 색·간격은 토큰으로만). 방윤철 님이 디자인 확정 시 여기만 바꾼다. */
+/*
+ * 디자인 토큰 — 기준 디자인 언어: 삼성 One UI (.claude/rules/ui-design.md, samsung-one-ui.md)
+ * [발행] = One UI 2(2019) 발행값 그대로. [제품] = One UI에 발행값이 없어 이 제품이 정한 값.
+ * 색은 role 로 쓴다: primary(포커스·입력), primary-dark(강조 버튼·텍스트 버튼), control(선택 컨트롤 활성).
+ * 대비는 2026-10-09 계산: 본문 4.5:1 이상, 굵은 15px 이상 3:1 이상.
+ */
 @theme {
-  --color-sea: #0b3954;
-  --color-sea-soft: #e6eef3;
-  --color-ink: #1b1f24;
-  --color-muted: #5f6b76;
-  --color-line: #d9e0e6;
-  --color-card: #ffffff;
-  --color-page: #f4f6f8;
-  --color-arriving: #d1495b;
-  --color-arrived: #2e8b57;
-  --color-idle: #8a96a3;
-  --color-sim: #b5651d;
-  --color-live: #2e8b57;
-  --font-sans: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  /* 색 — 라이트 */
+  --color-primary: #0381fe;        /* [발행] Primary */
+  --color-primary-dark: #0072de;   /* [발행] Primary dark(라이트). 흰 글자 4.51 */
+  --color-on-primary: #fafafa;
+  --color-control: #3e91ff;        /* [발행] Color control activated. 흰 굵은 글자 3.0 */
+  --color-on-control: #fafafa;
+  --color-primary-soft: #e5f1ff;   /* [제품] 막대 그래프 바탕·코드 블록 */
+  --color-page: #eef0f2;           /* [제품] */
+  --color-card: #fafafa;           /* [발행] White */
+  --color-ink: #000000;            /* [발행] Black(라이트) */
+  --color-muted: #5f6368;          /* [제품] 페이지·카드 위 5.3~5.8 */
+  --color-line: #e1e3e6;           /* [제품] */
+  --color-chip: #e8eaed;           /* [제품] 중간 강조(회색) 버튼 */
+  --color-arriving: #d32f2f;       /* [제품] 4.77 */
+  --color-arrived: #1e7d45;        /* [제품] 4.94 */
+  --color-idle: #8a9099;           /* [제품] 지도 점 전용(글자에 쓰지 않음) */
+  --color-sim: #e07b22;            /* [제품] 배지 점 전용 */
+  --color-live: #1e7d45;
+
+  /* 라운드·간격 */
+  --radius-card: 20px;             /* [발행] thumbnail-m 20dp를 카드에 준용 */
+  --radius-button: 18px;           /* [발행] 버튼 drawable 18dp */
+  --spacing-side: 24px;            /* [발행] 좌우 최소 마진 24dp */
+  --spacing-touch: 44px;           /* [제품] 터치 대상 최소 크기(One UI 미발행) */
+
+  /* 글자 — One UI 9단(Roboto 기준)을 크기 참고로만 사용 */
+  --text-extend: 40px;             /* Extend title */
+  --text-dialog: 20px;
+  --text-title: 19px;
+  --text-main: 18px;
+  --text-body: 16px;
+  --text-button: 15px;
+  --text-sub: 14px;
+  --text-small: 13px;              /* 최소 권장 크기 */
+  --font-sans: "Pretendard Variable", Pretendard, Roboto, system-ui, sans-serif;
+
+  /* 모션 — [발행] 100~500ms, Basic Path Interpolator */
+  --ease-oneui: cubic-bezier(0.22, 0.25, 0, 1);
 }
 
-html, body, #root { height: 100%; }
-body { background: var(--color-page); color: var(--color-ink); font-family: var(--font-sans); }
-.leaflet-container { font-family: var(--font-sans); }
+/* 다크 — [발행] 배경 Black #080808, Primary dark #3e91ff. 강조 버튼 글자는 [제품] 근흑(6.4:1) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-primary-dark: #3e91ff;
+    --color-on-primary: #080808;
+    --color-on-control: #080808;
+    --color-primary-soft: #11253d;
+    --color-page: #080808;
+    --color-card: #17181a;
+    --color-ink: #fafafa;
+    --color-muted: #a7abb1;
+    --color-line: #2a2c30;
+    --color-chip: #2a2c30;
+    --color-arriving: #ff6b6b;
+    --color-arrived: #4cc27a;
+    --color-live: #4cc27a;
+  }
+  .leaflet-tile { filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9); }
+  .leaflet-tooltip { background: var(--color-card); color: var(--color-ink); border-color: var(--color-line); }
+}
+
+html, body, #root { min-height: 100%; }
+body {
+  background: var(--color-page); color: var(--color-ink); font-family: var(--font-sans);
+  font-size: var(--text-body); -webkit-tap-highlight-color: transparent;
+}
+.leaflet-container { font-family: var(--font-sans); background: var(--color-primary-soft); }
+:focus-visible { outline: 3px solid var(--color-primary); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }

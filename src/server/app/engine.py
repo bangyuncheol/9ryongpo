@@ -110,19 +110,30 @@ class Engine:
         self.reset_tick()
 
     def reset_tick(self) -> None:
-        """되감기·소스 전환 시 틱 상태를 지워, 같은 장면에서 푸시가 다시 나가게 한다."""
+        """되감기·소스 전환 시 틱 상태를 지워, 같은 장면에서 푸시가 다시 나가게 한다.
+        알림함은 마지막 reset 이후 알림만 보여 준다(리허설 반복 기록이 섞이지 않게)."""
         self._last_tick = None
         self._announced.clear()
+        self.log_event("reset", {"vts": self.clock.now().isoformat(timespec="minutes"), "feed": self.feed})
 
     # --- 10분(가상) 틱: 기록 + 새로 입항 중이 된 배 알림 ---
     async def tick(self) -> None:
+        """실제 3초마다 불린다. 배속이 높아 그 사이 10분 경계를 여러 개 지났으면 하나씩 모두 처리한다."""
         t = floor_tick(self.clock.now())
-        if self._last_tick is not None and t <= self._last_tick:
-            if t < self._last_tick:  # 되감김
-                self.reset_tick()
-            else:
-                return
-        self._last_tick = t
+        if self._last_tick is not None and t < self._last_tick:  # 되감김
+            self.reset_tick()
+        if self._last_tick is None:
+            buckets = [t]
+        else:
+            buckets, b = [], self._last_tick + TICK
+            while b <= t and len(buckets) < 36:  # 최대 6시간분
+                buckets.append(b)
+                b += TICK
+        for b in buckets:
+            self._last_tick = b
+            await self._tick_at(b)
+
+    async def _tick_at(self, t: datetime) -> None:
         cur, prev = await self.snapshots(t)
         judged, notice = self._judge(cur, prev, t)
         if notice:  # 멈춘 데이터로는 기록·알림하지 않는다

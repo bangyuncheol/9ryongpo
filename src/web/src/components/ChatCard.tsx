@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { askStream } from '../api'
 import type { ChatEvent } from '../api'
-import Card from './Card'
+import Card, { Button } from './Card'
 
 const TOOL_LABEL: Record<string, string> = {
   get_arrival_forecast: '입항 예보 조회', get_species_estimate: '어종 추정', get_traffic_now: '위판장 앞 교통 조회',
@@ -33,31 +33,31 @@ export default function ChatCard({ onSubscribe }: { onSubscribe: (species: strin
   }
 
   return (
-    <Card title="물어보기" aside="숫자는 데이터에서만 가져옵니다">
+    <Card id="chat-card" title="물어보기" aside="숫자는 데이터에서만 가져옵니다">
       <div className="space-y-3">
         {turns.map((t, i) => (
-          <div key={i} className="space-y-1 text-sm">
-            <p className="font-medium">Q. {t.q}</p>
+          <div key={i} className="space-y-1.5 text-body">
+            <p className="font-bold">{t.q}</p>
             {t.log.length > 0 && (
-              <pre className="whitespace-pre-wrap rounded bg-sea-soft p-2 font-mono text-xs text-muted">{t.log.join('\n')}</pre>
+              <pre className="whitespace-pre-wrap rounded-button bg-primary-soft px-3 py-2 font-mono text-small text-muted" aria-label="데이터 조회 기록">{t.log.join('\n')}</pre>
             )}
-            {t.answer && <p>{t.answer}{t.mode === 'simple' && <span className="ml-1 text-xs text-muted">(간단 모드)</span>}</p>}
-            {t.error && <p role="alert" className="text-arriving">{t.error}</p>}
-            {!t.answer && !t.error && busy && i === turns.length - 1 && <p className="text-muted">확인하는 중…</p>}
+            {t.answer && <p>{t.answer}{t.mode === 'simple' && <span className="ml-1 text-small text-muted">(간단 모드)</span>}</p>}
+            {t.error && <p role="alert" className="text-sub text-arriving">{t.error}</p>}
+            {!t.answer && !t.error && busy && i === turns.length - 1 && <p className="text-muted" role="status">확인하는 중…</p>}
           </div>
         ))}
       </div>
-      <div className="mt-3 flex flex-wrap gap-2">
+      <div className="mt-4 flex flex-wrap gap-2">
         {QUICK.map((q) => (
-          <button key={q} onClick={() => ask(q)} disabled={busy}
-            className="rounded-full border border-line px-3 py-1 text-xs hover:bg-sea-soft disabled:opacity-50">{q}</button>
+          <Button key={q} compact onClick={() => ask(q)} disabled={busy}>{q}</Button>
         ))}
       </div>
       <form className="mt-3 flex gap-2" onSubmit={(e) => { e.preventDefault(); ask(input) }}>
         <label htmlFor="chat-input" className="sr-only">질문</label>
         <input id="chat-input" value={input} onChange={(e) => setInput(e.target.value)} maxLength={300}
-          placeholder="예: 대게 들어오면 알려줘" className="flex-1 rounded-lg border border-line px-3 py-2 text-sm" />
-        <button disabled={busy || !input.trim()} className="rounded-lg bg-sea px-4 py-2 text-sm font-bold text-white disabled:opacity-50">묻기</button>
+          placeholder="예: 대게 들어오면 알려줘"
+          className="min-h-[var(--spacing-touch)] min-w-0 flex-1 rounded-button border border-line bg-card px-4 text-body text-ink placeholder:text-muted focus:border-primary focus:outline-none" />
+        <Button emphasis="high" disabled={busy || !input.trim()}>묻기</Button>
       </form>
     </Card>
   )

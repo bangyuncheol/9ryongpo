@@ -31,7 +31,9 @@ description: 미구현·보류·기술부채·진행 중 과제의 현재 상태
 - 배포 준비: `src/deploy/`(setup_vm.sh·update.sh·wipan.service·Caddyfile), deploy 스킬에 첫 설치·갱신·되돌리기·HTTPS(Caddy+sslip.io 또는 Cloudflare 터널)·환경 변수 표.
 - 리허설 체크리스트 `qa-regression/checklist.md`(데모 장면·푸시·장애 대비).
 - 실데이터 모드에서 위치가 24시간 넘게 미갱신이면 예보·기록·알림을 멈추고 `notice`("…이후 갱신되지 않아 입항 예보를 낼 수 없습니다")를 띄운다. 멈춘 위치로 엉터리 ETA·푸시가 나가던 문제 수정(10/9).
-- 테스트 48개 (`cd src/server && uv run pytest`). 외부 호출 없이 `tests/fixtures/`의 실제 응답 일부로 돈다.
+- 화면 One UI 1차 반영(`ui-design.md` 적용 상태 참고). 지도는 처음 한 번 위판장·배 전체에 맞춤.
+- 틱: 배속이 높아 10분 경계를 여러 개 지나도 하나씩 처리(600배 재생에서 03:10 알림 누락 방지). 되감으면 `reset` 이벤트를 남기고 알림함은 그 이후만 보여 준다.
+- 테스트 50개 (`cd src/server && uv run pytest`). 외부 호출 없이 `tests/fixtures/`의 실제 응답 일부로 돈다.
 
 **다음 할 일 (설계 §10 순서)**
 1. **폰 푸시 실기 시험**: HTTPS 주소 필요(로컬은 Cloudflare 임시 터널 또는 VM). `.env`의 `VAPID_SUBJECT=mailto:주소`가 비어 있으면 발송을 건너뛰고 알림함에만 남긴다.

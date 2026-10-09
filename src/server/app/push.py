@@ -101,7 +101,9 @@ class Pusher:
 
 def recent_notifications(conn: sqlite3.Connection, until: datetime, limit: int = 20) -> list[dict]:
     """화면 안 알림함(푸시 지연 대비, 설계 §11). 가상 시각 until 이전 것만, 같은 장면 반복은 하나로."""
-    rows = conn.execute("SELECT payload FROM events WHERE kind='push' ORDER BY id DESC LIMIT 200").fetchall()
+    last_reset = conn.execute("SELECT COALESCE(MAX(id), 0) FROM events WHERE kind='reset'").fetchone()[0]
+    rows = conn.execute("SELECT payload FROM events WHERE kind='push' AND id > ? ORDER BY id DESC LIMIT 200",
+                        (last_reset,)).fetchall()
     seen, out = set(), []
     cut = until.isoformat(timespec="minutes")
     for (p,) in rows:

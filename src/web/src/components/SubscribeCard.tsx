@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { api, postJson } from '../api'
-import Card from './Card'
+import Card, { Button } from './Card'
 
 type State = 'idle' | 'busy' | 'on' | 'unsupported' | 'denied'
 const KEY = 'wipan_sub_species'
@@ -57,24 +57,23 @@ export default function SubscribeCard({ preset }: { preset?: { species: string; 
   const label = species === '전체' ? '배가 들어오면' : `${species} 들어오면`
   return (
     <div id="subscribe-card">
-    <Card title="알림 받기">
-      {state === 'unsupported' && <p className="text-sm text-muted">이 브라우저는 알림을 지원하지 않습니다. 안드로이드 크롬에서 열어 주세요.</p>}
-      {state === 'denied' && <p className="text-sm text-muted">알림이 차단돼 있습니다. 크롬 설정 › 사이트 설정 › 알림에서 이 사이트를 허용해 주세요.</p>}
+    <Card id="subscribe" title="알림 받기" aside="새벽에 배가 들어오면 폰으로 알려 드립니다">
+      {state === 'unsupported' && <p className="text-sub text-muted">이 브라우저는 알림을 지원하지 않습니다. 안드로이드 크롬에서 열어 주세요.</p>}
+      {state === 'denied' && <p className="text-sub text-muted">알림이 차단돼 있습니다. 크롬 설정 › 사이트 설정 › 알림에서 이 사이트를 허용해 주세요.</p>}
       {(state === 'idle' || state === 'busy' || state === 'on') && (
         <div className="flex flex-wrap items-center gap-2">
-          <label className="text-sm" htmlFor="sub-species">어종</label>
+          <label className="text-sub text-muted" htmlFor="sub-species">어종</label>
           <select id="sub-species" value={species} onChange={(e) => setSpecies(e.target.value)}
-            className="rounded border border-line bg-card px-2 py-1 text-sm">
+            className="min-h-[var(--spacing-touch)] rounded-button border border-line bg-card px-3 text-body text-ink">
             {[...options, '전체'].map((o) => <option key={o}>{o}</option>)}
           </select>
-          <button onClick={subscribe} disabled={state === 'busy'}
-            className="rounded-lg bg-sea px-3 py-1.5 text-sm font-bold text-white disabled:opacity-60">
-            🔔 {label} 알려줘
-          </button>
-          {state === 'on' && <span className="text-sm text-arrived">알림이 켜져 있습니다</span>}
+          <Button emphasis="high" onClick={subscribe} disabled={state === 'busy'} className="flex-1 sm:flex-none">
+            {label} 알려줘
+          </Button>
         </div>
       )}
-      {msg && <p role="alert" className="mt-2 text-sm text-arriving">{msg}</p>}
+      {state === 'on' && <p role="status" className="mt-2 text-sub font-bold text-arrived">✓ 알림이 켜져 있습니다</p>}
+      {msg && <p role="alert" className="mt-2 text-sub text-arriving">{msg}</p>}
     </Card>
     </div>
   )

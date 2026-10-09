@@ -5,11 +5,12 @@ import Card from './Card'
 export default function InboxCard({ items }: { items: { vts: string; title: string; body: string }[] }) {
   if (items.length === 0) return null
   return (
-    <Card title="알림함" aside="보낸 입항 알림">
-      <ul className="space-y-1.5">
+    <Card id="inbox" title="알림함" aside="보낸 입항 알림">
+      <ul className="space-y-2">
         {items.map((n) => (
-          <li key={n.vts + n.body} className="text-sm">
-            <span className="mr-2 tabular-nums text-muted">{hhmm(n.vts)}</span>{n.body}
+          <li key={n.vts + n.body} className="flex gap-3 text-sub">
+            <span className="shrink-0 font-bold tabular-nums text-primary-dark">{hhmm(n.vts)}</span>
+            <span>{n.body}</span>
           </li>
         ))}
       </ul>
