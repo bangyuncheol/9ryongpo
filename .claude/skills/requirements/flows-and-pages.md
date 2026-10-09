@@ -26,6 +26,8 @@
 | POST | `/api/sim/pause` | 일시정지 | 관리자 |
 | POST | `/api/sim/seek?t=03:10` | 가상 시각 이동. 틱·알림 상태 초기화(같은 장면 재연) | 관리자 |
 | POST | `/api/sim/feed?mode=sim\|live` | 데이터 소스 전환(데모 7번 장면) | 관리자 |
+| GET | `/api/visit?visitor=false` | 방문 권장 문구(경매 시각 + 위판장 앞 실측). 교통 실패 시에도 경매 기준 문구 | 공개 |
+| POST | `/api/chat` | 질문창 SSE `{message}` → tool/tool_result/action/answer/error/done 이벤트. IP당 분당 8회, 하루 400회 | 공개 |
 | GET | `/api/push/key` | VAPID 공개 키와 구독 가능한 어종 목록 | 공개 |
 | POST | `/api/subscribe` | 브라우저 푸시 구독 저장 `{subscription, species}`(species 없으면 전체) | 공개 |
 | POST | `/api/unsubscribe` | 구독 삭제 `{endpoint}` | 공개 |

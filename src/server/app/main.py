@@ -20,6 +20,8 @@ from .collectors.traffic import DEFAULT_SENSOR, TrafficService
 from .config import settings
 from .engine import Engine
 from . import push as pushmod
+from .agent import chat as chatmod
+from .agent.tools import ToolContext
 from .eum import EumClient, EumError
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
@@ -65,6 +67,12 @@ async def lifespan(app: FastAPI):
     app.state.engine = engine
     app.state.pusher = pushmod.Pusher(app.state.db, settings)
     engine.hooks.append(app.state.pusher.on_new_arrivals)
+    app.state.llm = None
+    if settings.openai_api_key:
+        from openai import AsyncOpenAI
+        app.state.llm = AsyncOpenAI(api_key=settings.openai_api_key, timeout=30.0, max_retries=1)
+    else:
+        log.warning("OPENAI_API_KEY 가 없어 질문창은 간단 모드로만 답합니다.")
     sched = AsyncIOScheduler()
     # 실제 3초마다 가상 시계를 확인하고, 10분(가상) 경계를 넘었을 때만 기록·알림한다.
     sched.add_job(engine.tick, "interval", seconds=3, max_instances=1, coalesce=True)
@@ -121,6 +129,17 @@ def sensors(request: Request) -> list[dict]:
 @app.get("/api/traffic/now")
 async def traffic_now(request: Request, sensor: str = DEFAULT_SENSOR) -> dict:
     return await request.app.state.traffic.now(sensor)
+
+
+@app.get("/api/visit")
+async def visit_advice(request: Request, visitor: bool = False) -> dict:
+    """방문 권장 문구(설계 §5.4). 교통 조회가 실패해도 경매 시각 기준 문구는 준다."""
+    from .rules import visit
+    try:
+        t = await request.app.state.traffic.now()
+    except EumError:
+        t = None
+    return visit.recommend(t, visitor=visitor)
 
 
 # --- 입항 예보 ---
@@ -223,6 +242,64 @@ async def push_test(request: Request) -> dict:
 def real_now_str() -> str:
     from .feed.clock import real_now
     return real_now().strftime("%H:%M:%S")
+
+
+# --- 질문창 (설계 §4.2) ---
+import json as _json  # noqa: E402
+import time as _time  # noqa: E402
+from collections import defaultdict, deque  # noqa: E402
+
+from fastapi.responses import StreamingResponse  # noqa: E402
+
+_PER_IP_PER_MIN = 8
+_PER_DAY = 400
+_hits: dict[str, deque] = defaultdict(deque)
+_day = {"date": "", "count": 0}
+
+
+def _rate_limit(ip: str) -> str | None:
+    """OpenAI 지원금(20만원) 보호. 넘으면 한국어 안내 문구를 돌려준다."""
+    now = _time.monotonic()
+    q = _hits[ip]
+    while q and now - q[0] > 60:
+        q.popleft()
+    today_s = _time.strftime("%Y-%m-%d")
+    if _day["date"] != today_s:
+        _day.update(date=today_s, count=0)
+    if len(q) >= _PER_IP_PER_MIN:
+        return "질문이 너무 잦습니다. 1분 뒤에 다시 물어봐 주세요."
+    if _day["count"] >= _PER_DAY:
+        return "오늘 질문 한도를 넘었습니다. 내일 다시 이용해 주세요."
+    q.append(now)
+    _day["count"] += 1
+    return None
+
+
+@app.post("/api/chat")
+async def chat(request: Request) -> StreamingResponse:
+    body = await request.json()
+    question = str(body.get("message", ""))
+    ip = request.client.host if request.client else "?"
+    limited = _rate_limit(ip)
+    ctx = ToolContext(engine=request.app.state.engine, traffic=request.app.state.traffic)
+
+    async def stream():
+        if limited:
+            yield f"data: {_json.dumps({'type': 'error', 'message': limited}, ensure_ascii=False)}\n\n"
+            return
+        answer_text = None
+        try:
+            async for ev in chatmod.answer(request.app.state.llm, settings.openai_model, ctx, question):
+                if ev["type"] == "answer":
+                    answer_text = ev["text"]
+                yield f"data: {_json.dumps(ev, ensure_ascii=False, default=str)}\n\n"
+        except Exception:
+            log.exception("질문창 처리 실패")
+            yield "data: " + _json.dumps({"type": "error", "message": "답을 만들지 못했습니다. 잠시 후 다시 물어봐 주세요."}, ensure_ascii=False) + "\n\n"
+        request.app.state.engine.log_event("chat", {"q": question[:300], "a": (answer_text or "")[:500]})
+        yield "data: {\"type\": \"done\"}\n\n"
+
+    return StreamingResponse(stream(), media_type="text/event-stream", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
 
 # --- 화면(Vite 빌드 결과) 정적 서빙. API 라우트보다 뒤에 둔다. ---

@@ -13,11 +13,17 @@ function b64ToBytes(b64: string) {
 
 const supported = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window
 
-export default function SubscribeCard() {
+export default function SubscribeCard({ preset }: { preset?: { species: string; at: number } | null }) {
   const [species, setSpecies] = useState<string>(() => { try { return localStorage.getItem(KEY) ?? '붉은대게' } catch { return '붉은대게' } })
   const [options, setOptions] = useState<string[]>(['붉은대게'])
   const [state, setState] = useState<State>(supported() ? 'idle' : 'unsupported')
   const [msg, setMsg] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!preset) return
+    setSpecies(preset.species)
+    document.getElementById('subscribe-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  }, [preset])
 
   useEffect(() => {
     api.pushKey().then((k) => setOptions(k.species)).catch(console.error)
@@ -50,6 +56,7 @@ export default function SubscribeCard() {
 
   const label = species === '전체' ? '배가 들어오면' : `${species} 들어오면`
   return (
+    <div id="subscribe-card">
     <Card title="알림 받기">
       {state === 'unsupported' && <p className="text-sm text-muted">이 브라우저는 알림을 지원하지 않습니다. 안드로이드 크롬에서 열어 주세요.</p>}
       {state === 'denied' && <p className="text-sm text-muted">알림이 차단돼 있습니다. 크롬 설정 › 사이트 설정 › 알림에서 이 사이트를 허용해 주세요.</p>}
@@ -69,5 +76,6 @@ export default function SubscribeCard() {
       )}
       {msg && <p role="alert" className="mt-2 text-sm text-arriving">{msg}</p>}
     </Card>
+    </div>
   )
 }

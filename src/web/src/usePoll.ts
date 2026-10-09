@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 
 /** 주기 조회. 실패하면 마지막 성공 값을 유지하고 오류 문구만 바꾼다. */
-export function usePoll<T>(fn: () => Promise<T>, ms: number) {
+export function usePoll<T>(fn: () => Promise<T>, ms: number, key: unknown = null) {
   const [data, setData] = useState<T | null>(null)
   const [error, setError] = useState<string | null>(null)
   const fnRef = useRef(fn)
@@ -20,6 +20,6 @@ export function usePoll<T>(fn: () => Promise<T>, ms: number) {
     run()
     const id = setInterval(run, ms)
     return () => { alive = false; clearInterval(id) }
-  }, [ms])
+  }, [ms, key])
   return { data, error }
 }

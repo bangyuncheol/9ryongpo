@@ -9,6 +9,7 @@ import TrafficCard from './components/TrafficCard'
 import AdminBar from './components/AdminBar'
 import SubscribeCard from './components/SubscribeCard'
 import InboxCard from './components/InboxCard'
+import ChatCard from './components/ChatCard'
 import { ErrorLine } from './components/Card'
 
 type Mode = 'boss' | 'visitor'
@@ -21,6 +22,8 @@ export default function App() {
   const ships = usePoll(api.ships, 2000)
   const traffic = usePoll(api.traffic, 60000)
   const inbox = usePoll(api.notifications, 3000)
+  const visit = usePoll(() => api.visit(mode === 'visitor'), 60000, mode)
+  const [subPreset, setSubPreset] = useState<{ species: string; at: number } | null>(null)
   const admin = new URLSearchParams(location.search).has('admin')
 
   useEffect(() => {
@@ -55,8 +58,9 @@ export default function App() {
       <InboxCard items={inbox.data ?? []} />
       <ArrivalsCard today={today.data} mode={mode} />
       <SpeciesCard today={today.data} mode={mode} />
-      <TrafficCard traffic={traffic.data} error={traffic.error} />
-      <SubscribeCard />
+      <TrafficCard traffic={traffic.data} error={traffic.error} advice={visit.data?.advice ?? null} />
+      <ChatCard onSubscribe={(species) => setSubPreset({ species, at: Date.now() })} />
+      <SubscribeCard preset={subPreset} />
       <footer className="pb-6 text-center text-xs text-muted">
         선박 움직임은 {src?.feed === 'sim' ? '시뮬레이션' : '실데이터'} · 어선 명부·위판장·교통·위판 실적은 실데이터
       </footer>

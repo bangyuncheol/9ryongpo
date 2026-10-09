@@ -59,6 +59,7 @@ export const api = {
   sensors: () => get<Sensor[]>('/api/sensors'),
   place: () => get<Place>('/api/place'),
   traffic: () => get<Traffic>('/api/traffic/now'),
+  visit: (visitor: boolean) => get<{ advice: string; basis: string }>(`/api/visit?visitor=${visitor}`),
   pushKey: () => get<{ publicKey: string; species: string[] }>('/api/push/key'),
   notifications: () => get<{ vts: string; title: string; body: string }[]>('/api/notifications'),
 }
@@ -83,5 +84,39 @@ export async function postJson(path: string, body: unknown): Promise<void> {
   if (!r.ok) {
     const b = await r.json().catch(() => null)
     throw new ApiError(b?.detail ?? '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.')
+  }
+}
+
+export type ChatEvent =
+  | { type: 'tool'; name: string; args: Record<string, unknown> }
+  | { type: 'tool_result'; name: string; summary: string }
+  | { type: 'action'; name: 'subscribe'; species: string }
+  | { type: 'answer'; text: string; mode: 'llm' | 'simple' }
+  | { type: 'error'; message: string }
+  | { type: 'done' }
+
+/** 질문창 SSE(POST라 EventSource 대신 fetch 스트림을 읽는다). */
+export async function askStream(message: string, onEvent: (e: ChatEvent) => void): Promise<void> {
+  let r: Response
+  try {
+    r = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message }) })
+  } catch {
+    onEvent({ type: 'error', message: '서버에 연결할 수 없습니다. 네트워크를 확인해 주세요.' }); return
+  }
+  if (!r.ok || !r.body) { onEvent({ type: 'error', message: '질문을 보내지 못했습니다. 잠시 후 다시 시도해 주세요.' }); return }
+  const reader = r.body.getReader()
+  const dec = new TextDecoder()
+  let buf = ''
+  for (;;) {
+    const { value, done } = await reader.read()
+    if (done) break
+    buf += dec.decode(value, { stream: true })
+    let i
+    while ((i = buf.indexOf('\n\n')) >= 0) {
+      const chunk = buf.slice(0, i); buf = buf.slice(i + 2)
+      const line = chunk.split('\n').find((l) => l.startsWith('data: '))
+      if (!line) continue
+      try { onEvent(JSON.parse(line.slice(6)) as ChatEvent) } catch (e) { console.error('질문창 응답 해석 실패', e) }
+    }
   }
 }

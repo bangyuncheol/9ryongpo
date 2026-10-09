@@ -3,7 +3,7 @@ import Card, { ErrorLine } from './Card'
 
 const AUCTION = '09:00'
 
-export default function TrafficCard({ traffic, error }: { traffic: Traffic | null; error: string | null }) {
+export default function TrafficCard({ traffic, error, advice }: { traffic: Traffic | null; error: string | null; advice: string | null }) {
   const last = traffic?.last_hour
   const cmp = traffic?.vs_yesterday.level !== '비교 불가'
     ? `어제 이맘때보다 ${traffic?.vs_yesterday.level}`
@@ -16,6 +16,7 @@ export default function TrafficCard({ traffic, error }: { traffic: Traffic | nul
             경매 {AUCTION}(기본값) · 지난 1시간 트럭 <b className="tabular-nums">{last.truck}</b>대, 전체{' '}
             <b className="tabular-nums">{last.total}</b>대{cmp ? ` · ${cmp}` : ''}
           </p>
+          {advice && <p className="mt-1 text-sm font-medium text-sea">{advice.split('. ').slice(-1)[0]}</p>}
           <MiniBars hours={traffic!.hours} />
           {traffic!.stale && <p className="mt-1 text-xs text-muted">최신 조회에 실패해 직전 값을 보여 줍니다.</p>}
         </>
