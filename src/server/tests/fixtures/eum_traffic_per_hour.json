@@ -1,0 +1,166 @@
+{
+ "교통센서3": [
+  {
+   "time": "2026-10-09 14",
+   "car": "1320",
+   "van": "11",
+   "truck": "319",
+   "lorry": "2",
+   "bus": "5",
+   "motorcycle": "19",
+   "sumCnt": "1676"
+  },
+  {
+   "time": "2026-10-09 15",
+   "car": "1403",
+   "van": "8",
+   "truck": "407",
+   "lorry": "2",
+   "bus": "3",
+   "motorcycle": "28",
+   "sumCnt": "1851"
+  },
+  {
+   "time": "2026-10-09 16",
+   "car": "1189",
+   "van": "4",
+   "truck": "226",
+   "lorry": "0",
+   "bus": "1",
+   "motorcycle": "20",
+   "sumCnt": "1440"
+  },
+  {
+   "time": "2026-10-09 17",
+   "car": "1148",
+   "van": "8",
+   "truck": "273",
+   "lorry": "0",
+   "bus": "1",
+   "motorcycle": "20",
+   "sumCnt": "1450"
+  },
+  {
+   "time": "2026-10-09 18",
+   "car": "900",
+   "van": "3",
+   "truck": "35",
+   "lorry": "0",
+   "bus": "1",
+   "motorcycle": "6",
+   "sumCnt": "945"
+  },
+  {
+   "time": "2026-10-09 19",
+   "car": "571",
+   "van": "0",
+   "truck": "15",
+   "lorry": "0",
+   "bus": "0",
+   "motorcycle": "2",
+   "sumCnt": "588"
+  },
+  {
+   "time": "2026-10-09 20",
+   "car": "350",
+   "van": "0",
+   "truck": "9",
+   "lorry": "0",
+   "bus": "0",
+   "motorcycle": "3",
+   "sumCnt": "362"
+  },
+  {
+   "time": "2026-10-09 21",
+   "car": "393",
+   "van": "4",
+   "truck": "8",
+   "lorry": "0",
+   "bus": "2",
+   "motorcycle": "3",
+   "sumCnt": "410"
+  }
+ ],
+ "교통센서1": [
+  {
+   "time": "2026-10-09 14",
+   "car": "2322",
+   "van": "14",
+   "truck": "118",
+   "lorry": "5",
+   "bus": "22",
+   "motorcycle": "24",
+   "sumCnt": "2505"
+  },
+  {
+   "time": "2026-10-09 15",
+   "car": "2040",
+   "van": "10",
+   "truck": "71",
+   "lorry": "10",
+   "bus": "8",
+   "motorcycle": "18",
+   "sumCnt": "2157"
+  },
+  {
+   "time": "2026-10-09 16",
+   "car": "1818",
+   "van": "8",
+   "truck": "80",
+   "lorry": "4",
+   "bus": "15",
+   "motorcycle": "12",
+   "sumCnt": "1937"
+  },
+  {
+   "time": "2026-10-09 17",
+   "car": "2236",
+   "van": "8",
+   "truck": "78",
+   "lorry": "5",
+   "bus": "18",
+   "motorcycle": "14",
+   "sumCnt": "2359"
+  },
+  {
+   "time": "2026-10-09 18",
+   "car": "1595",
+   "van": "6",
+   "truck": "28",
+   "lorry": "4",
+   "bus": "10",
+   "motorcycle": "14",
+   "sumCnt": "1657"
+  },
+  {
+   "time": "2026-10-09 19",
+   "car": "1095",
+   "van": "7",
+   "truck": "19",
+   "lorry": "3",
+   "bus": "9",
+   "motorcycle": "7",
+   "sumCnt": "1140"
+  },
+  {
+   "time": "2026-10-09 20",
+   "car": "697",
+   "van": "4",
+   "truck": "14",
+   "lorry": "1",
+   "bus": "7",
+   "motorcycle": "5",
+   "sumCnt": "728"
+  },
+  {
+   "time": "2026-10-09 21",
+   "car": "318",
+   "van": "1",
+   "truck": "8",
+   "lorry": "3",
+   "bus": "6",
+   "motorcycle": "6",
+   "sumCnt": "342"
+  }
+ ]
+}

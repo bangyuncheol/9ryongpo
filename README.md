@@ -44,6 +44,27 @@
 
 API 키는 루트 `.env`(커밋 금지): `EUM_SERVICE_KEY`(pohang-eum.kr 마이페이지 > 나의 API), `DATA_GO_KR_KEY`(data.go.kr 마이페이지 > 인증키 발급현황). 해수부 API 엔드포인트 `https://api.odcloud.kr/api/15102791/v1/uddi:8e543159-83ba-4778-b2cd-a4ab4e871c40`, 필터 `cond[산지조합명::EQ]=구룡포수산업협동조합`.
 
+## 실행 방법 (맥·윈도우 공통)
+
+처음 한 번:
+
+1. [uv](https://docs.astral.sh/uv/) 설치. 맥은 `brew install uv`, 윈도우 PowerShell은 `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"`.
+2. 루트에 `.env` 넣기. 형식은 `.env.example`, 값은 팀 내부 경로로 공유받는다.
+
+서버:
+
+```
+cd src/server
+uv sync
+uv run uvicorn app.main:app --reload --port 8000
+```
+
+브라우저에서 `http://localhost:8000/api/health` → `fleet`이 202면 정상. DB(`data/app.db`)는 기동 때 API·CSV로 다시 채워지므로 지워도 된다.
+
+테스트: `cd src/server` 후 `uv run pytest`.
+
+이어받는 사람은 `.claude/skills/project-status/SKILL.md`의 "다음 할 일"부터 본다.
+
 ## 규칙
 
 - 받은 원본(pdf·hwp·html) 옆에 같은 이름의 `.md` 변환본을 둔다. **원본이 정본.**

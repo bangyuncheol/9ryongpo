@@ -28,3 +28,7 @@ Thumbs.db
 
 # Claude Code 로컬 설정
 .claude/settings.local.json
+
+# 로컬 DB (서버 기동 시 API·CSV로 다시 채워짐)
+data/app.db
+data/app.db-*
