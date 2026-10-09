@@ -23,12 +23,13 @@ description: 미구현·보류·기술부채·진행 중 과제의 현재 상태
 - 확인된 데모 장면: 03:10에 연안자망 3척 ETA 04:25~04:35, 붉은대게 79%·골뱅이 10%.
 - 화면 `src/web/` (Vite + React 19 + Tailwind 4 + react-leaflet 5): 지도(위판장★·센서▲·배●), 입항 예보·어종·교통 카드, 사장/구경 모드, sim/live 배지, `?admin=1` 진행 막대. 2초마다 `/api/today`·`/api/ships`, 1분마다 `/api/traffic/now`. 색은 `src/web/src/index.css` 토큰.
 - 서버가 `src/web/dist`가 있으면 `/`에서 화면을 서빙.
-- 테스트 28개 (`cd src/server && uv run pytest`). 외부 호출 없이 `tests/fixtures/`의 실제 응답 일부로 돈다.
+- 웹 푸시: `app/push.py`(구독 저장·검증, 조건 매칭, 만료 구독 삭제, 발송 기록), 알림 문구 템플릿 `rules/brief.py`, 서비스 워커 `src/web/public/sw.js`, 알림 받기·알림함 카드. 03:10 틱에 "04:25~04:35 자망선 3척 입항 예정 · 붉은대게·골뱅이 가능성. 경매 09:00(기본값)" 확인.
+- 테스트 34개 (`cd src/server && uv run pytest`). 외부 호출 없이 `tests/fixtures/`의 실제 응답 일부로 돈다.
 
 **다음 할 일 (설계 §10 순서)**
-1. 웹 푸시: `Engine.hooks`에 새 입항 알림 훅을 붙이면 된다(`app/engine.py` tick). 구독 조건 매칭 + 문장(LLM, 실패 시 템플릿).
+1. **폰 푸시 실기 시험**: HTTPS 주소 필요(로컬은 Cloudflare 임시 터널 또는 VM). `.env`의 `VAPID_SUBJECT=mailto:주소`가 비어 있으면 발송을 건너뛰고 알림함에만 남긴다.
 2. 질문창(tool calling, SSE) — 도구 6개(설계 §4.2).
-3. 방문 권장 문구 `rules/visit.py`(설계 §5.4) — 지금은 `/api/traffic/now`가 숫자만 준다.
+3. 알림 문장 LLM 다듬기(`rules/brief.py`, 실패 시 지금 템플릿) / 방문 권장 문구 `rules/visit.py`(설계 §5.4) — 지금은 `/api/traffic/now`가 숫자만 준다.
 
 **알아 둘 것**
 - 어종 전체 비율은 어종을 말할 수 있는 업종끼리만 톤수 가중한다. 근해자망처럼 해마다 1위가 바뀌는 업종은 `category_only_biz`로 따로 알린다.

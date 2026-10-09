@@ -7,6 +7,8 @@ import ArrivalsCard from './components/ArrivalsCard'
 import SpeciesCard from './components/SpeciesCard'
 import TrafficCard from './components/TrafficCard'
 import AdminBar from './components/AdminBar'
+import SubscribeCard from './components/SubscribeCard'
+import InboxCard from './components/InboxCard'
 import { ErrorLine } from './components/Card'
 
 type Mode = 'boss' | 'visitor'
@@ -18,6 +20,7 @@ export default function App() {
   const today = usePoll(api.today, 2000)
   const ships = usePoll(api.ships, 2000)
   const traffic = usePoll(api.traffic, 60000)
+  const inbox = usePoll(api.notifications, 3000)
   const admin = new URLSearchParams(location.search).has('admin')
 
   useEffect(() => {
@@ -49,9 +52,11 @@ export default function App() {
       {admin && <AdminBar clock={today.data?.clock ?? null} feed={src?.feed ?? null} />}
       <ShipMap place={place} sensors={sensors} ships={ships.data?.ships ?? []} arriving={today.data?.arriving ?? []} />
       <ErrorLine message={today.error ?? ships.error} />
+      <InboxCard items={inbox.data ?? []} />
       <ArrivalsCard today={today.data} mode={mode} />
       <SpeciesCard today={today.data} mode={mode} />
       <TrafficCard traffic={traffic.data} error={traffic.error} />
+      <SubscribeCard />
       <footer className="pb-6 text-center text-xs text-muted">
         선박 움직임은 {src?.feed === 'sim' ? '시뮬레이션' : '실데이터'} · 어선 명부·위판장·교통·위판 실적은 실데이터
       </footer>

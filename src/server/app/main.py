@@ -19,6 +19,7 @@ from .collectors import auction, fleet
 from .collectors.traffic import DEFAULT_SENSOR, TrafficService
 from .config import settings
 from .engine import Engine
+from . import push as pushmod
 from .eum import EumClient, EumError
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
@@ -62,6 +63,8 @@ async def lifespan(app: FastAPI):
     engine = Engine(app.state.db, app.state.eum, app.state.place, settings.feed)
     engine.reload_fleet()
     app.state.engine = engine
+    app.state.pusher = pushmod.Pusher(app.state.db, settings)
+    engine.hooks.append(app.state.pusher.on_new_arrivals)
     sched = AsyncIOScheduler()
     # 실제 3초마다 가상 시계를 확인하고, 10분(가상) 경계를 넘었을 때만 기록·알림한다.
     sched.add_job(engine.tick, "interval", seconds=3, max_instances=1, coalesce=True)
@@ -178,6 +181,48 @@ def sim_feed(request: Request, mode: str = Query(..., pattern="^(sim|live)$")) -
     e = request.app.state.engine
     e.set_feed(mode)
     return {**e.clock.state(), "feed": e.feed}
+
+
+# --- 웹 푸시 (설계 §5.3) ---
+@app.get("/api/push/key")
+def push_key() -> dict:
+    return {"publicKey": settings.vapid_public_key, "species": sorted(s for s in pushmod.ALLOWED_SPECIES if s)}
+
+
+@app.post("/api/subscribe")
+async def subscribe(request: Request) -> dict:
+    body = await request.json()
+    try:
+        sub_id = pushmod.save_subscription(request.app.state.db, body.get("subscription") or {},
+                                           {"species": body.get("species") or None})
+    except ValueError as err:
+        raise HTTPException(422, detail=str(err)) from None
+    return {"ok": True, "id": sub_id}
+
+
+@app.post("/api/unsubscribe")
+async def unsubscribe(request: Request) -> dict:
+    body = await request.json()
+    pushmod.delete_subscription(request.app.state.db, str(body.get("endpoint", "")))
+    return {"ok": True}
+
+
+@app.get("/api/notifications")
+def notifications(request: Request) -> list[dict]:
+    return pushmod.recent_notifications(request.app.state.db, request.app.state.engine.clock.now())
+
+
+@app.post("/api/push/test", dependencies=[Depends(require_admin)])
+async def push_test(request: Request) -> dict:
+    """리허설용: 구독한 폰 전부에 시험 알림. 지연 측정에 쓴다(설계 §11)."""
+    e = request.app.state.engine
+    return await request.app.state.pusher.notify(e.clock.now(), "위판 당직 시험 알림",
+                                                 f"시험 발송 {real_now_str()}", {"overall": []}, [], everyone=True)
+
+
+def real_now_str() -> str:
+    from .feed.clock import real_now
+    return real_now().strftime("%H:%M:%S")
 
 
 # --- 화면(Vite 빌드 결과) 정적 서빙. API 라우트보다 뒤에 둔다. ---

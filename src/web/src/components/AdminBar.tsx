@@ -27,6 +27,7 @@ export default function AdminBar({ clock, feed }: { clock: Clock | null; feed: s
       <button className={btn} onClick={() => run(`/api/sim/feed?mode=${feed === 'sim' ? 'live' : 'sim'}`)}>
         {feed === 'sim' ? '실데이터로 전환' : '시뮬레이션으로 전환'}
       </button>
+      <button className={btn} onClick={() => run('/api/push/test')}>시험 알림</button>
       <span className="text-muted">{clock ? `${clock.playing ? '재생' : '정지'} ×${clock.speed}` : ''}</span>
       {msg && <span role="alert" className="text-arriving">{msg}</span>}
     </div>

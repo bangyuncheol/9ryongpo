@@ -7,6 +7,8 @@
 
 | 경로 | 용도 | 접근 권한 |
 |---|---|---|
+| `/` | 한 페이지 화면(지도·알림함·입항 예보·어종·교통·알림 받기) | 공개 |
+| `/?admin=1` | 위 화면 + 데모 진행 막대(조작은 서버가 토큰 검사) | 공개(조작은 관리자) |
 
 ## API 엔드포인트 목록
 
@@ -24,3 +26,8 @@
 | POST | `/api/sim/pause` | 일시정지 | 관리자 |
 | POST | `/api/sim/seek?t=03:10` | 가상 시각 이동. 틱·알림 상태 초기화(같은 장면 재연) | 관리자 |
 | POST | `/api/sim/feed?mode=sim\|live` | 데이터 소스 전환(데모 7번 장면) | 관리자 |
+| GET | `/api/push/key` | VAPID 공개 키와 구독 가능한 어종 목록 | 공개 |
+| POST | `/api/subscribe` | 브라우저 푸시 구독 저장 `{subscription, species}`(species 없으면 전체) | 공개 |
+| POST | `/api/unsubscribe` | 구독 삭제 `{endpoint}` | 공개 |
+| GET | `/api/notifications` | 화면 안 알림함(가상 시각 이전, 같은 장면 중복 제거) | 공개 |
+| POST | `/api/push/test` | 구독한 모든 기기에 시험 알림(리허설 지연 측정) | 관리자 |

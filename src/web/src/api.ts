@@ -59,6 +59,8 @@ export const api = {
   sensors: () => get<Sensor[]>('/api/sensors'),
   place: () => get<Place>('/api/place'),
   traffic: () => get<Traffic>('/api/traffic/now'),
+  pushKey: () => get<{ publicKey: string; species: string[] }>('/api/push/key'),
+  notifications: () => get<{ vts: string; title: string; body: string }[]>('/api/notifications'),
 }
 
 export async function adminPost(path: string, token: string): Promise<Clock & { feed: string }> {
@@ -70,3 +72,16 @@ export async function adminPost(path: string, token: string): Promise<Clock & { 
 
 export const hhmm = (iso?: string | null) => (iso ? iso.slice(11, 16) : '--:--')
 export const pct = (v: number) => `${Math.round(v * 100)}%`
+
+export async function postJson(path: string, body: unknown): Promise<void> {
+  let r: Response
+  try {
+    r = await fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+  } catch {
+    throw new ApiError('서버에 연결할 수 없습니다. 네트워크를 확인해 주세요.')
+  }
+  if (!r.ok) {
+    const b = await r.json().catch(() => null)
+    throw new ApiError(b?.detail ?? '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.')
+  }
+}
