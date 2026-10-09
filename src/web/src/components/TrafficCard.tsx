@@ -1,7 +1,9 @@
 import type { Traffic } from '../api'
 import Card, { ErrorLine } from './Card'
 
-export default function TrafficCard({ traffic, error, advice }: { traffic: Traffic | null; error: string | null; advice: string | null }) {
+type Props = { traffic: Traffic | null; error: string | null; advice: string | null; visitorAfter: string | null }
+
+export default function TrafficCard({ traffic, error, advice, visitorAfter }: Props) {
   const last = traffic?.last_hour
   const cmp = traffic && traffic.vs_yesterday.level !== '비교 불가'
     ? `어제 이맘때보다 ${traffic.vs_yesterday.level}`
@@ -21,6 +23,11 @@ export default function TrafficCard({ traffic, error, advice }: { traffic: Traff
         </>
       ) : (
         !error && <p className="text-sub text-muted">교통 정보를 불러오는 중입니다.</p>
+      )}
+      {visitorAfter && (
+        <p className="mt-3 text-small text-muted">
+          관광객은 경매에 참여할 수 없습니다. 경매가 끝난 {visitorAfter} 이후에 오시면 덜 붐빕니다.
+        </p>
       )}
       <ErrorLine message={error && !last ? '교통 정보를 지금 불러올 수 없습니다. 잠시 후 다시 확인해 주세요.' : null} />
     </Card>

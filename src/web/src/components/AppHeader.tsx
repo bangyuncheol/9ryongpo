@@ -2,10 +2,8 @@ import type { Source, Today } from '../api'
 import { hhmm } from '../api'
 import { summary } from './ArrivalsCard'
 
-type Mode = 'boss' | 'visitor'
-
-/** 확장 앱바 = 보는 영역(One UI): 넓은 여백, 가운데 큰 제목, 비인터랙티브 요약. 조작은 우측 상단 하나뿐. */
-export default function AppHeader({ today, mode, setMode }: { today: Today | null; mode: Mode; setMode: (m: Mode) => void }) {
+/** 확장 앱바 = 보는 영역(One UI): 넓은 여백, 가운데 큰 제목, 비인터랙티브 요약. */
+export default function AppHeader({ today }: { today: Today | null }) {
   const arriving = today?.arriving ?? []
   const top = today?.species.overall[0]?.name
   const line = today?.notice
@@ -17,14 +15,6 @@ export default function AppHeader({ today, mode, setMode }: { today: Today | nul
     <header className="px-[var(--spacing-side)] pb-8 pt-4">
       <div className="flex items-center justify-end gap-2">
         <SourceBadge source={today?.source} />
-        <div className="flex rounded-button bg-chip p-1" role="group" aria-label="보기 모드">
-          {(['boss', 'visitor'] as const).map((m) => (
-            <button key={m} onClick={() => setMode(m)} aria-pressed={mode === m}
-              className={`min-h-9 rounded-button px-4 text-button font-bold transition-colors duration-200 ease-oneui ${mode === m ? 'bg-control text-on-control' : 'text-muted'}`}>
-              {m === 'boss' ? '사장' : '구경'}
-            </button>
-          ))}
-        </div>
       </div>
       <div className="mt-10 text-center">
         <h1 className="text-extend font-light tracking-tight">위판 당직</h1>

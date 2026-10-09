@@ -14,22 +14,19 @@ import InboxCard from './components/InboxCard'
 import ChatCard from './components/ChatCard'
 import { ErrorLine } from './components/Card'
 
-type Mode = 'boss' | 'visitor'
-
 /*
  * 배치(One UI): 위 = 보는 영역(AppHeader), 아래 = 누르는 영역(카드·입력, 폰은 하단 바).
  * 폰: 한 줄(지도 → 알림함 → 예보 → 어종 → 교통 → 질문 → 알림 받기).
  * 600px 이상: 두 칸 42:58, 960px 이상 38:62(대형 화면 분할비). 왼쪽 = 예보·어종·교통, 오른쪽 = 지도·질문·알림.
  */
 export default function App() {
-  const [mode, setMode] = useState<Mode>('boss')
   const [place, setPlace] = useState<Place | null>(null)
   const [sensors, setSensors] = useState<Sensor[]>([])
   const today = usePoll(api.today, 2000)
   const ships = usePoll(api.ships, 2000)
   const traffic = usePoll(api.traffic, 60000)
   const inbox = usePoll(api.notifications, 3000)
-  const visit = usePoll(() => api.visit(mode === 'visitor'), 60000, mode)
+  const visit = usePoll(() => api.visit(false), 60000)
   const [subPreset, setSubPreset] = useState<{ species: string; at: number } | null>(null)
   const admin = new URLSearchParams(location.search).has('admin')
 
@@ -41,14 +38,14 @@ export default function App() {
   const src = today.data?.source
   return (
     <div className="mx-auto min-h-screen max-w-6xl pb-24 sm:pb-10">
-      <AppHeader today={today.data} mode={mode} setMode={setMode} />
+      <AppHeader today={today.data} />
       {admin && <div className="mb-4"><AdminBar clock={today.data?.clock ?? null} feed={src?.feed ?? null} /></div>}
       <main className="flex flex-col gap-4 px-[var(--spacing-side)] sm:grid sm:grid-cols-[42fr_58fr] sm:items-start lg:grid-cols-[38fr_62fr]">
         <div className="contents sm:flex sm:flex-col sm:gap-4">
           <div className="order-2"><InboxCard items={inbox.data ?? []} /></div>
-          <div className="order-3"><ArrivalsCard today={today.data} mode={mode} /></div>
-          <div className="order-4"><SpeciesCard today={today.data} mode={mode} /></div>
-          <div className="order-5"><TrafficCard traffic={traffic.data} error={traffic.error} advice={visit.data?.advice ?? null} /></div>
+          <div className="order-3"><ArrivalsCard today={today.data} /></div>
+          <div className="order-4"><SpeciesCard today={today.data} /></div>
+          <div className="order-5"><TrafficCard traffic={traffic.data} error={traffic.error} advice={visit.data?.advice ?? null} visitorAfter={visit.data?.visitor_after ?? null} /></div>
         </div>
         <div className="contents sm:flex sm:flex-col sm:gap-4">
           <div className="order-1">

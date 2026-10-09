@@ -21,7 +21,7 @@ description: 미구현·보류·기술부채·진행 중 과제의 현재 상태
 - 엔진 `app/engine.py`: 시계·피드·룰 연결. 실제 3초마다 확인해 10분(가상) 경계에서 `ships_pos`·`forecast`·`events` 기록, 새로 입항 중이 된 배를 훅으로 넘김. 입항 판정 `rules/arrival.py`, 어종 추정 `rules/species.py`.
 - API 추가: `/api/today` `/api/ships` `/api/sim/*`(조작은 `X-Admin-Token`).
 - 확인된 데모 장면: 03:10에 연안자망 3척 ETA 04:25~04:35, 붉은대게 79%·골뱅이 10%.
-- 화면 `src/web/` (Vite + React 19 + Tailwind 4 + react-leaflet 5): 지도(위판장★·센서▲·배●), 입항 예보·어종·교통 카드, 사장/구경 모드, sim/live 배지, `?admin=1` 진행 막대. 2초마다 `/api/today`·`/api/ships`, 1분마다 `/api/traffic/now`. 색은 `src/web/src/index.css` 토큰.
+- 화면 `src/web/` (Vite + React 19 + Tailwind 4 + react-leaflet 5): 지도(위판장★·센서▲·배●), 입항 예보·어종·교통 카드(모드 구분 없이 한 화면, 관광객 한 줄은 교통 카드), sim/live 배지, `?admin=1` 진행 막대. 2초마다 `/api/today`·`/api/ships`, 1분마다 `/api/traffic/now`. 색은 `src/web/src/index.css` 토큰.
 - 서버가 `src/web/dist`가 있으면 `/`에서 화면을 서빙.
 - 웹 푸시: `app/push.py`(구독 저장·검증, 조건 매칭, 만료 구독 삭제, 발송 기록), 알림 문구 템플릿 `rules/brief.py`, 서비스 워커 `src/web/public/sw.js`, 알림 받기·알림함 카드. 03:10 틱에 "04:25~04:35 자망선 3척 입항 예정 · 붉은대게·골뱅이 가능성. 경매 09:00(기본값)" 확인.
 - 질문창: `app/agent/tools.py`(도구 6개: 입항 예보·어종·교통·방문 권장·과거 실적·알림 준비), `app/agent/chat.py`(OpenAI Responses API, `gpt-6.1-sol` medium, 최대 5회 도구 왕복). LLM 실패 시 간단 모드, 크레딧·인증 오류면 5분 쿨다운. 화면 `ChatCard`(자주 묻는 질문 4개, 도구 호출 기록 스트리밍, '알려줘'면 알림 받기 버튼 준비).
