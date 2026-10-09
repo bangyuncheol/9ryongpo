@@ -17,3 +17,10 @@
 | GET | `/api/fleet` | 어선 명부(번호·이름·어업종류·톤수) | 공개 |
 | GET | `/api/sensors` | 교통 센서 목록, 위판장과 거리순 | 공개 |
 | GET | `/api/traffic/now?sensor=교통센서3` | 위판장 앞 최근 9시간 교통량 + 24시간 혼잡율 요약. 5분 캐시, 실패 시 503(한국어 문구) | 공개 |
+| GET | `/api/today` | 가상 시계 기준 입항 중·입항 완료 배(ETA순), 업종별·전체 어종 추정, 데이터 소스 배지 | 공개 |
+| GET | `/api/ships` | 지도용 전체 배 위치와 상태(입항 중/입항/조업·대기) | 공개 |
+| GET | `/api/sim/state` | 시계 상태(모드·현재 가상 시각·재생·배속)와 데이터 소스 | 공개 |
+| POST | `/api/sim/play?speed=60` | 재생(배속 0~3600) | 관리자(`X-Admin-Token`) |
+| POST | `/api/sim/pause` | 일시정지 | 관리자 |
+| POST | `/api/sim/seek?t=03:10` | 가상 시각 이동. 틱·알림 상태 초기화(같은 장면 재연) | 관리자 |
+| POST | `/api/sim/feed?mode=sim\|live` | 데이터 소스 전환(데모 7번 장면) | 관리자 |

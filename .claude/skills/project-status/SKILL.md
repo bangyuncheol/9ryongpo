@@ -18,14 +18,16 @@ description: 미구현·보류·기술부채·진행 중 과제의 현재 상태
 - 서버 뼈대 `src/server/` (uv, Python 3.12, FastAPI). 기동 시 위판장 좌표·어선 명부 202척·교통 센서 11대·위판 실적(`data/auction/`) 적재.
 - API: `/api/health` `/api/place` `/api/fleet` `/api/sensors` `/api/traffic/now` (목록은 requirements 스킬 `flows-and-pages.md`).
 - 시뮬레이터 `app/feed/sim.py`(시각의 순수 함수, 대본 6척 + 실제 위치 44척, 시드 고정), 가상 시계 `app/feed/clock.py`, 실데이터 `app/feed/live.py`. 대본은 `KEY_SHIPS`.
-- 테스트 19개 (`cd src/server && uv run pytest`). 외부 호출 없이 `tests/fixtures/`의 실제 응답 일부로 돈다.
+- 엔진 `app/engine.py`: 시계·피드·룰 연결. 실제 3초마다 확인해 10분(가상) 경계에서 `ships_pos`·`forecast`·`events` 기록, 새로 입항 중이 된 배를 훅으로 넘김. 입항 판정 `rules/arrival.py`, 어종 추정 `rules/species.py`.
+- API 추가: `/api/today` `/api/ships` `/api/sim/*`(조작은 `X-Admin-Token`).
+- 확인된 데모 장면: 03:10에 연안자망 3척 ETA 04:25~04:35, 붉은대게 79%·골뱅이 10%.
+- 테스트 27개 (`cd src/server && uv run pytest`). 외부 호출 없이 `tests/fixtures/`의 실제 응답 일부로 돈다.
 
 **다음 할 일 (설계 §10 순서)**
-1. 시뮬레이터·시계를 서버에 연결: 10분(가상) 틱마다 `ships_pos` 적재, `/sim/*`(관리자 토큰).
-2. 입항 판정 `app/rules/arrival.py`(§5.1) → `forecast`, 어종 추정 `app/rules/species.py`(§5.2, 4개년 10월 평균).
-3. `/api/today`(입항 카드 + 어종 + 교통 현황) — 화면이 붙을 API.
-4. 화면 뼈대 `src/web/` (Vite + React + Tailwind + Leaflet).
-5. 웹 푸시, 질문창(tool calling), 관리자 토큰 걸린 `/sim/*`.
+1. 화면 뼈대 `src/web/` (Vite + React + Tailwind + Leaflet).
+2. 웹 푸시: `Engine.hooks`에 새 입항 알림 훅을 붙이면 된다(`app/engine.py` tick). 구독 조건 매칭 + 문장(LLM, 실패 시 템플릿).
+3. 질문창(tool calling, SSE) — 도구 6개(설계 §4.2).
+4. 방문 권장 문구 `rules/visit.py`(설계 §5.4) — 지금은 `/api/traffic/now`가 숫자만 준다.
 
 **알아 둘 것**
 - 혼잡율 API는 23~25시간 범위를 들쭉날쭉 준다. 어제 같은 시각이 없으면 `vs_day`(24시간 중 위치)를 쓴다.
@@ -39,4 +41,4 @@ description: 미구현·보류·기술부채·진행 중 과제의 현재 상태
 - (없음)
 
 ## 기술부채
-- (없음)
+- 물량 상대 등급(설계 §5.2 '평소보다 적음/비슷/많음')은 기준이 없어 아직 척수·톤수만 낸다.

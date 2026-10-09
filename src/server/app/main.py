@@ -6,16 +6,19 @@
 """
 from __future__ import annotations
 
+import hmac
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
 
 from . import db, geo
 from .collectors import auction, fleet
 from .collectors.traffic import DEFAULT_SENSOR, TrafficService
 from .config import settings
+from .engine import Engine
 from .eum import EumClient, EumError
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
@@ -56,8 +59,16 @@ async def lifespan(app: FastAPI):
     app.state.eum = EumClient(settings)
     app.state.place_info = None
     await bootstrap(app)
+    engine = Engine(app.state.db, app.state.eum, app.state.place, settings.feed)
+    engine.reload_fleet()
+    app.state.engine = engine
+    sched = AsyncIOScheduler()
+    # 실제 3초마다 가상 시계를 확인하고, 10분(가상) 경계를 넘었을 때만 기록·알림한다.
+    sched.add_job(engine.tick, "interval", seconds=3, max_instances=1, coalesce=True)
+    sched.start()
     log.info("서버 준비 완료 (FEED=%s, DB=%s)", settings.feed, settings.db_path)
     yield
+    sched.shutdown(wait=False)
     await app.state.eum.aclose()
     app.state.db.close()
 
@@ -107,3 +118,63 @@ def sensors(request: Request) -> list[dict]:
 @app.get("/api/traffic/now")
 async def traffic_now(request: Request, sensor: str = DEFAULT_SENSOR) -> dict:
     return await request.app.state.traffic.now(sensor)
+
+
+# --- 입항 예보 ---
+@app.get("/api/today")
+async def today(request: Request) -> dict:
+    return await request.app.state.engine.today()
+
+
+@app.get("/api/ships")
+async def ships(request: Request) -> dict:
+    return await request.app.state.engine.ships()
+
+
+# --- 시뮬레이터 시계·데이터 소스 제어 (관리자 토큰, 설계 §1-18) ---
+def require_admin(x_admin_token: str = Header(default="")) -> None:
+    if not settings.sim_admin_token:
+        raise HTTPException(503, detail="관리자 토큰이 서버에 설정되지 않았습니다. .env 의 SIM_ADMIN_TOKEN 을 확인해 주세요.")
+    if not hmac.compare_digest(x_admin_token, settings.sim_admin_token):
+        raise HTTPException(403, detail="관리자만 시계를 조작할 수 있습니다. 관리자 토큰을 확인해 주세요.")
+
+
+@app.get("/api/sim/state")
+def sim_state(request: Request) -> dict:
+    e = request.app.state.engine
+    return {**e.clock.state(), "feed": e.feed}
+
+
+@app.post("/api/sim/play", dependencies=[Depends(require_admin)])
+def sim_play(request: Request, speed: float | None = Query(default=None)) -> dict:
+    e = request.app.state.engine
+    try:
+        e.clock.play(speed)
+    except ValueError as err:
+        raise HTTPException(422, detail=str(err)) from None
+    return {**e.clock.state(), "feed": e.feed}
+
+
+@app.post("/api/sim/pause", dependencies=[Depends(require_admin)])
+def sim_pause(request: Request) -> dict:
+    e = request.app.state.engine
+    e.clock.pause()
+    return {**e.clock.state(), "feed": e.feed}
+
+
+@app.post("/api/sim/seek", dependencies=[Depends(require_admin)])
+def sim_seek(request: Request, t: str = Query(..., description="HH:MM")) -> dict:
+    e = request.app.state.engine
+    try:
+        e.clock.seek(t)
+    except ValueError as err:
+        raise HTTPException(422, detail=str(err)) from None
+    e.reset_tick()
+    return {**e.clock.state(), "feed": e.feed}
+
+
+@app.post("/api/sim/feed", dependencies=[Depends(require_admin)])
+def sim_feed(request: Request, mode: str = Query(..., pattern="^(sim|live)$")) -> dict:
+    e = request.app.state.engine
+    e.set_feed(mode)
+    return {**e.clock.state(), "feed": e.feed}
