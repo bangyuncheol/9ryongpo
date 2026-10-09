@@ -28,13 +28,15 @@ description: 미구현·보류·기술부채·진행 중 과제의 현재 상태
 - 방문 권장 `rules/visit.py` + `/api/visit`, 교통 카드에 표시.
 - 알림 문장: 템플릿을 LLM(`reasoning low`)이 다듬되, 숫자 집합·'가능성'·길이가 템플릿과 다르면 버리고 템플릿 사용(`rules/brief.py accept`). 크레딧 쿨다운은 질문창과 공유.
 - `VAPID_SUBJECT`는 주소만 넣어도 `mailto:`를 자동으로 붙인다.
+- 배포 준비: `src/deploy/`(setup_vm.sh·update.sh·wipan.service·Caddyfile), deploy 스킬에 첫 설치·갱신·되돌리기·HTTPS(Caddy+sslip.io 또는 Cloudflare 터널)·환경 변수 표.
+- 리허설 체크리스트 `qa-regression/checklist.md`(데모 장면·푸시·장애 대비).
 - 테스트 47개 (`cd src/server && uv run pytest`). 외부 호출 없이 `tests/fixtures/`의 실제 응답 일부로 돈다.
 
 **다음 할 일 (설계 §10 순서)**
 1. **폰 푸시 실기 시험**: HTTPS 주소 필요(로컬은 Cloudflare 임시 터널 또는 VM). `.env`의 `VAPID_SUBJECT=mailto:주소`가 비어 있으면 발송을 건너뛰고 알림함에만 남긴다.
 2. **OpenAI 크레딧 충전 후 LLM 경로 실기 확인**: 지금 키는 `credit_balance_exhausted`(10/9). 그동안 질문창은 간단 모드(낱말 규칙)로 같은 도구를 불러 답한다.
-4. VM 배포(운영진 SSH 키 등록 후), 리허설 체크리스트(`qa-regression`)
-5. UI 작업 단계: One UI 기준 정리(`.claude/rules/ui-design.md`) `rules/visit.py`(설계 §5.4) — 지금은 `/api/traffic/now`가 숫자만 준다.
+3. VM 배포: SSH 키 등록 후 deploy 스킬 '첫 설치' 절차(`src/deploy/setup_vm.sh`). 리허설은 `qa-regression/checklist.md`.
+4. UI 작업 단계: One UI 기준 정리(`.claude/rules/ui-design.md`) `rules/visit.py`(설계 §5.4) — 지금은 `/api/traffic/now`가 숫자만 준다.
 
 **알아 둘 것**
 - 어종 전체 비율은 어종을 말할 수 있는 업종끼리만 톤수 가중한다. 근해자망처럼 해마다 1위가 바뀌는 업종은 `category_only_biz`로 따로 알린다.

@@ -1,0 +1,17 @@
+# setup_vm.sh 가 __USER__ __REPO__ __HOME__ 을 바꿔 /etc/systemd/system/wipan.service 로 설치한다.
+[Unit]
+Description=위판 당직 서버 (FastAPI)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=__USER__
+WorkingDirectory=__REPO__/src/server
+Environment=PATH=__HOME__/.local/bin:/usr/local/bin:/usr/bin:/bin
+# 프로세스 1개(SQLite 단일 쓰기, 설계 §1-19). 외부 노출은 Caddy/터널이 맡는다.
+ExecStart=__HOME__/.local/bin/uv run uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 1
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
