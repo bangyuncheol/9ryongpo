@@ -59,7 +59,7 @@ export const api = {
   sensors: () => get<Sensor[]>('/api/sensors'),
   place: () => get<Place>('/api/place'),
   traffic: () => get<Traffic>('/api/traffic/now'),
-  visit: (visitor: boolean) => get<{ advice: string; basis: string; auction_time: string; visitor_line: string }>(`/api/visit?visitor=${visitor}`),
+  visit: (visitor: boolean) => get<{ advice: string; basis: string; auction_time: string }>(`/api/visit?visitor=${visitor}`),
   pushKey: () => get<{ publicKey: string; species: string[] }>('/api/push/key'),
   notifications: () => get<{ vts: string; title: string; body: string }[]>('/api/notifications'),
 }

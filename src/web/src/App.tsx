@@ -42,7 +42,7 @@ export default function App() {
           <div className="order-2"><AlertsCard items={inbox.data ?? []} preset={subPreset} /></div>
           <div className="order-3"><ArrivalsCard today={today.data} /></div>
           <div className="order-4"><SpeciesCard today={today.data} /></div>
-          <div className="order-5"><TrafficCard traffic={traffic.data} error={traffic.error} advice={visit.data?.advice ?? null} visitorLine={visit.data?.visitor_line ?? null} /></div>
+          <div className="order-5"><TrafficCard traffic={traffic.data} error={traffic.error} advice={visit.data?.advice ?? null} /></div>
         </div>
         <div className="contents sm:flex sm:flex-col sm:gap-4">
           <div className="order-1">
