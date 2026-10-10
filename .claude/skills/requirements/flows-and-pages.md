@@ -34,3 +34,8 @@
 | POST | `/api/unsubscribe` | 구독 삭제 `{endpoint}` | 공개 |
 | GET | `/api/notifications` | 화면 안 알림함(가상 시각 이전, 같은 장면 중복 제거) | 공개 |
 | POST | `/api/push/test` | 구독한 모든 기기에 시험 알림(리허설 지연 측정) | 공개(데모 진행용) |
+| GET | `/api/call/state` | 전화 기능 상태·지금 통화 내역(가린 번호, 말·도구 기록) | 공개 |
+| POST | `/api/call/subscribe` | `{phone, species}` 전화 알림 구독. 허용 목록 밖 번호는 403 | 공개(서버가 허용 번호 검사) |
+| POST | `/api/call/unsubscribe` | `{phone}` 전화 알림 해지 | 공개 |
+| POST | `/api/call/toggle?on=` | '전화 켜기/끄기'. 켜져 있을 때만 입항 알림이 전화로도 나감 | 공개(데모 진행용) |
+| POST | `/api/call/test` | 허용 번호 첫 번째로 최근 알림 문장을 읽는 시험 전화(발신 시간 소모) | 공개(데모 진행용) |

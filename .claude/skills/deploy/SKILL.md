@@ -56,4 +56,9 @@ description: 배포 절차·환경 변수 목록·프로덕션 마이그레이�
 | `VAPID_SUBJECT` | 푸시 연락 주소. 주소만 넣어도 `mailto:` 자동 | 예 |
 | `FEED` | 시작 데이터 소스 `sim`/`live` | 아니오(기본 sim) |
 | `DB_PATH` | SQLite 위치(기본 `./data/app.db`) | 아니오 |
+| `PHONE_ENABLED` | `1`이면 전화 에이전트를 ClawOps 번호에 붙인다. **번호당 서버 하나만**(로컬과 VM 동시 금지) | 아니오(기본 0) |
+| `CLAWOPS_API_KEY` / `CLAWOPS_ACCOUNT_ID` | ClawOps API 키·계정 ID | 전화 쓸 때 예 |
+| `CLAWOPS_FROM_NUMBER` | 발급받은 070 번호(숫자만) | 전화 쓸 때 예 |
+| `CALL_ALLOWED_NUMBERS` | 전화를 걸 수 있는 번호(쉼표 구분) | 전화 쓸 때 예 |
+| `GEMINI_API_KEY` | 전화 음성 합성 키(하루 100회). 음성은 `data/tts_cache/`에 저장돼 재사용 | 전화 쓸 때 예 |
 | `VITE_KAKAO_MAP_KEY` | 카카오맵 JavaScript 키(화면 빌드 때 들어가는 공개 키). 운영 도메인을 Kakao Developers의 JavaScript SDK 도메인에 등록해야 지도가 뜸. 비우면 Leaflet 지도 | 아니오 |

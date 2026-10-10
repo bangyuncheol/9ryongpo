@@ -31,6 +31,15 @@ class Settings:
     feed: str  # "sim" | "live"
     db_path: Path
     auction_dir: Path
+    # 전화(설계 §4.3, 10/11). PHONE_ENABLED=1 인 서버 하나만 ClawOps 번호에 붙는다(번호당 연결 하나).
+    phone_enabled: bool = False
+    clawops_api_key: str = ""
+    clawops_account_id: str = ""
+    clawops_from_number: str = ""
+    call_allowed_numbers: tuple[str, ...] = ()
+    gemini_api_key: str = ""
+    gemini_tts_model: str = "gemini-3.8-flash-tts"
+    gemini_tts_voice: str = "Kore"
     eum_base_url: str = "https://genix.pohang-eum.kr/dpg"
     http_timeout_s: float = 15.0
 
@@ -41,6 +50,14 @@ def _vapid_subject(raw: str) -> str:
     if raw and "@" in raw and not raw.startswith(("mailto:", "https://")):
         return "mailto:" + raw
     return raw
+
+
+def phone_digits(raw: str) -> str:
+    """'010-1234-5678' · '+82 10 1234 5678' → '01012345678'. 국내 휴대폰 형식이 아니면 ''."""
+    d = "".join(ch for ch in raw if ch.isdigit())
+    if d.startswith("8210"):
+        d = "0" + d[2:]
+    return d if d.startswith("01") and len(d) in (10, 11) else ""
 
 
 def load_settings() -> Settings:
@@ -58,6 +75,14 @@ def load_settings() -> Settings:
         feed=feed,
         db_path=_resolve(os.getenv("DB_PATH", "./data/app.db").strip()),
         auction_dir=REPO_ROOT / "data" / "auction",
+        phone_enabled=os.getenv("PHONE_ENABLED", "0").strip() == "1",
+        clawops_api_key=os.getenv("CLAWOPS_API_KEY", "").strip(),
+        clawops_account_id=os.getenv("CLAWOPS_ACCOUNT_ID", "").strip(),
+        clawops_from_number=os.getenv("CLAWOPS_FROM_NUMBER", "").strip(),
+        call_allowed_numbers=tuple(n for n in (phone_digits(x) for x in os.getenv("CALL_ALLOWED_NUMBERS", "").split(",")) if n),
+        gemini_api_key=os.getenv("GEMINI_API_KEY", "").strip(),
+        gemini_tts_model=os.getenv("GEMINI_TTS_MODEL", "gemini-3.8-flash-tts").strip(),
+        gemini_tts_voice=os.getenv("GEMINI_TTS_VOICE", "Kore").strip(),
     )
 
 

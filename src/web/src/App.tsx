@@ -11,6 +11,7 @@ import TrafficCard from './components/TrafficCard'
 import AdminBar from './components/AdminBar'
 import AlertsCard from './components/AlertsCard'
 import ChatCard from './components/ChatCard'
+import CallCard from './components/CallCard'
 import { ErrorLine } from './components/Card'
 
 /*
@@ -29,6 +30,7 @@ export default function App() {
   const trucks = usePoll(api.trafficSensors, 60000)
   const inbox = usePoll(api.notifications, 3000)
   const visit = usePoll(() => api.visit(false), 60000)
+  const call = usePoll(api.callState, 1500)
   const [subPreset, setSubPreset] = useState<{ species: string; at: number } | null>(null)
   const admin = new URLSearchParams(location.search).has('admin')
 
@@ -46,10 +48,10 @@ export default function App() {
   return (
     <div className="mx-auto min-h-screen max-w-6xl pb-24 sm:pb-10">
       <AppHeader today={today.data} />
-      {admin && <div className="mb-4"><AdminBar clock={today.data?.clock ?? null} feed={src?.feed ?? null} /></div>}
+      {admin && <div className="mb-4"><AdminBar clock={today.data?.clock ?? null} feed={src?.feed ?? null} call={call.data} /></div>}
       <main className="flex flex-col gap-4 px-[var(--spacing-side)] sm:grid sm:grid-cols-[42fr_58fr] sm:items-start lg:grid-cols-[38fr_62fr]">
         <div className="contents sm:flex sm:flex-col sm:gap-4">
-          <div className="order-2"><AlertsCard items={inbox.data ?? []} preset={subPreset} /></div>
+          <div className="order-2"><AlertsCard items={inbox.data ?? []} preset={subPreset} phone={!!call.data?.enabled} /></div>
           <div className="order-3"><ArrivalsCard today={today.data} selected={selected} onSelect={onSelect} /></div>
           <div className="order-4"><SpeciesCard today={today.data} /></div>
           <div className="order-5"><TrafficCard traffic={traffic.data} error={traffic.error} advice={visit.data?.advice ?? null} /></div>
@@ -61,6 +63,7 @@ export default function App() {
               notice={today.data?.notice ?? null} selected={selected} onSelect={onSelect} />
             <ErrorLine message={today.error ?? ships.error} />
           </div>
+          <div className="order-6 empty:hidden"><CallCard call={call.data} /></div>
           <div className="order-6"><ChatCard onSubscribe={(species) => setSubPreset({ species, at: Date.now() })} /></div>
         </div>
       </main>

@@ -45,6 +45,7 @@ def delete_subscription(conn: sqlite3.Connection, endpoint: str) -> None:
 class Pusher:
     def __init__(self, conn: sqlite3.Connection, settings: Settings, sender=webpush, llm=None):
         self.conn, self.s, self._send, self.llm = conn, settings, sender, llm
+        self.listeners: list = []  # (vt, 본문, 어종 추정) — 전화 알림 등 같은 알림을 다른 경로로 보낼 때
 
     def _claims(self) -> dict:
         if not (self.s.vapid_private_key and self.s.vapid_subject.startswith(("mailto:", "https://"))):
@@ -97,6 +98,11 @@ class Pusher:
         body, how = await brief.polish(self.llm, self.s.openai_model, body)
         log.info("알림 문장(%s): %s", how, body)
         await self.notify(vt, title, body, est, [a["ship_id"] for a in new])
+        for fn in self.listeners:
+            try:
+                await fn(vt, body, est)
+            except Exception:
+                log.exception("알림 후속 처리 실패")
 
 
 def recent_notifications(conn: sqlite3.Connection, until: datetime, limit: int = 5) -> list[dict]:

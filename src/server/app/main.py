@@ -72,6 +72,13 @@ async def lifespan(app: FastAPI):
         log.warning("OPENAI_API_KEY 가 없어 질문창은 간단 모드로, 알림은 템플릿으로만 만듭니다.")
     app.state.pusher = pushmod.Pusher(app.state.db, settings, llm=app.state.llm)
     engine.hooks.append(app.state.pusher.on_new_arrivals)
+    from .phone.service import PhoneService
+    ctx = ToolContext(engine=engine, traffic=app.state.traffic)
+    from .phone.brain import chat_answer_fn
+    app.state.phone = PhoneService(settings, app.state.db, lambda: chat_answer_fn(app.state.llm, settings.openai_model, ctx),
+                                   settings.db_path.parent / "tts_cache")
+    app.state.pusher.listeners.append(app.state.phone.on_alert)
+    await app.state.phone.start()
     sched = AsyncIOScheduler()
     # 실제 3초마다 가상 시계를 확인하고, 10분(가상) 경계를 넘었을 때만 기록·알림한다.
     sched.add_job(engine.tick, "interval", seconds=3, max_instances=1, coalesce=True)
@@ -79,6 +86,7 @@ async def lifespan(app: FastAPI):
     log.info("서버 준비 완료 (FEED=%s, DB=%s)", settings.feed, settings.db_path)
     yield
     sched.shutdown(wait=False)
+    await app.state.phone.stop()
     await app.state.eum.aclose()
     app.state.db.close()
 
@@ -298,6 +306,60 @@ async def chat(request: Request) -> StreamingResponse:
         yield "data: {\"type\": \"done\"}\n\n"
 
     return StreamingResponse(stream(), media_type="text/event-stream", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+
+# --- 전화 알림 (설계 §4.3, 10/11) ---
+from .config import phone_digits  # noqa: E402
+from .phone import service as phonemod  # noqa: E402
+from .phone.brain import outbound_greeting  # noqa: E402
+
+
+@app.get("/api/call/state")
+def call_state(request: Request) -> dict:
+    return request.app.state.phone.state()
+
+
+@app.post("/api/call/subscribe")
+async def call_subscribe(request: Request) -> dict:
+    body = await request.json()
+    phone = phone_digits(str(body.get("phone", "")))
+    species = body.get("species") or None
+    if not phone:
+        raise HTTPException(422, detail="휴대폰 번호를 010으로 시작하는 숫자로 입력해 주세요.")
+    if species not in phonemod.ALLOWED_SPECIES:
+        raise HTTPException(422, detail="지원하지 않는 어종입니다. 목록에서 골라 주세요.")
+    if not request.app.state.phone.allowed(phone):
+        raise HTTPException(403, detail="시연 중에는 미리 등록한 번호로만 전화 알림을 받을 수 있습니다.")
+    phonemod.save_call_sub(request.app.state.db, phone, species)
+    return {"ok": True, "phone": phonemod.mask(phone)}
+
+
+@app.post("/api/call/unsubscribe")
+async def call_unsubscribe(request: Request) -> dict:
+    body = await request.json()
+    phonemod.delete_call_sub(request.app.state.db, phone_digits(str(body.get("phone", ""))))
+    return {"ok": True}
+
+
+@app.post("/api/call/toggle")
+def call_toggle(request: Request, on: bool = Query(...)) -> dict:
+    """진행 막대 '전화 켜기'. 켜져 있을 때만 입항 알림이 전화로도 나간다(체험 발신 10분 보호)."""
+    request.app.state.phone.calls_on = on
+    return request.app.state.phone.state()
+
+
+@app.post("/api/call/test")
+async def call_test(request: Request) -> dict:
+    """진행 막대 '시험 전화': 허용 번호 첫 번째로 가장 최근 알림 문장을 읽는 전화를 건다."""
+    ph = request.app.state.phone
+    if not settings.call_allowed_numbers:
+        raise HTTPException(422, detail="CALL_ALLOWED_NUMBERS 가 비어 있어 시험 전화를 걸 수 없습니다.")
+    recent = pushmod.recent_notifications(request.app.state.db, request.app.state.engine.clock.now())
+    body = recent[0]["body"] if recent else "지금은 새로 들어오는 배 알림이 없습니다."
+    res = await ph.dial(settings.call_allowed_numbers[0], outbound_greeting(body))
+    if not res["ok"]:
+        raise HTTPException(503, detail=res["message"])
+    return res
 
 
 # --- 화면(Vite 빌드 결과) 정적 서빙. API 라우트보다 뒤에 둔다. ---

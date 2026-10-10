@@ -54,9 +54,17 @@ CREATE TABLE IF NOT EXISTS subs (
     created_at  TEXT NOT NULL
 );
 
+-- 전화 알림 구독(10/11 /db-change-plan 승인). 시연 중에는 CALL_ALLOWED_NUMBERS 에 있는 번호만 저장·발신한다.
+CREATE TABLE IF NOT EXISTS call_subs (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    phone       TEXT NOT NULL UNIQUE,    -- 숫자만, 예: 01012345678
+    cond_json   TEXT NOT NULL,           -- {"species": null | "붉은대게" ...} (subs 와 같은 형식)
+    created_at  TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS events (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     ts          TEXT NOT NULL,
-    kind        TEXT NOT NULL,           -- push | forecast | chat | error
+    kind        TEXT NOT NULL,           -- push | forecast | chat | call | error
     payload     TEXT NOT NULL
 );

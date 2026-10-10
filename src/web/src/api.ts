@@ -39,6 +39,18 @@ export type Traffic = {
   vs_day: string
 }
 
+export type CallLine = { role: 'ai' | 'user' | 'tool'; text: string; t: string }
+export type CallState = {
+  enabled: boolean; connected: boolean; calls_on: boolean; number: string | null
+  active: boolean; status: string; direction?: 'inbound' | 'outbound'; who?: string; duration?: number; lines: CallLine[]
+}
+
+/** 도구 이름 → 화면 문구. 질문창과 통화 내역이 같이 쓴다. */
+export const TOOL_LABEL: Record<string, string> = {
+  get_arrival_forecast: '입항 예보 조회', get_species_estimate: '어종 추정', get_traffic_now: '위판장 앞 교통 조회',
+  recommend_visit_time: '방문 시각 계산', get_past_auction: '과거 경매 실적 조회', subscribe: '알림 준비', llm: 'AI',
+}
+
 export class ApiError extends Error {}
 
 async function get<T>(path: string): Promise<T> {
@@ -65,6 +77,7 @@ export const api = {
   visit: (visitor: boolean) => get<{ advice: string; basis: string; auction_time: string }>(`/api/visit?visitor=${visitor}`),
   pushKey: () => get<{ publicKey: string; species: string[] }>('/api/push/key'),
   notifications: () => get<{ vts: string; title: string; body: string }[]>('/api/notifications'),
+  callState: () => get<CallState>('/api/call/state'),
 }
 
 export async function adminPost(path: string): Promise<Clock & { feed: string }> {

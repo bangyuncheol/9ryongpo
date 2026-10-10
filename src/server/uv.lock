@@ -187,6 +187,25 @@ wheels = [
 ]
 
 [[package]]
+name = "clawops"
+version = "0.62.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "httpx" },
+    { name = "pydantic" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/8f/ad/0a7f00dba1a2b0cca3f98ad817f80636576cbc1bef57cd02357563972ff7/clawops-0.62.0.tar.gz", hash = "sha256:d88b89a5f1759bfefb103ff5c5fa3c1dd3cfee1480d5e767ac366c400d273824", size = 321267, upload-time = "2026-10-10T14:48:27.843Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/7f/15/ce181cc5a8d4bc76fdd97eeb7a078c3d0c477ebfe526409f38ff8046f6c7/clawops-0.62.0-py3-none-any.whl", hash = "sha256:6269291b36e18d74a16dcfdf706cdd9be665f1a051b61869227f8e8d5a24da39", size = 206566, upload-time = "2026-10-10T14:48:26.141Z" },
+]
+
+[package.optional-dependencies]
+agent = [
+    { name = "aiohttp" },
+]
+
+[[package]]
 name = "click"
 version = "8.5.0"
 source = { registry = "https://pypi.org/simple" }
@@ -870,6 +889,7 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "apscheduler" },
+    { name = "clawops", extra = ["agent"] },
     { name = "fastapi" },
     { name = "httpx" },
     { name = "openai" },
@@ -886,6 +906,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "apscheduler", specifier = ">=3.10,<4" },
+    { name = "clawops", extras = ["agent"], specifier = "==0.62.0" },
     { name = "fastapi", specifier = ">=0.115" },
     { name = "httpx", specifier = ">=0.27" },
     { name = "openai", specifier = ">=1.50" },

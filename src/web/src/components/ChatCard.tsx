@@ -1,13 +1,9 @@
 import { useState } from 'react'
-import { askStream } from '../api'
+import { askStream, TOOL_LABEL } from '../api'
 import type { ChatEvent } from '../api'
 import Card, { Button } from './Card'
 import More from './More'
 
-const TOOL_LABEL: Record<string, string> = {
-  get_arrival_forecast: '입항 예보 조회', get_species_estimate: '어종 추정', get_traffic_now: '위판장 앞 교통 조회',
-  recommend_visit_time: '방문 시각 계산', get_past_auction: '과거 경매 실적 조회', subscribe: '알림 준비', llm: 'AI',
-}
 const QUICK = ['43톤 자망선 언제 와?', '오늘 오징어 있어?', '몇 시에 가면 돼?', '작년 10월 붉은대게 얼마였어?']
 
 const KEEP = 3 // 최근 질문 3개만 보관·표시하고 AI 맥락으로도 보낸다(10/10 결정)
