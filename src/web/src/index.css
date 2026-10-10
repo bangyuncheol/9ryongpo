@@ -76,3 +76,18 @@ body {
 .leaflet-container { font-family: var(--font-sans); background: var(--color-primary-soft); }
 :focus-visible { outline: 3px solid var(--color-primary); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
+
+/* 입항 지도 효과(10/10). 움직임 줄이기 설정이면 끈다. */
+@keyframes port-ripple {
+  from { transform: scale(0.4); opacity: 0.7; }
+  to { transform: scale(2.6); opacity: 0; }
+}
+.port-ripple::after {
+  content: ""; position: absolute; inset: -6px; border-radius: 9999px;
+  border: 3px solid var(--color-primary); animation: port-ripple 1.4s var(--ease-oneui) 2;
+}
+@keyframes boat-bob { 0%, 100% { translate: 0 0; } 50% { translate: 0 -1.5px; } }
+.boat-bob { animation: boat-bob 1.6s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .port-ripple::after, .boat-bob { animation: none; }
+}
