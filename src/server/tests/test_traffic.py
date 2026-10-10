@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 
 from app import geo
-from app.collectors.traffic import compare_level, day_position, parse_sensors, summarize
+from app.collectors.traffic import compare_level, day_position, last_hour_by_sensor, parse_sensors, summarize
 
 FX = Path(__file__).parent / "fixtures"
 
@@ -59,3 +59,12 @@ def test_day_position():
 def test_fixture_has_no_24h_pair_but_day_position_works():
     s = summarize(load("eum_traffic_per_hour.json"), load("eum_congestion.json"), "교통센서3")
     assert s["vs_day"] in {"붐비는 편", "보통", "한산한 편"}
+
+
+def test_last_hour_by_sensor_only_nearby():
+    sensors = parse_sensors(load("eum_sensors.json"), geo.AUCTION_PLACE)
+    got = last_hour_by_sensor(load("eum_traffic_per_hour.json"), sensors, max_m=1000)
+    # 고정 데이터에는 센서3·센서1 원본만 있다. 둘 다 1km 안이고, 가까운 순서
+    assert [g["name"] for g in got] == ["교통센서3", "교통센서1"]
+    assert all(g["total"] >= g["truck"] >= 0 and g["dist_m"] <= 1000 for g in got)
+    assert last_hour_by_sensor(load("eum_traffic_per_hour.json"), sensors, max_m=50) == []

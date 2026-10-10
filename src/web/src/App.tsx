@@ -26,6 +26,7 @@ export default function App() {
   const today = usePoll(api.today, 2000)
   const ships = usePoll(api.ships, 2000)
   const traffic = usePoll(api.traffic, 60000)
+  const trucks = usePoll(api.trafficSensors, 60000)
   const inbox = usePoll(api.notifications, 3000)
   const visit = usePoll(() => api.visit(false), 60000)
   const [subPreset, setSubPreset] = useState<{ species: string; at: number } | null>(null)
@@ -56,7 +57,7 @@ export default function App() {
         <div className="contents sm:flex sm:flex-col sm:gap-4">
           <div className="order-1">
             <MapView place={place} ships={ships.data?.ships ?? []} arriving={today.data?.arriving ?? []}
-              arrivedCount={today.data?.arrived.length ?? 0} truck={truck} sensor={sensor}
+              arrivedCount={today.data?.arrived.length ?? 0} truck={truck} trucks={trucks.data?.sensors ?? []} sensor={sensor}
               notice={today.data?.notice ?? null} selected={selected} onSelect={onSelect} />
             <ErrorLine message={today.error ?? ships.error} />
           </div>

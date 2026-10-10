@@ -25,6 +25,8 @@ export type Ship = {
   status: '입항 중' | '입항' | '조업·대기' | '미갱신'
 }
 
+export type SensorTraffic = { name: string; nickname: string | null; lat: number; lon: number; dist_m: number; hour: string; truck: number; total: number }
+
 export type Sensor = { id: number; name: string; nickname: string | null; lat: number; lon: number; dist_m: number }
 export type Place = { name: string; address?: string; lat: number; lon: number }
 
@@ -59,6 +61,7 @@ export const api = {
   sensors: () => get<Sensor[]>('/api/sensors'),
   place: () => get<Place>('/api/place'),
   traffic: () => get<Traffic>('/api/traffic/now'),
+  trafficSensors: () => get<{ sensors: SensorTraffic[]; stale: boolean }>('/api/traffic/sensors'),
   visit: (visitor: boolean) => get<{ advice: string; basis: string; auction_time: string }>(`/api/visit?visitor=${visitor}`),
   pushKey: () => get<{ publicKey: string; species: string[] }>('/api/push/key'),
   notifications: () => get<{ vts: string; title: string; body: string }[]>('/api/notifications'),

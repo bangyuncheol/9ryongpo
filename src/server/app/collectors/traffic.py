@@ -108,6 +108,22 @@ def summarize(per_hour: dict[str, list[dict]], congestion: list[dict], sensor: s
     }
 
 
+def last_hour_by_sensor(per_hour: dict[str, list[dict]], sensors: list[dict], max_m: int = 1000) -> list[dict]:
+    """위판장 max_m 안 센서마다 지난 1시간 트럭·전체 수. 트럭의 위치가 아니라 '그 지점을 지나간 수'다."""
+    out = []
+    for s in sensors:
+        if s["dist_m"] > max_m:
+            continue
+        rows = [(h, r) for r in per_hour.get(s["name"], []) if (h := _hour_key(str(r.get("time", "")))) is not None]
+        if not rows:
+            continue
+        h, r = max(rows, key=lambda x: x[0])
+        out.append({"name": s["name"], "nickname": s.get("nickname"), "lat": s["lat"], "lon": s["lon"],
+                    "dist_m": s["dist_m"], "hour": h.strftime("%Y-%m-%dT%H:00"),
+                    "truck": int(r.get("truck") or 0) + int(r.get("lorry") or 0), "total": int(r.get("sumCnt") or 0)})
+    return sorted(out, key=lambda x: x["dist_m"])
+
+
 @dataclass
 class TrafficService:
     eum: EumClient
@@ -115,6 +131,7 @@ class TrafficService:
     sensors: list[dict] = field(default_factory=list)
     _cache: dict[str, Any] | None = None
     _cache_at: float = 0.0
+    _per_hour: dict[str, list[dict]] = field(default_factory=dict)  # 11개 센서 원본(같은 5분 캐시)
 
     async def load_sensors(self) -> None:
         self.sensors = parse_sensors(await self.eum.sensors(), self.place)
@@ -131,8 +148,15 @@ class TrafficService:
             if self._cache and self._cache["sensor"] == sensor:
                 return {**self._cache, "stale": True}
             raise
+        self._per_hour = per_hour
         data = summarize(per_hour, congestion, sensor)
         data["fetched_at"] = datetime.now().isoformat(timespec="seconds")
         data["stale"] = False
         self._cache, self._cache_at = data, time.monotonic()
         return data
+
+    async def nearby(self, max_m: int = 1000) -> dict[str, Any]:
+        """지도용: 위판장 주변 센서별 지난 1시간 트럭 수. now()와 같은 조회·캐시를 쓴다."""
+        base = await self.now()
+        return {"fetched_at": base.get("fetched_at"), "stale": base.get("stale", False),
+                "sensors": last_hour_by_sensor(self._per_hour, self.sensors, max_m)}

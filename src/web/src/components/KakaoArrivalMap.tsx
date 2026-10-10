@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import type { Arrival, Place, Ship } from '../api'
+import type { Arrival, Place, SensorTraffic, Ship } from '../api'
 import { hhmm } from '../api'
 import { loadKakao } from './kakaoLoader'
 import { shortBiz } from './ArrivalsCard'
@@ -18,7 +18,8 @@ type K = any
 const POLL_MS = 2000
 const reduceMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
 // 항구 확대 범위: 위판장 주변 육지 + 항구 + 입구 바깥 접근로(harbor.py APPROACH[0])까지
-const VIEW = { s: 35.9822, n: 35.9935, w: 129.5495, e: 129.5672 }
+// 서쪽은 위판장 1km 안 교통 센서(병포리 교차로·행정복지센터)까지 들어오게(10/10)
+const VIEW = { s: 35.9822, n: 35.9935, w: 129.5465, e: 129.5672 }
 
 type Props = {
   place: Place | null
@@ -26,6 +27,7 @@ type Props = {
   arriving: Arrival[]
   arrivedCount: number
   truck: { perHour: number; level: string | null } | null
+  trucks: SensorTraffic[]
   sensor: { lat: number; lon: number } | null
   notice: string | null
   selected: number | null
@@ -87,7 +89,9 @@ export default function KakaoArrivalMap(p: Props) {
   const map = useRef<K>(null)
   const tracks = useRef(new Map<number, Track>())
   const info = useRef<K>(null)
-  const statics = useRef<{ star?: HTMLElement; badge?: K; badgeEl?: HTMLElement; truck?: K; truckEl?: HTMLElement }>({})
+  const statics = useRef<{ star?: HTMLElement; badge?: K; badgeEl?: HTMLElement }>({})
+  const truckOs = useRef<K[]>([])
+  const [sensorFocus, setSensorFocus] = useState<string | null>(null)  // 누르거나 올린 트럭 아이콘(센서 이름)
   const prevArrived = useRef<number | null>(null)
   const arrRef = useRef(new Map<number, Arrival>())
   const [ready, setReady] = useState(false)
@@ -111,7 +115,7 @@ export default function KakaoArrivalMap(p: Props) {
       const b = new kakao.maps.LatLngBounds()
       b.extend(new kakao.maps.LatLng(VIEW.s, VIEW.w)); b.extend(new kakao.maps.LatLng(VIEW.n, VIEW.e))
       map.current.setBounds(b, 0, 0, 0, 0)
-      kakao.maps.event.addListener(map.current, 'click', () => onSelect(null))
+      kakao.maps.event.addListener(map.current, 'click', () => { onSelect(null); setSensorFocus(null) })
       setReady(true)
     }).catch((e: unknown) => { console.error(e); onFail() })
     return () => { alive = false }
@@ -126,16 +130,15 @@ export default function KakaoArrivalMap(p: Props) {
     star.style.cssText = 'pointer-events:none;position:relative;width:28px;height:28px;display:grid;place-items:center;border-radius:9999px;' +
       'background:var(--color-card);box-shadow:0 1px 4px rgba(0,0,0,.2);font-size:18px;color:var(--color-primary-dark)'
     star.setAttribute('aria-label', '위판장'); star.textContent = '★'
-    const starO = new kakao.maps.CustomOverlay({ position: pos, content: star, yAnchor: 0.5, zIndex: 5 })
+    const starO = new kakao.maps.CustomOverlay({ position: pos, content: star, yAnchor: 0.5, zIndex: 9 })  // 별은 늘 맨 위
     starO.setMap(m)
-    const nameO = new kakao.maps.CustomOverlay({ position: pos, content: chip('구룡포수협 위판장'), yAnchor: 2.1, zIndex: 5 })
+    // 이름표는 별 오른쪽 위(바다 쪽). 왼쪽 위는 위판장 앞 트럭 아이콘, 남동쪽은 정박한 배 자리
+    const nameO = new kakao.maps.CustomOverlay({ position: pos, content: chip('구룡포수협 위판장'), xAnchor: -0.12, yAnchor: 1.5, zIndex: 8 })
     nameO.setMap(m)
     const badgeEl = chip()
-    const badge = new kakao.maps.CustomOverlay({ position: pos, content: badgeEl, xAnchor: 1.15, yAnchor: 0.5, zIndex: 6 })
-    const truckEl = chip()
-    const truck = new kakao.maps.CustomOverlay({ position: pos, content: truckEl, xAnchor: 1.08, yAnchor: -0.9, zIndex: 6 })
-    statics.current = { star, badge, badgeEl, truck, truckEl }
-    return () => { starO.setMap(null); nameO.setMap(null); badge.setMap(null); truck.setMap(null) }
+    const badge = new kakao.maps.CustomOverlay({ position: pos, content: badgeEl, xAnchor: 1.1, yAnchor: -0.7, zIndex: 8 })  // 별 왼쪽 아래(육지)
+    statics.current = { star, badge, badgeEl }
+    return () => { starO.setMap(null); nameO.setMap(null); badge.setMap(null) }
   }, [ready, place])
 
   // 정박 N척: 실제로 부두에 멈춘 배만 센다. 하나 늘 때 별 주위 물결.
@@ -150,13 +153,46 @@ export default function KakaoArrivalMap(p: Props) {
     prevArrived.current = dockedCount
   }, [ready, dockedCount])
 
+  // 트럭 아이콘: 위판장 1km 안 교통 센서 자리. 크기는 지난 1시간 트럭 수(트럭의 위치가 아니라 그 지점을 지난 수)
   useEffect(() => {
-    const s = statics.current
-    if (!ready || !s.truck || !map.current) return
-    if (!p.truck) { s.truck.setMap(null); return }
-    s.truckEl!.innerHTML = `🚚 트럭 ${p.truck.perHour}대/시${p.truck.level ? ` · <span style="font-weight:500;color:var(--color-muted)">${p.truck.level}</span>` : ''}`
-    s.truck.setMap(map.current)
-  }, [ready, p.truck])
+    const kakao = k.current, m = map.current
+    if (!ready || !kakao || !m) return
+    truckOs.current.forEach((o) => o.setMap(null))
+    truckOs.current = p.trucks.map((t) => {
+      const size = Math.round(14 + Math.min(12, Math.sqrt(t.truck) * 1.3))
+      const el = document.createElement('button')
+      el.type = 'button'
+      el.setAttribute('aria-label', `${t.nickname ?? t.name} 지난 1시간 트럭 ${t.truck}대`)
+      el.style.cssText = `display:grid;place-items:center;width:${size + 10}px;height:${size + 10}px;border-radius:9999px;` +
+        `background:var(--color-card);border:0;box-shadow:0 1px 4px rgba(0,0,0,.2);font-size:${size}px;line-height:1;cursor:pointer;padding:0`
+      el.textContent = '🚚'
+      el.addEventListener('click', (e) => { e.stopPropagation(); onSelect(null); setSensorFocus((f) => (f === t.name ? null : t.name)) })
+      el.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') setSensorFocus(t.name) })
+      el.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') setSensorFocus((f) => (f === t.name ? null : f)) })
+      // 위판장 앞 센서는 위판장에서 77m라 별·이름표를 가린다 → 육지 쪽(왼쪽 위)으로 비켜 놓는다
+      const near = t.dist_m < 150
+      const o = new kakao.maps.CustomOverlay({ position: new kakao.maps.LatLng(t.lat, t.lon), content: el,
+        xAnchor: near ? 1.35 : 0.5, yAnchor: near ? 1.0 : 0.5, zIndex: 7 })
+      o.setMap(m)
+      return o
+    })
+  }, [ready, p.trucks, onSelect])
+
+  // 트럭 아이콘 정보: 위판장 앞 센서는 어제 대비도 함께
+  const sensorInfo = useRef<K>(null)
+  useEffect(() => {
+    const kakao = k.current, m = map.current
+    if (!ready || !kakao || !m) return
+    sensorInfo.current?.setMap(null)
+    const t = p.trucks.find((x) => x.name === sensorFocus)
+    if (!t) return
+    const main = t === p.trucks[0]
+    const extra = main && p.truck?.level ? ` · ${p.truck.level}` : ''
+    const el = chip(`🚚 ${t.nickname ?? t.name} · 지난 1시간 트럭 ${t.truck}대 · 전체 ${t.total}대${extra}`)
+    sensorInfo.current = new kakao.maps.CustomOverlay({ position: new kakao.maps.LatLng(t.lat, t.lon), content: el, yAnchor: 2.2, zIndex: 41 })
+    sensorInfo.current.setMap(m)
+    if (el.parentElement) el.parentElement.style.pointerEvents = 'none'
+  }, [ready, sensorFocus, p.trucks, p.truck])
 
   // 들어오는 배·정박한 배: 배 모양. 위치는 2초 사이를 부드럽게 잇는다.
   useEffect(() => {
@@ -293,7 +329,7 @@ export default function KakaoArrivalMap(p: Props) {
         <p className="sr-only">지도 범례</p>
         <div className="flex flex-wrap gap-x-3">
           <span><span aria-hidden style={{ color: 'var(--color-primary-dark)' }}>★</span> 위판장</span>
-          <span><span aria-hidden>🚚</span> 위판장 앞 교통</span>
+          <span><span aria-hidden>🚚</span> 지난 1시간 트럭(클수록 많음)</span>
         </div>
         <div className="flex flex-wrap gap-x-3">
           <span><span aria-hidden style={{ color: 'var(--color-arriving)' }}>⛴</span> 들어오는 배</span>

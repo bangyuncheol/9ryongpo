@@ -131,6 +131,12 @@ async def traffic_now(request: Request, sensor: str = DEFAULT_SENSOR) -> dict:
     return await request.app.state.traffic.now(sensor)
 
 
+@app.get("/api/traffic/sensors")
+async def traffic_sensors(request: Request) -> dict:
+    """위판장 1km 안 교통 센서별 지난 1시간 트럭·전체 수(지도 트럭 아이콘용)."""
+    return await request.app.state.traffic.nearby()
+
+
 @app.get("/api/visit")
 async def visit_advice(request: Request, visitor: bool = False) -> dict:
     """방문 권장 문구(설계 §5.4). 교통 조회가 실패해도 경매 시각 기준 문구는 준다."""
