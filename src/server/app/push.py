@@ -99,7 +99,8 @@ class Pusher:
         await self.notify(vt, title, body, est, [a["ship_id"] for a in new])
 
 
-def recent_notifications(conn: sqlite3.Connection, until: datetime, limit: int = 20) -> list[dict]:
+def recent_notifications(conn: sqlite3.Connection, until: datetime, limit: int = 5) -> list[dict]:
+    """최근 5건만(화면 상한, 10/10 결정). 오래된 것부터 빠지는 큐."""
     """화면 안 알림함(푸시 지연 대비, 설계 §11). 가상 시각 until 이전 것만, 같은 장면 반복은 하나로."""
     last_reset = conn.execute("SELECT COALESCE(MAX(id), 0) FROM events WHERE kind='reset'").fetchone()[0]
     rows = conn.execute("SELECT payload FROM events WHERE kind='push' AND id > ? ORDER BY id DESC LIMIT 200",

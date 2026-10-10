@@ -218,3 +218,16 @@ def test_system_prompt_has_date_and_plain_text_rules(ctx):
     p = chat.system_prompt(ctx)
     assert "'작년'은 2025년" in p and "마크다운" in p and "붉은대게로 처리" in p
     assert chat.plain("**제33안성호**는 **04:45** 도착") == "제33안성호는 04:45 도착"
+
+
+def test_history_is_sent_as_context_and_sanitized(ctx):
+    client = FakeClient()
+    hist = [{"q": "아주 오래된 질문", "a": "오래된 답"},
+            {"q": "43톤 자망선 언제 와?", "a": "제33안성호가 04:45 도착 예정입니다."},
+            {"q": "그 배 어디쯤이야?", "a": "9.4km 남았습니다."},
+            {"q": 123, "a": None}]
+    collect(chat.answer(client, "m", ctx, "그 배는 뭐 싣고 와?", hist))
+    roles = [(i["role"], i["content"]) for i in client.responses.seen[0]["input"] if isinstance(i, dict) and "role" in i]
+    assert roles[1:] == [("user", "43톤 자망선 언제 와?"), ("assistant", "제33안성호가 04:45 도착 예정입니다."),
+                         ("user", "그 배 어디쯤이야?"), ("assistant", "9.4km 남았습니다."), ("user", "그 배는 뭐 싣고 와?")]
+    assert chat.clean_history("not a list") == [] and chat.clean_history([{"q": "x" * 999, "a": "y"}])[0]["q"] == "x" * 300

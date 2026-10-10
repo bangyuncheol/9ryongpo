@@ -10,6 +10,8 @@ const TOOL_LABEL: Record<string, string> = {
 }
 const QUICK = ['43톤 자망선 언제 와?', '오늘 오징어 있어?', '몇 시에 가면 돼?', '작년 10월 붉은대게 얼마였어?']
 
+const KEEP = 3 // 최근 질문 3개만 보관·표시하고 AI 맥락으로도 보낸다(10/10 결정)
+
 type Turn = { q: string; log: string[]; answer: string | null; mode?: string; error?: string }
 
 export default function ChatCard({ onSubscribe }: { onSubscribe: (species: string) => void }) {
@@ -23,9 +25,10 @@ export default function ChatCard({ onSubscribe }: { onSubscribe: (species: strin
     const text = q.trim()
     if (!text || busy) return
     setBusy(true); setInput(''); setShowOld(false); setOpenLog(null)
-    setTurns((t) => [...t, { q: text, log: [], answer: null }])
+    const history = turns.filter((t) => t.answer).slice(-(KEEP - 1)).map((t) => ({ q: t.q, a: t.answer as string }))
+    setTurns((t) => [...t, { q: text, log: [], answer: null }].slice(-KEEP))
     const patch = (f: (t: Turn) => Turn) => setTurns((ts) => ts.map((t, i) => (i === ts.length - 1 ? f(t) : t)))
-    await askStream(text, (e: ChatEvent) => {
+    await askStream(text, history, (e: ChatEvent) => {
       if (e.type === 'tool') patch((t) => ({ ...t, log: [...t.log, `→ ${TOOL_LABEL[e.name] ?? e.name}`] }))
       else if (e.type === 'tool_result') patch((t) => ({ ...t, log: [...t.log, `  ${TOOL_LABEL[e.name] ?? e.name}: ${e.summary}`] }))
       else if (e.type === 'action') onSubscribe(e.species)

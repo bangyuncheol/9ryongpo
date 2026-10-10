@@ -22,6 +22,8 @@ from .tools import TOOLS, ToolContext, dumps, run_tool
 log = logging.getLogger(__name__)
 MAX_ROUNDS = 5
 MAX_INPUT = 300
+MAX_HISTORY = 2      # 화면에 남는 질문 3개 = 이전 2개 + 지금 질문(10/10 결정)
+MAX_HISTORY_ANSWER = 600
 COOLDOWN_S = 300
 _cooldown_until = 0.0  # 크레딧 소진·인증 오류 뒤 잠시 LLM을 건너뛴다(질문마다 실패를 기다리지 않도록)
 
@@ -34,7 +36,8 @@ SYSTEM = """너는 '위판 당직'이다. 구룡포 위판장에 생선을 사�
 - 경매 시각 09:00(잡어·문어 07:00)은 기본값이다.
 - '대게'·'홍게'라고 물으면 붉은대게로 처리한다. 구룡포 본소 위판 실적(2022~2025년 10월)에는 대게가 없고 붉은대게(홍게)만 있다는 점을 한 번 짧게 밝힌다. 알림도 붉은대게로 준비한다.
 - 모르는 것은 모른다고 말한다. 2~4문장의 짧은 한국어 존댓말로 답한다.
-- 마크다운(별표 강조, #, 목록 기호, 표)을 쓰지 않고 평문으로 답한다. 화면이 마크다운을 그리지 않는다."""
+- 마크다운(별표 강조, #, 목록 기호, 표)을 쓰지 않고 평문으로 답한다. 화면이 마크다운을 그리지 않는다.
+- 이전 대화가 있으면 '그 배', '거기'가 무엇인지 이어서 해석한다. 이전 답의 숫자는 지금과 다를 수 있으니 필요하면 도구로 다시 확인한다."""
 
 
 def system_prompt(ctx: ToolContext) -> str:
@@ -78,8 +81,22 @@ async def _tool_events(ctx: ToolContext, name: str, args: dict) -> AsyncIterator
         yield {"type": "action", "name": "subscribe", "species": out["species"]}, {}
 
 
-async def llm_answer(client: Any, model: str, ctx: ToolContext, question: str) -> AsyncIterator[dict]:
-    items: list[Any] = [{"role": "system", "content": system_prompt(ctx)}, {"role": "user", "content": question}]
+def clean_history(history: Any) -> list[dict]:
+    """화면이 보낸 이전 대화(질문·답). 형식이 틀리면 버리고, 최근 2개만, 길이도 자른다."""
+    out = []
+    if isinstance(history, list):
+        for h in history:
+            if isinstance(h, dict) and isinstance(h.get("q"), str) and isinstance(h.get("a"), str) and h["q"].strip() and h["a"].strip():
+                out.append({"q": h["q"].strip()[:MAX_INPUT], "a": h["a"].strip()[:MAX_HISTORY_ANSWER]})
+    return out[-MAX_HISTORY:]
+
+
+async def llm_answer(client: Any, model: str, ctx: ToolContext, question: str,
+                     history: list[dict] | None = None) -> AsyncIterator[dict]:
+    items: list[Any] = [{"role": "system", "content": system_prompt(ctx)}]
+    for h in history or []:  # 이어지는 질문("그 배는?")을 이해하도록 이전 대화를 붙인다. 숫자는 다시 도구로 확인한다.
+        items += [{"role": "user", "content": h["q"]}, {"role": "assistant", "content": h["a"]}]
+    items.append({"role": "user", "content": question})
     for _ in range(MAX_ROUNDS):
         r = await client.responses.create(model=model, reasoning={"effort": "medium"}, tools=TOOLS,
                                           input=items, max_output_tokens=1200)
@@ -173,7 +190,7 @@ async def simple_answer(ctx: ToolContext, question: str) -> AsyncIterator[dict]:
     yield {"type": "answer", "text": compose(question, results), "mode": "simple"}
 
 
-async def answer(client: Any, model: str, ctx: ToolContext, question: str) -> AsyncIterator[dict]:
+async def answer(client: Any, model: str, ctx: ToolContext, question: str, history: Any = None) -> AsyncIterator[dict]:
     q = (question or "").strip()[:MAX_INPUT]
     if not q:
         yield {"type": "error", "message": "질문을 입력해 주세요."}
@@ -182,7 +199,7 @@ async def answer(client: Any, model: str, ctx: ToolContext, question: str) -> As
     if client is not None and time.monotonic() >= _cooldown_until:
         sent_any = False
         try:
-            async for ev in llm_answer(client, model, ctx, q):
+            async for ev in llm_answer(client, model, ctx, q, clean_history(history)):
                 sent_any = True
                 yield ev
             return

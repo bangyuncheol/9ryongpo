@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { api } from './api'
-import type { Place, Sensor } from './api'
+import type { Place } from './api'
 import { usePoll } from './usePoll'
 import AppHeader from './components/AppHeader'
 import BottomBar from './components/BottomBar'
@@ -20,7 +20,6 @@ import { ErrorLine } from './components/Card'
  */
 export default function App() {
   const [place, setPlace] = useState<Place | null>(null)
-  const [sensors, setSensors] = useState<Sensor[]>([])
   const today = usePoll(api.today, 2000)
   const ships = usePoll(api.ships, 2000)
   const traffic = usePoll(api.traffic, 60000)
@@ -31,7 +30,6 @@ export default function App() {
 
   useEffect(() => {
     api.place().then(setPlace).catch(console.error)
-    api.sensors().then(setSensors).catch(console.error)
   }, [])
 
   const src = today.data?.source
@@ -48,7 +46,7 @@ export default function App() {
         </div>
         <div className="contents sm:flex sm:flex-col sm:gap-4">
           <div className="order-1">
-            <ShipMap place={place} sensors={sensors} ships={ships.data?.ships ?? []} arriving={today.data?.arriving ?? []} />
+            <ShipMap place={place} ships={ships.data?.ships ?? []} arriving={today.data?.arriving ?? []} />
             <ErrorLine message={today.error ?? ships.error} />
           </div>
           <div className="order-6"><ChatCard onSubscribe={(species) => setSubPreset({ species, at: Date.now() })} /></div>

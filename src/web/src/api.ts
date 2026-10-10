@@ -96,10 +96,10 @@ export type ChatEvent =
   | { type: 'done' }
 
 /** 질문창 SSE(POST라 EventSource 대신 fetch 스트림을 읽는다). */
-export async function askStream(message: string, onEvent: (e: ChatEvent) => void): Promise<void> {
+export async function askStream(message: string, history: { q: string; a: string }[], onEvent: (e: ChatEvent) => void): Promise<void> {
   let r: Response
   try {
-    r = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message }) })
+    r = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message, history }) })
   } catch {
     onEvent({ type: 'error', message: '서버에 연결할 수 없습니다. 네트워크를 확인해 주세요.' }); return
   }

@@ -289,7 +289,7 @@ async def chat(request: Request) -> StreamingResponse:
             return
         answer_text = None
         try:
-            async for ev in chatmod.answer(request.app.state.llm, settings.openai_model, ctx, question):
+            async for ev in chatmod.answer(request.app.state.llm, settings.openai_model, ctx, question, body.get("history")):
                 if ev["type"] == "answer":
                     answer_text = ev["text"]
                 yield f"data: {_json.dumps(ev, ensure_ascii=False, default=str)}\n\n"

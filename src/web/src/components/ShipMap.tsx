@@ -1,7 +1,7 @@
 import L from 'leaflet'
 import { useEffect, useRef } from 'react'
 import { CircleMarker, MapContainer, Marker, TileLayer, Tooltip, useMap } from 'react-leaflet'
-import type { Arrival, Place, Sensor, Ship } from '../api'
+import type { Arrival, Place, Ship } from '../api'
 import { hhmm } from '../api'
 
 const COLOR: Record<Ship['status'], string> = {
@@ -16,11 +16,6 @@ const placeIcon = L.divIcon({
   html: '<div aria-label="위판장" style="font-size:22px;line-height:22px;color:var(--color-primary-dark)">★</div>',
   iconSize: [22, 22], iconAnchor: [11, 11],
 })
-const sensorIcon = L.divIcon({
-  className: '',
-  html: '<div aria-label="교통 센서" style="font-size:12px;line-height:12px;color:var(--color-muted)">▲</div>',
-  iconSize: [12, 12], iconAnchor: [6, 6],
-})
 
 /** 처음 데이터가 오면 한 번만 위판장과 배 전체가 보이게 맞춘다. 이후엔 사용자가 움직인 화면을 존중한다. */
 function FitOnce({ points }: { points: [number, number][] }) {
@@ -34,13 +29,13 @@ function FitOnce({ points }: { points: [number, number][] }) {
   return null
 }
 
-type Props = { place: Place | null; sensors: Sensor[]; ships: Ship[]; arriving: Arrival[] }
+type Props = { place: Place | null; ships: Ship[]; arriving: Arrival[] }
 
-export default function ShipMap({ place, sensors, ships, arriving }: Props) {
+export default function ShipMap({ place, ships, arriving }: Props) {
   const center: [number, number] = place ? [place.lat, place.lon + 0.045] : [35.99, 129.6]
   const eta = new Map(arriving.map((a) => [a.ship_id, a.eta]))
-  // 라벨은 가장 먼저 도착하는 3척만 항상 표시(입항 중이 많으면 겹침). 나머지는 점을 누르면 보인다.
-  const labeled = new Set(arriving.slice(0, 3).map((a) => a.ship_id))
+  // 라벨은 바로 다음에 들어올 1척만 항상 표시(항구 근처에 몰리면 겹침, 10/10). 나머지는 점을 누르면(폰은 탭) 보인다.
+  const labeled = new Set(arriving.slice(0, 1).map((a) => a.ship_id))
   return (
     <div className="relative">
     <MapContainer center={center} zoom={12} scrollWheelZoom={false} className="h-72 w-full rounded-card md:h-[440px]">
@@ -54,11 +49,6 @@ export default function ShipMap({ place, sensors, ships, arriving }: Props) {
           <Tooltip>{place.name}</Tooltip>
         </Marker>
       )}
-      {sensors.map((s) => (
-        <Marker key={s.id} position={[s.lat, s.lon]} icon={sensorIcon}>
-          <Tooltip>{s.name}{s.nickname ? ` · ${s.nickname}` : ''} ({s.dist_m}m)</Tooltip>
-        </Marker>
-      ))}
       {ships.map((s) => (
         <CircleMarker
           key={s.ship_id}
@@ -77,7 +67,8 @@ export default function ShipMap({ place, sensors, ships, arriving }: Props) {
   )
 }
 
-/** 지도 범례. 색만으로 뜻을 전하지 않도록(One UI 접근성) 기호와 글자를 함께 둔다. 확대 버튼(좌상)·출처(우하)와 겹치지 않게 좌하. */
+/** 지도 범례. 색만으로 뜻을 전하지 않도록(One UI 접근성) 기호와 글자를 함께 둔다. 확대 버튼(좌상)·출처(우하)와 겹치지 않게 좌하.
+ *  교통 센서는 손님에게 필요 없어 지도·범례에서 뺐다(10/10). 출처는 교통 카드 문구가 설명한다. */
 function Legend() {
   const dot = (c: string, big = false) => (
     <span aria-hidden className="inline-block rounded-full" style={{ background: c, width: big ? 10 : 7, height: big ? 10 : 7 }} />
@@ -88,7 +79,6 @@ function Legend() {
       <p className="sr-only">지도 범례</p>
       <div className="flex flex-wrap gap-x-3">
         <span className={row}><span aria-hidden style={{ color: 'var(--color-primary-dark)' }}>★</span>위판장</span>
-        <span className={row}><span aria-hidden style={{ color: 'var(--color-muted)' }}>▲</span>교통 센서</span>
       </div>
       <div className="flex flex-wrap gap-x-3">
         <span className={row}>{dot('var(--color-arriving)', true)}입항 중</span>

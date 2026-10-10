@@ -121,3 +121,11 @@ def test_polish_falls_back_on_bad_llm_output(monkeypatch):
     assert asyncio.run(brief.polish(_Client(good), "m", TEMPLATE)) == (good, "llm")
     assert asyncio.run(brief.polish(_Client("자망선 5척 곧 입항!"), "m", TEMPLATE)) == (TEMPLATE, "template")
     assert asyncio.run(brief.polish(None, "m", TEMPLATE)) == (TEMPLATE, "template")
+
+
+def test_inbox_keeps_latest_five(conn):
+    p = push.Pusher(conn, replace(settings, vapid_private_key="x", vapid_subject="mailto:a@b.c"), sender=lambda **kw: None)
+    for m in range(7):
+        asyncio.run(p.notify(VT.replace(minute=m), "t", f"알림 {m}", EST, []))
+    got = push.recent_notifications(conn, VT.replace(hour=4))
+    assert [g["body"] for g in got] == ["알림 6", "알림 5", "알림 4", "알림 3", "알림 2"]
