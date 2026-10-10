@@ -275,3 +275,9 @@ def test_gate_failure_lets_question_through(ctx):
 
 def test_system_prompt_has_scope_rule(ctx):
     assert chat.REFUSAL in chat.system_prompt(ctx)
+
+
+def test_prompts_do_not_assume_visitor(ctx):
+    desc = next(t["description"] for t in chat.TOOLS if t["name"] == "recommend_visit_time")
+    assert "참여 불가" not in desc
+    assert "단정하지 않는다" in chat.system_prompt(ctx) and "경매에 참여할 수 있는지는 말하지 않는다" in chat.system_prompt(ctx)

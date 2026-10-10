@@ -29,7 +29,7 @@ TOOLS: list[dict] = [
      "description": "위판장 80m 앞 교통센서3의 실측 교통량(최근 9시간 트럭·전체)과 혼잡율 비교. 실제 현재 시각 기준이며 미래 예측이 아니다.",
      "parameters": {"type": "object", "properties": {}, "additionalProperties": False}},
     {"type": "function", "name": "recommend_visit_time",
-     "description": "경매 시각과 지금 위판장 앞 실측 교통으로 방문 권장 문구. visitor=true면 관광객(경매 참여 불가)용.",
+     "description": "경매 시각과 지금 위판장 앞 실측 교통으로 방문 권장 문구. visitor=true는 질문한 사람이 스스로 관광·구경이라고 밝혔을 때만 쓴다(그때는 경매 시작 시각만 알린다).",
      "parameters": {"type": "object", "properties": {
          "auction_time": {"type": "string", "description": "HH:MM. 기본 09:00(대게·홍게), 잡어·문어는 07:00"},
          "visitor": {"type": "boolean"}}, "additionalProperties": False}},
