@@ -37,7 +37,7 @@ description: 미구현·보류·기술부채·진행 중 과제의 현재 상태
 - 화면 정리(10/10): 알림 받기+알림함을 '알림' 카드 하나로(구독 후 한 줄로 축소), 긴 목록은 카드 안 스크롤 대신 '더보기'(`More.tsx`), 질문창은 최근 질문만 펼치고 조회 기록은 답 뒤 한 줄로 접힘, 지도 범례, 도착 라벨은 먼저 오는 3척만, 상단 요약 한 줄.
 - 상한(10/10): 보낸 알림 최근 5건(`recent_notifications`), 질문 최근 3개. 질문창은 이전 2개 질문·답을 AI 맥락으로 함께 보내 '그 배'를 이어서 해석(`chat.clean_history`). 지도 라벨은 다음 입항 1척만, 교통 센서는 지도·범례에서 뺌.
 - 위판 실적 56개월 전체(2022-01~2026-08)를 저장소에 둠. 질문창은 어느 달 가격·물량에도 답하고, 연도·월이 없으면 전체 기간을 보고 답함. 새 달은 `src/server/scripts/fetch_auction.py`. 테스트는 `tests/conftest.py`의 데모 기준 5개월만 써서 빠름.
-- 지도(10/10): 카카오맵 JS SDK(`KakaoShipMap.tsx`), 키 없음·실패 시 Leaflet(`ShipMap.tsx`)로 자동 전환(`MapView.tsx`). 지도 고정, 다음 입항 1척 라벨, 점 탭 정보 5초. 화면 빌드는 루트 `.env`의 `VITE_` 값만 읽음(`vite.config.ts envDir`).
+- 지도(10/10): 카카오맵 JS SDK(`KakaoShipMap.tsx`), 키 없음·실패 시 Leaflet(`ShipMap.tsx`)로 자동 전환(`MapView.tsx`). 지도 고정, 다음 입항 1척 라벨. 정보는 하나만: PC는 마우스 올림/뗌, 탭·클릭은 고정(같은 배·빈 곳 탭이면 닫힘), 누르는 영역 28px. 화면 빌드는 루트 `.env`의 `VITE_` 값만 읽음(`vite.config.ts envDir`).
 - 테스트 55개 (`cd src/server && uv run pytest`). 외부 호출 없이 `tests/fixtures/`의 실제 응답 일부로 돈다.
 
 **다음 할 일**

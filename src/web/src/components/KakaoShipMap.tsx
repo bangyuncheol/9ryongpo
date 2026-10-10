@@ -17,6 +17,7 @@ type Kakao = {
     LatLngBounds: new () => { extend: (p: unknown) => void }
     Map: new (el: HTMLElement, opt: Record<string, unknown>) => KMap
     CustomOverlay: new (opt: Record<string, unknown>) => KOverlay
+    event: { addListener: (target: unknown, type: string, fn: () => void) => void }
   }
 }
 declare global { interface Window { kakao?: Kakao } }
@@ -48,17 +49,28 @@ const COLOR: Record<Ship['status'], string> = {
   '조업·대기': 'var(--color-idle)', '미갱신': 'var(--color-idle)',
 }
 
-function dotEl(s: Ship, onPick: () => void) {
-  const big = s.status === '입항 중' || s.status === '입항'
+type DotHandlers = { onTap: () => void; onHover: (on: boolean) => void }
+
+/** 배 점. 보이는 점은 작게 두고, 누르는 영역은 28px로 넓힌다(손가락용). 한 번만 만들고 paintDot으로 상태만 바꾼다. */
+function dotEl(h: DotHandlers) {
   const el = document.createElement('button')
   el.type = 'button'
-  el.setAttribute('aria-label', `${s.name ?? '배'} ${s.status}`)
-  const size = big ? 14 : 9
-  el.style.cssText = `width:${size}px;height:${size}px;border-radius:50%;padding:0;cursor:pointer;` +
-    `background:${COLOR[s.status]};border:1.5px solid rgba(255,255,255,.9);box-shadow:0 0 0 1px rgba(0,0,0,.15)`
-  el.addEventListener('click', onPick)
-  el.addEventListener('mouseenter', onPick)
+  el.style.cssText = 'width:28px;height:28px;padding:0;border:0;background:transparent;cursor:pointer;display:grid;place-items:center'
+  const dot = document.createElement('span')
+  el.appendChild(dot)
+  el.addEventListener('click', (e) => { e.stopPropagation(); h.onTap() })
+  // 마우스만 올리기/떼기로 보여 준다. 터치는 탭(click)으로만.
+  el.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') h.onHover(true) })
+  el.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') h.onHover(false) })
   return el
+}
+
+function paintDot(el: HTMLElement, s: Ship) {
+  const big = s.status === '입항 중' || s.status === '입항'
+  const size = big ? 14 : 9
+  el.setAttribute('aria-label', `${s.name ?? '배'} ${s.status}`)
+  ;(el.firstChild as HTMLElement).style.cssText = `width:${size}px;height:${size}px;border-radius:50%;` +
+    `background:${COLOR[s.status]};border:1.5px solid rgba(255,255,255,.9);box-shadow:0 0 0 1px rgba(0,0,0,.15)`
 }
 
 function labelEl(text: string) {
@@ -76,10 +88,11 @@ export default function KakaoShipMap({ place, ships, arriving, onFail }: Props) 
   const box = useRef<HTMLDivElement>(null)
   const kakao = useRef<Kakao | null>(null)
   const map = useRef<KMap | null>(null)
-  const dots = useRef(new Map<number, KOverlay>())
+  const dots = useRef(new Map<number, { o: KOverlay; el: HTMLElement }>())
   const label = useRef<KOverlay | null>(null)
   const fitted = useRef(false)
-  const [picked, setPicked] = useState<number | null>(null)
+  const [picked, setPicked] = useState<number | null>(null)   // 탭·클릭으로 고정된 배(하나만)
+  const [hovered, setHovered] = useState<number | null>(null) // PC 마우스를 올린 배
   const [ready, setReady] = useState(false)
 
   // 지도는 한 번만 만든다(위판장 정보가 늦게 와도 다시 만들지 않음 — 다시 만들면 점이 옛 지도에 붙는다, 10/10).
@@ -94,6 +107,7 @@ export default function KakaoShipMap({ place, ships, arriving, onFail }: Props) 
         disableDoubleClickZoom: true, keyboardShortcuts: false,
       })
       map.current.setZoomable(false) // 지도 고정(10/10)
+      k.maps.event.addListener(map.current, 'click', () => setPicked(null)) // 지도 빈 곳 탭·클릭 → 닫기
       setReady(true)
     }).catch((e) => { console.error(e); onFail() })
     return () => { alive = false }
@@ -121,14 +135,23 @@ export default function KakaoShipMap({ place, ships, arriving, onFail }: Props) 
     for (const s of ships) {
       seen.add(s.ship_id)
       const pos = new k.maps.LatLng(s.lat, s.lon)
-      const content = dotEl(s, () => setPicked(s.ship_id))
-      const o = dots.current.get(s.ship_id)
-      if (o) { o.setPosition(pos); o.setContent(content) } else {
-        const n = new k.maps.CustomOverlay({ position: pos, content, yAnchor: 0.5, xAnchor: 0.5, zIndex: s.status === '조업·대기' ? 1 : 2 })
-        n.setMap(m); dots.current.set(s.ship_id, n)
+      let d = dots.current.get(s.ship_id)
+      if (!d) {
+        const id = s.ship_id
+        const el = dotEl({
+          onTap: () => setPicked((p) => (p === id ? null : id)),   // 같은 배 다시 탭 → 닫기, 다른 배 → 바꾸기
+          onHover: (on) => setHovered((h) => (on ? id : h === id ? null : h)),
+        })
+        const o = new k.maps.CustomOverlay({ position: pos, content: el, yAnchor: 0.5, xAnchor: 0.5, zIndex: 2 })
+        o.setMap(m)
+        d = { o, el }
+        dots.current.set(id, d)
+      } else {
+        d.o.setPosition(pos)
       }
+      paintDot(d.el, s)
     }
-    for (const [id, o] of dots.current) if (!seen.has(id)) { o.setMap(null); dots.current.delete(id) }
+    for (const [id, d] of dots.current) if (!seen.has(id)) { d.o.setMap(null); dots.current.delete(id) }
     if (!fitted.current && place && ships.length) {
       const b = new k.maps.LatLngBounds()
       b.extend(new k.maps.LatLng(place.lat, place.lon))
@@ -138,25 +161,19 @@ export default function KakaoShipMap({ place, ships, arriving, onFail }: Props) 
     }
   }, [ready, ships, place])
 
-  // 누른 배 정보는 5초 뒤 사라지고 다음 입항 라벨로 돌아간다(10/10).
-  useEffect(() => {
-    if (picked === null) return
-    const id = setTimeout(() => setPicked(null), 5000)
-    return () => clearTimeout(id)
-  }, [picked])
-
-  // 라벨: 고른 배가 있으면 그 배, 없으면 다음에 들어올 1척
+  // 라벨은 하나만: 마우스를 올린 배 → 탭·클릭으로 고른 배 → 다음에 들어올 1척 순(10/10).
   useEffect(() => {
     const k = kakao.current, m = map.current
     if (!ready || !k || !m) return
     label.current?.setMap(null)
     const eta = new Map(arriving.map((a) => [a.ship_id, a.eta]))
-    const s = ships.find((x) => x.ship_id === picked) ?? ships.find((x) => x.ship_id === arriving[0]?.ship_id)
+    const want = hovered ?? picked ?? arriving[0]?.ship_id
+    const s = ships.find((x) => x.ship_id === want)
     if (!s) return
     const text = eta.has(s.ship_id) ? `${hhmm(eta.get(s.ship_id))} ${s.name}` : `${s.name} · ${s.biz ?? '업종 미상'} · ${s.status}`
     label.current = new k.maps.CustomOverlay({ position: new k.maps.LatLng(s.lat, s.lon), content: labelEl(text), yAnchor: 1, zIndex: 4 })
     label.current.setMap(m)
-  }, [ready, ships, arriving, picked])
+  }, [ready, ships, arriving, picked, hovered])
 
   return (
     <div className="relative">
