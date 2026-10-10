@@ -1,137 +1,166 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 870" role="img" aria-label="배마중 아키텍처: E-UM과 해수부 데이터가 FastAPI 서버의 수집·피드·계산·에이전트 모듈을 거쳐 SQLite에 쌓이고, React SPA와 웹 푸시로 사용자에게 간다. 선박 위치는 FEED 스위치로 실제 API와 시뮬레이터를 바꾼다." style="color:#1c2733;font-family:IBM Plex Sans KR,Apple SD Gothic Neo,Malgun Gothic,sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 960" role="img" aria-label="배마중 아키텍처(2026-10-10 현행): E-UM 실시간 데이터와 해수부 위판 실적 56개월이 대회 제공 GCP VM의 FastAPI 서버에서 피드·규칙·에이전트를 거쳐 SQLite에 기록되고, React 화면과 웹 푸시로 사용자에게 간다. 선박 위치는 FEED 스위치로 실제 API와 시뮬레이터를 바꾼다." style="color:#1c2733;font-family:IBM Plex Sans KR,Apple SD Gothic Neo,Malgun Gothic,sans-serif">
 <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker><marker id="ahw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#b9541a"/></marker><marker id="aha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#0e7c7b"/></marker></defs>
-<rect x="0" y="0" width="1200" height="870" fill="#faf8f3"/>
-<rect x="40" y="30" width="1120" height="130" rx="8" fill="none" stroke="currentColor" stroke-width="1.2"/>
-<text x="55" y="52" font-size="13" font-weight="600">외부 데이터</text>
-<text x="1145" y="52" font-size="11" fill="#6b7280" text-anchor="end">E-UM: genix.pohang-eum.kr/dpg · 해수부: data.go.kr 15102791</text>
-<rect x="65" y="78" width="118" height="62" rx="5" fill="#ffffff" stroke="currentColor" stroke-width="1.1"/>
-<text x="124.0" y="99" text-anchor="middle" font-size="13" font-weight="600">어선 명부</text>
-<text x="124.0" y="113" text-anchor="middle" font-size="11" fill="#6b7280">E-UM S03_001</text>
-<text x="124.0" y="127" text-anchor="middle" font-size="11">202척 · 표지판에 어업종류</text>
-<rect x="193" y="78" width="118" height="62" rx="5" fill="#ffffff" stroke="currentColor" stroke-width="1.1"/>
-<text x="252.0" y="99" text-anchor="middle" font-size="13" font-weight="600">교통 센서 11대</text>
-<text x="252.0" y="113" text-anchor="middle" font-size="11" fill="#6b7280">E-UM S07_001</text>
-<text x="252.0" y="127" text-anchor="middle" font-size="11">센서3 = 위판장 80m</text>
-<rect x="321" y="78" width="118" height="62" rx="5" fill="#ffffff" stroke="currentColor" stroke-width="1.1"/>
-<text x="380.0" y="99" text-anchor="middle" font-size="13" font-weight="600">교통량</text>
-<text x="380.0" y="113" text-anchor="middle" font-size="11" fill="#6b7280">E-UM S07_004</text>
-<text x="380.0" y="127" text-anchor="middle" font-size="11">차종별 · 최근 9h만</text>
-<rect x="449" y="78" width="118" height="62" rx="5" fill="#ffffff" stroke="currentColor" stroke-width="1.1"/>
-<text x="508.0" y="99" text-anchor="middle" font-size="13" font-weight="600">혼잡율</text>
-<text x="508.0" y="113" text-anchor="middle" font-size="11" fill="#6b7280">E-UM S07_005</text>
-<text x="508.0" y="127" text-anchor="middle" font-size="11">24h 상대 지수</text>
-<rect x="577" y="78" width="118" height="62" rx="5" fill="#ffffff" stroke="currentColor" stroke-width="1.1"/>
-<text x="636.0" y="99" text-anchor="middle" font-size="13" font-weight="600">해수부 위탁판매</text>
-<text x="636.0" y="113" text-anchor="middle" font-size="11" fill="#6b7280">15102791</text>
-<text x="636.0" y="127" text-anchor="middle" font-size="11">월별 CSV · API</text>
-<rect x="720" y="78" width="140" height="62" rx="5" fill="#ffffff" stroke="#b9541a" stroke-width="1.1" stroke-dasharray="5 3"/>
-<text x="790.0" y="99" text-anchor="middle" font-size="13" font-weight="600">선박 실시간 위치</text>
-<text x="790.0" y="113" text-anchor="middle" font-size="11" fill="#6b7280">E-UM S03_007</text>
-<text x="790.0" y="127" text-anchor="middle" font-size="11" fill="#b9541a">2025-04-27에 멈춤</text>
-<rect x="885" y="78" width="140" height="62" rx="5" fill="#ffffff" stroke="currentColor" stroke-width="1.1"/>
-<text x="955.0" y="99" text-anchor="middle" font-size="13" font-weight="600">위판장 좌표</text>
-<text x="955.0" y="113" text-anchor="middle" font-size="11" fill="#6b7280">E-UM S07_003</text>
-<text x="955.0" y="127" text-anchor="middle" font-size="11">35.9895 / 129.5558</text>
-<line x1="124" y1="140" x2="124" y2="185" stroke="currentColor" stroke-width="1.3"/>
-<line x1="252" y1="140" x2="252" y2="185" stroke="currentColor" stroke-width="1.3"/>
-<line x1="380" y1="140" x2="380" y2="185" stroke="currentColor" stroke-width="1.3"/>
-<line x1="508" y1="140" x2="508" y2="185" stroke="currentColor" stroke-width="1.3"/>
-<line x1="636" y1="140" x2="636" y2="185" stroke="currentColor" stroke-width="1.3"/>
-<line x1="124" y1="185" x2="636" y2="185" stroke="currentColor" stroke-width="1.3"/>
-<polyline points="252,185 252,255" fill="none" stroke="currentColor" stroke-width="1.3" marker-end="url(#ah)"/>
-<text x="262" y="228" font-size="11" fill="#6b7280" text-anchor="start">기동 시 1회 · 매시 · 월 1회(수동)</text>
-<polyline points="790,140 790,255" fill="none" stroke="#b9541a" stroke-width="1.3" marker-end="url(#ahw)" stroke-dasharray="5 3"/>
-<text x="798" y="228" font-size="11" fill="#6b7280" text-anchor="start">10분 (FEED=live)</text>
-<polyline points="955,140 955,205 1017,205 1017,255" fill="none" stroke="currentColor" stroke-width="1.3" marker-end="url(#ah)"/>
-<text x="963" y="199" font-size="11" fill="#6b7280" text-anchor="start">기준 좌표</text>
-<rect x="40" y="215" width="1120" height="440" rx="8" fill="none" stroke="currentColor" stroke-width="1.2"/>
-<text x="55" y="237" font-size="13" font-weight="600">FastAPI 서버 · Cloud Run 컨테이너 1개</text>
-<text x="1145" y="237" font-size="11" fill="#6b7280" text-anchor="end">APScheduler: 매시 수집 · 10분 예보 · 03:10 푸시</text>
-<rect x="65" y="255" width="390" height="150" rx="6" fill="none" stroke="currentColor" stroke-width="1"/>
-<text x="80" y="276" font-size="13" font-weight="600">collectors/ 수집</text>
-<rect x="80" y="290" width="360" height="24" rx="4" fill="none" stroke="#6b7280" stroke-width="0.8"/>
-<text x="90" y="306" font-size="11">fleet.py · 명부 → 어업종류(표지판 정규식)·톤수</text>
-<rect x="80" y="322" width="360" height="24" rx="4" fill="none" stroke="#6b7280" stroke-width="0.8"/>
-<text x="90" y="338" font-size="11">traffic.py · 교통량·혼잡 매시 upsert (누적이 유일한 이력)</text>
-<rect x="80" y="354" width="360" height="24" rx="4" fill="none" stroke="#6b7280" stroke-width="0.8"/>
-<text x="90" y="370" font-size="11">auction.py · 월·업종 → 어종 분포·요일 가중 (2025-10 기본)</text>
-<rect x="480" y="255" width="390" height="150" rx="6" fill="none" stroke="#0e7c7b" stroke-width="1.4"/>
-<text x="495" y="276" font-size="13" font-weight="600">feed/ 선박 위치 피드</text>
-<rect x="712" y="261" width="146" height="22" rx="11" fill="#0e7c7b"/>
-<text x="785" y="276" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff">FEED = live | sim</text>
-<rect x="495" y="290" width="360" height="24" rx="4" fill="none" stroke="#6b7280" stroke-width="0.8"/>
-<text x="505" y="306" font-size="11">live.py · E-UM 선박 위치 10분 호출 (지금은 멈춘 값·배지 표시)</text>
-<rect x="495" y="322" width="360" height="24" rx="4" fill="none" stroke="#6b7280" stroke-width="0.8"/>
-<text x="505" y="338" font-size="11">sim.py · 명부 202척 + 실좌표 50척으로 새벽 입항 생성</text>
-<rect x="495" y="354" width="360" height="24" rx="4" fill="none" stroke="#6b7280" stroke-width="0.8"/>
-<text x="505" y="370" font-size="11">clock.py · 가상 시계: 배속·멈춤·되감기 (/sim/*)</text>
-<rect x="900" y="255" width="235" height="150" rx="6" fill="none" stroke="currentColor" stroke-width="1"/>
-<text x="915" y="276" font-size="13" font-weight="600">rules/ 계산 (결정론)</text>
-<rect x="915" y="288" width="205" height="24" rx="4" fill="none" stroke="#6b7280" stroke-width="0.8"/>
-<text x="925" y="304" font-size="11">arrival.py · 입항 판정·ETA</text>
-<rect x="915" y="316" width="205" height="24" rx="4" fill="none" stroke="#6b7280" stroke-width="0.8"/>
-<text x="925" y="332" font-size="11">species.py · 어종 추정</text>
-<rect x="915" y="344" width="205" height="24" rx="4" fill="none" stroke="#6b7280" stroke-width="0.8"/>
-<text x="925" y="360" font-size="11">visit.py · 방문 시각</text>
-<rect x="915" y="372" width="205" height="24" rx="4" fill="none" stroke="#6b7280" stroke-width="0.8"/>
-<text x="925" y="388" font-size="11">brief.py · 문장 (LLM)</text>
-<polyline points="260,405 260,445" fill="none" stroke="currentColor" stroke-width="1.3" marker-end="url(#ah)"/>
-<text x="268" y="430" font-size="11" fill="#6b7280" text-anchor="start">저장</text>
-<polyline points="675,405 675,445" fill="none" stroke="#0e7c7b" stroke-width="1.3" marker-end="url(#aha)"/>
-<text x="683" y="430" font-size="11" fill="#6b7280" text-anchor="start">ships_pos (live·sim 같은 스키마)</text>
-<polyline points="1017,445 1017,405" fill="none" stroke="currentColor" stroke-width="1.3" marker-end="url(#ah)"/>
-<text x="1025" y="430" font-size="11" fill="#6b7280" text-anchor="start">읽기 → forecast</text>
-<line x1="1017" y1="405" x2="1017" y2="445" stroke="currentColor" stroke-width="1.3" marker-end="url(#ah)"/>
-<rect x="65" y="445" width="1070" height="50" rx="6" fill="#ffffff" stroke="currentColor" stroke-width="1.1"/>
-<text x="80" y="466" font-size="13" font-weight="600">SQLite</text>
-<text x="140" y="466" font-size="12">fleet · ships_pos · traffic_hourly · auction_stats · forecast · subs · events</text>
-<text x="140" y="484" font-size="11" fill="#6b7280">source 열로 live/sim 구분 · events는 시연 후 증빙</text>
-<rect x="65" y="535" width="420" height="100" rx="6" fill="none" stroke="currentColor" stroke-width="1"/>
-<text x="80" y="556" font-size="13" font-weight="600">agent/ 질문창 (tool calling)</text>
-<rect x="80" y="570" width="255" height="24" rx="4" fill="none" stroke="#6b7280" stroke-width="0.8"/>
-<text x="90" y="586" font-size="11">tools.py · 도구 5개 → rules·SQLite 함수</text>
-<rect x="80" y="600" width="255" height="24" rx="4" fill="none" stroke="#6b7280" stroke-width="0.8"/>
-<text x="90" y="616" font-size="11">chat.py · SSE 스트리밍 (도구 호출 로그)</text>
-<rect x="355" y="575" width="118" height="44" rx="5" fill="#ffffff" stroke="currentColor" stroke-width="1.1" stroke-dasharray="4 3"/>
-<text x="414.0" y="594" text-anchor="middle" font-size="13" font-weight="600">OpenAI</text>
-<text x="414.0" y="608" text-anchor="middle" font-size="11">tool calling</text>
-<polyline points="335,612 355,600" fill="none" stroke="currentColor" stroke-width="1.3" marker-end="url(#ah)"/>
-<polyline points="275,535 275,495" fill="none" stroke="currentColor" stroke-width="1.3" marker-end="url(#ah)"/>
-<text x="283" y="520" font-size="11" fill="#6b7280" text-anchor="start">도구가 읽음</text>
-<rect x="515" y="535" width="340" height="100" rx="6" fill="none" stroke="currentColor" stroke-width="1"/>
-<text x="530" y="556" font-size="13" font-weight="600">api/ 라우트</text>
-<text x="530" y="580" font-size="12">/today  /ships  /traffic  /subscribe</text>
-<text x="530" y="598" font-size="12">/chat (SSE)   /sim/play · pause · seek</text>
-<text x="530" y="616" font-size="12">/static ← Vite dist (같은 컨테이너)</text>
-<rect x="885" y="535" width="250" height="100" rx="6" fill="none" stroke="currentColor" stroke-width="1"/>
-<text x="900" y="556" font-size="13" font-weight="600">push/webpush.py (VAPID)</text>
-<text x="900" y="580" font-size="12">03:10 정기 브리핑</text>
-<text x="900" y="598" font-size="12">구독 조건 배가 새로 ‘입항 중’</text>
-<text x="900" y="616" font-size="11" fill="#6b7280">실패 시 화면 알림함 폴백</text>
-<polyline points="685,635 685,740" fill="none" stroke="currentColor" stroke-width="1.3" marker-end="url(#ah)"/>
-<text x="693" y="690" font-size="11" fill="#6b7280" text-anchor="start">JSON · SSE</text>
-<polyline points="1010,635 1010,672 1047,672 1047,740" fill="none" stroke="currentColor" stroke-width="1.3" marker-end="url(#ah)"/>
-<text x="1056" y="676" font-size="11" fill="#6b7280" text-anchor="start">웹 푸시 → 서비스 워커</text>
-<rect x="40" y="700" width="1120" height="150" rx="8" fill="none" stroke="currentColor" stroke-width="1.2"/>
-<text x="55" y="722" font-size="13" font-weight="600">Vite + React SPA (PWA) · 갤럭시 크롬 · 모바일 폭 우선</text>
-<text x="1145" y="722" font-size="11" fill="#6b7280" text-anchor="end">사용자: 횟집 사장(사장 모드) · 관광객(구경 모드)</text>
-<rect x="65" y="740" width="165" height="60" rx="5" fill="#ffffff" stroke="#0e7c7b" stroke-width="1.1"/>
-<text x="147.5" y="767" text-anchor="middle" font-size="13" font-weight="600">지도 (Leaflet)</text>
-<text x="147.5" y="781" text-anchor="middle" font-size="11" fill="#6b7280">위판장 ★ 센서 ▲ 배 ●</text>
-<rect x="245" y="740" width="165" height="60" rx="5" fill="#ffffff" stroke="currentColor" stroke-width="1.1"/>
-<text x="327.5" y="767" text-anchor="middle" font-size="13" font-weight="600">입항 예보</text>
-<text x="327.5" y="781" text-anchor="middle" font-size="11" fill="#6b7280">척별 ETA · 어업종류</text>
-<rect x="425" y="740" width="165" height="60" rx="5" fill="#ffffff" stroke="currentColor" stroke-width="1.1"/>
-<text x="507.5" y="767" text-anchor="middle" font-size="13" font-weight="600">어종·물량</text>
-<text x="507.5" y="781" text-anchor="middle" font-size="11" fill="#6b7280">같은 달 실적 기준</text>
-<rect x="605" y="740" width="165" height="60" rx="5" fill="#ffffff" stroke="currentColor" stroke-width="1.1"/>
-<text x="687.5" y="767" text-anchor="middle" font-size="13" font-weight="600">방문 시각</text>
-<text x="687.5" y="781" text-anchor="middle" font-size="11" fill="#6b7280">교통 곡선 차트</text>
-<rect x="785" y="740" width="165" height="60" rx="5" fill="#ffffff" stroke="currentColor" stroke-width="1.1"/>
-<text x="867.5" y="767" text-anchor="middle" font-size="13" font-weight="600">질문창</text>
-<text x="867.5" y="781" text-anchor="middle" font-size="11" fill="#6b7280">도구 로그 스트리밍</text>
-<rect x="965" y="740" width="165" height="60" rx="5" fill="#ffffff" stroke="#0e7c7b" stroke-width="1.1"/>
-<text x="1047.5" y="767" text-anchor="middle" font-size="13" font-weight="600">알림 받기</text>
-<text x="1047.5" y="781" text-anchor="middle" font-size="11" fill="#6b7280">PushSubscription</text>
-<text x="80" y="832" font-size="11" fill="#6b7280">가짜는 ‘배의 움직임’(sim)뿐. 명부·좌표·교통·위판 실적은 실데이터. 배지로 데이터 소스(live | sim)를 항상 표시.</text>
+<rect x="0" y="0" width="1200" height="960" rx="0" fill="#faf8f3" stroke="none" stroke-width="0"/>
+<rect x="40" y="30" width="1120" height="132" rx="8" fill="none" stroke="currentColor" stroke-width="1.2"/>
+<text x="55" y="52" font-size="13" font-weight="600" text-anchor="start">외부 데이터</text>
+<text x="1145" y="52" font-size="11" fill="#6b7280" text-anchor="end">E-UM: genix.pohang-eum.kr/dpg · 해수부: data.go.kr 15102791 · OpenAI</text>
+<rect x="60" y="72" width="144" height="62" rx="5" fill="#ffffff" stroke="currentColor" stroke-width="1.1"/>
+<text x="132.0" y="93" font-size="13" font-weight="600" text-anchor="middle">어선 명부</text>
+<text x="132.0" y="107" font-size="11" fill="#6b7280" text-anchor="middle">E-UM S03_001</text>
+<text x="132.0" y="121" font-size="11" text-anchor="middle">202척 · 표지판에 어업종류</text>
+<rect x="214" y="72" width="144" height="62" rx="5" fill="#ffffff" stroke="currentColor" stroke-width="1.1"/>
+<text x="286.0" y="93" font-size="13" font-weight="600" text-anchor="middle">위판장 좌표</text>
+<text x="286.0" y="107" font-size="11" fill="#6b7280" text-anchor="middle">E-UM S07_003</text>
+<text x="286.0" y="121" font-size="11" text-anchor="middle">35.9895 / 129.5558</text>
+<rect x="368" y="72" width="144" height="62" rx="5" fill="#ffffff" stroke="currentColor" stroke-width="1.1"/>
+<text x="440.0" y="93" font-size="13" font-weight="600" text-anchor="middle">교통량</text>
+<text x="440.0" y="107" font-size="11" fill="#6b7280" text-anchor="middle">E-UM S07_001·004</text>
+<text x="440.0" y="121" font-size="11" text-anchor="middle">센서3(80m) · 최근 9h</text>
+<rect x="522" y="72" width="144" height="62" rx="5" fill="#ffffff" stroke="currentColor" stroke-width="1.1"/>
+<text x="594.0" y="93" font-size="13" font-weight="600" text-anchor="middle">혼잡율</text>
+<text x="594.0" y="107" font-size="11" fill="#6b7280" text-anchor="middle">E-UM S07_005</text>
+<text x="594.0" y="121" font-size="11" text-anchor="middle">최근 24h 상대 지수</text>
+<rect x="676" y="72" width="144" height="62" rx="5" fill="#ffffff" stroke="#b9541a" stroke-width="1.1" stroke-dasharray="5 3"/>
+<text x="748.0" y="93" font-size="13" font-weight="600" text-anchor="middle">선박 실시간 위치</text>
+<text x="748.0" y="107" font-size="11" fill="#6b7280" text-anchor="middle">E-UM S03_007</text>
+<text x="748.0" y="121" font-size="11" text-anchor="middle">2025-04-27에 멈춤</text>
+<rect x="830" y="72" width="144" height="62" rx="5" fill="#ffffff" stroke="currentColor" stroke-width="1.1"/>
+<text x="902.0" y="93" font-size="13" font-weight="600" text-anchor="middle">해수부 위탁판매</text>
+<text x="902.0" y="107" font-size="11" fill="#6b7280" text-anchor="middle">15102791 · odcloud</text>
+<text x="902.0" y="121" font-size="11" text-anchor="middle">56개월 · 매월 15일 등록</text>
+<rect x="984" y="72" width="144" height="62" rx="5" fill="#ffffff" stroke="#0e7c7b" stroke-width="1.1"/>
+<text x="1056.0" y="93" font-size="13" font-weight="600" text-anchor="middle">OpenAI</text>
+<text x="1056.0" y="107" font-size="11" fill="#6b7280" text-anchor="middle">gpt-6.1-sol</text>
+<text x="1056.0" y="121" font-size="11" text-anchor="middle">질문창 · 알림 문장</text>
+<text x="60" y="152" font-size="10" fill="#6b7280" text-anchor="start">기동 시 1회</text>
+<text x="446" y="152" font-size="10" fill="#6b7280" text-anchor="start">요청 시 · 5분 캐시</text>
+<text x="742" y="152" font-size="10" fill="#b9541a" text-anchor="end">10분 (FEED=live)</text>
+<text x="908" y="152" font-size="10" fill="#6b7280" text-anchor="start">월 1회 스크립트</text>
+<rect x="40" y="196" width="1120" height="512" rx="8" fill="none" stroke="currentColor" stroke-width="1.2"/>
+<text x="55" y="220" font-size="13" font-weight="600" text-anchor="start">FastAPI 서버 · GCP VM</text>
+<text x="1145" y="220" font-size="11" fill="#6b7280" text-anchor="end">systemd 상시 실행 · HTTPS: Caddy/터널</text>
+<rect x="60" y="250" width="350" height="170" rx="6" fill="none" stroke="currentColor" stroke-width="1"/>
+<text x="74" y="272" font-size="13" font-weight="600" text-anchor="start">collectors/ 수집</text>
+<rect x="74" y="282" width="322" height="24" rx="4" fill="none" stroke="#6b7280" stroke-width="0.8"/>
+<text x="84" y="298" font-size="11" font-weight="600" text-anchor="start">fleet.py</text>
+<text x="147.6" y="298" font-size="11" fill="#6b7280" text-anchor="start">명부 → 어업종류(표지판 정규식)·톤수</text>
+<rect x="74" y="312" width="322" height="24" rx="4" fill="none" stroke="#6b7280" stroke-width="0.8"/>
+<text x="84" y="328" font-size="11" font-weight="600" text-anchor="start">traffic.py</text>
+<text x="162.0" y="328" font-size="11" fill="#6b7280" text-anchor="start">센서3 교통량·혼잡율 실시간 + 5분 캐시</text>
+<rect x="74" y="342" width="322" height="24" rx="4" fill="none" stroke="#6b7280" stroke-width="0.8"/>
+<text x="84" y="358" font-size="11" font-weight="600" text-anchor="start">auction.py</text>
+<text x="162.0" y="358" font-size="11" fill="#6b7280" text-anchor="start">56개월 CSV → 월·위판장·업종·어종 집계</text>
+<rect x="74" y="372" width="322" height="24" rx="4" fill="none" stroke="#6b7280" stroke-width="0.8"/>
+<text x="84" y="388" font-size="11" font-weight="600" text-anchor="start">scripts/fetch_auction.py</text>
+<text x="262.8" y="388" font-size="11" fill="#6b7280" text-anchor="start">새 달 받기(맥·윈도우)</text>
+<rect x="425" y="250" width="350" height="170" rx="6" fill="none" stroke="currentColor" stroke-width="1"/>
+<text x="439" y="272" font-size="13" font-weight="600" text-anchor="start">feed/ 선박 위치 피드</text>
+<text x="761" y="272" font-size="11" fill="#6b7280" text-anchor="end">FEED = live | sim</text>
+<rect x="439" y="282" width="322" height="24" rx="4" fill="none" stroke="#b9541a" stroke-width="0.8"/>
+<text x="449" y="298" font-size="11" font-weight="600" text-anchor="start">live.py</text>
+<text x="505.4" y="298" font-size="11" fill="#6b7280" text-anchor="start">E-UM 10분 · 24h 미갱신이면 예보 중지</text>
+<rect x="439" y="312" width="322" height="24" rx="4" fill="none" stroke="#6b7280" stroke-width="0.8"/>
+<text x="449" y="328" font-size="11" font-weight="600" text-anchor="start">sim.py</text>
+<text x="498.2" y="328" font-size="11" fill="#6b7280" text-anchor="start">대본 6척 + 실좌표 44척(시드 고정)</text>
+<rect x="439" y="342" width="322" height="24" rx="4" fill="none" stroke="#6b7280" stroke-width="0.8"/>
+<text x="449" y="358" font-size="11" font-weight="600" text-anchor="start">clock.py</text>
+<text x="512.6" y="358" font-size="11" fill="#6b7280" text-anchor="start">가상 시계: 재생·배속·되감기</text>
+<text x="439" y="392" font-size="10" fill="#6b7280" text-anchor="start">가짜는 '배의 움직임'뿐. 같은 스키마로 ships_pos에 기록</text>
+<rect x="790" y="250" width="350" height="170" rx="6" fill="none" stroke="currentColor" stroke-width="1"/>
+<text x="804" y="272" font-size="13" font-weight="600" text-anchor="start">rules/ 계산 (결정론)</text>
+<rect x="804" y="282" width="322" height="24" rx="4" fill="none" stroke="#6b7280" stroke-width="0.8"/>
+<text x="814" y="298" font-size="11" font-weight="600" text-anchor="start">arrival.py</text>
+<text x="892.0" y="298" font-size="11" fill="#6b7280" text-anchor="start">입항 판정(15km·2kn·35°·거리 감소)·ETA</text>
+<rect x="804" y="312" width="322" height="24" rx="4" fill="none" stroke="#6b7280" stroke-width="0.8"/>
+<text x="814" y="328" font-size="11" font-weight="600" text-anchor="start">species.py</text>
+<text x="892.0" y="328" font-size="11" fill="#6b7280" text-anchor="start">같은 달 여러 해 평균 · 해마다 바뀌는 업종 제외</text>
+<rect x="804" y="342" width="322" height="24" rx="4" fill="none" stroke="#6b7280" stroke-width="0.8"/>
+<text x="814" y="358" font-size="11" font-weight="600" text-anchor="start">visit.py</text>
+<text x="877.6" y="358" font-size="11" fill="#6b7280" text-anchor="start">지금 교통 + 경매 시각(기본 09:00) 권장</text>
+<rect x="804" y="372" width="322" height="24" rx="4" fill="none" stroke="#6b7280" stroke-width="0.8"/>
+<text x="814" y="388" font-size="11" font-weight="600" text-anchor="start">brief.py</text>
+<text x="877.6" y="388" font-size="11" fill="#6b7280" text-anchor="start">알림 문장: LLM → 숫자 검증 실패 시 템플릿</text>
+<rect x="60" y="436" width="350" height="150" rx="6" fill="none" stroke="currentColor" stroke-width="1"/>
+<text x="74" y="458" font-size="13" font-weight="600" text-anchor="start">engine.py 엔진</text>
+<text x="74" y="476" font-size="11" text-anchor="start">today · ships: 지금 위치 → 판정 → 어종</text>
+<text x="74" y="494" font-size="11" text-anchor="start">tick(실제 3초마다 확인): 지나간 10분 경계마다</text>
+<text x="88" y="510" font-size="11" text-anchor="start">ships_pos · forecast · events 기록</text>
+<text x="74" y="528" font-size="11" text-anchor="start">새 '입항 중' 배 묶음 → 알림(백그라운드)</text>
+<text x="74" y="548" font-size="11" fill="#b9541a" text-anchor="start">실데이터가 24h 넘게 멈추면 예보·알림 중지</text>
+<text x="74" y="568" font-size="10" fill="#6b7280" text-anchor="start">되감기 → reset 이벤트(알림함은 그 이후만)</text>
+<rect x="425" y="436" width="350" height="150" rx="6" fill="#ffffff" stroke="currentColor" stroke-width="1.1"/>
+<text x="439" y="458" font-size="13" font-weight="600" text-anchor="start">SQLite (VM 디스크, 재배포해도 유지)</text>
+<text x="439" y="482" font-size="11" text-anchor="start">fleet · ships_pos · auction_stats</text>
+<text x="439" y="500" font-size="11" text-anchor="start">forecast · subs · events</text>
+<text x="439" y="524" font-size="10" fill="#6b7280" text-anchor="start">source 열로 live / sim 구분</text>
+<text x="439" y="540" font-size="10" fill="#6b7280" text-anchor="start">스키마 정본 schema.sql (마이그레이션 도구 없음)</text>
+<text x="439" y="556" font-size="10" fill="#6b7280" text-anchor="start">명부·실적은 기동 시 다시 채움, 교통은 저장 안 함</text>
+<rect x="790" y="436" width="350" height="150" rx="6" fill="none" stroke="currentColor" stroke-width="1"/>
+<text x="804" y="458" font-size="13" font-weight="600" text-anchor="start">agent/ 질문창 (tool calling)</text>
+<rect x="804" y="466" width="322" height="24" rx="4" fill="none" stroke="#6b7280" stroke-width="0.8"/>
+<text x="814" y="482" font-size="11" font-weight="600" text-anchor="start">tools.py</text>
+<text x="877.6" y="482" font-size="11" fill="#6b7280" text-anchor="start">도구 6개: 예보·어종·교통·권장·과거 실적·알림</text>
+<rect x="804" y="496" width="322" height="24" rx="4" fill="none" stroke="#6b7280" stroke-width="0.8"/>
+<text x="814" y="512" font-size="11" font-weight="600" text-anchor="start">chat.py</text>
+<text x="870.4" y="512" font-size="11" fill="#6b7280" text-anchor="start">SSE 스트리밍 · 이전 2개 질문 맥락</text>
+<text x="804" y="540" font-size="10" fill="#0e7c7b" text-anchor="start">LLM 실패 → 간단 모드(낱말 규칙, 같은 도구)</text>
+<text x="804" y="556" font-size="10" fill="#6b7280" text-anchor="start">숫자는 도구에서만 · 호출 제한(분당 8, 하루 400)</text>
+<text x="804" y="572" font-size="10" fill="#6b7280" text-anchor="start">데이터 소스는 말하지 않음(화면 배지가 표시)</text>
+<rect x="60" y="600" width="715" height="94" rx="6" fill="none" stroke="currentColor" stroke-width="1"/>
+<text x="74" y="622" font-size="13" font-weight="600" text-anchor="start">api/ 라우트 (모두 /api/…)</text>
+<text x="74" y="644" font-size="11" text-anchor="start">/today  /ships  /traffic/now  /visit  /place  /notifications  /chat (SSE)</text>
+<text x="74" y="662" font-size="11" text-anchor="start">/push/key  /subscribe  /unsubscribe</text>
+<text x="74" y="682" font-size="11" fill="#b9541a" text-anchor="start">관리자 토큰: /sim/state·play·pause·seek·feed  /push/test   ·   / ← Vite dist 정적 서빙</text>
+<rect x="790" y="600" width="350" height="94" rx="6" fill="#ffffff" stroke="currentColor" stroke-width="1.1"/>
+<text x="804" y="622" font-size="13" font-weight="600" text-anchor="start">push.py 웹 푸시 (VAPID)</text>
+<text x="804" y="644" font-size="11" text-anchor="start">구독 조건(어종) 매칭 → 발송, 만료 구독 삭제</text>
+<text x="804" y="662" font-size="11" text-anchor="start">발송 기록 = 화면 알림함(최근 5건)</text>
+<text x="804" y="682" font-size="10" fill="#6b7280" text-anchor="start">제목 '배마중 · 구룡포 입항 예보'</text>
+<rect x="40" y="740" width="1120" height="158" rx="8" fill="none" stroke="currentColor" stroke-width="1.2"/>
+<text x="55" y="762" font-size="13" font-weight="600" text-anchor="start">Vite + React SPA (PWA) · 배마중</text>
+<text x="1145" y="762" font-size="11" fill="#6b7280" text-anchor="end">구룡포 새벽 입항·어종 알림 · 갤럭시 크롬 · 폰 폭 우선 · One UI · 모드 구분 없이 한 화면</text>
+<rect x="60" y="778" width="170" height="52" rx="5" fill="#ffffff" stroke="currentColor" stroke-width="1.1"/>
+<text x="145" y="799" font-size="12" font-weight="600" text-anchor="middle">지도 (Leaflet)</text>
+<text x="145" y="816" font-size="10" fill="#6b7280" text-anchor="middle">위판장 ★ · 배 ● · 범례</text>
+<rect x="240" y="778" width="170" height="52" rx="5" fill="#ffffff" stroke="currentColor" stroke-width="1.1"/>
+<text x="325" y="799" font-size="12" font-weight="600" text-anchor="middle">알림</text>
+<text x="325" y="816" font-size="10" fill="#6b7280" text-anchor="middle">알림 켜기 + 보낸 알림</text>
+<rect x="420" y="778" width="170" height="52" rx="5" fill="#ffffff" stroke="currentColor" stroke-width="1.1"/>
+<text x="505" y="799" font-size="12" font-weight="600" text-anchor="middle">오늘 입항 예보</text>
+<text x="505" y="816" font-size="10" fill="#6b7280" text-anchor="middle">척별 ETA · 5척 + 더보기</text>
+<rect x="600" y="778" width="170" height="52" rx="5" fill="#ffffff" stroke="currentColor" stroke-width="1.1"/>
+<text x="685" y="799" font-size="12" font-weight="600" text-anchor="middle">오늘 뭐가 들어오나</text>
+<text x="685" y="816" font-size="10" fill="#6b7280" text-anchor="middle">지금 들어오는 배 N척 기준</text>
+<rect x="780" y="778" width="170" height="52" rx="5" fill="#ffffff" stroke="currentColor" stroke-width="1.1"/>
+<text x="865" y="799" font-size="12" font-weight="600" text-anchor="middle">위판장 앞 지금</text>
+<text x="865" y="816" font-size="10" fill="#6b7280" text-anchor="middle">실측 교통 · 도착 권장</text>
+<rect x="960" y="778" width="170" height="52" rx="5" fill="#ffffff" stroke="currentColor" stroke-width="1.1"/>
+<text x="1045" y="799" font-size="12" font-weight="600" text-anchor="middle">물어보기</text>
+<text x="1045" y="816" font-size="10" fill="#6b7280" text-anchor="middle">조회 기록 · 최근 3개</text>
+<text x="60" y="852" font-size="11" text-anchor="start">오른쪽 위 배지: 선박 위치 시뮬레이션 / 실시간 / 미갱신</text>
+<text x="60" y="870" font-size="11" fill="#b9541a" text-anchor="start">?admin=1 → 진행 막대(관리자 토큰): 03:00·03:10·재생·일시정지·실데이터 전환·시험 알림</text>
+<text x="60" y="888" font-size="10" fill="#6b7280" text-anchor="start">폰: 하단 바(알림 받기 · 물어보기) · 600px 이상 두 칸(42:58), 960px 이상 38:62</text>
+<path d="M132 134 V172" fill="none" stroke="currentColor" stroke-width="1.2"/>
+<path d="M286 134 V172" fill="none" stroke="currentColor" stroke-width="1.2"/>
+<path d="M440 134 V172" fill="none" stroke="currentColor" stroke-width="1.2"/>
+<path d="M594 134 V172" fill="none" stroke="currentColor" stroke-width="1.2"/>
+<path d="M132 172 H594" fill="none" stroke="currentColor" stroke-width="1.2"/>
+<path d="M380 172 V248" fill="none" stroke="currentColor" stroke-width="1.2" marker-end="url(#ah)"/>
+<path d="M902 134 V184 H395 V248" fill="none" stroke="currentColor" stroke-width="1.2" marker-end="url(#ah)"/>
+<path d="M748 134 V248" fill="none" stroke="#b9541a" stroke-width="1.2" stroke-dasharray="5 3" marker-end="url(#ahw)"/>
+<path d="M1056 134 V170 H1150 V500 H1142" fill="none" stroke="#0e7c7b" stroke-width="1.2" marker-end="url(#aha)"/>
+<text x="1146" y="186" font-size="10" fill="#0e7c7b" text-anchor="end">tool calling</text>
+<path d="M235 420 V434" fill="none" stroke="currentColor" stroke-width="1.2" marker-end="url(#ah)"/>
+<path d="M600 420 V434" fill="none" stroke="currentColor" stroke-width="1.2" marker-end="url(#ah)"/>
+<path d="M410 511 H423" fill="none" stroke="currentColor" stroke-width="1.2" marker-end="url(#ah)"/>
+<path d="M790 511 H777" fill="none" stroke="currentColor" stroke-width="1.2" marker-end="url(#ah)"/>
+<path d="M965 420 V434" fill="none" stroke="#0e7c7b" stroke-width="1.2" marker-end="url(#aha)"/>
+<text x="972" y="431" font-size="10" fill="#0e7c7b" text-anchor="start">도구가 rules 호출</text>
+<path d="M235 586 V598" fill="none" stroke="currentColor" stroke-width="1.2" marker-end="url(#ah)"/>
+<path d="M405 586 V593 H782 V647 H788" fill="none" stroke="currentColor" stroke-width="1.2" marker-end="url(#ah)"/>
+<path d="M418 694 V738" fill="none" stroke="currentColor" stroke-width="1.2" marker-end="url(#ah)"/>
+<text x="426" y="722" font-size="10" fill="#6b7280" text-anchor="start">JSON · SSE</text>
+<path d="M965 694 V738" fill="none" stroke="currentColor" stroke-width="1.2" marker-end="url(#ah)"/>
+<text x="973" y="722" font-size="10" fill="#6b7280" text-anchor="start">웹 푸시 → 서비스 워커</text>
+<text x="600" y="935" font-size="11" fill="#6b7280" text-anchor="middle">가짜는 '배의 움직임'(sim)뿐. 어선 명부·위판장·교통·위판 실적 56개월은 실데이터. 숫자는 규칙이 내고 LLM은 문장만 쓴다. (2026-10-10 현행)</text>
 </svg>
