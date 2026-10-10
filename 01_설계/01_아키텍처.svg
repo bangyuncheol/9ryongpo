@@ -120,8 +120,8 @@
 <text x="55" y="762" font-size="13" font-weight="600" text-anchor="start">Vite + React SPA (PWA) · 배마중</text>
 <text x="1145" y="762" font-size="11" fill="#6b7280" text-anchor="end">구룡포 새벽 입항·어종 알림 · 갤럭시 크롬 · 폰 폭 우선 · One UI · 모드 구분 없이 한 화면</text>
 <rect x="60" y="778" width="170" height="52" rx="5" fill="#ffffff" stroke="currentColor" stroke-width="1.1"/>
-<text x="145" y="799" font-size="12" font-weight="600" text-anchor="middle">지도 (Leaflet)</text>
-<text x="145" y="816" font-size="10" fill="#6b7280" text-anchor="middle">위판장 ★ · 배 ● · 범례</text>
+<text x="145" y="799" font-size="12" font-weight="600" text-anchor="middle">지도 (카카오맵)</text>
+<text x="145" y="816" font-size="10" fill="#6b7280" text-anchor="middle">고정 · 범례 · 실패 시 Leaflet</text>
 <rect x="240" y="778" width="170" height="52" rx="5" fill="#ffffff" stroke="currentColor" stroke-width="1.1"/>
 <text x="325" y="799" font-size="12" font-weight="600" text-anchor="middle">알림</text>
 <text x="325" y="816" font-size="10" fill="#6b7280" text-anchor="middle">알림 켜기 + 보낸 알림</text>

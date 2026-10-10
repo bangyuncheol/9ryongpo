@@ -4,7 +4,7 @@ import type { Place } from './api'
 import { usePoll } from './usePoll'
 import AppHeader from './components/AppHeader'
 import BottomBar from './components/BottomBar'
-import ShipMap from './components/ShipMap'
+import MapView from './components/MapView'
 import ArrivalsCard from './components/ArrivalsCard'
 import SpeciesCard from './components/SpeciesCard'
 import TrafficCard from './components/TrafficCard'
@@ -46,7 +46,7 @@ export default function App() {
         </div>
         <div className="contents sm:flex sm:flex-col sm:gap-4">
           <div className="order-1">
-            <ShipMap place={place} ships={ships.data?.ships ?? []} arriving={today.data?.arriving ?? []} />
+            <MapView place={place} ships={ships.data?.ships ?? []} arriving={today.data?.arriving ?? []} />
             <ErrorLine message={today.error ?? ships.error} />
           </div>
           <div className="order-6"><ChatCard onSubscribe={(species) => setSubPreset({ species, at: Date.now() })} /></div>

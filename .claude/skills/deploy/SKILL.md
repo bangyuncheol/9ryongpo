@@ -21,7 +21,8 @@ description: 배포 절차·환경 변수 목록·프로덕션 마이그레이�
 2. 로컬의 `.env`를 VM `~/9ryongpo/.env`로 복사(scp). 메신저·저장소로 보내지 않는다.
 3. 외부 IP 확인 후 HTTPS 호스트 정하기: IP `34.64.1.2` → `34-64-1-2.sslip.io`.
 4. `bash ~/9ryongpo/src/deploy/setup_vm.sh 34-64-1-2.sslip.io`
-5. 폰 크롬에서 `https://<호스트>/` 열기 → 알림 받기 → `/?admin=1`에서 "시험 알림".
+5. Kakao Developers > 플랫폼 키 > JavaScript SDK 도메인에 `https://<호스트>` 추가(카카오맵용)
+6. 폰 크롬에서 `https://<호스트>/` 열기 → 알림 받기 → `/?admin=1`에서 "시험 알림".
 
 ## 배포 절차 (코드 갱신)
 1. 로컬에서 테스트 통과 확인(`cd src/server && uv run pytest`) 후 `main`에 푸시
@@ -56,3 +57,4 @@ description: 배포 절차·환경 변수 목록·프로덕션 마이그레이�
 | `SIM_ADMIN_TOKEN` | 시뮬레이터 시계·소스 전환 API 관리자 토큰 | 예 |
 | `FEED` | 시작 데이터 소스 `sim`/`live` | 아니오(기본 sim) |
 | `DB_PATH` | SQLite 위치(기본 `./data/app.db`) | 아니오 |
+| `VITE_KAKAO_MAP_KEY` | 카카오맵 JavaScript 키(화면 빌드 때 들어가는 공개 키). 운영 도메인을 Kakao Developers의 JavaScript SDK 도메인에 등록해야 지도가 뜸. 비우면 Leaflet 지도 | 아니오 |

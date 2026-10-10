@@ -72,13 +72,13 @@ export default function ShipMap({ place, ships, arriving }: Props) {
 
 /** 지도 범례. 색만으로 뜻을 전하지 않도록(One UI 접근성) 기호와 글자를 함께 둔다. 확대 버튼(좌상)·출처(우하)와 겹치지 않게 좌하.
  *  교통 센서는 손님에게 필요 없어 지도·범례에서 뺐다(10/10). 출처는 교통 카드 문구가 설명한다. */
-function Legend() {
+export function Legend({ position = 'bottom-left' }: { position?: 'bottom-left' | 'top-left' }) {
   const dot = (c: string, big = false) => (
     <span aria-hidden className="inline-block rounded-full" style={{ background: c, width: big ? 10 : 7, height: big ? 10 : 7 }} />
   )
   const row = 'flex items-center gap-1.5'
   return (
-    <div className="pointer-events-none absolute bottom-2 left-2 z-[500] rounded-button bg-card/90 px-3 py-2 text-[12px] leading-5 text-ink shadow-sm">
+    <div className={`pointer-events-none absolute left-2 z-[500] rounded-button bg-card/90 px-3 py-2 text-[12px] leading-5 text-ink shadow-sm ${position === 'top-left' ? 'top-2' : 'bottom-2'}`}>
       <p className="sr-only">지도 범례</p>
       <div className="flex flex-wrap gap-x-3">
         <span className={row}><span aria-hidden style={{ color: 'var(--color-primary-dark)' }}>★</span>위판장</span>
