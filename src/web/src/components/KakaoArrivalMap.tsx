@@ -89,7 +89,7 @@ export default function KakaoArrivalMap(p: Props) {
   const map = useRef<K>(null)
   const tracks = useRef(new Map<number, Track>())
   const info = useRef<K>(null)
-  const statics = useRef<{ star?: HTMLElement; badge?: K; badgeEl?: HTMLElement }>({})
+  const statics = useRef<{ star?: HTMLElement }>({})
   const truckOs = useRef<K[]>([])
   const [sensorFocus, setSensorFocus] = useState<string | null>(null)  // 누르거나 올린 트럭 아이콘(센서 이름)
   const prevArrived = useRef<number | null>(null)
@@ -132,21 +132,16 @@ export default function KakaoArrivalMap(p: Props) {
     star.setAttribute('aria-label', '위판장'); star.textContent = '★'
     const starO = new kakao.maps.CustomOverlay({ position: pos, content: star, yAnchor: 0.5, zIndex: 9 })  // 별은 늘 맨 위
     starO.setMap(m)
-    // 이름표는 별 오른쪽 위(바다 쪽). 왼쪽 위는 위판장 앞 트럭 아이콘, 남동쪽은 정박한 배 자리
-    const nameO = new kakao.maps.CustomOverlay({ position: pos, content: chip('구룡포수협 위판장'), xAnchor: -0.12, yAnchor: 1.5, zIndex: 8 })
-    nameO.setMap(m)
-    const badgeEl = chip()
-    const badge = new kakao.maps.CustomOverlay({ position: pos, content: badgeEl, xAnchor: 1.1, yAnchor: -0.7, zIndex: 8 })  // 별 왼쪽 아래(육지)
-    statics.current = { star, badge, badgeEl }
-    return () => { starO.setMap(null); nameO.setMap(null); badge.setMap(null) }
+    // 이름표·정박 N척 배지는 두지 않는다(10/10): 범례에 ★ 위판장, 정박 척수는 입항 예보 카드에 있다
+    statics.current = { star }
+    return () => { starO.setMap(null) }
   }, [ready, place])
 
-  // 정박 N척: 실제로 부두에 멈춘 배만 센다. 하나 늘 때 별 주위 물결.
+  // 배가 부두에 닿는 순간(멈춘 배 수가 늘 때) 별 주위 물결
   const dockedCount = p.ships.filter(isDocked).length
   useEffect(() => {
     const s = statics.current
-    if (!ready || !s.badge || !map.current) return
-    if (dockedCount > 0) { s.badgeEl!.innerHTML = `⚓ 정박 ${dockedCount}척`; s.badge.setMap(map.current) } else s.badge.setMap(null)
+    if (!ready || !map.current) return
     if (prevArrived.current !== null && dockedCount > prevArrived.current && s.star && !reduceMotion()) {
       s.star.classList.remove('port-ripple'); void s.star.offsetWidth; s.star.classList.add('port-ripple')
     }
@@ -163,8 +158,9 @@ export default function KakaoArrivalMap(p: Props) {
       const el = document.createElement('button')
       el.type = 'button'
       el.setAttribute('aria-label', `${t.nickname ?? t.name} 지난 1시간 트럭 ${t.truck}대`)
-      el.style.cssText = `display:grid;place-items:center;width:${size + 10}px;height:${size + 10}px;border-radius:9999px;` +
-        `background:var(--color-card);border:0;box-shadow:0 1px 4px rgba(0,0,0,.2);font-size:${size}px;line-height:1;cursor:pointer;padding:0`
+      // 흰 원 배경 없이 트럭 모양만. 둘레에 흰 테두리를 둘러 지도 위에서도 또렷하게(10/10)
+      el.style.cssText = `display:grid;place-items:center;background:transparent;border:0;padding:2px;cursor:pointer;` +
+        `font-size:${size}px;line-height:1;filter:drop-shadow(0 0 1px #fff) drop-shadow(0 0 1px #fff) drop-shadow(0 0 2px #fff) drop-shadow(0 1px 2px rgba(0,0,0,.25))`
       el.textContent = '🚚'
       el.addEventListener('click', (e) => { e.stopPropagation(); onSelect(null); setSensorFocus((f) => (f === t.name ? null : t.name)) })
       el.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') setSensorFocus(t.name) })
@@ -329,7 +325,7 @@ export default function KakaoArrivalMap(p: Props) {
         <p className="sr-only">지도 범례</p>
         <div className="flex flex-wrap gap-x-3">
           <span><span aria-hidden style={{ color: 'var(--color-primary-dark)' }}>★</span> 위판장</span>
-          <span><span aria-hidden>🚚</span> 지난 1시간 트럭(클수록 많음)</span>
+          <span><span aria-hidden>🚚</span> 지난 1시간 트럭 수(클수록 많음)</span>
         </div>
         <div className="flex flex-wrap gap-x-3">
           <span><span aria-hidden style={{ color: 'var(--color-arriving)' }}>⛴</span> 들어오는 배</span>
