@@ -31,6 +31,10 @@ description: 배포 절차·환경 변수 목록·프로덕션 마이그레이�
 - 되돌리기: VM에서 `git checkout <이전 커밋>` 후 `update.sh` 대신 `sudo systemctl restart wipan`. 원인 고친 뒤 `git checkout main`.
 - 스키마는 `src/server/app/schema.sql`(CREATE IF NOT EXISTS)라 별도 마이그레이션 적용 단계가 없다.
 
+## 위판 실적 월 갱신
+- 해수부 일자별 위탁판매현황은 매월 15일 전후 새 달이 등록된다(다음: 2026-09분 10/15).
+- 로컬에서 `cd src/server && uv run python scripts/fetch_auction.py` → 새 CSV 커밋·푸시 → VM에서 `update.sh`(재시작 시 자동 적재).
+
 ## HTTPS (웹 푸시 필수)
 - **80·443 포트가 열린 경우**: Caddy가 sslip.io 호스트로 인증서를 자동 발급(`setup_vm.sh` 5단계).
 - **포트가 막힌 경우 또는 로컬에서 폰 시험**: Cloudflare 임시 터널. 계정 불필요, 주소는 실행할 때마다 바뀐다.

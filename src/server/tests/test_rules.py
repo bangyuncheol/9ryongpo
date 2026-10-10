@@ -64,10 +64,10 @@ def test_not_closing_is_dropped():
 
 
 @pytest.fixture(scope="module")
-def conn(tmp_path_factory):
+def conn(tmp_path_factory, auction_dir):
     c = db.connect(tmp_path_factory.mktemp("db") / "t.db")
     db.init_schema(c)
-    load_dir(c, settings.auction_dir)  # 저장소의 실제 10월 4개년 + 2026-08
+    load_dir(c, auction_dir)  # 저장소의 실제 10월 4개년 + 2026-08
     return c
 
 
@@ -103,3 +103,15 @@ def test_category_only_ship_does_not_dilute(conn):
     e = species.estimate(conn, ships, 10)
     assert e["overall"][0]["name"] == "붉은대게" and e["overall"][0]["share"] > 0.7
     assert "근해자망어업" in e["category_only_biz"]
+
+
+def test_full_repo_data_covers_all_56_months(tmp_path):
+    """저장소의 위판 실적은 2022-01~2026-08 56개월 전체(10/10 결정). 2024-12는 원본 값이 따옴표로 감싸져 있어 정리해 저장했다."""
+    from app.agent.tools import past_auction
+    c = db.connect(tmp_path / "full.db")
+    db.init_schema(c)
+    load_dir(c, settings.auction_dir)
+    yms = [r[0] for r in c.execute("SELECT DISTINCT ym FROM auction_stats WHERE place='판매과(1계)' ORDER BY ym")]
+    assert len(yms) == 56 and yms[0] == "2022-01" and yms[-1] == "2026-08"
+    dec = past_auction(c, "붉은대게", 2024, 12)["records"]
+    assert dec and dec[0]["ym"] == "2024-12" and dec[0]["kg_price"] > 0

@@ -26,10 +26,10 @@ class FakeTraffic:
 
 
 @pytest.fixture
-def ctx(tmp_path):
+def ctx(tmp_path, auction_dir):
     conn = db.connect(tmp_path / "t.db")
     db.init_schema(conn)
-    load_dir(conn, settings.auction_dir)
+    load_dir(conn, auction_dir)
     conn.executemany("INSERT INTO fleet (ship_id, name, biz, gt, raw_json, updated_at) VALUES (?,?,?,?, '{}', 'x')", FLEET)
     conn.commit()
     e = Engine(conn, eum=None, place=geo.AUCTION_PLACE, feed="sim")
