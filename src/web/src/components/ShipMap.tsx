@@ -23,7 +23,7 @@ function FitOnce({ points }: { points: [number, number][] }) {
   const done = useRef(false)
   useEffect(() => {
     if (done.current || points.length < 2) return
-    map.fitBounds(L.latLngBounds(points), { padding: [24, 24] })
+    map.fitBounds(L.latLngBounds(points), { padding: [24, 24], animate: false })
     done.current = true
   }, [map, points])
   return null
@@ -38,7 +38,10 @@ export default function ShipMap({ place, ships, arriving }: Props) {
   const labeled = new Set(arriving.slice(0, 1).map((a) => a.ship_id))
   return (
     <div className="relative">
-    <MapContainer center={center} zoom={12} scrollWheelZoom={false} className="h-72 w-full rounded-card md:h-[440px]">
+    {/* 지도는 고정(10/10): 끌기·확대 없음. 폰에서 페이지를 내릴 때 지도만 움직이는 문제도 없앤다. 배 점 탭은 그대로. */}
+    <MapContainer center={center} zoom={12} className="h-72 w-full rounded-card md:h-[440px]"
+      dragging={false} touchZoom={false} doubleClickZoom={false} scrollWheelZoom={false}
+      boxZoom={false} keyboard={false} zoomControl={false}>
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
