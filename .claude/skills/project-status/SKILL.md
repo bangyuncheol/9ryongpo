@@ -19,7 +19,7 @@ description: 미구현·보류·기술부채·진행 중 과제의 현재 상태
 - API: `/api/health` `/api/place` `/api/fleet` `/api/sensors` `/api/traffic/now` (목록은 requirements 스킬 `flows-and-pages.md`).
 - 시뮬레이터 `app/feed/sim.py`(시각의 순수 함수, 대본 6척 + 실제 위치 44척, 시드 고정), 가상 시계 `app/feed/clock.py`, 실데이터 `app/feed/live.py`. 대본은 `KEY_SHIPS`.
 - 엔진 `app/engine.py`: 시계·피드·룰 연결. 실제 3초마다 확인해 10분(가상) 경계에서 `ships_pos`·`forecast`·`events` 기록, 새로 입항 중이 된 배를 훅으로 넘김. 입항 판정 `rules/arrival.py`, 어종 추정 `rules/species.py`.
-- API 추가: `/api/today` `/api/ships` `/api/sim/*`(조작은 `X-Admin-Token`).
+- API 추가: `/api/today` `/api/ships` `/api/sim/*`(토큰 없음, 10/10).
 - 확인된 데모 장면: 03:10에 연안자망 3척 ETA 04:25~04:35, 붉은대게 79%·골뱅이 10%.
 - 화면 `src/web/` (Vite + React 19 + Tailwind 4 + react-leaflet 5): 지도(위판장★·센서▲·배●), 입항 예보·어종·교통 카드(모드 구분 없이 한 화면, 관광객 한 줄은 교통 카드), sim/live 배지, `?admin=1` 진행 막대. 2초마다 `/api/today`·`/api/ships`, 1분마다 `/api/traffic/now`. 색은 `src/web/src/index.css` 토큰.
 - 서버가 `src/web/dist`가 있으면 `/`에서 화면을 서빙.

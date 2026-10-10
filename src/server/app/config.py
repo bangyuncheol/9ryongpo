@@ -28,7 +28,6 @@ class Settings:
     vapid_public_key: str
     vapid_private_key: str
     vapid_subject: str
-    sim_admin_token: str
     feed: str  # "sim" | "live"
     db_path: Path
     auction_dir: Path
@@ -56,7 +55,6 @@ def load_settings() -> Settings:
         vapid_public_key=os.getenv("VAPID_PUBLIC_KEY", "").strip(),
         vapid_private_key=os.getenv("VAPID_PRIVATE_KEY", "").strip(),
         vapid_subject=_vapid_subject(os.getenv("VAPID_SUBJECT", "")),
-        sim_admin_token=os.getenv("SIM_ADMIN_TOKEN", "").strip(),
         feed=feed,
         db_path=_resolve(os.getenv("DB_PATH", "./data/app.db").strip()),
         auction_dir=REPO_ROOT / "data" / "auction",

@@ -67,8 +67,8 @@ export const api = {
   notifications: () => get<{ vts: string; title: string; body: string }[]>('/api/notifications'),
 }
 
-export async function adminPost(path: string, token: string): Promise<Clock & { feed: string }> {
-  const r = await fetch(path, { method: 'POST', headers: { 'X-Admin-Token': token } })
+export async function adminPost(path: string): Promise<Clock & { feed: string }> {
+  const r = await fetch(path, { method: 'POST' })
   const body = await r.json().catch(() => null)
   if (!r.ok) throw new ApiError(body?.detail ?? '시계를 조작하지 못했습니다.')
   return body

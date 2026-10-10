@@ -6,12 +6,11 @@
 """
 from __future__ import annotations
 
-import hmac
 import logging
 from contextlib import asynccontextmanager
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
+from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
 
 from . import db, geo
@@ -159,21 +158,14 @@ async def ships(request: Request) -> dict:
     return await request.app.state.engine.ships()
 
 
-# --- 시뮬레이터 시계·데이터 소스 제어 (관리자 토큰, 설계 §1-18) ---
-def require_admin(x_admin_token: str = Header(default="")) -> None:
-    if not settings.sim_admin_token:
-        raise HTTPException(503, detail="관리자 토큰이 서버에 설정되지 않았습니다. .env 의 SIM_ADMIN_TOKEN 을 확인해 주세요.")
-    if not hmac.compare_digest(x_admin_token, settings.sim_admin_token):
-        raise HTTPException(403, detail="관리자만 시계를 조작할 수 있습니다. 관리자 토큰을 확인해 주세요.")
-
-
+# --- 시뮬레이터 시계·데이터 소스 제어 (데모 진행용, 토큰 없음 — 10/10 결정, 설계 §1-18) ---
 @app.get("/api/sim/state")
 def sim_state(request: Request) -> dict:
     e = request.app.state.engine
     return {**e.clock.state(), "feed": e.feed}
 
 
-@app.post("/api/sim/play", dependencies=[Depends(require_admin)])
+@app.post("/api/sim/play")
 def sim_play(request: Request, speed: float | None = Query(default=None)) -> dict:
     e = request.app.state.engine
     try:
@@ -183,14 +175,14 @@ def sim_play(request: Request, speed: float | None = Query(default=None)) -> dic
     return {**e.clock.state(), "feed": e.feed}
 
 
-@app.post("/api/sim/pause", dependencies=[Depends(require_admin)])
+@app.post("/api/sim/pause")
 def sim_pause(request: Request) -> dict:
     e = request.app.state.engine
     e.clock.pause()
     return {**e.clock.state(), "feed": e.feed}
 
 
-@app.post("/api/sim/seek", dependencies=[Depends(require_admin)])
+@app.post("/api/sim/seek")
 def sim_seek(request: Request, t: str = Query(..., description="HH:MM")) -> dict:
     e = request.app.state.engine
     try:
@@ -201,7 +193,7 @@ def sim_seek(request: Request, t: str = Query(..., description="HH:MM")) -> dict
     return {**e.clock.state(), "feed": e.feed}
 
 
-@app.post("/api/sim/feed", dependencies=[Depends(require_admin)])
+@app.post("/api/sim/feed")
 def sim_feed(request: Request, mode: str = Query(..., pattern="^(sim|live)$")) -> dict:
     e = request.app.state.engine
     e.set_feed(mode)
@@ -237,7 +229,7 @@ def notifications(request: Request) -> list[dict]:
     return pushmod.recent_notifications(request.app.state.db, request.app.state.engine.clock.now())
 
 
-@app.post("/api/push/test", dependencies=[Depends(require_admin)])
+@app.post("/api/push/test")
 async def push_test(request: Request) -> dict:
     """리허설용: 구독한 폰 전부에 시험 알림. 지연 측정에 쓴다(설계 §11)."""
     e = request.app.state.engine

@@ -110,7 +110,7 @@
 <text x="74" y="622" font-size="13" font-weight="600" text-anchor="start">api/ 라우트 (모두 /api/…)</text>
 <text x="74" y="644" font-size="11" text-anchor="start">/today  /ships  /traffic/now  /visit  /place  /notifications  /chat (SSE)</text>
 <text x="74" y="662" font-size="11" text-anchor="start">/push/key  /subscribe  /unsubscribe</text>
-<text x="74" y="682" font-size="11" fill="#b9541a" text-anchor="start">관리자 토큰: /sim/state·play·pause·seek·feed  /push/test   ·   / ← Vite dist 정적 서빙</text>
+<text x="74" y="682" font-size="11" fill="#b9541a" text-anchor="start">데모 진행: /sim/state·play·pause·seek·feed  /push/test (토큰 없음)   ·   / ← Vite dist 정적 서빙</text>
 <rect x="790" y="600" width="350" height="94" rx="6" fill="#ffffff" stroke="currentColor" stroke-width="1.1"/>
 <text x="804" y="622" font-size="13" font-weight="600" text-anchor="start">push.py 웹 푸시 (VAPID)</text>
 <text x="804" y="644" font-size="11" text-anchor="start">구독 조건(어종) 매칭 → 발송, 만료 구독 삭제</text>
@@ -138,7 +138,7 @@
 <text x="1045" y="799" font-size="12" font-weight="600" text-anchor="middle">물어보기</text>
 <text x="1045" y="816" font-size="10" fill="#6b7280" text-anchor="middle">조회 기록 · 최근 3개</text>
 <text x="60" y="852" font-size="11" text-anchor="start">오른쪽 위 배지: 선박 위치 시뮬레이션 / 실시간 / 미갱신</text>
-<text x="60" y="870" font-size="11" fill="#b9541a" text-anchor="start">?admin=1 → 진행 막대(관리자 토큰): 03:00·03:10·재생·일시정지·실데이터 전환·시험 알림</text>
+<text x="60" y="870" font-size="11" fill="#b9541a" text-anchor="start">?admin=1 → 진행 막대: 03:00·03:10·재생·일시정지·실데이터 전환·시험 알림</text>
 <text x="60" y="888" font-size="10" fill="#6b7280" text-anchor="start">폰: 하단 바(알림 받기 · 물어보기) · 600px 이상 두 칸(42:58), 960px 이상 38:62</text>
 <path d="M132 134 V172" fill="none" stroke="currentColor" stroke-width="1.2"/>
 <path d="M286 134 V172" fill="none" stroke="currentColor" stroke-width="1.2"/>

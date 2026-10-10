@@ -72,7 +72,7 @@ npm run build      # 결과(dist/)를 서버가 http://localhost:8000/ 에서 �
 npm run dev        # 화면만 고칠 때. http://localhost:5173 (API는 8000으로 자동 연결)
 ```
 
-데모 진행 막대는 주소 끝에 `?admin=1`을 붙이면 나온다. 토큰은 `.env`의 `SIM_ADMIN_TOKEN`.
+데모 진행 막대는 주소 끝에 `?admin=1`을 붙이면 나온다(토큰 없음).
 
 테스트: `cd src/server` 후 `uv run pytest`.
 

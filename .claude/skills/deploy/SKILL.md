@@ -54,7 +54,6 @@ description: 배포 절차·환경 변수 목록·프로덕션 마이그레이�
 | `OPENAI_MODEL` | 기본 `gpt-6.1-sol` | 아니오 |
 | `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | 웹 푸시 키 쌍. 팀 공용 하나 | 예 |
 | `VAPID_SUBJECT` | 푸시 연락 주소. 주소만 넣어도 `mailto:` 자동 | 예 |
-| `SIM_ADMIN_TOKEN` | 시뮬레이터 시계·소스 전환 API 관리자 토큰 | 예 |
 | `FEED` | 시작 데이터 소스 `sim`/`live` | 아니오(기본 sim) |
 | `DB_PATH` | SQLite 위치(기본 `./data/app.db`) | 아니오 |
 | `VITE_KAKAO_MAP_KEY` | 카카오맵 JavaScript 키(화면 빌드 때 들어가는 공개 키). 운영 도메인을 Kakao Developers의 JavaScript SDK 도메인에 등록해야 지도가 뜸. 비우면 Leaflet 지도 | 아니오 |

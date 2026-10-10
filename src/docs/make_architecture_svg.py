@@ -101,7 +101,7 @@ r(60, 600, 715, 94, 6, "none", "currentColor", 1)
 t(74, 622, "api/ 라우트 (모두 /api/…)", 13, 600)
 t(74, 644, "/today  /ships  /traffic/now  /visit  /place  /notifications  /chat (SSE)", 11)
 t(74, 662, "/push/key  /subscribe  /unsubscribe", 11)
-t(74, 682, "관리자 토큰: /sim/state·play·pause·seek·feed  /push/test   ·   / ← Vite dist 정적 서빙", 11, fill=WARN)
+t(74, 682, "데모 진행: /sim/state·play·pause·seek·feed  /push/test (토큰 없음)   ·   / ← Vite dist 정적 서빙", 11, fill=WARN)
 
 r(790, 600, 350, 94, 6, "#ffffff", "currentColor", 1.1)
 t(804, 622, "push.py 웹 푸시 (VAPID)", 13, 600)
@@ -120,7 +120,7 @@ for x, a, b in C:
     r(x, 778, 170, 52, 5, "#ffffff", "currentColor", 1.1)
     t(x + 85, 799, a, 12, 600, anchor="middle"); t(x + 85, 816, b, 10, fill=MUTED, anchor="middle")
 t(60, 852, "오른쪽 위 배지: 선박 위치 시뮬레이션 / 실시간 / 미갱신", 11)
-t(60, 870, "?admin=1 → 진행 막대(관리자 토큰): 03:00·03:10·재생·일시정지·실데이터 전환·시험 알림", 11, fill=WARN)
+t(60, 870, "?admin=1 → 진행 막대: 03:00·03:10·재생·일시정지·실데이터 전환·시험 알림", 11, fill=WARN)
 t(60, 888, "폰: 하단 바(알림 받기 · 물어보기) · 600px 이상 두 칸(42:58), 960px 이상 38:62", 10, fill=MUTED)
 
 # ── 화살표 ───────────────────────────────
