@@ -1,6 +1,6 @@
 import type { Source, Today } from '../api'
 import { hhmm } from '../api'
-import { summary } from './ArrivalsCard'
+import { shortBiz } from './ArrivalsCard'
 
 /** 확장 앱바 = 보는 영역(One UI): 넓은 여백, 가운데 큰 제목, 비인터랙티브 요약. */
 export default function AppHeader({ today }: { today: Today | null }) {
@@ -9,7 +9,7 @@ export default function AppHeader({ today }: { today: Today | null }) {
   const line = today?.notice
     ? '실시간 선박 위치가 들어오지 않아 예보를 멈췄습니다'
     : arriving.length
-      ? `${summary(arriving)} 입항 예정${top ? ` · ${top} 위주` : ''}`
+      ? `${headline(arriving)}${top ? ` · ${top} 위주` : ''}`
       : '지금 항구로 향하는 배가 없습니다'
   return (
     <header className="px-[var(--spacing-side)] pb-8 pt-4">
@@ -38,4 +38,13 @@ function SourceBadge({ source }: { source?: Source }) {
       <span aria-hidden className={`h-2 w-2 rounded-full ${dot}`} />선박 위치 {text}
     </span>
   )
+}
+
+/** 보는 영역은 한 줄로: 종류가 둘 이하면 다 쓰고, 많으면 가장 많은 종류만. 예) "9척 입항 예정 · 자망선 3척 외" */
+function headline(list: Today['arriving']) {
+  const c = new Map<string, number>()
+  list.forEach((a) => c.set(shortBiz(a.biz), (c.get(shortBiz(a.biz)) ?? 0) + 1))
+  const kinds = [...c].sort((a, b) => b[1] - a[1])
+  if (kinds.length <= 2) return `${kinds.map(([k, v]) => `${k}선 ${v}척`).join(', ')} 입항 예정`
+  return `${list.length}척 입항 예정 · ${kinds[0][0]}선 ${kinds[0][1]}척 외`
 }

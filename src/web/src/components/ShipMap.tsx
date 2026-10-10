@@ -39,7 +39,10 @@ type Props = { place: Place | null; sensors: Sensor[]; ships: Ship[]; arriving: 
 export default function ShipMap({ place, sensors, ships, arriving }: Props) {
   const center: [number, number] = place ? [place.lat, place.lon + 0.045] : [35.99, 129.6]
   const eta = new Map(arriving.map((a) => [a.ship_id, a.eta]))
+  // 라벨은 가장 먼저 도착하는 3척만 항상 표시(입항 중이 많으면 겹침). 나머지는 점을 누르면 보인다.
+  const labeled = new Set(arriving.slice(0, 3).map((a) => a.ship_id))
   return (
+    <div className="relative">
     <MapContainer center={center} zoom={12} scrollWheelZoom={false} className="h-72 w-full rounded-card md:h-[440px]">
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -63,11 +66,35 @@ export default function ShipMap({ place, sensors, ships, arriving }: Props) {
           radius={s.status === '입항 중' || s.status === '입항' ? 7 : 4}
           pathOptions={{ color: COLOR[s.status], fillColor: COLOR[s.status], fillOpacity: 0.85, weight: 1 }}
         >
-          <Tooltip permanent={s.status === '입항 중'} direction="top" offset={[0, -6]}>
+          <Tooltip permanent={labeled.has(s.ship_id)} direction="top" offset={[0, -6]}>
             {s.status === '입항 중' ? `${hhmm(eta.get(s.ship_id))} ${s.name}` : `${s.name} · ${s.biz ?? '업종 미상'} · ${s.status}`}
           </Tooltip>
         </CircleMarker>
       ))}
     </MapContainer>
+    <Legend />
+    </div>
+  )
+}
+
+/** 지도 범례. 색만으로 뜻을 전하지 않도록(One UI 접근성) 기호와 글자를 함께 둔다. 확대 버튼(좌상)·출처(우하)와 겹치지 않게 좌하. */
+function Legend() {
+  const dot = (c: string, big = false) => (
+    <span aria-hidden className="inline-block rounded-full" style={{ background: c, width: big ? 10 : 7, height: big ? 10 : 7 }} />
+  )
+  const row = 'flex items-center gap-1.5'
+  return (
+    <div className="pointer-events-none absolute bottom-2 left-2 z-[500] rounded-button bg-card/90 px-3 py-2 text-[12px] leading-5 text-ink shadow-sm">
+      <p className="sr-only">지도 범례</p>
+      <div className="flex flex-wrap gap-x-3">
+        <span className={row}><span aria-hidden style={{ color: 'var(--color-primary-dark)' }}>★</span>위판장</span>
+        <span className={row}><span aria-hidden style={{ color: 'var(--color-muted)' }}>▲</span>교통 센서</span>
+      </div>
+      <div className="flex flex-wrap gap-x-3">
+        <span className={row}>{dot('var(--color-arriving)', true)}입항 중</span>
+        <span className={row}>{dot('var(--color-arrived)', true)}입항</span>
+        <span className={row}>{dot('var(--color-idle)')}조업·대기</span>
+      </div>
+    </div>
   )
 }

@@ -8,7 +8,7 @@ export default function BottomBar() {
   const item = 'flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 text-small font-bold text-ink active:bg-chip'
   return (
     <nav aria-label="주요 행동" className="fixed inset-x-0 bottom-0 z-[1000] flex border-t border-line bg-card pb-[env(safe-area-inset-bottom)] sm:hidden">
-      <button className={item} onClick={() => go('subscribe-card')}>
+      <button className={item} onClick={() => go('alerts-card')}>
         <svg aria-hidden width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></svg>
         알림 받기
       </button>

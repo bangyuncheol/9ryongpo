@@ -9,15 +9,14 @@ import ArrivalsCard from './components/ArrivalsCard'
 import SpeciesCard from './components/SpeciesCard'
 import TrafficCard from './components/TrafficCard'
 import AdminBar from './components/AdminBar'
-import SubscribeCard from './components/SubscribeCard'
-import InboxCard from './components/InboxCard'
+import AlertsCard from './components/AlertsCard'
 import ChatCard from './components/ChatCard'
 import { ErrorLine } from './components/Card'
 
 /*
  * 배치(One UI): 위 = 보는 영역(AppHeader), 아래 = 누르는 영역(카드·입력, 폰은 하단 바).
- * 폰: 한 줄(지도 → 알림함 → 예보 → 어종 → 교통 → 질문 → 알림 받기).
- * 600px 이상: 두 칸 42:58, 960px 이상 38:62(대형 화면 분할비). 왼쪽 = 예보·어종·교통, 오른쪽 = 지도·질문·알림.
+ * 폰: 한 줄(지도 → 알림(받기+보낸 알림) → 예보 → 어종 → 교통 → 질문).
+ * 600px 이상: 두 칸 42:58, 960px 이상 38:62(대형 화면 분할비). 왼쪽 = 알림·예보·어종·교통, 오른쪽 = 지도·질문.
  */
 export default function App() {
   const [place, setPlace] = useState<Place | null>(null)
@@ -42,7 +41,7 @@ export default function App() {
       {admin && <div className="mb-4"><AdminBar clock={today.data?.clock ?? null} feed={src?.feed ?? null} /></div>}
       <main className="flex flex-col gap-4 px-[var(--spacing-side)] sm:grid sm:grid-cols-[42fr_58fr] sm:items-start lg:grid-cols-[38fr_62fr]">
         <div className="contents sm:flex sm:flex-col sm:gap-4">
-          <div className="order-2"><InboxCard items={inbox.data ?? []} /></div>
+          <div className="order-2"><AlertsCard items={inbox.data ?? []} preset={subPreset} /></div>
           <div className="order-3"><ArrivalsCard today={today.data} /></div>
           <div className="order-4"><SpeciesCard today={today.data} /></div>
           <div className="order-5"><TrafficCard traffic={traffic.data} error={traffic.error} advice={visit.data?.advice ?? null} visitorAfter={visit.data?.visitor_after ?? null} /></div>
@@ -53,7 +52,6 @@ export default function App() {
             <ErrorLine message={today.error ?? ships.error} />
           </div>
           <div className="order-6"><ChatCard onSubscribe={(species) => setSubPreset({ species, at: Date.now() })} /></div>
-          <div className="order-7"><SubscribeCard preset={subPreset} /></div>
         </div>
       </main>
       <footer className="mt-8 px-[var(--spacing-side)] text-center text-small text-muted">

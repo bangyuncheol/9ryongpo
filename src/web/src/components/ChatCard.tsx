@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { askStream } from '../api'
 import type { ChatEvent } from '../api'
 import Card, { Button } from './Card'
+import More from './More'
 
 const TOOL_LABEL: Record<string, string> = {
   get_arrival_forecast: '입항 예보 조회', get_species_estimate: '어종 추정', get_traffic_now: '위판장 앞 교통 조회',
@@ -15,11 +16,13 @@ export default function ChatCard({ onSubscribe }: { onSubscribe: (species: strin
   const [input, setInput] = useState('')
   const [turns, setTurns] = useState<Turn[]>([])
   const [busy, setBusy] = useState(false)
+  const [showOld, setShowOld] = useState(false)
+  const [openLog, setOpenLog] = useState<number | null>(null)
 
   const ask = async (q: string) => {
     const text = q.trim()
     if (!text || busy) return
-    setBusy(true); setInput('')
+    setBusy(true); setInput(''); setShowOld(false); setOpenLog(null)
     setTurns((t) => [...t, { q: text, log: [], answer: null }])
     const patch = (f: (t: Turn) => Turn) => setTurns((ts) => ts.map((t, i) => (i === ts.length - 1 ? f(t) : t)))
     await askStream(text, (e: ChatEvent) => {
@@ -34,18 +37,31 @@ export default function ChatCard({ onSubscribe }: { onSubscribe: (species: strin
 
   return (
     <Card id="chat-card" title="물어보기" aside="숫자는 데이터에서만 가져옵니다">
-      <div className="space-y-3">
-        {turns.map((t, i) => (
-          <div key={i} className="space-y-1.5 text-body">
-            <p className="font-bold">{t.q}</p>
-            {t.log.length > 0 && (
-              <pre className="whitespace-pre-wrap rounded-button bg-primary-soft px-3 py-2 font-mono text-small text-muted" aria-label="데이터 조회 기록">{t.log.join('\n')}</pre>
-            )}
-            {t.answer && <p>{t.answer}{t.mode === 'simple' && <span className="ml-1 text-small text-muted">(간단 모드)</span>}</p>}
-            {t.error && <p role="alert" className="text-sub text-arriving">{t.error}</p>}
-            {!t.answer && !t.error && busy && i === turns.length - 1 && <p className="text-muted" role="status">확인하는 중…</p>}
-          </div>
-        ))}
+      {/* 최근 질문 하나만 펼친다. 조회 기록은 답을 만드는 동안만 흐르고, 답이 나오면 한 줄로 접힌다. */}
+      <More open={showOld} hidden={turns.length - 1} label="이전 질문" onToggle={() => setShowOld(!showOld)} />
+      <div className="space-y-4">
+        {turns.map((t, i) => {
+          const latest = i === turns.length - 1
+          if (!latest && !showOld) return null
+          const running = latest && busy && !t.answer && !t.error
+          const logOpen = running || openLog === i
+          const lookups = t.log.filter((l) => l.startsWith('→')).length
+          return (
+            <div key={i} className={`space-y-1.5 text-body ${latest ? '' : 'opacity-80'}`}>
+              <p className="font-bold">{t.q}</p>
+              {t.log.length > 0 && (logOpen ? (
+                <pre className="whitespace-pre-wrap rounded-button bg-primary-soft px-3 py-2 font-mono text-small text-muted" aria-label="데이터 조회 기록">{t.log.join('\n')}</pre>
+              ) : (
+                <button onClick={() => setOpenLog(i)} className="text-small text-muted underline-offset-2 hover:underline">
+                  데이터 {lookups}건 조회 · 기록 보기
+                </button>
+              ))}
+              {t.answer && <p>{t.answer}{t.mode === 'simple' && <span className="ml-1 text-small text-muted">(간단 모드)</span>}</p>}
+              {t.error && <p role="alert" className="text-sub text-arriving">{t.error}</p>}
+              {running && <p className="text-muted" role="status">확인하는 중…</p>}
+            </div>
+          )
+        })}
       </div>
       <div className="mt-4 flex flex-wrap gap-2">
         {QUICK.map((q) => (
