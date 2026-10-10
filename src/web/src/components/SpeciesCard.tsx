@@ -4,8 +4,8 @@ import Card from './Card'
 
 export default function SpeciesCard({ today }: { today: Today | null }) {
   const sp = today?.species
-  const basis = sp?.by_biz.find((b) => b.basis)?.basis
-  const basisText = basis ? `최근 ${basis.years.length}년 ${basis.month}월 구룡포 위판 실적 기준` : undefined
+  // 숫자가 실시간 입항 배에서 나온다는 걸 먼저 보이게(10/10). 4년 실적 근거는 아래 설명 문구가 말한다.
+  const basisText = sp && sp.ships > 0 ? `지금 들어오는 배 ${sp.ships}척 기준` : undefined
   return (
     <Card id="species" title="오늘 뭐가 들어오나" aside={basisText}>
       {!sp || sp.overall.length === 0 ? (
