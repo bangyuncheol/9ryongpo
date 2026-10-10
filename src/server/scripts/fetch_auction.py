@@ -88,7 +88,7 @@ def main(args: list[str]) -> None:
             print(f"{ym}: 구룡포수협 행이 0개라 저장하지 않았습니다. 원본 형식을 확인해 주세요.")
             continue
         with (out_dir / f"구룡포수협_{ym}.csv").open("w", encoding="utf-8-sig", newline="") as f:
-            w = csv.DictWriter(f, fieldnames=COLUMNS, extrasaction="ignore")
+            w = csv.DictWriter(f, fieldnames=COLUMNS, extrasaction="ignore", lineterminator="\n")  # 저장소 줄바꿈 규칙(LF)
             w.writeheader()
             w.writerows(rows)
         print(f"{ym}: {len(rows)}행 저장")
