@@ -1,0 +1,773 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>배마중 발표</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<style>
+/* 색은 앱(src/web/src/index.css)의 One UI 토큰을 따른다.
+   의미 규칙: 파랑 = 그 장의 강조 하나 · 빨강 = 입항 시각과 0톤 · 초록 = 실데이터·실측 · 주황 = 시뮬레이션 */
+:root {
+  --primary: #0381fe; --primary-dark: #0072de; --primary-soft: #e5f1ff;
+  --page: #eef0f2; --card: #fafafa; --ink: #111418; --muted: #5b6168; --line: #dfe2e6; --chip: #e6e9ed; --bar: #d3d9e0;
+  --arriving: #d32f2f; --arrived: #1e7d45; --sim: #c8661a;
+  --night: #0b1626; --night-2: #15263d; --night-ink: #eef3f8; --night-muted: #a3b3c5; --night-blue: #6fb3ff; --night-red: #ff8a80;
+  --fs-stat: 112px; --fs-h2: 60px; --fs-h3: 40px; --fs-l: 30px; --fs-body: 26px; --fs-label: 22px; --fs-src: 18px;
+  --font: "Pretendard Variable", Pretendard, "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: #05090f; font-family: var(--font); color: var(--ink); }
+body { overflow: hidden; word-break: keep-all; overflow-wrap: anywhere; line-break: strict; }
+h1, h2, h3, p { margin: 0; }
+h1, h2, .h3 { text-wrap: balance; }
+p, li { text-wrap: pretty; }
+.num, td, .big { font-variant-numeric: tabular-nums; }
+
+#stage { position: absolute; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: center; }
+.slide { position: absolute; inset: 0; background: var(--page); padding: 92px 120px 96px; display: none; flex-direction: column; overflow: hidden; }
+.slide.on { display: flex; }
+.slide.dark { background: var(--night); color: var(--night-ink); }
+.slide.center { justify-content: center; }
+
+.kicker { font-size: var(--fs-label); font-weight: 700; color: var(--primary-dark); display: flex; align-items: center; gap: 12px; }
+.dark .kicker { color: var(--night-blue); }
+.kn { display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--primary-dark); color: #fff; font-size: 19px; font-weight: 800; flex: none; }
+.dark .kn { background: var(--night-blue); color: var(--night); }
+h2 { font-size: var(--fs-h2); font-weight: 750; line-height: 1.22; letter-spacing: -.025em; margin-top: 16px; }
+.lead { font-size: var(--fs-l); line-height: 1.5; color: var(--muted); margin-top: 22px; max-width: 1450px; }
+.dark .lead { color: var(--night-muted); }
+.h3 { font-size: var(--fs-h3); font-weight: 750; line-height: 1.28; letter-spacing: -.02em; }
+.big { font-size: var(--fs-stat); font-weight: 800; letter-spacing: -.035em; line-height: 1; }
+.b30 { font-size: var(--fs-l); line-height: 1.45; }
+.b26 { font-size: var(--fs-body); line-height: 1.55; }
+.lab { font-size: var(--fs-label); font-weight: 600; color: var(--muted); }
+.dark .lab, .dark .mut { color: var(--night-muted); }
+.mut { color: var(--muted); }
+.red { color: var(--arriving); } .dark .red { color: var(--night-red); }
+.blue { color: var(--primary-dark); } .dark .blue { color: var(--night-blue); }
+.green { color: var(--arrived); }
+
+.foot { position: absolute; left: 120px; right: 120px; bottom: 34px; display: flex; justify-content: space-between; align-items: flex-end; gap: 40px; font-size: var(--fs-src); color: var(--muted); line-height: 1.45; }
+.dark .foot { color: var(--night-muted); }
+.foot .src { max-width: 1520px; }
+.foot .src:empty::before { content: "\200b"; }
+.foot .pg { white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+.body { display: flex; gap: 48px; margin-top: 48px; min-height: 0; align-items: stretch; }
+.col { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.card { background: var(--card); border-radius: 28px; padding: 36px 40px; }
+.dark .card { background: var(--night-2); }
+.card > .lab + * { margin-top: 10px; }
+.stack { display: flex; flex-direction: column; gap: 24px; }
+.grow { flex: 1; }
+.mid-area { flex: 1; display: flex; flex-direction: column; justify-content: center; min-height: 0; }
+.card p, .card li { text-wrap: wrap; }
+.tag { display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px; border-radius: 999px; font-size: 20px; font-weight: 700; white-space: nowrap; }
+.tag i { width: 10px; height: 10px; border-radius: 50%; }
+.tag.live { background: #e2f2e8; color: var(--arrived); } .tag.live i { background: var(--arrived); }
+.tag.sim { background: #fbeadb; color: #a3520f; } .tag.sim i { background: var(--sim); }
+.tag.off { background: var(--chip); color: var(--muted); } .tag.off i { background: #9aa1a9; }
+ul.dots { list-style: none; padding: 0; margin: 0; }
+ul.dots li { position: relative; padding-left: 30px; }
+ul.dots li + li { margin-top: 12px; }
+ul.dots li::before { content: ""; position: absolute; left: 4px; top: .65em; width: 10px; height: 10px; border-radius: 50%; background: var(--primary); }
+.dark ul.dots li::before { background: var(--night-blue); }
+.notes { display: none; }
+table.t { border-collapse: collapse; width: 100%; font-size: var(--fs-body); }
+table.t th, table.t td { text-align: left; padding: 18px 16px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+table.t tr:last-child td { border-bottom: 0; }
+table.t td.nw { white-space: nowrap; }
+.callout { position: relative; outline: 3px solid var(--primary-dark); }
+.callout::before { content: ""; position: absolute; left: -64px; top: 50%; width: 64px; height: 3px; background: var(--primary-dark); }
+.chip-s { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--primary-dark); color: #fff; font-size: 16px; font-weight: 800; margin-left: 6px; vertical-align: 1px; }
+#runTable td b { font-size: 32px; }
+.map-row .r .chip-s { color: #fff; font-size: 16px; margin-top: 0; line-height: 1; }
+table.t th { font-size: var(--fs-label); color: var(--muted); font-weight: 600; padding-top: 6px; }
+
+/* 폰 재현 화면 — shots/ 에 실제 캡처가 있으면 자동으로 바뀐다 */
+.phone { width: 420px; height: 790px; border-radius: 58px; background: #0d0f12; padding: 14px; flex: none; box-shadow: 0 30px 70px rgba(11,22,38,.22); position: relative; }
+.screen { width: 100%; height: 100%; border-radius: 46px; background: var(--page); color: var(--ink); overflow: hidden; position: relative; font-size: 17px; }
+.slide:not(.dark) .phone { height: 700px; }
+.slide.dark .phone { height: 690px; }
+.lock.low .clock { padding-top: 120px; }
+.shot-img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
+.app-h { text-align: center; padding: 20px 20px 14px; }
+.app-h .badge { display: inline-flex; gap: 6px; align-items: center; background: var(--card); border-radius: 18px; padding: 6px 12px; font-size: 15px; font-weight: 700; float: right; }
+.app-h .badge i { width: 8px; height: 8px; border-radius: 50%; background: var(--sim); }
+.app-h h4 { clear: both; margin: 24px 0 0; font-size: 42px; font-weight: 300; }
+.app-h p { margin: 4px 0 0; color: var(--muted); font-size: 17px; }
+.app-h .line { color: var(--ink); font-size: 20px; font-weight: 650; margin-top: 10px; }
+.acard { background: var(--card); border-radius: 22px; margin: 0 12px 12px; padding: 16px 18px; }
+.acard .ah { display: flex; justify-content: space-between; align-items: baseline; font-size: 21px; font-weight: 750; margin-bottom: 6px; }
+.acard .ah span { font-size: 15px; font-weight: 500; color: var(--muted); }
+.row { display: flex; gap: 12px; align-items: center; padding: 9px 2px; border-top: 1px solid var(--line); }
+.acard .ah + .row { border-top: 0; }
+.row .eta { flex: none; width: 72px; white-space: nowrap; font-size: 23px; font-weight: 800; color: var(--arriving); font-variant-numeric: tabular-nums; }
+.row b { display: block; font-size: 19px; font-weight: 650; }
+.row small { color: var(--muted); font-size: 16px; }
+.bar { display: flex; align-items: center; gap: 10px; margin: 9px 0; font-size: 18px; }
+.bar .n { width: 86px; }
+.bar .tr { flex: 1; height: 11px; border-radius: 6px; background: var(--primary-soft); overflow: hidden; }
+.bar .tr span { display: block; height: 100%; background: var(--primary-dark); border-radius: 6px; }
+.bar .p { width: 50px; text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+.acard .fine { font-size: 15px; color: var(--muted); margin-top: 6px; }
+.lock { background: linear-gradient(170deg, #1d3150, #0b1626 62%); color: #fff; }
+.lock .clock { text-align: center; padding-top: 44px; }
+.lock .clock .d { font-size: 19px; opacity: .8; }
+.lock .clock .t { font-size: 92px; font-weight: 300; letter-spacing: -.03em; }
+.noti { margin: 28px 12px 0; background: rgba(250,250,250,.95); color: var(--ink); border-radius: 26px; padding: 18px 20px; }
+.noti .nh { display: flex; justify-content: space-between; font-size: 16px; color: var(--muted); }
+.noti .nt { font-size: 21px; font-weight: 750; margin-top: 8px; }
+.noti .nb { font-size: 20px; line-height: 1.45; margin-top: 4px; }
+
+/* 말풍선·통화 */
+.bubble { max-width: 88%; border-radius: 28px; padding: 18px 26px; font-size: var(--fs-body); line-height: 1.5; }
+.bubble.q { align-self: flex-end; background: var(--primary-dark); color: #fff; border-bottom-right-radius: 8px; font-weight: 650; }
+.bubble.a { align-self: flex-start; background: #eef1f4; border-bottom-left-radius: 8px; }
+.log { align-self: flex-start; font-size: 20px; color: var(--muted); background: var(--primary-soft); border-radius: 14px; padding: 10px 18px; }
+.talk { display: grid; grid-template-columns: 120px 1fr; column-gap: 24px; row-gap: 20px; font-size: var(--fs-body); line-height: 1.5; }
+.talk .who { font-weight: 800; color: var(--primary-dark); }
+.talk .who.u { color: var(--muted); }
+
+/* 문제 → 기능 (다크 장) */
+.map-row { display: grid; grid-template-columns: 1fr 64px 1.3fr; align-items: stretch; gap: 8px; }
+.map-row + .map-row { margin-top: 18px; }
+.map-row .l { border-radius: 22px; padding: 22px 30px; background: var(--night-2); font-size: var(--fs-body); line-height: 1.4; display: flex; flex-direction: column; justify-content: center; }
+.map-row .l small { font-size: 19px; color: var(--night-muted); font-weight: 700; margin-bottom: 4px; }
+.map-row .r { border-radius: 22px; padding: 20px 30px; background: #f4f7fb; color: var(--ink); display: flex; flex-direction: column; justify-content: center; }
+.map-row .r b { font-size: 30px; font-weight: 800; color: var(--primary-dark); }
+.map-row .r span { font-size: 21px; color: var(--muted); margin-top: 4px; line-height: 1.45; }
+.map-row .ar { display: grid; place-items: center; font-size: 34px; color: var(--night-blue); }
+
+/* 원칙 목록(다크) */
+.rules { margin-top: 56px; display: grid; grid-template-columns: 260px 1fr; column-gap: 0; font-size: var(--fs-body); line-height: 1.55; max-width: 1580px; }
+.rules > * { padding: 22px 0; border-top: 1px solid #263a55; }
+.rules .k { color: var(--night-blue); font-weight: 800; font-size: 28px; }
+
+/* 구조 도식 */
+.pipe { display: grid; grid-template-columns: repeat(5, 1fr); align-items: stretch; margin: 0 -14px; }
+.pipe .st { background: var(--card); border-radius: 26px; padding: 30px 28px; margin: 0 14px; position: relative; }
+.pipe .st.hl { background: var(--primary-soft); outline: 3px solid var(--primary-dark); }
+.pipe .st + .st::before { content: "→"; position: absolute; left: -14px; top: 50%; transform: translate(-50%, -50%); font-size: 30px; color: var(--primary-dark); }
+.pipe .st h4 { font-size: 32px; margin: 8px 0 12px; }
+.pipe .st p { font-size: 21px; line-height: 1.5; color: var(--muted); }
+
+#hud { position: fixed; right: 16px; bottom: 12px; color: #8a96a6; font: 12px var(--font); opacity: 0; transition: opacity .3s; }
+body:hover #hud { opacity: .8; }
+#notes-panel { position: fixed; left: 0; right: 0; bottom: 0; max-height: 34vh; overflow: auto; background: rgba(8,12,18,.94); color: #e8eef5; font: 18px/1.65 var(--font); padding: 18px 28px; display: none; }
+#notes-panel.on { display: block; }
+
+@media print {
+  @page { size: 1920px 1080px; margin: 0; }
+  html, body { background: none; overflow: visible; height: auto; }
+  #stage { position: static; transform: none !important; width: 1920px; height: auto; }
+  .slide { position: relative; display: flex !important; width: 1920px; height: 1080px; break-after: page; break-inside: avoid; }
+  .slide:last-child { break-after: auto; }
+  #hud, #notes-panel { display: none !important; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+</style>
+</head>
+<body>
+<div id="stage">
+
+<!-- 1 표지 -->
+<section class="slide dark">
+  <div class="body" style="margin:auto 0; align-items:center; gap:80px;">
+    <div class="col">
+      <p class="kicker">2026 디지털 트윈 구룡포 AI 해커톤 · 팀 인터뷰브릿지</p>
+      <h1 style="font-size:168px; font-weight:800; letter-spacing:-.05em; margin-top:28px; line-height:1;">배마중</h1>
+      <p style="font-size:44px; font-weight:650; margin-top:36px; line-height:1.4;">오늘 뭐가 몇 시에 들어오는지,<br>위판장 나가기 전에 알려 드립니다</p>
+      <p class="lead" style="margin-top:32px;">구룡포 위판장 새벽 입항·어종 알림</p>
+    </div>
+    <div class="phone" data-shot="shots/cover.png">
+      <div class="screen">
+        <div class="app-h"><span class="badge"><i></i>선박 위치 시뮬레이션</span>
+          <h4>배마중</h4><p>구룡포 새벽 입항·어종 알림</p>
+          <p style="margin-top:10px;"><b style="color:var(--ink)">03:10</b> · 구룡포 위판장</p>
+          <p class="line">자망선 3척 입항 예정 · 붉은대게 위주</p></div>
+        <div class="acard"><div class="ah">오늘 입항 예보<span>03:10 기준</span></div>
+          <div class="row"><span class="eta">04:25</span><span><b>남진호</b><small>자망 5t · 11.7km · 신뢰도 높음</small></span></div>
+          <div class="row"><span class="eta">04:30</span><span><b>강성호</b><small>자망 10t · 12.9km · 신뢰도 높음</small></span></div>
+          <div class="row"><span class="eta">04:35</span><span><b>장명호</b><small>자망 5t · 12.7km · 신뢰도 높음</small></span></div></div>
+        <div class="acard"><div class="ah">오늘 뭐가 들어오나<span>지금 들어오는 배 3척 기준</span></div>
+          <div class="bar"><span class="n">붉은대게</span><span class="tr"><span style="width:79%"></span></span><span class="p">79%</span></div>
+          <div class="bar"><span class="n">골뱅이</span><span class="tr"><span style="width:10%"></span></span><span class="p">10%</span></div>
+          <div class="bar"><span class="n">살오징어</span><span class="tr"><span style="width:7%"></span></span><span class="p">7%</span></div>
+          <p class="fine">배 업종으로 본 가능성입니다.</p></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span class="src">오른쪽은 시뮬레이션 03:10 장면을 다시 그린 화면입니다.</span><span class="pg"></span></div>
+  <aside class="notes">안녕하세요, 팀 인터뷰브릿지 권인석입니다. 배마중은 구룡포 위판장에 생선 사러 오는 분들한테, 배가 닿기 전에 오늘 뭐가 들어오는지 먼저 알려 줍니다. 이름은 '배 마중'에서 따왔어요. 오른쪽이 새벽 3시 10분 장면입니다.</aside>
+</section>
+
+<!-- 2 훅 -->
+<section class="slide dark center">
+  <p class="kicker">새벽 4시, 구룡포 위판장 가는 길</p>
+  <h2 style="font-size:80px; margin-top:36px; line-height:1.2;">“오늘 붉은대게 들어오나?<br>몇 척이나? 몇 시에 가면 되나?”</h2>
+  <p class="lead" style="font-size:34px; margin-top:52px;">횟집 사장님이 지금 이걸 아는 방법은 둘입니다. 직접 나가 보거나, 아는 선장한테 전화하거나.<br>그런데 구룡포항에 등록된 어선은 <b style="color:var(--night-ink)">202척</b>입니다. 아는 선장 몇 명한테 물어서는 다 알 수 없습니다.</p>
+  <p style="font-size:40px; font-weight:750; margin-top:56px;">배 들어오기 전엔 아무도 모르고, <span class="red">닿고 나면 늦습니다.</span></p>
+  <div class="foot"><span class="src">사용자 장면은 설계 단계에서 정한 가상 사용자(구룡포 읍내 횟집 사장) 기준. 202척은 E-UM 어선 기본정보.</span><span class="pg"></span></div>
+  <aside class="notes">새벽 4시, 횟집 사장님 머릿속엔 이 질문이 있습니다. 오늘 붉은대게 들어오나, 몇 척이나, 몇 시에 가면 되나. 지금은 직접 나가 보거나 아는 선장한테 전화하는 수밖에 없어요. 근데 구룡포 배가 202척입니다. 몇 명한테 물어봐선 다 모르죠. 결국 배가 닿아야 압니다. 그땐 늦고요.</aside>
+</section>
+
+<!-- 3 8월 1위 -->
+<section class="slide">
+  <p class="kicker"><span class="kn">1</span>뭐가 잡힐지 모른다</p>
+  <h2>구룡포 위판장 8월 1위 어종이 2년 연속 바뀌었습니다</h2>
+  <div class="mid-area">
+  <div class="body">
+    <div class="card col" style="flex:1.35;">
+      <p class="lab">8월 위판금액 1위 어종과 그달 전체 금액 중 비중</p>
+      <svg viewBox="0 0 960 520" width="100%" style="margin-top:12px;" role="img" aria-label="8월 1위 어종: 2022 살오징어 82%, 2023 살오징어 73%, 2024 살오징어 85%, 2025 붉은대게 33%, 2026 청어 86%">
+        <!-- 막대 높이 = 비중 × 3.4, 기준선 y=440 -->
+        <line x1="30" y1="440" x2="940" y2="440" stroke="#c4cad1" stroke-width="2"/>
+        <g fill="#d3d9e0">
+          <rect x="70" y="161" width="120" height="279" rx="4"><title>2022년 8월 살오징어 82%</title></rect>
+          <rect x="250" y="192" width="120" height="248" rx="4"><title>2023년 8월 살오징어 73%</title></rect>
+          <rect x="430" y="151" width="120" height="289" rx="4"><title>2024년 8월 살오징어 85%</title></rect>
+          <rect x="610" y="328" width="120" height="112" rx="4"><title>2025년 8월 붉은대게 33%</title></rect>
+          <rect x="790" y="148" width="120" height="292" rx="4"><title>2026년 8월 청어 86%</title></rect>
+        </g>
+        <line x1="580" y1="40" x2="580" y2="440" stroke="#0072de" stroke-width="2" stroke-dasharray="6 7"/>
+        <text x="596" y="58" font-size="20" font-weight="700" fill="#0072de">2025년부터</text>
+        <g text-anchor="middle" font-size="30" font-weight="800">
+          <text x="130" y="140" fill="#5b6168">살오징어</text><text x="310" y="171" fill="#5b6168">살오징어</text><text x="490" y="130" fill="#5b6168">살오징어</text>
+          <text x="670" y="307" fill="#0072de">붉은대게</text><text x="850" y="127" fill="#0072de">청어</text>
+        </g>
+        <g text-anchor="middle" font-size="22" fill="#5b6168">
+          <text x="130" y="200">82%</text><text x="310" y="231">73%</text><text x="490" y="190">85%</text><text x="670" y="367">33%</text><text x="850" y="187">86%</text>
+        </g>
+        <g text-anchor="middle" font-size="24" font-weight="700" fill="#111418">
+          <text x="130" y="478">2022</text><text x="310" y="478">2023</text><text x="490" y="478">2024</text><text x="670" y="478">2025</text><text x="850" y="478">2026</text>
+        </g>
+        <text x="670" y="510" text-anchor="middle" font-size="19" fill="#5b6168">1위가 33%뿐인 해</text>
+      </svg>
+    </div>
+    <div class="col stack" style="flex:.85;">
+      <div class="card"><p class="lab">10월 살오징어 위판량</p>
+        <p style="margin-top:14px;"><span class="big">1,473</span><span class="h3">톤</span></p>
+        <p style="margin-top:6px;"><span class="h3 red">→ 44톤</span><span class="b26 mut">　2025년, 3년 만에 3%</span></p></div>
+      <div class="card"><p class="lab">보도로 확인한 것</p>
+        <ul class="dots b26" style="margin-top:14px;">
+          <li>동해 수온 상승과 남획으로 오징어가 줄었고, 구룡포 채낚기 어선 50여 척 중 절반이 감척됐거나 신청했습니다 <span class="mut">(2024.4)</span></li>
+          <li>올여름 포항 연안 고수온 특보는 46일 이어졌습니다 <span class="mut">(양식 피해 보도, 2026.10)</span></li>
+        </ul></div>
+    </div>
+  </div>
+  </div>
+  <div class="foot"><span class="src">자료: 해양수산부 「일자별 위탁판매현황」(공공데이터포털 15102791) 구룡포수협 본소(판매과 1계) 2022.1~2026.8 56개월, 팀 집계 · 경향신문 2024.4.28 · 경북일보 2026.10.1</span><span class="pg"></span></div>
+  <aside class="notes">해수부 위판 실적 56개월치를 저희가 직접 받아서 봤는데요. 8월 1위가 3년 내내 살오징어였다가, 작년엔 붉은대게, 올해는 청어로 바뀌었습니다. 10월 살오징어는 3년 만에 1,473톤에서 44톤이 됐습니다. 보도로는 수온 상승과 남획이 원인으로 꼽힙니다.</aside>
+</section>
+
+<!-- 4 방어 일별 -->
+<section class="slide">
+  <p class="kicker"><span class="kn">1</span>하루 단위로 보면</p>
+  <h2>84.6톤 들어오고 닷새 뒤, 위판장은 열렸는데 방어만 0톤</h2>
+  <div class="mid-area">
+  <div class="body">
+    <div class="card col" style="flex:1.65;">
+      <p class="lab">2025년 12월 구룡포 위판장 방어 위판량 (경매일별, 톤)</p>
+      <svg id="dailyChart" viewBox="0 0 1060 560" width="100%" style="margin-top:8px;" role="img" aria-label="2025년 12월 방어 일별 위판량. 12월 7일 84.6톤, 12일부터 14일까지 0톤"></svg>
+    </div>
+    <div class="col stack" style="flex:.8;">
+      <div class="card"><p class="lab">방어만 없던 날</p>
+        <p class="b26" style="margin-top:12px;">12일엔 위판장 전체 <b>14.7톤</b>, 14일엔 <b>15.9톤</b>이 팔렸습니다. 방어는 <b class="red">0톤</b>.</p></div>
+      <div class="card"><p class="lab">10월 방어 위판량</p>
+        <table class="t" style="margin-top:4px;">
+          <tr><td style="padding:12px 4px;">2022</td><td style="text-align:right; padding:12px 4px;"><b class="red">0.01</b>톤</td></tr>
+          <tr><td style="padding:12px 4px;">2023</td><td style="text-align:right; padding:12px 4px;"><b>640</b>톤</td></tr>
+          <tr><td style="padding:12px 4px;">2024</td><td style="text-align:right; padding:12px 4px;"><b>496</b>톤</td></tr>
+          <tr><td style="padding:12px 4px;">2025</td><td style="text-align:right; padding:12px 4px;"><b class="red">3</b>톤</td></tr>
+        </table></div>
+    </div>
+  </div>
+  </div>
+  <div class="foot"><span class="src">자료: 해양수산부 「일자별 위탁판매현황」 구룡포수협 본소, 팀 집계. 막대는 위판 기록이 있는 날만 그렸습니다(12월 4일 기록 없음).</span><span class="pg"></span></div>
+  <aside class="notes">하루 단위로 보면 더 심합니다. 겨울 횟집에서 제일 많이 찾는 방어인데요. 작년 12월 7일엔 84톤이 들어왔습니다. 그런데 닷새 뒤인 12일부터 0톤이었습니다. 위판장이 쉰 것도 아닙니다. 12일이랑 14일엔 다른 생선이 15톤 안팎 팔렸는데 방어만 없었습니다.</aside>
+</section>
+
+<!-- 5 김 사장 -->
+<section class="slide">
+  <p class="kicker"><span class="kn">2</span>헛걸음</p>
+  <h2>위판장에 도착해서야 오늘 물건을 압니다</h2>
+  <div class="mid-area">
+  <div class="body">
+    <div class="card col">
+      <p class="lab">횟집 김 사장의 12월 · 가상 인물, 날짜와 물량은 실제 위판 기록</p>
+      <div class="stack" style="margin-top:44px; gap:52px; border-left:3px solid var(--line); margin-left:8px; padding-left:40px;">
+        <div style="position:relative;"><span style="position:absolute; left:-51px; top:6px; width:18px; height:18px; border-radius:50%; background:var(--primary-dark);"></span>
+          <p class="lab num">12월 7일 일요일</p><p class="b30" style="margin-top:4px;">방어 <b>84.6톤</b>. 넉넉하게 받아 옵니다.</p></div>
+        <div style="position:relative;"><span style="position:absolute; left:-51px; top:6px; width:18px; height:18px; border-radius:50%; background:var(--arriving);"></span>
+          <p class="lab num">12월 12일 금요일</p><p class="b30" style="margin-top:4px;">주말 예약 때문에 새벽에 나갔는데 방어 <b class="red">0톤</b>.</p></div>
+        <div style="position:relative;"><span style="position:absolute; left:-51px; top:6px; width:18px; height:18px; border-radius:50%; background:var(--arriving);"></span>
+          <p class="lab num">12월 13~14일</p><p class="b30" style="margin-top:4px;">또 <b class="red">0톤</b>. 주말 상에 방어를 못 올립니다.</p></div>
+      </div>
+    </div>
+    <div class="col">
+      <p class="h3" style="margin-top:8px;">김 사장이 잃는 것</p>
+      <div style="margin-top:28px;">
+        <div style="padding:26px 0; border-top:1px solid var(--line);"><p class="b30"><b>새벽 운전과 기다린 시간, 그리고 빈손</b></p></div>
+        <div style="padding:26px 0; border-top:1px solid var(--line);"><p class="b30"><b>나갈지 말지, 다른 위판장을 알아볼지</b></p><p class="b26 mut" style="margin-top:6px;">출발 전에 정할 근거가 없습니다.</p></div>
+        <div style="padding:26px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line);"><p class="b30"><b>트럭을 몇 대 부를지</b></p><p class="b26 mut" style="margin-top:6px;">위판장 전체 물량도 7일 <b style="color:var(--ink)">98.8톤</b>, 12일 <b style="color:var(--ink)">14.7톤</b>. 넉넉히 부르면 빈 차, 적게 부르면 모자랍니다.</p></div>
+      </div>
+    </div>
+  </div>
+  </div>
+  <div class="foot"><span class="src">자료: 해양수산부 「일자별 위탁판매현황」 구룡포수협 본소 2025.12 일별 위판중량, 팀 집계</span><span class="pg"></span></div>
+  <aside class="notes">이렇게 들쭉날쭉하면 손해는 사러 온 사람이 봅니다. 김 사장님은 가상 인물이지만 날짜랑 물량은 실제 기록이에요. 7일엔 넉넉했고, 12일 금요일 새벽엔 없었습니다. 빈손으로 돌아오고, 다른 데로 갈지 정할 수도 없고, 트럭을 몇 대 부를지도 모릅니다. 위판장 전체 물량도 98톤에서 14톤까지 오갑니다.</aside>
+</section>
+
+<!-- 6 언제 가야 하나 -->
+<section class="slide">
+  <p class="kicker"><span class="kn">3</span>언제 가야 할지 모른다</p>
+  <h2>몇 시에 나갈지, 지금은 감으로 정합니다</h2>
+  <div class="mid-area">
+  <div class="card" style="margin-top:56px; padding:48px 56px 40px;">
+    <svg viewBox="0 0 1600 270" width="100%" role="img" aria-label="03시부터 09시까지 시간 축. 배가 닿는 시각, 경매 시각, 위판장 앞 길이 모두 물음표">
+      <line x1="60" y1="110" x2="1540" y2="110" stroke="#c4cad1" stroke-width="4" stroke-linecap="round"/>
+      <g stroke="#c4cad1" stroke-width="2"><line x1="60" y1="98" x2="60" y2="122"/><line x1="307" y1="98" x2="307" y2="122"/><line x1="553" y1="98" x2="553" y2="122"/><line x1="800" y1="98" x2="800" y2="122"/><line x1="1047" y1="98" x2="1047" y2="122"/><line x1="1293" y1="98" x2="1293" y2="122"/><line x1="1540" y1="98" x2="1540" y2="122"/></g>
+      <g fill="#5b6168" font-size="22" text-anchor="middle"><text x="60" y="262">03시</text><text x="307" y="262">04시</text><text x="553" y="262">05시</text><text x="800" y="262">06시</text><text x="1047" y="262">07시</text><text x="1293" y="262">08시</text><text x="1540" y="262">09시</text></g>
+      <rect x="240" y="88" width="560" height="44" rx="22" fill="none" stroke="#d32f2f" stroke-width="3" stroke-dasharray="8 8"/>
+      <text x="520" y="62" text-anchor="middle" font-size="30" font-weight="800" fill="#d32f2f">배는 언제 닿나?</text>
+      <rect x="1000" y="88" width="540" height="44" rx="22" fill="none" stroke="#111418" stroke-width="3" stroke-dasharray="8 8"/>
+      <text x="1270" y="62" text-anchor="middle" font-size="30" font-weight="800" fill="#111418">경매는 몇 시?</text>
+      <rect x="60" y="186" width="1480" height="22" rx="11" fill="none" stroke="#9aa1a9" stroke-width="2" stroke-dasharray="6 8"/><text x="60" y="174" font-size="24" font-weight="700" fill="#5b6168">위판장 앞 길은? 가 봐야 압니다</text>
+    </svg>
+  </div>
+  <div class="body" style="margin-top:36px; gap:40px;">
+    <div class="col"><p class="b30"><b>배</b>　<span class="mut">일찍 가면 기다리고, 늦으면 좋은 물건을 놓칩니다.</span></p></div>
+    <div class="col"><p class="b30"><b>경매</b>　<span class="mut">붉은대게 09:00, 잡어·문어 07:00. 어종마다 다릅니다.</span></p></div>
+    <div class="col"><p class="b30"><b>길</b>　<span class="mut">호미로 위판장 앞에 하역·출하 트럭이 몰렸는지는 가 봐야 압니다.</span></p></div>
+  </div>
+  </div>
+  <div class="foot"><span class="src">경매 시각은 공개 정보로 정한 가정이며 수협 확인 전입니다.</span><span class="pg"></span></div>
+  <aside class="notes">세 번째는 언제 가느냐입니다. 배가 몇 시에 닿는지, 경매가 몇 시인지, 위판장 앞이 막혔는지. 이 셋을 같이 알려 주는 데가 지금은 없어요. 그래서 다들 감으로 나갑니다.</aside>
+</section>
+
+<!-- 7 전화 -->
+<section class="slide">
+  <p class="kicker"><span class="kn">4</span>앱과 웹이 낯선 분들</p>
+  <h2>어가 인구 둘 중 한 명이 고령입니다</h2>
+  <div class="mid-area">
+  <div class="body" style="gap:40px;">
+    <div class="card col" style="flex:.9; justify-content:center; padding:56px;">
+      <p class="lab">어가 인구 중 고령 인구 비중</p>
+      <p style="margin-top:18px;"><span class="big" style="font-size:180px;">48.2</span><span class="h3">%</span></p>
+      <p class="b26 mut" style="margin-top:16px;">2025년 12월 1일 기준. 둘 중 한 명꼴입니다.</p>
+    </div>
+    <div class="card col" style="flex:1.1; justify-content:center; gap:48px; padding:56px;">
+      <div><p class="lab">AI 서비스를 써 본 비율</p>
+        <div style="margin-top:16px; display:grid; grid-template-columns:130px 1fr 96px; gap:14px 18px; align-items:center; font-size:24px;">
+          <span>농어민</span><span style="height:22px; background:var(--chip); border-radius:11px;"><span style="display:block; width:31.1%; height:100%; background:var(--primary-dark); border-radius:11px;"></span></span><b class="num">31.1%</b>
+          <span class="mut">일반 국민</span><span style="height:22px; background:var(--chip); border-radius:11px;"><span style="display:block; width:59.4%; height:100%; background:#9aa6b3; border-radius:11px;"></span></span><span class="num mut">59.4%</span>
+        </div></div>
+      <div><p class="lab">키오스크 활동률</p>
+        <div style="margin-top:16px; display:grid; grid-template-columns:130px 1fr 96px; gap:14px 18px; align-items:center; font-size:24px;">
+          <span>농어민</span><span style="height:22px; background:var(--chip); border-radius:11px;"><span style="display:block; width:48.3%; height:100%; background:var(--primary-dark); border-radius:11px;"></span></span><b class="num">48.3%</b>
+          <span class="mut">일반 국민</span><span style="height:22px; background:var(--chip); border-radius:11px;"><span style="display:block; width:74.5%; height:100%; background:#9aa6b3; border-radius:11px;"></span></span><span class="num mut">74.5%</span>
+        </div></div>
+    </div>
+  </div>
+  <p class="b30" style="margin-top:40px;"><b>글자 안 쳐도 됩니다. 전화로 물으면 됩니다.</b> <span class="mut">운전하면서도요.</span></p>
+  </div>
+  <div class="foot"><span class="src">자료: 국가데이터처 「2025년 농림어업총조사 결과(잠정)」(헤럴드경제 2026.4.27 보도) · 과학기술정보통신부·한국지능정보사회진흥원 「2025 디지털정보격차 실태조사」 2026.3.26(머니투데이 2026.3.27 보도)</span><span class="pg"></span></div>
+  <aside class="notes">네 번째는 쓰는 사람 얘기입니다. 어가 인구 둘 중 한 명이 고령이고, 농어민 중에 AI 서비스 써 본 사람은 31%, 일반 국민의 절반쯤입니다. 그래서 화면만 만들지 않고 전화를 붙였어요. 화면을 못 봐도 말로 물으면 됩니다.</aside>
+</section>
+
+<!-- 8 그래서 -->
+<section class="slide dark center">
+  <h2>네 가지를 만들었습니다</h2>
+  <div style="margin-top:48px;">
+    <div class="map-row"><div class="l"><small>1 뭐가 잡힐지 모른다</small>오늘 무엇이 얼마나 오는지</div><div class="ar">→</div><div class="r"><b>입항 예보 + 어종 추정</b><span>항으로 오는 배와 도착 시각, 그 배 업종으로 본 어종 가능성 · 시연<span class="chip-s">1</span><span class="chip-s">3</span></span></div></div>
+    <div class="map-row"><div class="l"><small>2 모르고 오면 손해</small>나갈지 말지, 트럭은 몇 대</div><div class="ar">→</div><div class="r"><b>먼저 알림</b><span>원하는 어종을 실은 배가 오기 시작하면 폰으로. 몇 시에 몇 척인지까지 · 시연<span class="chip-s">2</span></span></div></div>
+    <div class="map-row"><div class="l"><small>3 언제 가야 할지 모른다</small>배 · 경매 · 길</div><div class="ar">→</div><div class="r"><b>도착 권장 시각</b><span>입항 시각, 경매 시각, 위판장 앞 트럭 실측을 한 줄로 · 시연<span class="chip-s">4</span></span></div></div>
+    <div class="map-row"><div class="l"><small>4 화면이 낯설다</small>말로 묻고 싶다</div><div class="ar">→</div><div class="r"><b>물어보기 + 070 전화</b><span>글로 묻든 전화로 묻든 같은 답 · 시연<span class="chip-s">5</span><span class="chip-s">6</span></span></div></div>
+  </div>
+  <div class="foot"><span class="src"></span><span class="pg"></span></div>
+  <aside class="notes">네 개를 만들었습니다. 말로 하는 것보다 보는 게 빠르니까, 시연 들어가기 전에 하나만 먼저 말씀드릴게요.</aside>
+</section>
+
+<!-- 9 시연 전에 -->
+<section class="slide">
+  <p class="kicker">시연 전에</p>
+  <h2>시뮬레이션은 배 위치 하나, 나머지는 실데이터입니다</h2>
+  <div class="mid-area">
+  <div class="body">
+    <div class="card col" style="flex:1.35; padding:28px 36px;">
+      <table class="t">
+        <tr><th>데이터</th><th>상태</th><th>쓰는 곳</th></tr>
+        <tr><td class="nw">E-UM 어선 기본정보 202척</td><td><span class="tag live"><i></i>실데이터</span></td><td>업종·톤수·배 이름</td></tr>
+        <tr><td class="nw">E-UM 위판장 위치</td><td><span class="tag live"><i></i>실데이터</span></td><td>거리 계산 기준점</td></tr>
+        <tr><td class="nw">E-UM 교통센서·교통량·혼잡율</td><td><span class="tag live"><i></i>실측</span></td><td>위판장 앞 지금 (최근 9~24시간)</td></tr>
+        <tr><td class="nw">해수부 위판 실적 56개월</td><td><span class="tag live"><i></i>실데이터</span></td><td>어종 추정 · 과거 실적</td></tr>
+        <tr><td class="nw">E-UM 선박 위치 50척</td><td><span class="tag sim"><i></i>시뮬레이션</span></td><td>2025-04-27 멈춤 → 같은 형식 재생</td></tr>
+        <tr><td class="nw">E-UM 선박탄소 4종</td><td><span class="tag off"><i></i>안 씀</span></td><td>값이 0 또는 매번 다름</td></tr>
+      </table>
+    </div>
+    <div class="col stack">
+      <div class="card"><p class="lab">진짜 위치가 들어오면</p>
+        <p class="b26">스위치 하나로 지금 화면이 그대로 돕니다. 위치가 하루 넘게 멈춰 있으면 예보를 내지 않고 이렇게 띄웁니다.</p>
+        <p class="b26" style="margin-top:14px; background:var(--primary-soft); border-radius:16px; padding:16px 20px;">“선박 위치가 2025-04-27 이후 갱신되지 않아 입항 예보를 낼 수 없습니다”</p></div>
+      <div class="card"><p class="lab">아직 안 되는 것</p>
+        <ul class="dots b26" style="margin-top:12px;"><li>업종으로 본 어종은 가능성입니다</li><li>10월 근거는 2025년까지 (9월분 10/15 공개)</li><li>경매 시각·도착 권장은 수협 확인 전</li><li>도착 시각은 직선거리 기준이라 접안보다 몇 분 이릅니다</li></ul></div>
+    </div>
+  </div>
+  </div>
+  <div class="foot"><span class="src">E-UM 호출 검증 2026.10.8~9. 선박 위치 50척 모두 2025-04-27 14:07 수신.</span><span class="pg"></span></div>
+  <aside class="notes">선박 위치 API가 작년 4월에 멈춰 있습니다. 그래서 같은 형식으로 시뮬레이션을 돌렸고, 화면 위에 늘 시뮬레이션이라고 띄웁니다. 나머지는 전부 진짜 데이터예요. 시연 끝에 이 스위치를 실데이터로 바꿔 볼게요. 그러면 엉터리 예보 대신 '못 냅니다'가 뜹니다.</aside>
+</section>
+
+<!-- 10 시연① -->
+<section class="slide">
+  <p class="kicker">시연 1 · 가상 시각 03:10</p>
+  <h2>항으로 오는 배 3척, 4시 25분부터 들어옵니다</h2>
+  <div class="mid-area">
+  <div class="body" style="gap:64px;">
+    <div class="phone" data-shot="shots/map.png">
+      <div class="screen">
+        <svg viewBox="0 0 392 330" width="100%" style="display:block; background:#d9e8f6;">
+          <path d="M0 0 H178 C196 40 170 80 186 118 C200 150 164 190 178 232 C188 262 160 300 150 330 H0 Z" fill="#ecebe6"/>
+          <path d="M190 64 L246 98" stroke="#97a1ab" stroke-width="7" stroke-linecap="round"/><circle cx="246" cy="98" r="5" fill="#fff" stroke="#5b6168" stroke-width="2"/><text x="196" y="56" font-size="14" fill="#5b6168">북방파제</text>
+          <path d="M180 266 L236 230" stroke="#97a1ab" stroke-width="7" stroke-linecap="round"/><circle cx="236" cy="230" r="5" fill="#fff" stroke="#5b6168" stroke-width="2"/><text x="186" y="290" font-size="14" fill="#5b6168">남방파제</text>
+          <g transform="translate(166 168)"><path d="M0 -14 L4 -4 L14 -4 L6 2 L9 13 L0 6 L-9 13 L-6 2 L-14 -4 L-4 -4 Z" fill="#0072de" stroke="#fff" stroke-width="2"/></g>
+          <path d="M350 150 C320 156 290 160 262 164" stroke="#d32f2f" stroke-width="2" stroke-dasharray="3 5" fill="none"/>
+          <g fill="#d32f2f" stroke="#fff" stroke-width="1.5"><path d="M272 150 l-17 -6 l0 12 z"/><path d="M308 176 l-17 -6 l0 12 z"/><path d="M300 128 l-17 -6 l0 12 z"/></g>
+          <g font-size="15" font-weight="700" fill="#111418"><text x="268" y="112">강성호</text><text x="274" y="148">남진호</text><text x="290" y="200">장명호</text></g>
+          <rect x="180" y="10" width="204" height="28" rx="14" fill="#fafafa"/><text x="192" y="29" font-size="14" font-weight="600" fill="#5b6168">조업·대기 47척 · 동쪽 약 9km ▸</text>
+        </svg>
+        <div class="acard" style="margin-top:12px;"><div class="ah">오늘 입항 예보<span>03:10 기준</span></div>
+          <div class="row"><span class="eta">04:25</span><span><b>남진호</b><small>자망 5t · 11.7km · 신뢰도 높음</small></span></div>
+          <div class="row"><span class="eta">04:30</span><span><b>강성호</b><small>자망 10t · 12.9km · 신뢰도 높음</small></span></div>
+          <div class="row"><span class="eta">04:35</span><span><b>장명호</b><small>자망 5t · 12.7km · 신뢰도 높음</small></span></div></div>
+      </div>
+    </div>
+    <div class="col" style="padding-top:8px;">
+      <p class="b30 mut">배 위치를 10분마다 읽어서, 아래 넷을 모두 만족하는 배만 ‘입항 중’으로 봅니다.</p>
+      <div style="margin-top:28px; display:grid; grid-template-columns:56px 1fr; gap:22px; align-items:center; font-size:30px;">
+        <span class="kn" style="width:48px; height:48px; font-size:24px;">1</span><span>위판장에서 15km 안</span>
+        <span class="kn" style="width:48px; height:48px; font-size:24px;">2</span><span>2노트 이상으로 움직이는 중</span>
+        <span class="kn" style="width:48px; height:48px; font-size:24px;">3</span><span>뱃머리가 위판장 쪽 (±35°)</span>
+        <span class="kn" style="width:48px; height:48px; font-size:24px;">4</span><span>10분 전보다 가까워짐</span>
+      </div>
+      <p class="b30" style="margin-top:40px;">도착 시각 = <b>남은 거리 ÷ 속도</b></p>
+      <p class="b26 mut" style="margin-top:12px;">어선 기본정보 202척에서 업종과 톤수를 붙여 무엇을 싣고 오는 배인지 적습니다.</p>
+    </div>
+  </div>
+  </div>
+  <div class="foot"><span class="src">배 움직임은 시뮬레이션(E-UM 마지막 위치 50척에서 출발, 응답 형식 동일). 지도는 다시 그린 그림이며 실제 화면은 카카오맵입니다.</span><span class="pg"></span></div>
+  <aside class="notes">시계를 새벽 3시 10분에 놓았습니다. 오른쪽 바다에서 자망선 세 척이 항으로 들어오고 있어요. 배마중은 배 위치를 10분마다 보고 이 네 가지를 다 만족하는 배만 골라서, 남은 거리를 속도로 나눕니다. 여기까진 AI가 안 들어가고, 그냥 나눗셈입니다. 방파제 사이로 들어와 부두에 붙는 길은 위성 사진 보고 저희가 직접 찍었습니다.</aside>
+</section>
+
+<!-- 11 시연② -->
+<section class="slide">
+  <p class="kicker">시연 2 · 가상 시각 03:10</p>
+  <h2>3시 10분, 사장님 폰이 먼저 울립니다</h2>
+  <div class="mid-area">
+  <div class="body" style="gap:64px;">
+    <div class="phone" data-shot="shots/push.png">
+      <div class="screen lock low">
+        <div class="clock"><p class="d">10월 13일 화요일</p><p class="t num">3:10</p></div>
+        <div class="noti"><div class="nh"><b style="color:var(--ink)">Chrome</b><span>지금</span></div>
+          <p class="nt">배마중 · 구룡포 입항 예보</p>
+          <p class="nb">04:25~04:35 자망선 3척 입항 예정 · 붉은대게·골뱅이 가능성. 경매 09:00</p></div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card callout" style="padding:40px 48px; margin-top:110px;">
+        <p class="lab">잠금 화면에 뜨는 말</p>
+        <p style="font-size:46px; font-weight:750; line-height:1.38; letter-spacing:-.02em; margin-top:14px;"><span class="red">04:25~04:35</span> 자망선 3척 입항 예정 · 붉은대게·골뱅이 가능성. 경매 09:00</p>
+      </div>
+      <div style="margin-top:36px;">
+        <div style="padding:22px 0; border-top:1px solid var(--line);"><p class="b26"><b>언제 보내나</b>　사장님이 고른 어종(붉은대게)을 실은 것으로 보이는 배가 새로 입항 중이 되는 순간</p></div>
+        <div style="padding:22px 0; border-top:1px solid var(--line);"><p class="b26"><b>숫자 검사</b>　AI가 문장을 다듬어도 숫자가 하나라도 바뀌면 버리고 이 문장 그대로 보냅니다</p></div>
+        <div style="padding:22px 0; border-top:1px solid var(--line);"><p class="b26"><b>받는 법</b>　갤럭시 크롬에서 앱 설치 없이. 전화로도 받습니다</p></div>
+      </div>
+    </div>
+  </div>
+  </div>
+  <div class="foot"><span class="src">알림 문장은 시뮬레이션 03:10에 규칙 템플릿(rules/brief.py)이 낸 문장입니다.</span><span class="pg"></span></div>
+  <aside class="notes">같은 3시 10분, 붉은대게 알림을 켜 둔 사장님 폰이 먼저 울립니다. 4시 25분부터 35분 사이 자망선 세 척, 붉은대게랑 골뱅이 가능성, 경매 9시. AI가 문장을 다듬긴 하는데, 숫자가 하나라도 바뀌면 버리고 이 문장 그대로 나갑니다. [무대: 푸시 실기 시험을 마쳤을 때만] 지금 이 폰으로 받아 볼게요.</aside>
+</section>
+
+<!-- 12 시연③ -->
+<section class="slide">
+  <p class="kicker">시연 3 · 무엇을 싣고 오나</p>
+  <h2>10월에 자망선이 들어오면, 대부분 붉은대게입니다</h2>
+  <div class="mid-area">
+  <div class="body">
+    <div class="card col" style="flex:1.3;">
+      <p class="lab">구룡포 위판장 10월, 연안자망 배가 판 어종 (2022~2025 평균, 금액 기준)</p>
+      <div style="margin-top:34px; display:grid; grid-template-columns:150px 1fr 220px; gap:30px 24px; align-items:center;">
+        <span class="b30"><b>붉은대게</b></span><span style="height:30px; background:var(--primary-soft); border-radius:15px;"><span style="display:block; width:78%; height:100%; background:var(--primary-dark); border-radius:15px;"></span></span><span><b style="font-size:36px; margin-right:10px;" class="num">78%</b> <span class="lab num">63~88</span></span>
+        <span class="b30">골뱅이</span><span style="height:30px; background:var(--primary-soft); border-radius:15px;"><span style="display:block; width:10%; height:100%; background:#8fb6e6; border-radius:15px;"></span></span><span><b style="font-size:36px; margin-right:10px;" class="num">10%</b> <span class="lab num">3~19</span></span>
+        <span class="b30">살오징어</span><span style="height:30px; background:var(--primary-soft); border-radius:15px;"><span style="display:block; width:7%; height:100%; background:#8fb6e6; border-radius:15px;"></span></span><span><b style="font-size:36px; margin-right:10px;" class="num">7%</b> <span class="lab num">0~27</span></span>
+      </div>
+      <p class="b26 mut" style="margin-top:40px;">회색 숫자는 해마다의 최저~최고. 해수부 실적은 업종과 어종이 한 줄에 같이 있어서 이 계산이 됩니다.</p>
+      <p class="b26 mut" style="margin-top:8px;">같은 연안자망도 올해 8월엔 골뱅이 50%, 붉은대게 37%였습니다. 그래서 늘 같은 달 실적만 봅니다.</p>
+    </div>
+    <div class="col stack">
+      <div class="card"><p class="lab">맞혀 봤습니다</p>
+        <p class="b26">한 해씩 빼고, 나머지 3년으로 그해 10월 1위를 골라 봤습니다.</p>
+        <div style="display:grid; grid-template-columns:1fr auto; gap:14px; margin-top:20px; font-size:26px; align-items:baseline;">
+          <span>연안자망 · 연안통발 · 근해채낚기</span><b class="num blue" style="font-size:32px; justify-self:end;">12번 중 12번</b>
+          <span>근해자망</span><b class="num mut" style="font-size:32px; justify-self:end;">4번 중 0번</b>
+        </div></div>
+      <div class="card"><p class="lab">근해자망은 어종을 안 말합니다</p>
+        <p class="b26">해마다 1위가 뒤집혀서요. 물량(kg)도 말하지 않고 배 척수와 톤수만 알립니다.</p></div>
+    </div>
+  </div>
+  </div>
+  <div class="foot"><span class="src">자료: 해양수산부 「일자별 위탁판매현황」 구룡포수협 본소, 팀 계산. 화면의 79%는 같은 값(78.46%)을 두 번 반올림한 표시입니다.</span><span class="pg"></span></div>
+  <aside class="notes">어선 기본정보엔 연안자망이라고만 나옵니다. 사장님이 궁금한 건 그래서 뭐가 오냐죠. 해수부 실적엔 업종이랑 어종이 같은 줄에 있어서, 10월 연안자망 배는 붉은대게가 78%라는 걸 4년치로 계산할 수 있습니다. 한 해씩 빼고 시험해 봤더니 세 업종은 12번 다 맞았고, 근해자망은 4번 다 틀렸습니다. 1위가 잘 안 바뀌는 업종이니 맞히기 쉬운 것 아니냐고 물으실 수 있는데, 맞습니다. 그래서 1위가 안 바뀌는 업종만 말하고, 바뀌는 근해자망은 말 안 하는 게 이 규칙의 핵심입니다.</aside>
+</section>
+
+<!-- 13 시연④ -->
+<section class="slide">
+  <p class="kicker">시연 4 · 언제 가면 되나</p>
+  <h2>4시 25분에 첫 배가 닿고, 8시 반까지 오시면 됩니다</h2>
+  <div class="mid-area">
+  <div class="card" style="margin-top:48px; padding:24px 56px 30px;">
+    <svg viewBox="0 0 1600 230" width="100%" role="img" aria-label="시간 비례 축. 03:10 알림, 04:25~04:35 입항, 08:30까지 도착 권장, 09:00 경매">
+      <!-- 03:00 = x60, 1분 = 4.111px -->
+      <line x1="60" y1="120" x2="1540" y2="120" stroke="#c4cad1" stroke-width="4" stroke-linecap="round"/>
+      <g stroke="#c4cad1" stroke-width="2"><line x1="60" y1="108" x2="60" y2="132"/><line x1="307" y1="108" x2="307" y2="132"/><line x1="553" y1="108" x2="553" y2="132"/><line x1="800" y1="108" x2="800" y2="132"/><line x1="1047" y1="108" x2="1047" y2="132"/><line x1="1293" y1="108" x2="1293" y2="132"/><line x1="1540" y1="108" x2="1540" y2="132"/></g>
+      <g fill="#5b6168" font-size="20" text-anchor="middle"><text x="60" y="222">03시</text><text x="307" y="222">04시</text><text x="553" y="222">05시</text><text x="800" y="222">06시</text><text x="1047" y="222">07시</text><text x="1293" y="222">08시</text><text x="1540" y="222">09시</text></g>
+      <rect x="409" y="108" width="41" height="24" rx="12" fill="#d32f2f"/>
+      <line x1="470" y1="100" x2="1396" y2="100" stroke="#0072de" stroke-width="3" stroke-dasharray="2 9" stroke-linecap="round"/>
+      <circle cx="101" cy="120" r="14" fill="#0072de"/>
+      <circle cx="1416" cy="120" r="14" fill="#0072de"/>
+      <circle cx="1540" cy="120" r="14" fill="#111418"/>
+      <g font-weight="800" font-size="28">
+        <text x="101" y="74" text-anchor="middle" fill="#0072de">03:10</text>
+        <text x="430" y="74" text-anchor="middle" fill="#d32f2f">04:25~04:35</text>
+        <text x="1430" y="74" text-anchor="end" fill="#0072de">08:30</text>
+        <text x="1540" y="74" text-anchor="middle" fill="#111418">09:00</text>
+      </g>
+      <g font-size="22" fill="#5b6168">
+        <text x="101" y="172" text-anchor="middle">알림</text>
+        <text x="430" y="172" text-anchor="middle">첫 입항</text>
+        <text x="1430" y="172" text-anchor="end">도착 권장</text>
+        <text x="1540" y="172" text-anchor="middle">경매</text>
+        <text x="930" y="84" text-anchor="middle" fill="#0072de" font-weight="700">나갈지 정하고 움직일 시간, 약 4시간</text>
+      </g>
+    </svg>
+  </div>
+  <div class="body" style="margin-top:28px; gap:28px;">
+    <div class="col card" style="box-shadow: inset 0 5px 0 var(--arrived);"><p class="lab">위판장 앞 지금 <span class="tag live" style="margin-left:10px;"><i></i>실측 · 실제 현재 시각</span></p>
+      <p class="b30" style="margin-top:14px;">위판장 80m 앞 교통센서3의 <b>최근 1시간 트럭·전체 대수</b>, 그리고 어제 같은 시각보다 붐비는지</p>
+      <p class="b26 mut" style="margin-top:10px;">시연 화면에서 지금 값을 바로 불러옵니다. 배 시계는 새벽이지만 이 값은 지금 이 시각 실측입니다.</p></div>
+    <div class="col card"><p class="lab">화면에 뜨는 말</p>
+      <p class="b30" style="margin-top:14px;">“경매 09:00 기준 08:30까지 도착을 권합니다.”</p>
+      <p class="b26 mut" style="margin-top:10px;">앞으로 막힐지는 맞히지 않습니다. 교통 API가 최근 9시간치만 줘서 근거가 없습니다.</p></div>
+  </div>
+  </div>
+  <div class="foot"><span class="src">교통: E-UM 시간대별·차종별 교통량(최근 9시간), 혼잡율(최근 24시간, 상대 지수). 경매 30분 전 도착은 제품 가정(수협 확인 전).</span><span class="pg"></span></div>
+  <aside class="notes">언제 가면 되냐에는 이렇게 답합니다. 4시 25분에 첫 배가 닿으니까 그즈음 나갈지 정하시면 되고, 9시 경매니까 8시 반까지 오시면 됩니다. 그리고 이 트럭 숫자는 진짜예요. 호미로 위판장 80m 앞 센서가 센 값을 지금 바로 불러와 보겠습니다.</aside>
+</section>
+
+<!-- 14 시연⑤ -->
+<section class="slide">
+  <p class="kicker">시연 5 · 물어보기 · 가상 시각 04:00</p>
+  <h2>글로 물으면, AI가 표에서 숫자를 찾아 그대로 옮깁니다</h2>
+  <div class="mid-area">
+  <div class="body">
+    <div class="col card" style="flex:1.25; gap:20px; padding:40px 44px;">
+      <p class="bubble q">43톤 자망선 언제 와?</p>
+      <p class="log">→ 입항 예보 조회</p>
+      <p class="bubble a">제33안성호(근해자망 43톤)가 04시 45분 전후에 들어올 예정입니다. 근해자망은 해마다 잡는 어종이 달라 어종은 말씀드리기 어렵습니다.</p>
+      <p class="bubble q" style="margin-top:16px;">x² − 5x + 6 = 0 풀어줘</p>
+      <p class="bubble a">배마중은 구룡포 위판장 입항·어종·위판 실적·위판장 앞 교통만 안내해 드려요. 그와 관련해 물어봐 주세요.</p>
+    </div>
+    <div class="col stack">
+      <div class="card"><p class="lab">AI가 쓸 수 있는 도구 6개</p>
+        <p class="b26" style="line-height:1.8;">입항 예보 조회 · 어종 추정 · 위판장 앞 교통 조회 · 방문 시각 계산 · 과거 경매 실적 조회 · 알림 준비</p></div>
+      <div class="card grow"><p class="lab">조회 기록</p>
+        <p class="b26">AI가 뭘 찾아봤는지 답 위에 그대로 찍힙니다. 엉뚱한 질문은 답을 만들면서 동시에 걸러, 정해진 한마디로 거절합니다.</p></div>
+    </div>
+  </div>
+  </div>
+  <div class="foot"><span class="src">OpenAI tool calling. 왼쪽 답은 시연 시나리오 기준 예시이며, 시연 때는 실제 답이 나옵니다.</span><span class="pg"></span></div>
+  <aside class="notes">물어보기입니다. 시계를 4시로 옮겼어요. "43톤 자망선 언제 와?" 치면 AI가 입항 예보를 찾아보고, 거기 있는 숫자만 옮겨서 답합니다. 상관없는 질문엔 정해진 한마디만 합니다.</aside>
+</section>
+
+<!-- 15 시연⑥ -->
+<section class="slide">
+  <p class="kicker">시연 6 · 전화</p>
+  <h2>알림을 전화로 받고, 궁금한 건 그대로 말로 묻습니다</h2>
+  <div class="mid-area">
+  <div class="body">
+    <div class="col card" style="flex:1.3; padding:40px 44px;">
+      <p class="lab">배마중이 건 전화 · 통화 예시</p>
+      <div class="talk" style="margin-top:28px; row-gap:28px;">
+        <span class="who">배마중</span><p>안녕하세요, 배마중입니다. 04:25~04:35 자망선 3척 입항 예정 · 붉은대게·골뱅이 가능성. 경매 09:00. 더 궁금하신 거 있으세요?</p>
+        <span class="who u">사장님</span><p class="mut">그 배들 몇 시에 들어와요?</p>
+        <span class="who">배마중</span><p>네, 확인해 볼게요. … 남진호가 4시 25분쯤, 강성호가 4시 30분, 장명호가 4시 35분쯤 들어옵니다.</p>
+        <span class="who u">사장님</span><p class="mut">됐어요.</p>
+        <span class="who">배마중</span><p>네, 알겠습니다. 좋은 하루 보내세요.</p>
+      </div>
+    </div>
+    <div class="col">
+      <div style="padding:26px 0; border-bottom:1px solid var(--line);"><p class="lab">선장한테 전화하던 그대로</p><p class="b26" style="margin-top:8px;">앱 설치도, 글자 입력도 없습니다. 070 번호로 먼저 걸어서 물어도 됩니다. 번호 등록은 화면에서 한 번, 가족이 대신 해도 됩니다.</p></div>
+      <div style="padding:26px 0; border-bottom:1px solid var(--line);"><p class="lab">화면이랑 같은 답</p><p class="b26" style="margin-top:8px;">물어보기와 같은 도구·규칙으로 답합니다. 전화라고 다른 숫자를 말하지 않습니다.</p></div>
+      <div style="padding:26px 0;"><p class="lab">말이 안 끊기게</p><p class="b26" style="margin-top:8px;">0.6초 안에 답이 안 나오면 미리 만들어 둔 “네, 확인해 볼게요”부터 말합니다.</p></div>
+    </div>
+  </div>
+  </div>
+  <div class="foot"><span class="src">ClawOps 070 · OpenAI 받아쓰기 · Gemini 음성 합성(첫 소리 1.22초, 10/11 단독 측정, 통화 전체 지연 아님). 가운데 답은 예시.</span><span class="pg"></span></div>
+  <aside class="notes">채팅이 낯선 분들을 위해 전화를 붙였습니다. 알림이 오면 배마중이 전화를 걸어서 읽어 드리고, 궁금한 걸 말로 물으면 말로 답해요. 답은 화면의 물어보기랑 같은 엔진이 냅니다. [무대: 실통화 시험을 마쳤을 때만] 지금 걸어 볼게요. 마지막으로 아까 말씀드린 스위치를 실데이터로 바꿔 보겠습니다.</aside>
+</section>
+
+<!-- 16 원칙 -->
+<section class="slide dark center">
+  <p class="kicker">숫자는 누가 내나</p>
+  <h2 style="font-size:84px;">숫자는 규칙이 내고, AI는 문장만 씁니다</h2>
+  <div class="rules">
+    <span class="k">도착 시각</span><p>조건 4개와 남은 거리 ÷ 속도. AI는 계산에 손대지 않습니다.</p>
+    <span class="k">어종</span><p>업종 × 같은 달 4년 실적. 해마다 1위가 바뀌는 업종(근해자망)은 말하지 않습니다.</p>
+    <span class="k">가격</span><p>해 봤는데 안 맞았습니다. 8월 값으로 10월 붉은대게 값을 맞혀 보니, 4년 중 3년은 3분의 1 남짓만 범위 안에 들었습니다. “그때 얼마였나”에만 근거 달을 밝혀 답합니다.</p>
+    <span class="k">질문 범위</span><p>엉뚱한 질문은 답을 만드는 동안 같이 걸러서, 바로 거절합니다. 앞 대화를 꾸며 넣어도 안 넘어갑니다(프롬프트 주입).</p>
+  </div>
+  <div class="foot"><span class="src">가격 시험: 그해 8월 붉은대게 kg당 가격(중량 가중) 25~75% 범위에 그해 10월 거래 중량이 든 비율. 2022 37% · 2023 65% · 2024 32% · 2025 35%, 팀 계산.</span><span class="pg"></span></div>
+  <aside class="notes">새벽에 돈이 걸린 결정을 돕는 거라 숫자가 틀리면 안 됩니다. 그래서 숫자는 전부 규칙이 내고 AI는 문장만 씁니다. 가격도 해 봤는데, 3분의 1 남짓밖에 안 맞았습니다. 예측은 접고 과거 실적만 답합니다.</aside>
+</section>
+
+<!-- 17 구조 -->
+<section class="slide">
+  <p class="kicker">구조</p>
+  <h2>데이터 받고, 규칙으로 계산하고, 말로 바꿔 보냅니다</h2>
+  <div class="mid-area">
+  <div class="pipe">
+    <div class="st"><p class="lab">1 받기</p><h4>공개 데이터</h4><p>E-UM 어선·위판장·교통 · 해수부 위판 실적</p></div>
+    <div class="st"><p class="lab">2 모으기</p><h4>수집</h4><p>10분마다 배 위치, 교통은 부를 때마다 실측</p></div>
+    <div class="st hl"><p class="lab blue">3 계산</p><h4>규칙</h4><p>도착 시각, 어종 가능성, 도착 권장</p></div>
+    <div class="st"><p class="lab">4 문장</p><h4>AI</h4><p>알림 문장 다듬기 · 질문 답하기(도구 6개)</p></div>
+    <div class="st"><p class="lab">5 보내기</p><h4>폰 · 전화</h4><p>웹 푸시 · 070 전화 · 화면</p></div>
+  </div>
+  <div class="body" style="margin-top:48px; gap:28px;">
+    <div class="col card" style="padding:28px 40px;"><p class="lab">서버</p><p class="b30">Python · FastAPI · SQLite</p></div>
+    <div class="col card" style="padding:28px 40px;"><p class="lab">화면</p><p class="b30">React · 카카오맵 · 웹 푸시</p></div>
+    <div class="col card" style="padding:28px 40px;"><p class="lab">말</p><p class="b30">OpenAI · Gemini 음성<br>ClawOps 070</p></div>
+  </div>
+  </div>
+  <div class="foot"><span class="src">자세한 그림: 01_설계/01_아키텍처.svg (10/10판, 전화 경로는 그 뒤에 추가)</span><span class="pg"></span></div>
+  <aside class="notes">구조는 단순합니다. 받고, 계산하고, 문장으로 바꿔서, 폰이랑 전화로 보냅니다.</aside>
+</section>
+
+<!-- 18 지금 돌아가나 -->
+<section class="slide">
+  <p class="kicker">내일 바로 켤 수 있나</p>
+  <h2>수협 내부 자료 없이, 공개 데이터만으로 돌아갑니다</h2>
+  <div class="mid-area">
+  <div class="card" style="margin-top:48px; padding:20px 48px;">
+    <table class="t" style="font-size:28px;" id="runTable">
+      <tr><td style="width:420px;" class="mut">수협 내부 자료</td><td><b>안 씀.</b> E-UM과 해수부 공개 API만</td></tr>
+      <tr><td class="mut">서버</td><td><b>VM 1대, 프로세스 1개.</b> 대회 VM에 올릴 설치 스크립트 준비 완료</td></tr>
+      <tr><td class="mut">자동 테스트</td><td><b>72개.</b> 실제 API 응답 일부로, 외부 호출 없이</td></tr>
+      <tr><td class="mut">음성 처리 1분</td><td><b>약 2센트.</b> 합성 1.4~1.7센트 + 받아쓰기 0.3센트(업체 표기). 070 회선·AI 답변 비용 별도</td></tr>
+      <tr><td class="mut">새 달 위판 실적</td><td><b>스크립트 한 번.</b> 매월 15일 전후 공개분을 받아 반영</td></tr>
+      <tr><td class="mut">OpenAI가 안 될 때</td><td><b>규칙만으로 답하는 간단 모드</b>로 바뀝니다</td></tr>
+    </table>
+  </div>
+  </div>
+  <div class="foot"><span class="src">테스트 수 2026.10.11 기준.</span><span class="pg"></span></div>
+  <aside class="notes">그럼 진짜 켤 수 있냐. 수협 내부 자료는 하나도 안 씁니다. 공개 데이터만으로 돌고, 서버 한 대면 됩니다. 음성 처리는 1분에 2센트쯤입니다.</aside>
+</section>
+
+<!-- 19 대회 끝나고 -->
+<section class="slide">
+  <p class="kicker">대회 끝나고</p>
+  <h2>효과는 아직 모릅니다. 잴 것부터 정했습니다</h2>
+  <div class="mid-area">
+  <div class="body" style="gap:28px;">
+    <div class="col card"><p class="lab">맞았는지 잴 것</p>
+      <ul class="dots b26" style="margin-top:16px;"><li>도착 예보가 몇 분 틀렸나 · 실제 입항 기록과 비교</li><li>알린 어종이 그날 실제로 위판됐나</li><li>알림 받고 나온 손님이 헛걸음했나</li></ul></div>
+    <div class="col card"><p class="lab">다음에 붙일 곳</p>
+      <ul class="dots b26" style="margin-top:16px;"><li>구룡포수협 장기·호미곶 지점 위판장</li><li>E-UM 데이터가 있는 포항의 다른 항</li><li>실제 입항 기록이 쌓이면 예보 규칙 보정</li></ul></div>
+    <div class="col card"><p class="lab">누가 켜 둘 수 있나</p>
+      <p class="b26" style="margin-top:16px;">위판장 손님 안내 서비스나 포항시 디지털 트윈 서비스의 한 메뉴로. 고정비는 서버 한 대, 전화는 쓴 만큼.</p>
+      <p class="b26 mut" style="margin-top:12px;">아직 수협·시와 이야기해 보지 않은 제안입니다.</p></div>
+  </div>
+  </div>
+  <div class="foot"><span class="src"></span><span class="pg"></span></div>
+  <aside class="notes">효과는 아직 모릅니다. 뭘 재 볼지부터 정했어요. 예보가 몇 분 틀렸는지, 알린 어종이 그날 실제로 팔렸는지. 수협이나 시와는 아직 얘기 못 해 봤습니다. 된다면 포항시 디지털 트윈 안에 메뉴 하나로 들어가는 게 제일 현실적일 것 같습니다.</aside>
+</section>
+
+<!-- 20 마무리 -->
+<section class="slide dark center">
+  <h2 style="font-size:96px; line-height:1.2;">10월 13일 새벽 3시 10분,<br>이번엔 김 사장님이 먼저 압니다</h2>
+  <p class="lead" style="font-size:36px; margin-top:44px;">붉은대게를 실었을 자망선 세 척, 4시 25분부터. 8시 반까지 가면 됩니다.</p>
+  <p class="b30" style="margin-top:96px; color:var(--night-muted);">팀 인터뷰브릿지　·　권인석 기획·발표　·　이지원 서버·AI·데이터　·　방윤철 디자인·화면</p>
+  <div class="foot"><span class="src">2026 디지털 트윈 구룡포 AI 해커톤</span><span class="pg"></span></div>
+  <aside class="notes">12월엔 빈손으로 돌아왔던 김 사장님이, 이번엔 3시 10분에 압니다. 붉은대게 실었을 배 세 척, 8시 반까지 가면 된다는 걸요. 12월 방어는 선망 배가 잡는데, 그 배들이 E-UM 명부에 있는지는 아직 확인하지 못해서 오늘은 10월 붉은대게로 보여 드렸습니다. 감사합니다.</aside>
+</section>
+
+</div>
+<div id="notes-panel" aria-live="polite"></div>
+<div id="hud">← → 이동 · N 발표 메모 · F 전체 화면</div>
+<script>
+(function () {
+  const stage = document.getElementById('stage');
+  const slides = [...document.querySelectorAll('.slide')];
+  const panel = document.getElementById('notes-panel');
+  let i = Math.max(0, Math.min(slides.length - 1, (parseInt(location.hash.slice(1), 10) || 1) - 1));
+
+  slides.forEach((s, n) => { const pg = s.querySelector('.pg'); if (pg) pg.textContent = `${n + 1} / ${slides.length}`; });
+
+  function fit() {
+    const k = Math.min(innerWidth / 1920, innerHeight / 1080);
+    stage.style.transform = `translate(-50%, -50%) scale(${k})`;
+  }
+  function show(n) {
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach((s, k) => s.classList.toggle('on', k === i));
+    history.replaceState(null, '', '#' + (i + 1));
+    const note = slides[i].querySelector('.notes');
+    panel.textContent = note ? note.textContent.trim() : '';
+  }
+  addEventListener('resize', fit);
+  addEventListener('keydown', (e) => {
+    if (['ArrowRight', 'PageDown', ' ', 'Enter'].includes(e.key)) { e.preventDefault(); show(i + 1); }
+    else if (['ArrowLeft', 'PageUp', 'Backspace'].includes(e.key)) { e.preventDefault(); show(i - 1); }
+    else if (e.key === 'Home') show(0);
+    else if (e.key === 'End') show(slides.length - 1);
+    else if (e.key === 'n' || e.key === 'N') panel.classList.toggle('on');
+    else if (e.key === 'f' || e.key === 'F') { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(() => {}); }
+  });
+  stage.addEventListener('click', (e) => { if (!e.target.closest('a')) show(i + (e.clientX > innerWidth / 3 ? 1 : -1)); });
+
+  // shots/ 에 실제 캡처가 있으면 재현 화면 대신 쓴다.
+  document.querySelectorAll('[data-shot]').forEach((el) => {
+    const img = new Image();
+    img.onload = () => { const sc = el.querySelector('.screen'); sc.className = 'screen'; sc.innerHTML = ''; img.className = 'shot-img'; img.alt = '배마중 실제 화면'; sc.appendChild(img); };
+    img.src = el.dataset.shot;
+  });
+
+  // 2025년 12월 방어 경매일별 위판량(톤). 해수부 일자별 위탁판매현황, 구룡포수협 본소(판매과 1계).
+  const dec = [['1',28.0],['2',9.2],['3',0],['5',50.6],['6',55.6],['7',84.6],['8',56.4],['9',79.4],['10',45.6],['11',18.0],['12',0],['13',0],['14',0],['15',0],['16',6.8],['17',0],['18',0],['19',0],['20',2.8],['21',15.6],['22',0],['23',31.2],['24',15.9],['25',0],['26',0],['27',0],['28',4.4],['29',0],['30',16.8],['31',0]];
+  const svg = document.getElementById('dailyChart');
+  const W = 1060, base = 500, top = 60, max = 100, x0 = 64, step = (W - x0 - 6) / dec.length, bw = step - 6;
+  const y = (v) => base - (v / max) * (base - top);
+  const zeroRed = ['12', '13', '14'];
+  let g = '';
+  [0, 50, 100].forEach((t) => { g += `<line x1="${x0}" x2="${W}" y1="${y(t)}" y2="${y(t)}" stroke="${t ? '#e4e7eb' : '#c4cad1'}" stroke-width="${t ? 1 : 2}"/><text x="${x0 - 14}" y="${y(t) + 7}" font-size="20" fill="#5b6168" text-anchor="end">${t}</text>`; });
+  dec.forEach(([d, v], k) => {
+    const x = x0 + 3 + k * step;
+    if (v > 0) g += `<rect x="${x}" y="${y(v)}" width="${bw}" height="${base - y(v)}" rx="4" fill="${d === '7' ? '#0072de' : '#d3d9e0'}"><title>12월 ${d}일 ${v}톤</title></rect>`;
+    else g += `<rect x="${x}" y="${base - 6}" width="${bw}" height="6" rx="3" fill="${zeroRed.includes(d) ? '#d32f2f' : '#c4cad1'}"><title>12월 ${d}일 0톤</title></rect>`;
+    if (['1', '7', '12', '14', '23', '31'].includes(d)) g += `<text x="${x + bw / 2}" y="${base + 34}" font-size="20" fill="#5b6168" text-anchor="middle">${d}일</text>`;
+  });
+  const cx = (k) => x0 + 3 + k * step + bw / 2;
+  g += `<text x="${cx(5)}" y="${y(84.6) - 16}" font-size="26" font-weight="800" fill="#0072de" text-anchor="middle">84.6톤</text>`;
+  const a = x0 + 3 + 10 * step, b = x0 + 3 + 12 * step + bw;
+  g += `<path d="M${a} ${base - 30} V${base - 44} H${b} V${base - 30}" stroke="#d32f2f" stroke-width="2" fill="none"/>`;
+  g += `<text x="${a}" y="${base - 92}" font-size="24" font-weight="800" fill="#d32f2f" text-anchor="start">위판장은 열렸는데 방어 0톤</text><line x1="${a + 4}" x2="${a + 4}" y1="${base - 84}" y2="${base - 46}" stroke="#d32f2f" stroke-width="2"/>`;
+  svg.innerHTML = g;
+
+  fit(); show(i);
+})();
+</script>
+</body>
+</html>
