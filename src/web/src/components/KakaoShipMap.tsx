@@ -76,7 +76,8 @@ function paintDot(el: HTMLElement, s: Ship) {
 function labelEl(text: string) {
   const el = document.createElement('div')
   el.textContent = text
-  el.style.cssText = 'margin-bottom:12px;padding:3px 8px;border-radius:8px;font-size:12px;white-space:nowrap;' +
+  // 라벨은 읽기 전용: 마우스를 통과시킨다. 여백(margin) 대신 yAnchor로 띄워 보이지 않는 영역이 점을 덮지 않게(10/10 깜빡임 수정).
+  el.style.cssText = 'pointer-events:none;padding:3px 8px;border-radius:8px;font-size:12px;white-space:nowrap;' +
     'background:var(--color-card);color:var(--color-ink);border:1px solid var(--color-line);box-shadow:0 1px 3px rgba(0,0,0,.15)'
   return el
 }
@@ -171,8 +172,11 @@ export default function KakaoShipMap({ place, ships, arriving, onFail }: Props) 
     const s = ships.find((x) => x.ship_id === want)
     if (!s) return
     const text = eta.has(s.ship_id) ? `${hhmm(eta.get(s.ship_id))} ${s.name}` : `${s.name} · ${s.biz ?? '업종 미상'} · ${s.status}`
-    label.current = new k.maps.CustomOverlay({ position: new k.maps.LatLng(s.lat, s.lon), content: labelEl(text), yAnchor: 1, zIndex: 4 })
+    const content = labelEl(text)
+    // yAnchor 1.9: 라벨 아래 끝이 점 위쪽 누르는 영역(14px)보다 확실히 위에 오게
+    label.current = new k.maps.CustomOverlay({ position: new k.maps.LatLng(s.lat, s.lon), content, yAnchor: 1.9, zIndex: 4 })
     label.current.setMap(m)
+    if (content.parentElement) content.parentElement.style.pointerEvents = 'none' // 카카오가 감싼 상자도 통과
   }, [ready, ships, arriving, picked, hovered])
 
   return (
