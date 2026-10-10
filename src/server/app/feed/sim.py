@@ -17,7 +17,7 @@ from pathlib import Path
 
 from .. import geo
 from .clock import KST
-from .harbor import APPROACH, HARBOR_KN, SLOTS
+from .harbor import APPROACH, BASIN_NORTH, HARBOR_KN, SLOTS, Berth
 
 SEED = 20261013
 KMH_PER_KN = geo.KM_PER_NM
@@ -52,7 +52,7 @@ class Track:
     depart: datetime | None     # None 이면 창 안에서 입항하지 않는 조업선
     speed_kn: float
     idle_course: float          # 출발 전·조업 중 침로
-    berth: tuple[float, float] | None = None  # 위판장 앞 정박 자리(harbor.SLOTS)
+    berth: Berth | None = None  # 위판장 앞 정박 자리(harbor.SLOTS)
 
 
 def _offset(origin: tuple[float, float], bearing: float, dist_km: float) -> tuple[float, float]:
@@ -100,11 +100,13 @@ def _seg_km(a: tuple[float, float], b: tuple[float, float]) -> float:
 def path_of(track: Track, place: tuple[float, float]) -> list[tuple[tuple[float, float], float]]:
     """(지점, 그 지점까지 가는 속도 kn) 목록. 바다 구간은 배 속도, 수로부터는 HARBOR_KN.
     APPROACH 경로는 위판장 기준으로 그려져 있어, 다른 위판장 좌표가 들어오면(테스트 등) 직선으로 간다."""
-    end = track.berth or place
+    end = (track.berth.lat, track.berth.lon) if track.berth else place
     if geo.haversine_km(*place, *geo.AUCTION_PLACE) > 0.5:
         return [(end, track.speed_kn)]
-    pts = [(APPROACH[0], track.speed_kn)] + [(p, HARBOR_KN) for p in APPROACH[1:]] + [(end, HARBOR_KN)]
-    return pts
+    pts = [(APPROACH[0], track.speed_kn)] + [(p, HARBOR_KN) for p in APPROACH[1:]]
+    if track.berth and track.berth.via_north:
+        pts.append((BASIN_NORTH, HARBOR_KN))
+    return pts + [(end, HARBOR_KN)]
 
 
 def arrival_time(track: Track, place: tuple[float, float]) -> datetime | None:
@@ -136,6 +138,8 @@ def position(track: Track, t: datetime, place: tuple[float, float]) -> dict:
         if seg:
             course = round(geo.bearing_deg(*cur, *pt), 1)
         cur = pt
+    if track.berth:  # 정박: 자리마다 정한 방향(부두와 나란히 / 뱃머리를 해안에)
+        course = track.berth.heading
     return {"lat": cur[0], "lon": cur[1], "course": course, "speed": 0.0}
 
 

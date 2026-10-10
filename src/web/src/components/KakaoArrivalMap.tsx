@@ -49,8 +49,6 @@ function boatEl(onTap: () => void, onHover: (on: boolean) => void) {
   return el
 }
 
-const QUAY_DEG = 225 // 위판장 앞 부두 방향(남서). 정박한 배는 부두와 나란히
-
 /** 정박 = 위판장 500m 안('입항')이면서 멈춘 배. 항구 안에서 아직 움직이면 들어오는 배로 그린다. */
 const isDocked = (s: Ship) => s.status === '입항' && !(s.speed && s.speed > 0)
 
@@ -58,7 +56,8 @@ function paintBoat(el: HTMLElement, s: Ship, selected: boolean) {
   const docked = isDocked(s)
   const hull = el.querySelector('[data-hull]') as HTMLElement
   hull.innerHTML = boatSvg(docked ? 'var(--color-arrived)' : 'var(--color-arriving)')
-  hull.style.transform = `rotate(${docked ? QUAY_DEG : s.course ?? 270}deg) scale(${docked ? 0.8 : 1})`
+  // 정박한 배 방향은 서버가 자리마다 정한 값(부두와 나란히 / 뱃머리를 해안에, harbor.py)
+  hull.style.transform = `rotate(${s.course ?? 270}deg) scale(${docked ? 0.8 : 1})`
   hull.style.filter = selected ? 'drop-shadow(0 0 3px var(--color-primary)) drop-shadow(0 0 2px var(--color-primary))' : ''
   ;(el.firstChild as HTMLElement).className = docked ? '' : 'boat-bob'
   el.setAttribute('aria-label', `${s.name ?? '배'} ${s.status}`)

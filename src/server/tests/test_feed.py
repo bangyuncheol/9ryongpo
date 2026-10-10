@@ -95,9 +95,10 @@ def test_live_rows_accept_actual_field_names_and_flag_stale():
 def test_berths_are_distinct_and_in_front_of_auction_place():
     from app.feed.harbor import SLOTS
     assert len(set(SLOTS)) == len(SLOTS)
-    for s in SLOTS[:14]:
-        d = geo.haversine_km(*s, *PLACE)
-        assert 0.02 < d < 0.35, "첫 줄 정박 자리는 위판장 앞 부두를 따라 350m 안"
+    for s in SLOTS[:11]:
+        d = geo.haversine_km(s.lat, s.lon, *PLACE)
+        assert d < 0.2, "첫 줄 정박 자리는 위판장 부두·북쪽 해안(200m 안)"
+    assert all(not s.via_north for s in SLOTS[:6]), "1순위는 위판장 부두(하역)"
 
 
 def test_ship_enters_through_channel_and_moors_at_berth(simulator):
@@ -108,10 +109,10 @@ def test_ship_enters_through_channel_and_moors_at_berth(simulator):
     # 도착 전 어느 순간 수로(APPROACH[1]) 근처를 지난다
     passed = min(geo.haversine_km(*APPROACH[1], *(lambda p: (p["lat"], p["lon"]))(sim.position(tr, arrive - timedelta(minutes=m), PLACE)))
                  for m in range(1, 40))
-    assert passed < 0.15
+    assert passed < 0.1, "방파제 사이 입구를 지난다"
     end = sim.position(tr, arrive + timedelta(minutes=5), PLACE)
-    assert (round(end["lat"], 6), round(end["lon"], 6)) == (round(tr.berth[0], 6), round(tr.berth[1], 6))
-    assert end["speed"] == 0
+    assert (round(end["lat"], 6), round(end["lon"], 6)) == (round(tr.berth.lat, 6), round(tr.berth.lon, 6))
+    assert end["speed"] == 0 and end["course"] == tr.berth.heading
 
 
 def test_earliest_arrival_gets_berth_nearest_auction_place(simulator):
