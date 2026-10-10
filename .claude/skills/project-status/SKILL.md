@@ -36,10 +36,13 @@ description: 미구현·보류·기술부채·진행 중 과제의 현재 상태
 - OpenAI 실기 확인 완료(10/10, 새 키): 질문창 도구 호출·답, 알림 문장 다듬기(숫자 검증 통과). 실기에서 고친 것: 오늘 날짜를 시스템 프롬프트에 넣어 '작년' 해석, 마크다운 기호 제거, '대게·홍게'는 붉은대게로 처리(본소 실적에 대게 없음), 알림 발송을 백그라운드로 돌려 틱 밀림 제거.
 - 테스트 51개 (`cd src/server && uv run pytest`). 외부 호출 없이 `tests/fixtures/`의 실제 응답 일부로 돈다.
 
-**다음 할 일 (설계 §10 순서)**
-1. **폰 푸시 실기 시험**: HTTPS 주소 필요(로컬은 Cloudflare 임시 터널 또는 VM). `.env`의 `VAPID_SUBJECT=mailto:주소`가 비어 있으면 발송을 건너뛰고 알림함에만 남긴다.
-3. VM 배포: SSH 키 등록 후 deploy 스킬 '첫 설치' 절차(`src/deploy/setup_vm.sh`). 리허설은 `qa-regression/checklist.md`.
-4. UI 작업 단계: One UI 기준 정리(`.claude/rules/ui-design.md`) `rules/visit.py`(설계 §5.4) — 지금은 `/api/traffic/now`가 숫자만 준다.
+**다음 할 일**
+1. **VM 배포**: 운영진에게 SSH 공개키 전달 → 등록 후 deploy 스킬 '첫 설치' 절차(`src/deploy/setup_vm.sh`). 운영진 확인 사항은 설계 §12.
+2. **폰 푸시 실기 시험**: HTTPS 주소에서 갤럭시 크롬으로(VM 또는 Cloudflare 임시 터널). 시험 알림 지연 시간 기록.
+3. **갤럭시 실기 화면 확인**: 다크 모드, 글자 200% 확대.
+4. (선택) 03:10 정기 브리핑 — 들어오는 배가 없어도 정해진 시각에 요약 알림.
+5. (선택) CLAUDE.md 기술 스택의 Recharts 표기 정리(쓰지 않음, 막대는 직접 그림).
+6. 리허설 3회(`qa-regression/checklist.md`), PPT, 1차 제출 10/12(월) 24:00.
 
 **알아 둘 것**
 - 어종 전체 비율은 어종을 말할 수 있는 업종끼리만 톤수 가중한다. 근해자망처럼 해마다 1위가 바뀌는 업종은 `category_only_biz`로 따로 알린다.
