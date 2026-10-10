@@ -6,6 +6,8 @@ export default function SpeciesCard({ today }: { today: Today | null }) {
   const sp = today?.species
   // 숫자가 실시간 입항 배에서 나온다는 걸 먼저 보이게(10/10). 4년 실적 근거는 아래 설명 문구가 말한다.
   const basisText = sp && sp.ships > 0 ? `지금 들어오는 배 ${sp.ships}척 기준` : undefined
+  const basis = sp?.by_biz.find((b) => b.basis)?.basis
+  const source = basis ? ` (최근 ${basis.years.length}년 ${basis.month}월 구룡포 위판 실적 기준)` : ''
   return (
     <Card id="species" title="오늘 뭐가 들어오나" aside={basisText}>
       {!sp || sp.overall.length === 0 ? (
@@ -28,7 +30,7 @@ export default function SpeciesCard({ today }: { today: Today | null }) {
           {sp.category_only_biz.map((b) => b.replace(/어업$/, '')).join(', ')}은 해마다 잡는 어종이 달라 비율에서 뺐습니다.
         </p>
       )}
-      <p className="mt-2 text-small text-muted">배의 어업 종류로 추정한 가능성입니다. 실제 어획과 다를 수 있습니다.</p>
+      <p className="mt-2 text-small text-muted">배의 어업 종류로 추정한 가능성입니다. 실제 어획과 다를 수 있습니다.{source}</p>
     </Card>
   )
 }
