@@ -1,7 +1,7 @@
 [project]
 name = "wipan-server"
 version = "0.1.0"
-description = "위판 당직 서버 (FastAPI)"
+description = "배마중 서버 (FastAPI)"
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "fastapi>=0.115",

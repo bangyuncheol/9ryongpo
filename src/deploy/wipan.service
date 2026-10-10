@@ -1,6 +1,6 @@
 # setup_vm.sh 가 __USER__ __REPO__ __HOME__ 을 바꿔 /etc/systemd/system/wipan.service 로 설치한다.
 [Unit]
-Description=위판 당직 서버 (FastAPI)
+Description=배마중 서버 (FastAPI)
 After=network-online.target
 Wants=network-online.target
 

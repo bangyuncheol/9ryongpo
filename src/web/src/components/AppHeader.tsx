@@ -17,7 +17,8 @@ export default function AppHeader({ today }: { today: Today | null }) {
         <SourceBadge source={today?.source} />
       </div>
       <div className="mt-10 text-center">
-        <h1 className="text-extend font-light tracking-tight">위판 당직</h1>
+        <h1 className="text-extend font-light tracking-tight">배마중</h1>
+        <p className="mt-1 text-sub text-muted">구룡포 새벽 입항·어종 알림</p>
         <p className="mt-3 text-body text-muted">
           <span className="font-bold tabular-nums text-ink">{hhmm(today?.clock.now)}</span> · 구룡포 위판장
         </p>

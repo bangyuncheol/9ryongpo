@@ -1,6 +1,6 @@
 {
-  "name": "위판 당직",
-  "short_name": "위판 당직",
+  "name": "배마중 · 구룡포 새벽 입항·어종 알림",
+  "short_name": "배마중",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#eef0f2",

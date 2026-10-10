@@ -1,4 +1,4 @@
-"""위판 당직 FastAPI 진입점.
+"""배마중 FastAPI 진입점.
 
 실행(저장소 루트 기준, 맥·윈도우 공통):
     cd src/server
@@ -84,7 +84,7 @@ async def lifespan(app: FastAPI):
     app.state.db.close()
 
 
-app = FastAPI(title="위판 당직", lifespan=lifespan)
+app = FastAPI(title="배마중", lifespan=lifespan)
 
 
 @app.exception_handler(EumError)
@@ -235,7 +235,7 @@ def notifications(request: Request) -> list[dict]:
 async def push_test(request: Request) -> dict:
     """리허설용: 구독한 폰 전부에 시험 알림. 지연 측정에 쓴다(설계 §11)."""
     e = request.app.state.engine
-    return await request.app.state.pusher.notify(e.clock.now(), "위판 당직 시험 알림",
+    return await request.app.state.pusher.notify(e.clock.now(), "배마중 시험 알림",
                                                  f"시험 발송 {real_now_str()}", {"overall": []}, [], everyone=True)
 
 

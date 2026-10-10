@@ -32,7 +32,7 @@ def template(new: list[dict], est: dict) -> tuple[str, str]:
     if species:
         body += f" · {species} 가능성"
     body += f". 경매 {AUCTION_DEFAULT}(기본값)"
-    return "구룡포 입항 예보", body
+    return "배마중 · 구룡포 입항 예보", body
 
 
 def matches(cond: dict, est: dict) -> bool:
