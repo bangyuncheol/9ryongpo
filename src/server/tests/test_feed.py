@@ -90,3 +90,32 @@ def test_live_rows_accept_actual_field_names_and_flag_stale():
     assert [r["ship_id"] for r in rows] == [1, 2]
     f = live.freshness(rows, now=at("04:00"))
     assert f["stale"] is True and f["latest"].startswith("2025-04-27")
+
+
+def test_berths_are_distinct_and_in_front_of_auction_place():
+    from app.feed.harbor import SLOTS
+    assert len(set(SLOTS)) == len(SLOTS)
+    for s in SLOTS[:14]:
+        d = geo.haversine_km(*s, *PLACE)
+        assert 0.02 < d < 0.35, "첫 줄 정박 자리는 위판장 앞 부두를 따라 350m 안"
+
+
+def test_ship_enters_through_channel_and_moors_at_berth(simulator):
+    from app.feed.harbor import APPROACH
+    tr = next(t for t in simulator.tracks(DAY) if t.ship_id == 3)  # 남진호(가장 먼저 도착)
+    assert tr.berth is not None
+    arrive = sim.arrival_time(tr, PLACE)
+    # 도착 전 어느 순간 수로(APPROACH[1]) 근처를 지난다
+    passed = min(geo.haversine_km(*APPROACH[1], *(lambda p: (p["lat"], p["lon"]))(sim.position(tr, arrive - timedelta(minutes=m), PLACE)))
+                 for m in range(1, 40))
+    assert passed < 0.15
+    end = sim.position(tr, arrive + timedelta(minutes=5), PLACE)
+    assert (round(end["lat"], 6), round(end["lon"], 6)) == (round(tr.berth[0], 6), round(tr.berth[1], 6))
+    assert end["speed"] == 0
+
+
+def test_earliest_arrival_gets_berth_nearest_auction_place(simulator):
+    from app.feed.harbor import SLOTS
+    tracks = [t for t in simulator.tracks(DAY) if t.depart is not None]
+    first = min(tracks, key=lambda t: sim.arrival_time(t, PLACE))
+    assert first.berth == SLOTS[0]

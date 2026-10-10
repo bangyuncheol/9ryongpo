@@ -11,16 +11,16 @@ from __future__ import annotations
 import json
 import math
 import random
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import date, datetime, time as dtime, timedelta
 from pathlib import Path
 
 from .. import geo
 from .clock import KST
+from .harbor import APPROACH, HARBOR_KN, SLOTS
 
 SEED = 20261013
 KMH_PER_KN = geo.KM_PER_NM
-HARBOR_STOP_KM = 0.3  # 위판장 좌표 바로 앞에서 멈춤
 START_POSITIONS = Path(__file__).with_name("start_positions.json")
 
 
@@ -52,6 +52,7 @@ class Track:
     depart: datetime | None     # None 이면 창 안에서 입항하지 않는 조업선
     speed_kn: float
     idle_course: float          # 출발 전·조업 중 침로
+    berth: tuple[float, float] | None = None  # 위판장 앞 정박 자리(harbor.SLOTS)
 
 
 def _offset(origin: tuple[float, float], bearing: float, dist_km: float) -> tuple[float, float]:
@@ -92,22 +93,50 @@ def build_tracks(day: date, place: tuple[float, float], starts: dict[int, tuple[
     return tracks
 
 
+def _seg_km(a: tuple[float, float], b: tuple[float, float]) -> float:
+    return geo.haversine_km(a[0], a[1], b[0], b[1])
+
+
+def path_of(track: Track, place: tuple[float, float]) -> list[tuple[tuple[float, float], float]]:
+    """(지점, 그 지점까지 가는 속도 kn) 목록. 바다 구간은 배 속도, 수로부터는 HARBOR_KN.
+    APPROACH 경로는 위판장 기준으로 그려져 있어, 다른 위판장 좌표가 들어오면(테스트 등) 직선으로 간다."""
+    end = track.berth or place
+    if geo.haversine_km(*place, *geo.AUCTION_PLACE) > 0.5:
+        return [(end, track.speed_kn)]
+    pts = [(APPROACH[0], track.speed_kn)] + [(p, HARBOR_KN) for p in APPROACH[1:]] + [(end, HARBOR_KN)]
+    return pts
+
+
+def arrival_time(track: Track, place: tuple[float, float]) -> datetime | None:
+    if track.depart is None:
+        return None
+    hours, cur = 0.0, track.start
+    for pt, kn in path_of(track, place):
+        hours += _seg_km(cur, pt) / (kn * KMH_PER_KN)
+        cur = pt
+    return track.depart + timedelta(hours=hours)
+
+
 def position(track: Track, t: datetime, place: tuple[float, float]) -> dict:
-    """시각 t의 위치. 출발 전·조업 중에는 0.8kn 표류(입항 판정에 걸리지 않는 속도)."""
+    """시각 t의 위치. 출발 전·조업 중에는 0.8kn 표류(입항 판정에 걸리지 않는 속도).
+    출발 뒤에는 바다 → 항구 입구 → 수로 → 정박 자리 순으로 꺾은선을 따라간다(10/10)."""
     lat0, lon0 = track.start
     if track.depart is None or t < track.depart:
         return {"lat": lat0, "lon": lon0, "course": track.idle_course, "speed": 0.8}
-    total = max(geo.haversine_km(lat0, lon0, *place) - HARBOR_STOP_KM, 0.0)
-    hours = (t - track.depart).total_seconds() / 3600
-    traveled = track.speed_kn * KMH_PER_KN * hours
-    frac = 1.0 if total == 0 else min(traveled / total, 1.0)
-    course = geo.bearing_deg(lat0, lon0, *place)
-    return {
-        "lat": lat0 + (place[0] - lat0) * frac * (total / (total + HARBOR_STOP_KM) if total else 1),
-        "lon": lon0 + (place[1] - lon0) * frac * (total / (total + HARBOR_STOP_KM) if total else 1),
-        "course": round(course, 1),
-        "speed": track.speed_kn if frac < 1.0 else 0.0,
-    }
+    left_h = (t - track.depart).total_seconds() / 3600
+    cur, course = track.start, track.idle_course
+    for pt, kn in path_of(track, place):
+        seg = _seg_km(cur, pt)
+        need_h = seg / (kn * KMH_PER_KN) if seg else 0.0
+        if left_h < need_h:
+            f = left_h / need_h
+            return {"lat": cur[0] + (pt[0] - cur[0]) * f, "lon": cur[1] + (pt[1] - cur[1]) * f,
+                    "course": round(geo.bearing_deg(*cur, *pt), 1), "speed": kn}
+        left_h -= need_h
+        if seg:
+            course = round(geo.bearing_deg(*cur, *pt), 1)
+        cur = pt
+    return {"lat": cur[0], "lon": cur[1], "course": course, "speed": 0.0}
 
 
 class Simulator:
@@ -120,7 +149,12 @@ class Simulator:
 
     def tracks(self, day: date) -> list[Track]:
         if day != self._day:
-            self._tracks, self._day = build_tracks(day, self.place, self.starts, self.seed), day
+            raw = build_tracks(day, self.place, self.starts, self.seed)
+            # 정박 자리: 먼저 도착하는 배가 위판장에 가까운 자리(SLOTS[0])부터 차지
+            order = sorted((tr for tr in raw if tr.depart is not None), key=lambda tr: arrival_time(tr, self.place))
+            berth = {tr.ship_id: SLOTS[i % len(SLOTS)] for i, tr in enumerate(order)}
+            self._tracks = [replace(tr, berth=berth.get(tr.ship_id)) for tr in raw]
+            self._day = day
         return self._tracks
 
     def snapshot(self, t: datetime) -> list[dict]:
