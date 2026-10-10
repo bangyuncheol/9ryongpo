@@ -21,5 +21,5 @@ description: 브랜치·커밋·푸시를 할 때 항상 따르는 규칙
 - `.env` 등 비밀 파일은 절대 커밋하지 않는다.
 
 ## 협업
-- 원격 저장소: `https://github.com/bangyuncheol/9ryongpo` (비공개). 협업자: `insukkwon`.
+- 원격 저장소: `https://github.com/bangyuncheol/9ryongpo` (비공개). 협업자: `insukkwon`(write), 멘토 `jh941213`(write, 10/10 초대).
 - 다른 사람의 커밋을 되돌리거나 재작성하기 전에 오너에게 확인한다.
