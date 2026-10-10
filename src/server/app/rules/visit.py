@@ -32,9 +32,9 @@ def recommend(traffic: dict | None, auction_time: str = AUCTION_DEFAULT, visitor
         lines.append(f"지금 위판장 앞 지난 1시간 트럭 {last['truck']}대, 전체 {last['total']}대" + (f"로 {now_txt}" if now_txt else "입니다") + ".")
     if visitor:
         # 관광객도 경매를 구경하러 올 수 있다. 참여 여부·종료 시각·혼잡을 단정하지 않고 시작 시각만 알린다(10/10).
-        lines.append(f"경매는 {at:%H:%M}(기본값)에 시작합니다.")
+        lines.append(f"경매는 {at:%H:%M}에 시작합니다.")
     else:
-        lines.append(f"경매 {at:%H:%M}(기본값) 기준 {arrive_by}까지 도착을 권합니다.")
+        lines.append(f"경매 {at:%H:%M} 기준 {arrive_by}까지 도착을 권합니다.")
     return {"auction_time": at.strftime("%H:%M"), "arrive_by": arrive_by,
             "now": now_txt, "last_hour": last, "advice": " ".join(lines),
             "basis": "위판장 80m 앞 E-UM 교통센서3 실측(실제 현재 시각). 미래 혼잡 예측 아님"}

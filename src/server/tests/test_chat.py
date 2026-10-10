@@ -61,7 +61,7 @@ def test_visit_advice():
     boss = visit.recommend(TRAFFIC)
     assert "08:30까지" in boss["advice"] and "어제 이맘때보다 한산" in boss["advice"]
     tour = visit.recommend(TRAFFIC, visitor=True)
-    assert "경매는 09:00(기본값)에 시작합니다." in tour["advice"]
+    assert "경매는 09:00에 시작합니다." in tour["advice"]
     for banned in ("덜 붐", "10:00", "참여할 수 없"):  # 확인 안 된 종료 시각·혼잡·참여 단정 금지
         assert banned not in tour["advice"]
     assert "단정" not in tour["advice"]

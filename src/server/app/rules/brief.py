@@ -22,7 +22,7 @@ def short_biz(biz: str | None) -> str:
 
 
 def template(new: list[dict], est: dict) -> tuple[str, str]:
-    """(제목, 본문). 예: '04:25~04:35 자망선 3척 입항 예정 · 붉은대게·골뱅이. 경매 09:00(기본값)'"""
+    """(제목, 본문). 예: '04:25~04:35 자망선 3척 입항 예정 · 붉은대게·골뱅이. 경매 09:00'"""
     etas = sorted(a["eta"][11:16] for a in new if a.get("eta"))
     when = (etas[0] if etas[0] == etas[-1] else f"{etas[0]}~{etas[-1]}") if etas else "곧"
     kinds = Counter(short_biz(a.get("biz")) for a in new)
@@ -31,7 +31,7 @@ def template(new: list[dict], est: dict) -> tuple[str, str]:
     body = f"{when} {ships} 입항 예정"
     if species:
         body += f" · {species} 가능성"
-    body += f". 경매 {AUCTION_DEFAULT}(기본값)"
+    body += f". 경매 {AUCTION_DEFAULT}"  # '(기본값)'은 사용자에게 필요 없는 표시라 뺌(10/10)
     return "배마중 · 구룡포 입항 예보", body
 
 
@@ -46,7 +46,7 @@ def matches(cond: dict, est: dict) -> bool:
 NUM_RE = re.compile(r"\d+(?::\d+)?")
 POLISH_PROMPT = """아래 입항 알림 문장을 횟집 사장이 잠금 화면에서 한눈에 읽게 다듬어라.
 - 한 문장, 70자 이내, 존댓말 없이 간결하게.
-- 숫자·시각·어종·'가능성'·'(기본값)'을 하나도 바꾸거나 빼거나 더하지 마라.
+- 숫자·시각·어종·'가능성'을 하나도 바꾸거나 빼거나 더하지 마라. '기본값'이라는 말은 넣지 마라.
 - 다듬은 문장만 출력하라."""
 
 
@@ -57,7 +57,7 @@ def numbers(text: str) -> list[str]:
 def accept(template_body: str, candidate: str) -> bool:
     """LLM 문장이 템플릿의 숫자를 정확히 같은 집합으로 담고, 길이·어종이 지켜졌을 때만 쓴다."""
     c = candidate.strip()
-    if not c or len(c) > 90 or "\n" in c:
+    if not c or len(c) > 90 or "\n" in c or "기본값" in c:
         return False
     if numbers(c) != numbers(template_body):
         return False

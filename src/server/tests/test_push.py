@@ -27,7 +27,7 @@ def conn(tmp_path):
 
 def test_template_text():
     title, body = brief.template(NEW, EST)
-    assert body == "04:25~04:35 자망선 3척 입항 예정 · 붉은대게·골뱅이 가능성. 경매 09:00(기본값)"
+    assert body == "04:25~04:35 자망선 3척 입항 예정 · 붉은대게·골뱅이 가능성. 경매 09:00"
 
 
 def test_matches():
@@ -94,11 +94,11 @@ def test_vapid_subject_accepts_bare_email():
     assert _vapid_subject("") == ""
 
 
-TEMPLATE = "04:25~04:35 자망선 3척 입항 예정 · 붉은대게·골뱅이 가능성. 경매 09:00(기본값)"
+TEMPLATE = "04:25~04:35 자망선 3척 입항 예정 · 붉은대게·골뱅이 가능성. 경매 09:00"
 
 
 def test_accept_keeps_numbers_exact():
-    assert brief.accept(TEMPLATE, "자망선 3척 04:25~04:35 입항 예정, 붉은대게·골뱅이 가능성. 경매 09:00(기본값)")
+    assert brief.accept(TEMPLATE, "자망선 3척 04:25~04:35 입항 예정, 붉은대게·골뱅이 가능성. 경매 09:00")
     assert not brief.accept(TEMPLATE, "자망선 4척 04:25~04:35 입항 예정, 붉은대게 가능성. 경매 09:00")  # 숫자 바뀜
     assert not brief.accept(TEMPLATE, "자망선 3척 입항 예정, 붉은대게 가능성. 경매 09:00")              # 시각 빠짐
     assert not brief.accept(TEMPLATE, "04:25~04:35 자망선 3척, 붉은대게 확실. 경매 09:00")              # '가능성' 빠짐
@@ -117,7 +117,7 @@ class _Client:
 def test_polish_falls_back_on_bad_llm_output(monkeypatch):
     from app.agent import chat
     monkeypatch.setattr(chat, "_cooldown_until", 0.0)
-    good = "04:25~04:35 자망선 3척 입항 예정 · 붉은대게·골뱅이 가능성 · 경매 09:00(기본값)"
+    good = "04:25~04:35 자망선 3척 입항 예정 · 붉은대게·골뱅이 가능성 · 경매 09:00"
     assert asyncio.run(brief.polish(_Client(good), "m", TEMPLATE)) == (good, "llm")
     assert asyncio.run(brief.polish(_Client("자망선 5척 곧 입항!"), "m", TEMPLATE)) == (TEMPLATE, "template")
     assert asyncio.run(brief.polish(None, "m", TEMPLATE)) == (TEMPLATE, "template")
@@ -129,3 +129,7 @@ def test_inbox_keeps_latest_five(conn):
         asyncio.run(p.notify(VT.replace(minute=m), "t", f"알림 {m}", EST, []))
     got = push.recent_notifications(conn, VT.replace(hour=4))
     assert [g["body"] for g in got] == ["알림 6", "알림 5", "알림 4", "알림 3", "알림 2"]
+
+
+def test_polish_rejects_default_label():
+    assert not brief.accept(TEMPLATE, "04:25~04:35 자망선 3척 입항 예정 · 붉은대게·골뱅이 가능성 · 경매 09:00(기본값)")
