@@ -175,7 +175,9 @@ def test_live_stale_positions_give_no_forecast_or_push(ctx):
     assert today["arriving"] == [] and "2025-04-27" in today["notice"]
     ships = asyncio.run(e.ships())
     assert ships["ships"][0]["status"] == "미갱신"
-    asyncio.run(e.tick())
+    async def go():
+        await e.tick(); await e.drain()
+    asyncio.run(go())
     assert pushed == []
 
 
@@ -188,9 +190,13 @@ def test_fast_play_processes_every_10min_bucket(ctx):
     e.hooks.append(hook)
     e.clock.seek("03:00")
     e.reset_tick()
-    asyncio.run(e.tick())                 # 03:00
-    e.clock.seek("03:40")                 # 600배로 3초 = 30분 넘게 지난 상황
-    asyncio.run(e.tick())
+
+    async def go():
+        await e.tick()                    # 03:00
+        e.clock.seek("03:40")             # 600배로 3초 = 30분 넘게 지난 상황
+        await e.tick()
+        await e.drain()
+    asyncio.run(go())
     assert seen[0] == ("03:10", [3, 7, 17])  # 03:10 경계를 건너뛰지 않는다
     assert ("03:30", [1]) in seen
 
@@ -206,3 +212,9 @@ def test_inbox_shows_only_after_last_reset(ctx):
     asyncio.run(p.notify(vt, "t", "이번 재생", {"overall": []}, []))
     got = push.recent_notifications(e.conn, vt.replace(hour=4))
     assert [g["body"] for g in got] == ["이번 재생"]
+
+
+def test_system_prompt_has_date_and_plain_text_rules(ctx):
+    p = chat.system_prompt(ctx)
+    assert "'작년'은 2025년" in p and "마크다운" in p and "붉은대게로 처리" in p
+    assert chat.plain("**제33안성호**는 **04:45** 도착") == "제33안성호는 04:45 도착"

@@ -32,7 +32,22 @@ SYSTEM = """너는 '위판 당직'이다. 구룡포 위판장에 생선을 사�
 - 오늘·내일 가격은 예측하지 않는다. 물으면 과거 실적(get_past_auction)만 말하고, 경매가는 도매가라 소매가와 다르다고 덧붙인다.
 - 교통은 실제 현재 시각의 실측이다. 미래 혼잡을 단정하지 않는다.
 - 경매 시각 09:00(잡어·문어 07:00)은 기본값이다.
-- 모르는 것은 모른다고 말한다. 2~4문장의 짧은 한국어 존댓말로 답한다."""
+- '대게'·'홍게'라고 물으면 붉은대게로 처리한다. 구룡포 본소 위판 실적(2022~2025년 10월)에는 대게가 없고 붉은대게(홍게)만 있다는 점을 한 번 짧게 밝힌다. 알림도 붉은대게로 준비한다.
+- 모르는 것은 모른다고 말한다. 2~4문장의 짧은 한국어 존댓말로 답한다.
+- 마크다운(별표 강조, #, 목록 기호, 표)을 쓰지 않고 평문으로 답한다. 화면이 마크다운을 그리지 않는다."""
+
+
+def system_prompt(ctx: ToolContext) -> str:
+    """오늘 날짜를 알려 줘야 '작년'·'오늘'을 해석한다(10/10 실기에서 되물음 확인)."""
+    now = ctx.engine.clock.now()
+    src = "시뮬레이션" if ctx.engine.feed == "sim" else "실데이터"
+    return (SYSTEM + f"\n\n지금 시각(가상 시계): {now:%Y-%m-%d %H:%M}, 선박 위치 데이터: {src}. "
+            f"'작년'은 {now.year - 1}년, '올해'는 {now.year}년이다. 위판 실적은 서버에 있는 달만 조회된다.")
+
+
+def plain(text: str) -> str:
+    """마크다운 강조 기호가 섞여 와도 화면에 별표가 보이지 않게."""
+    return re.sub(r"\*\*|__|^#+\s*", "", text, flags=re.M).strip()
 
 
 def _summary(name: str, out: dict) -> str:
@@ -64,13 +79,13 @@ async def _tool_events(ctx: ToolContext, name: str, args: dict) -> AsyncIterator
 
 
 async def llm_answer(client: Any, model: str, ctx: ToolContext, question: str) -> AsyncIterator[dict]:
-    items: list[Any] = [{"role": "system", "content": SYSTEM}, {"role": "user", "content": question}]
+    items: list[Any] = [{"role": "system", "content": system_prompt(ctx)}, {"role": "user", "content": question}]
     for _ in range(MAX_ROUNDS):
         r = await client.responses.create(model=model, reasoning={"effort": "medium"}, tools=TOOLS,
                                           input=items, max_output_tokens=1200)
         calls = [o for o in r.output if getattr(o, "type", None) == "function_call"]
         if not calls:
-            yield {"type": "answer", "text": (r.output_text or "").strip() or "답을 만들지 못했습니다. 다시 물어봐 주세요.", "mode": "llm"}
+            yield {"type": "answer", "text": plain(r.output_text or "") or "답을 만들지 못했습니다. 다시 물어봐 주세요.", "mode": "llm"}
             return
         items += [o.model_dump(exclude_none=True) if hasattr(o, "model_dump") else o for o in r.output]
         for c in calls:

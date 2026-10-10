@@ -1,6 +1,7 @@
 """시계·피드·룰을 묶는 엔진. 화면 API와 10분(가상) 틱이 같은 계산을 쓴다."""
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import sqlite3
@@ -38,6 +39,7 @@ class Engine:
         self._last_tick: datetime | None = None
         self._announced: set[int] = set()
         self.hooks: list[NewArrivalHook] = []
+        self._bg: set[asyncio.Task] = set()
 
     # --- 데이터 ---
     def reload_fleet(self) -> None:
@@ -152,10 +154,21 @@ class Engine:
         if new:
             self.log_event("forecast", {"ts": ts, "new": [a["ship_id"] for a in new]})
             for hook in self.hooks:
-                try:
-                    await hook(t, new)
-                except Exception:  # 알림 실패가 틱을 멈추면 안 된다. 기록하고 계속.
-                    log.exception("새 입항 알림 처리 실패")
+                # 알림은 LLM 문장 다듬기로 몇 초 걸린다. 틱을 막지 않도록 따로 돌린다(10/10 실기에서 틱 밀림 확인).
+                task = asyncio.create_task(self._run_hook(hook, t, new))
+                self._bg.add(task)
+                task.add_done_callback(self._bg.discard)
+
+    async def _run_hook(self, hook: NewArrivalHook, t: datetime, new: list[dict]) -> None:
+        try:
+            await hook(t, new)
+        except Exception:  # 알림 실패가 다른 일을 멈추면 안 된다. 기록하고 계속.
+            log.exception("새 입항 알림 처리 실패")
+
+    async def drain(self) -> None:
+        """테스트·종료용: 돌고 있는 알림 작업을 끝까지 기다린다."""
+        while self._bg:
+            await asyncio.gather(*list(self._bg), return_exceptions=True)
 
     def log_event(self, kind: str, payload: dict) -> None:
         with tx(self.conn):

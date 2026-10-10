@@ -33,11 +33,11 @@ description: 미구현·보류·기술부채·진행 중 과제의 현재 상태
 - 실데이터 모드에서 위치가 24시간 넘게 미갱신이면 예보·기록·알림을 멈추고 `notice`("…이후 갱신되지 않아 입항 예보를 낼 수 없습니다")를 띄운다. 멈춘 위치로 엉터리 ETA·푸시가 나가던 문제 수정(10/9).
 - 화면 One UI 1차 반영(`ui-design.md` 적용 상태 참고). 지도는 처음 한 번 위판장·배 전체에 맞춤.
 - 틱: 배속이 높아 10분 경계를 여러 개 지나도 하나씩 처리(600배 재생에서 03:10 알림 누락 방지). 되감으면 `reset` 이벤트를 남기고 알림함은 그 이후만 보여 준다.
-- 테스트 50개 (`cd src/server && uv run pytest`). 외부 호출 없이 `tests/fixtures/`의 실제 응답 일부로 돈다.
+- OpenAI 실기 확인 완료(10/10, 새 키): 질문창 도구 호출·답, 알림 문장 다듬기(숫자 검증 통과). 실기에서 고친 것: 오늘 날짜를 시스템 프롬프트에 넣어 '작년' 해석, 마크다운 기호 제거, '대게·홍게'는 붉은대게로 처리(본소 실적에 대게 없음), 알림 발송을 백그라운드로 돌려 틱 밀림 제거.
+- 테스트 51개 (`cd src/server && uv run pytest`). 외부 호출 없이 `tests/fixtures/`의 실제 응답 일부로 돈다.
 
 **다음 할 일 (설계 §10 순서)**
 1. **폰 푸시 실기 시험**: HTTPS 주소 필요(로컬은 Cloudflare 임시 터널 또는 VM). `.env`의 `VAPID_SUBJECT=mailto:주소`가 비어 있으면 발송을 건너뛰고 알림함에만 남긴다.
-2. **OpenAI 크레딧 충전 후 LLM 경로 실기 확인**: 지금 키는 `credit_balance_exhausted`(10/9). 그동안 질문창은 간단 모드(낱말 규칙)로 같은 도구를 불러 답한다.
 3. VM 배포: SSH 키 등록 후 deploy 스킬 '첫 설치' 절차(`src/deploy/setup_vm.sh`). 리허설은 `qa-regression/checklist.md`.
 4. UI 작업 단계: One UI 기준 정리(`.claude/rules/ui-design.md`) `rules/visit.py`(설계 §5.4) — 지금은 `/api/traffic/now`가 숫자만 준다.
 
