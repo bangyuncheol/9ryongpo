@@ -233,3 +233,12 @@ def test_history_is_sent_as_context_and_sanitized(ctx):
     assert roles[1:] == [("user", "43톤 자망선 언제 와?"), ("assistant", "제33안성호가 04:45 도착 예정입니다."),
                          ("user", "그 배 어디쯤이야?"), ("assistant", "9.4km 남았습니다."), ("user", "그 배는 뭐 싣고 와?")]
     assert chat.clean_history("not a list") == [] and chat.clean_history([{"q": "x" * 999, "a": "y"}])[0]["q"] == "x" * 300
+
+
+def test_tools_hide_data_source_and_flag_category_only(ctx):
+    out = asyncio.run(run_tool(ctx, "get_arrival_forecast", {}))
+    assert "data_source" not in out and "notice" not in out
+    d = asyncio.run(run_tool(ctx, "get_species_estimate", {"biz": "근해자망어업"}))
+    assert d["category_only"] is True and "말하지 않는다" in d["note"]
+    p = chat.system_prompt(ctx)
+    assert "시뮬레이션인지 실데이터인지는 말하지 않는다" in p and "선박 위치 데이터" not in p

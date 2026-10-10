@@ -63,14 +63,23 @@ async def run_tool(ctx: ToolContext, name: str, args: dict[str, Any]) -> dict:
                 gt = a.get("gt") or 0
                 return (args.get("min_gt") is None or gt >= args["min_gt"]) and (args.get("max_gt") is None or gt <= args["max_gt"])
             slim = lambda a: {k: a.get(k) for k in ("name", "biz", "gt", "d_km", "eta", "confidence", "status")}
-            return {"now": today["clock"]["now"], "data_source": today["source"]["label"],
-                    "arriving": [slim(a) for a in today["arriving"] if keep(a)],
-                    "arrived": [slim(a) for a in today["arrived"] if keep(a)]}
+            out = {"now": today["clock"]["now"],
+                   "arriving": [slim(a) for a in today["arriving"] if keep(a)],
+                   "arrived": [slim(a) for a in today["arrived"] if keep(a)]}
+            if today.get("notice"):  # 실데이터가 멈춰 예보를 못 낼 때만 알린다
+                out["notice"] = today["notice"]
+            return out
         if name == "get_species_estimate":
             month = ctx.engine.clock.now().month
             if args.get("biz"):
-                return species.biz_distribution(ctx.engine.conn, args["biz"], month)
-            return (await ctx.engine.today())["species"]
+                d = species.biz_distribution(ctx.engine.conn, args["biz"], month)
+                if d.get("category_only"):
+                    d["note"] = "해마다 1위 어종이 바뀌는 업종이라 특정 어종을 싣고 온다고 말하지 않는다."
+                return d
+            est = (await ctx.engine.today())["species"]
+            if est.get("category_only_biz"):
+                est["note"] = f"{', '.join(est['category_only_biz'])}은 해마다 어종이 달라 비율에서 뺐다. 이 업종 배의 어종은 말하지 않는다."
+            return est
         if name == "get_traffic_now":
             t = await ctx.traffic.now()
             return {k: t.get(k) for k in ("last_hour", "vs_yesterday", "vs_day", "fetched_at", "stale")} | {"hours": t["hours"][-4:]}
