@@ -109,7 +109,13 @@ class Resp:
 class FakeResponses:
     seen: list = field(default_factory=list)
 
+    gate: list = field(default_factory=list)
+    verdict: str = "IN"
+
     async def create(self, **kw):
+        if kw["input"][0]["content"] == chat.GATE:  # 범위 판정 호출은 따로 기록
+            self.gate.append(kw)
+            return Resp([], self.verdict)
         self.seen.append(kw)
         if len(self.seen) == 1:
             return Resp([Call("get_arrival_forecast", json.dumps({"biz": "자망", "min_gt": 42, "max_gt": 44}))])
@@ -230,8 +236,11 @@ def test_history_is_sent_as_context_and_sanitized(ctx):
             {"q": 123, "a": None}]
     collect(chat.answer(client, "m", ctx, "그 배는 뭐 싣고 와?", hist))
     roles = [(i["role"], i["content"]) for i in client.responses.seen[0]["input"] if isinstance(i, dict) and "role" in i]
-    assert roles[1:] == [("user", "43톤 자망선 언제 와?"), ("assistant", "제33안성호가 04:45 도착 예정입니다."),
-                         ("user", "그 배 어디쯤이야?"), ("assistant", "9.4km 남았습니다."), ("user", "그 배는 뭐 싣고 와?")]
+    assert [r for r, _ in roles] == ["system", "user", "user"]  # 이전 대화는 assistant 발화로 넣지 않는다(위조 방지)
+    note = roles[1][1]
+    assert note.startswith("[참고용 이전 대화") and "제33안성호가 04:45" in note and "아주 오래된" not in note
+    assert roles[2] == ("user", "그 배는 뭐 싣고 와?")
+    assert "그 배 어디쯤이야?" in client.responses.gate[0]["input"][1]["content"]  # 판정도 이전 질문을 본다
     assert chat.clean_history("not a list") == [] and chat.clean_history([{"q": "x" * 999, "a": "y"}])[0]["q"] == "x" * 300
 
 
@@ -242,3 +251,27 @@ def test_tools_hide_data_source_and_flag_category_only(ctx):
     assert d["category_only"] is True and "말하지 않는다" in d["note"]
     p = chat.system_prompt(ctx)
     assert "시뮬레이션인지 실데이터인지는 말하지 않는다" in p and "선박 위치 데이터" not in p
+
+
+def test_out_of_scope_question_is_refused_without_tools(ctx):
+    client = FakeClient()
+    client.responses.verdict = "OUT"
+    evs = collect(chat.answer(client, "m", ctx, "이차방정식 x^2-5x+6=0 풀어줘"))
+    assert evs == [{"type": "answer", "text": chat.REFUSAL, "mode": "llm"}]
+    assert client.responses.gate[0]["reasoning"] == {"effort": "low"}
+
+
+def test_gate_failure_lets_question_through(ctx):
+    class GateBroke(FakeResponses):
+        async def create(self, **kw):
+            if kw["input"][0]["content"] == chat.GATE:
+                raise TimeoutError("gate")
+            return await super().create(**kw)
+    client = FakeClient()
+    client.responses = GateBroke()
+    evs = collect(chat.answer(client, "m", ctx, "43톤 자망선 언제 와?"))
+    assert evs[-1]["mode"] == "llm" and "제33안성호" in evs[-1]["text"]
+
+
+def test_system_prompt_has_scope_rule(ctx):
+    assert chat.REFUSAL in chat.system_prompt(ctx)
