@@ -1,22 +1,6 @@
 // 2차 시안(?v=2) 공용 계산. 화면 문구는 여기서 만든다(숫자는 서버 값 그대로).
 import type { Arrival, Species, Today } from '../api'
 
-const DAYS = ['일', '월', '화', '수', '목', '금', '토']
-
-/** 가상 시계 기준 인사. 새벽 서비스라 시간대마다 첫 줄을 바꾼다. */
-export function greeting(now?: string) {
-  const h = now ? Number(now.slice(11, 13)) : 4
-  if (h < 6) return '좋은 새벽이에요'
-  if (h < 11) return '좋은 아침이에요'
-  return '안녕하세요'
-}
-
-export function dateLine(now?: string) {
-  if (!now) return ''
-  const d = new Date(now)
-  return `${d.getMonth() + 1}월 ${d.getDate()}일 ${DAYS[d.getDay()]}요일`
-}
-
 /** 지금(가상)부터 ETA까지 분. 지났으면 0. */
 export function minutesUntil(now?: string, eta?: string) {
   if (!now || !eta) return null

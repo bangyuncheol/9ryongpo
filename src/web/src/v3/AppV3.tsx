@@ -5,10 +5,11 @@ import { usePoll } from '../usePoll'
 import MapView from '../components/MapView'
 import ChatCard from '../components/ChatCard'
 import AdminBar from '../components/AdminBar'
-import AppV2, { CallUs, Depart, Header, NextShip, Tag, Toast } from '../v2/AppV2'
+import AppV2, { CallUs, Depart, Header, NextShip, Toast } from '../v2/AppV2'
 import type { VisitData } from '../v2/AppV2'
 import WaitFish from '../v2/WaitFish'
-import { byEta, telHref, telText, trafficWord } from '../v2/bits'
+import Icon from '../v2/Icon'
+import { byEta, telHref, telText } from '../v2/bits'
 import '../v2/v2.css'
 
 /*
@@ -79,7 +80,7 @@ function PhoneV3() {
       {admin && <div className="pt-3"><AdminBar clock={t?.clock ?? null} feed={t?.source.feed ?? null} call={call.data} /></div>}
 
       {tab === 'home' && <>
-        <Header today={t} arrivingCount={arriving.length} traffic={trafficWord(v?.now)} />
+        <Header today={t} />
         <main className="flex flex-col gap-4 px-4">
           <NextShip today={t} list={arriving} idle={idle} selected={selected} onSelect={onSelect}
             limit={0} share="none" onMore={arriving.length > 1 ? () => setTab('ships') : undefined} />
@@ -88,7 +89,7 @@ function PhoneV3() {
           <section aria-labelledby="mini-map">
             <div className="mb-2 flex items-baseline justify-between px-1">
               <h2 id="mini-map" className="text-title font-bold text-primary-dark">구룡포항 지금</h2>
-              <button onClick={() => setTab('ships')} className="text-sub font-bold text-primary-dark">크게 보기 →</button>
+              <button onClick={() => setTab('ships')} className="v2-press -my-2 flex min-h-[var(--spacing-touch)] items-center gap-1 text-sub font-bold text-primary-dark">크게 보기 <Icon name="arrow" /></button>
             </div>
             {map(true)}
           </section>
@@ -99,17 +100,14 @@ function PhoneV3() {
         <main className="flex flex-col gap-4 px-4 pt-5">
           <TabTitle title="들어오는 배" sub={`${hhmm(t?.clock.now)} 기준 · ${sim}`} />
           <NextShip today={t} list={arriving} idle={idle} selected={selected} onSelect={onSelect} limit={20} share="basis" />
+          {/* '언제 가면'·트럭 수는 홈과 지도에 이미 있어 이 탭에서는 뺀다(10/11 다듬기) */}
           <section aria-label="구룡포항 지도">{map(false)}</section>
-          <Depart visit={v} />
-          {tr?.last_hour && (
-            <p className="px-1 text-sub text-muted">위판장 앞 지난 1시간 트럭 {tr.last_hour.truck}대 · 전체 {tr.last_hour.total}대 <Tag>실측</Tag></p>
-          )}
         </main>
       )}
 
       {tab === 'alerts' && (
         <main className="flex flex-col gap-4 px-4 pt-5">
-          <TabTitle title="알림" sub="원하는 생선이 들어오면 휴대폰이나 전화로 먼저 알려 드려요" />
+          <TabTitle title="알림" />
           <WaitFish phoneEnabled={!!call.data?.enabled} />
           <section className="rounded-card bg-card p-5" aria-labelledby="sent-title">
             <h2 id="sent-title" className="text-title font-bold text-primary-dark">보낸 알림</h2>
@@ -140,7 +138,7 @@ function PhoneV3() {
             <li key={k} className="flex-1">
               <button onClick={() => setTab(k)} aria-current={tab === k ? 'page' : undefined}
                 className={`relative flex h-14 w-full items-center justify-center text-sub font-bold ${tab === k ? 'text-primary-dark' : 'text-muted'}`}>
-                {tab === k && <span aria-hidden className="absolute inset-x-6 top-0 h-[3px] rounded-full bg-[var(--color-sunrise)]" />}
+                {tab === k && <span aria-hidden className="absolute inset-x-6 top-0 h-[3px] rounded-full bg-primary-dark" />}
                 {label}
               </button>
             </li>
@@ -151,11 +149,11 @@ function PhoneV3() {
   )
 }
 
-function TabTitle({ title, sub }: { title: string; sub: string }) {
+function TabTitle({ title, sub }: { title: string; sub?: string }) {
   return (
     <header className="px-1">
       <h1 className="text-dialog font-bold text-primary-dark">{title}</h1>
-      <p className="mt-1 text-sub text-muted">{sub}</p>
+      {sub && <p className="mt-1 text-sub text-muted">{sub}</p>}
     </header>
   )
 }
@@ -163,8 +161,9 @@ function TabTitle({ title, sub }: { title: string; sub: string }) {
 /** 홈용 한 줄 전화 버튼(물어보기 탭에는 큰 버튼). 어르신에게 가장 쉬운 입구라 홈에서 빼지 않는다. */
 function CallRow({ number }: { number: string }) {
   return (
-    <a href={telHref(number)} className="flex min-h-[var(--spacing-touch)] items-center justify-between rounded-button border-2 border-[var(--color-sunrise)] bg-card px-4 py-2">
-      <span className="text-button font-bold text-primary-dark">📞 전화로 물어보기</span>
+    <a href={telHref(number)} className="v2-press flex min-h-[var(--spacing-touch)] items-center gap-3 rounded-button bg-card px-4 py-3 hover:brightness-95">
+      <span aria-hidden className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary-dark text-on-primary"><Icon name="phone" /></span>
+      <span className="flex-1 text-button font-bold text-primary-dark">전화로 물어보기</span>
       <span className="text-sub tabular-nums text-muted">{telText(number)}</span>
     </a>
   )

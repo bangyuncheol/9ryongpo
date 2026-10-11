@@ -18,6 +18,9 @@
   --color-arrived: #1e7d45;
   --color-sunrise: #f18a54;       /* 선라이즈 오렌지 — 장식 전용 */
   --color-sunrise-soft: #fdf0e8;
+  --color-hero: #193b50;          /* '언제 가면' 띠. 라이트는 네이비 그대로 */
+  --color-on-hero: #ffffff;
+  color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -36,8 +39,28 @@
     --color-arrived: #5fcf8c;
     --color-sunrise: #f18a54;
     --color-sunrise-soft: #2c2119;
+    /* 다크에서 밝은 하늘색 면은 새벽에 눈부시다 → 카드보다 한 단계 밝은 네이비 면 + 밝은 글자(10.1:1) */
+    --color-hero: #1f3d52;
+    --color-on-hero: #eef2f1;
+    color-scheme: dark;            /* 체크박스·스크롤바도 어둡게 */
   }
 }
+
+/* 10/11 다듬기(.claude/rules/design-v2.md) — 누름 반응·줄바꿈·브라우저 기본 표면을 팔레트에 맞춘다. */
+.v2 { caret-color: var(--color-primary-dark); }
+.v2 :is(button, a, label) { touch-action: manipulation; } /* 두 번 탭 확대 지연 없애기 */
+.v2 ::selection { background: var(--color-sunrise-soft); color: var(--color-ink); }
+.v2 :is(h1, h2) { text-wrap: balance; }
+.v2 p { text-wrap: pretty; }
+/* 누르면 살짝 들어가는 느낌(손가락 아래에서 눌렸다는 확인). 색 변화는 각 요소의 hover 가 맡는다 */
+.v2-press { transition: transform 160ms var(--ease-oneui), background-color 200ms var(--ease-oneui), filter 200ms var(--ease-oneui); }
+.v2-press:active:not(:disabled) { transform: scale(0.98); }
+/* 띄운 면(알림 띠)만 그림자. 검정 대신 네이비 기운, 위에서 오는 빛 하나 */
+.v2-shadow { box-shadow: 0 6px 20px -6px rgb(25 59 80 / 0.28), 0 1px 3px rgb(25 59 80 / 0.12); }
+@media (prefers-color-scheme: dark) {
+  .v2-shadow { box-shadow: 0 6px 20px -6px rgb(0 0 0 / 0.6), 0 0 0 1px var(--color-line); }
+}
+@media (prefers-reduced-motion: reduce) { .v2-press:active:not(:disabled) { transform: none; } }
 
 /* 새 입항 알림 띠: 위에서 내려왔다 올라간다(100~500ms 규칙) */
 @keyframes v2-drop { from { transform: translateY(-120%); opacity: 0 } to { transform: translateY(0); opacity: 1 } }

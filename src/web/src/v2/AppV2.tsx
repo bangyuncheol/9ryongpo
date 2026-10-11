@@ -8,7 +8,8 @@ import ChatCard from '../components/ChatCard'
 import AdminBar from '../components/AdminBar'
 import CallCard from '../components/CallCard'
 import WaitFish from './WaitFish'
-import { byEta, dateLine, greeting, likelihood, minutesUntil, shipSpecies, shortBiz, telHref, telText, trafficWord } from './bits'
+import Icon from './Icon'
+import { byEta, likelihood, minutesUntil, shipSpecies, shortBiz, telHref, telText, trafficWord } from './bits'
 import './v2.css'
 
 /*
@@ -48,7 +49,7 @@ export default function AppV2() {
   return (
     <div className="v2 min-h-screen bg-page pb-16">
       <Toast items={inbox.data} />
-      <Header today={t} arrivingCount={arriving.length} traffic={trafficWord(visit.data ? (visit.data as { now?: string }).now : null)} />
+      <Header today={t} />
       {admin && <div className="mb-4"><AdminBar clock={t?.clock ?? null} feed={t?.source.feed ?? null} call={call.data} /></div>}
       <main className="mx-auto flex max-w-5xl flex-col gap-4 px-4 lg:grid lg:grid-cols-[5fr_7fr] lg:items-start">
         <div className="flex flex-col gap-4">
@@ -57,13 +58,10 @@ export default function AppV2() {
           {call.data?.enabled && call.data.number && <CallUs number={call.data.number} />}
           <WaitFish phoneEnabled={!!call.data?.enabled} />
         </div>
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 lg:sticky lg:top-4">
           {admin && <div className="empty:hidden"><CallCard call={call.data} /></div>}
           <section aria-labelledby="map-title">
-            <div className="mb-2 flex items-baseline justify-between px-1">
-              <h2 id="map-title" className="text-title font-bold text-primary-dark">구룡포항 지금</h2>
-              <Tag>{t?.source.feed === 'sim' ? '선박 위치 시연' : '실시간'}</Tag>
-            </div>
+            <h2 id="map-title" className="mb-2 px-1 text-title font-bold text-primary-dark">구룡포항 지금</h2>
             <MapView place={place} ships={ships.data?.ships ?? []} arriving={t?.arriving ?? []}
               arrivedCount={t?.arrived.length ?? 0} truck={truck} trucks={trucks.data?.sensors ?? []} sensor={sensor}
               notice={t?.notice ?? null} selected={selected} onSelect={onSelect} legendToggle />
@@ -71,9 +69,6 @@ export default function AppV2() {
           <ChatCard onSubscribe={() => document.getElementById('wait-title')?.scrollIntoView({ behavior: 'smooth', block: 'center' })} />
         </div>
       </main>
-      <footer className="mx-auto mt-8 max-w-5xl px-4 text-center text-small text-muted">
-        배를 마중 나가는 시간, 기다리지 말고 미리 알아보세요. · 2차 시안 <a className="underline" href="/">지금 화면 보기</a>
-      </footer>
     </div>
   )
 }
@@ -87,27 +82,24 @@ export function Tag({ children, tone = 'muted' }: { children: ReactNode; tone?: 
   )
 }
 
-/** 한 줄 헤더 + 오늘의 구룡포 요약(보는 영역). 제목을 크게 두지 않고 상황을 먼저. */
-export function Header({ today, arrivingCount, traffic }: { today: Today | null; arrivingCount: number; traffic: string | null }) {
-  const top = today?.species.overall[0]
+/**
+ * 한 줄 헤더: 이름 + 언제 기준의 어떤 데이터인지(10/11 다듬기). 입항 척수·어종·교통은 바로 아래 카드들이 말하므로
+ * 여기서 되풀이하지 않는다. 선박 위치가 멈췄을 때만 그 사실을 한 줄 더 띄운다.
+ */
+export function Header({ today }: { today: Today | null }) {
   const now = today?.clock.now
+  const sim = today?.source.feed === 'sim'
   return (
-    <header className="mx-auto max-w-5xl px-4 pb-5 pt-4">
-      <div className="flex items-center justify-between">
-        <p className="text-main font-extrabold tracking-tight text-primary-dark">⚓ 배마중 <span className="text-sub font-medium text-muted">구룡포항</span></p>
-        <Tag>{today?.source.feed === 'sim' ? '선박 위치 시연' : '실시간'}</Tag>
-      </div>
-      <div className="mt-5 rounded-card bg-gradient-to-b from-[var(--color-sunrise-soft)] to-card p-5">
-        <p className="text-sub text-muted">{dateLine(now)} · <span className="font-bold tabular-nums text-ink">{hhmm(now)}</span></p>
-        <p className="mt-1 text-dialog font-bold text-primary-dark" aria-live="polite">
-          {greeting(now)}. {today?.notice ? '지금은 선박 위치가 들어오지 않아요.' : arrivingCount ? '오늘도 배가 들어오고 있어요.' : '아직 항구로 오는 배가 없어요.'}
+    <header className="mx-auto max-w-5xl px-4 pb-4 pt-4">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-main font-extrabold tracking-tight text-primary-dark">배마중 <span className="text-sub font-medium text-muted">구룡포항</span></p>
+        <p className="flex items-center gap-1.5 text-small text-muted">
+          <span aria-hidden className={`h-2 w-2 rounded-full ${sim ? 'bg-[var(--color-sunrise)]' : 'bg-arrived'}`} />
+          <span>{sim ? '선박 위치 시연' : '실시간'}</span>
+          {now && <span className="tabular-nums">· {hhmm(now)} 기준</span>}
         </p>
-        <div className="mt-3 flex flex-wrap gap-2 text-sub">
-          <span className="rounded-full bg-card px-3 py-1 font-bold">🚢 입항 예정 {arrivingCount}척</span>
-          {top && <span className="rounded-full bg-card px-3 py-1 font-bold">{top.name} {likelihood(top.share)}</span>}
-          {traffic && <span className="rounded-full bg-card px-3 py-1 font-bold">🚗 위판장 앞 {traffic}</span>}
-        </div>
       </div>
+      {today?.notice && <p role="status" className="mt-3 rounded-card bg-card px-4 py-3 text-sub font-bold text-arriving">{today.notice}</p>}
     </header>
   )
 }
@@ -135,32 +127,30 @@ export function NextShip({ today, list, idle, selected, onSelect, limit = 5, onM
   const sp = shipSpecies(today, first)
   return (
     <section className="rounded-card bg-card p-5" aria-labelledby="next-title">
-      <div className="flex items-center justify-between">
-        <h2 id="next-title" className="text-title font-bold text-primary-dark">곧 들어오는 배</h2>
-        <Tag tone="sun">{mins === 0 ? '곧 도착' : `다음 입항까지 약 ${mins}분`}</Tag>
-      </div>
+      <h2 id="next-title" className="text-title font-bold text-primary-dark">곧 들어오는 배</h2>
+      {/* 카드 안에 카드를 두지 않는다: 첫 배는 크기로 앞세우고, 고른 배만 옅은 바탕으로 표시(10/11 다듬기) */}
       <button onClick={() => onSelect(selected === first.ship_id ? null : first.ship_id)} aria-pressed={selected === first.ship_id}
-        className={`mt-3 w-full rounded-card border-2 p-4 text-left transition-colors duration-200 ${selected === first.ship_id ? 'border-[var(--color-sunrise)]' : 'border-transparent bg-[var(--color-sunrise-soft)]'}`}>
-        <div className="flex items-end gap-3">
-          <span className="text-[40px] font-extrabold leading-none tabular-nums text-arriving">{hhmm(first.eta)}</span>
-          <span className="pb-1 text-small text-muted">예측 · 신뢰도 {first.confidence ?? '보통'}</span>
+        className={`v2-press -mx-3 mt-2 block w-[calc(100%+1.5rem)] rounded-button px-3 py-3 text-left ${selected === first.ship_id ? 'bg-[var(--color-sunrise-soft)]' : 'hover:bg-chip'}`}>
+        <div className="flex flex-wrap items-baseline gap-x-3">
+          <span className="text-[44px] font-extrabold leading-none tracking-tight tabular-nums text-arriving">{hhmm(first.eta)}</span>
+          <span className="text-main font-bold text-arriving">{mins === 0 ? '곧 도착' : `${mins}분 뒤`}</span>
         </div>
-        <p className="mt-2 text-dialog font-bold">{first.name ?? '이름 미상'}</p>
-        <p className="text-sub text-muted">{shortBiz(first.biz)}선 {first.gt ? `${Math.round(first.gt)}t` : ''} · 위판장까지 {first.d_km.toFixed(1)}km</p>
-        <p className="mt-2 text-body font-bold">
+        <p className="mt-3 text-dialog font-bold">{first.name ?? '이름 미상'}</p>
+        <p className="text-sub text-muted">{shortBiz(first.biz)}선 {first.gt ? `${Math.round(first.gt)}t` : ''} · 위판장까지 {first.d_km.toFixed(1)}km · 예측(신뢰도 {first.confidence ?? '보통'})</p>
+        <p className="mt-3 text-body font-bold">
           {sp.top ? <>{sp.top.name} {likelihood(sp.top.share)} {share !== 'none' && <span className="text-small font-medium text-muted">{
             share === 'basis' ? `최근 4년 ${Number(today.clock.now.slice(5, 7))}월 위판의 ${Math.round(sp.top.share * 100)}%` : `추정 ${Math.round(sp.top.share * 100)}%`}</span>}</>
             : sp.categoryOnly ? <span className="text-muted">이 업종은 해마다 잡는 생선이 달라요</span> : null}
         </p>
       </button>
       {list.length > 1 && limit > 0 && (
-        <ul className="mt-3 divide-y divide-line">
+        <ul className="mt-2 divide-y divide-line">
           {list.slice(1, 1 + limit).map((a) => {
             const s = shipSpecies(today, a)
             return (
               <li key={a.ship_id}>
                 <button onClick={() => onSelect(selected === a.ship_id ? null : a.ship_id)} aria-pressed={selected === a.ship_id}
-                  className={`flex min-h-[var(--spacing-touch)] w-full items-center gap-3 py-2 text-left ${selected === a.ship_id ? 'font-bold' : ''}`}>
+                  className={`v2-press -mx-3 flex min-h-[var(--spacing-touch)] w-[calc(100%+1.5rem)] items-center gap-3 rounded-button px-3 py-2 text-left ${selected === a.ship_id ? 'bg-[var(--color-sunrise-soft)]' : 'hover:bg-chip'}`}>
                   <span className="w-14 text-main font-bold tabular-nums text-arriving">{hhmm(a.eta)}</span>
                   <span className="flex-1">
                     <span className="text-body font-bold">{a.name}</span>
@@ -175,8 +165,8 @@ export function NextShip({ today, list, idle, selected, onSelect, limit = 5, onM
       )}
       {today.arrived.length > 0 && <p className="mt-2 text-small text-muted">이미 들어온 배 {today.arrived.length}척</p>}
       {onMore && (
-        <button onClick={onMore} className="mt-3 flex min-h-[var(--spacing-touch)] w-full items-center justify-between rounded-button bg-chip px-4 text-button font-bold">
-          들어오는 배 {list.length}척 모두 보기 <span aria-hidden>→</span>
+        <button onClick={onMore} className="v2-press mt-3 flex min-h-[var(--spacing-touch)] w-full items-center justify-between rounded-button bg-chip px-4 text-button font-bold hover:brightness-95">
+          들어오는 배 {list.length}척 모두 보기 <Icon name="arrow" />
         </button>
       )}
     </section>
@@ -188,10 +178,10 @@ export function Depart({ visit }: { visit: VisitData | null }) {
   if (!visit) return null
   const word = trafficWord(visit.now)
   return (
-    <section className="rounded-card bg-primary-dark p-5 text-on-primary" aria-label="언제 가면 되나">
-      <p className="text-sub opacity-80">언제 가면 될까요?</p>
-      <p className="mt-1 text-dialog font-bold">경매 {visit.auction_time} · <span className="tabular-nums">{visit.arrive_by}</span>까지 도착하면 돼요</p>
-      {word && <p className="mt-1 text-sub opacity-90">지금 위판장 앞은 {word} <span className="opacity-70">· 실측</span></p>}
+    <section className="rounded-card bg-[var(--color-hero)] p-5 text-[var(--color-on-hero)]" aria-label="언제 가면 되나">
+      {/* 머리말("언제 가면 될까요?") 없이 답이 곧 제목(10/11 다듬기) */}
+      <p className="text-dialog font-bold">경매 {visit.auction_time} · <span className="tabular-nums">{visit.arrive_by}</span>까지 도착하면 돼요</p>
+      {word && <p className="mt-2 flex items-center gap-1.5 text-sub opacity-90"><Icon name="truck" />지금 위판장 앞은 {word} <span className="opacity-75">· 실측</span></p>}
     </section>
   )
 }
@@ -200,12 +190,13 @@ export function Depart({ visit }: { visit: VisitData | null }) {
 export function CallUs({ number }: { number: string }) {
   return (
     <a href={telHref(number)}
-      className="flex items-center gap-4 rounded-card border-2 border-[var(--color-sunrise)] bg-card p-4 transition-[filter] duration-200 hover:brightness-95">
-      <span aria-hidden className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-[var(--color-sunrise)] text-2xl">📞</span>
-      <span>
+      className="v2-press flex items-center gap-4 rounded-card bg-card p-4 hover:brightness-95">
+      <span aria-hidden className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-primary-dark text-[22px] text-on-primary"><Icon name="phone" /></span>
+      <span className="flex-1">
         <span className="block text-main font-bold text-primary-dark">전화로 물어보기</span>
-        <span className="block text-sub text-muted">{telText(number)} · 말로 물으면 말로 알려 드려요</span>
+        <span className="block text-sub text-muted"><span className="tabular-nums">{telText(number)}</span> · 말로 물으면 말로 알려 드려요</span>
       </span>
+      <Icon name="arrow" className="text-muted" />
     </a>
   )
 }
@@ -230,9 +221,12 @@ export function Toast({ items }: { items: { vts: string; body: string }[] | null
   if (!show) return null
   return (
     <div role="status" className="v2-toast fixed inset-x-0 top-0 z-50 mx-auto max-w-xl px-4 pt-3">
-      <div className="rounded-card border-l-8 border-[var(--color-sunrise)] bg-card p-4 shadow-lg">
-        <p className="text-sub font-bold text-arriving">📣 {hhmm(show.vts)} 입항 알림을 보냈어요</p>
-        <p className="mt-1 text-body">{show.body}</p>
+      <div className="v2-shadow flex gap-3 rounded-card bg-card p-4">
+        <span aria-hidden className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[var(--color-sunrise-soft)] text-arriving"><Icon name="bell" /></span>
+        <div>
+          <p className="text-sub font-bold text-arriving"><span className="tabular-nums">{hhmm(show.vts)}</span> 입항 알림을 보냈어요</p>
+          <p className="mt-1 text-body">{show.body}</p>
+        </div>
       </div>
     </div>
   )
