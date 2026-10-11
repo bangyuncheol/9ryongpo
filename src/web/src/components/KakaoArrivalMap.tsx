@@ -124,6 +124,8 @@ export default function KakaoArrivalMap(p: Props) {
   const { place, onFail, onSelect } = p
   const pad = p.padBottom ?? 0
   const padAtInit = useRef(pad) // 처음 위치는 지도를 만들 때의 여백(시트 기본 높이)으로 한 번 잡는다
+  const padNow = useRef(pad)
+  padNow.current = pad
   const selRef = useRef<number | null>(p.selected)
   selRef.current = p.selected
   arrRef.current = new Map(p.arriving.map((a) => [a.ship_id, a]))
@@ -161,7 +163,11 @@ export default function KakaoArrivalMap(p: Props) {
       kakao.maps.event.addListener(m, 'idle', () => {
         const h = home.current
         if (!h) return
-        if (!limit.contain(m.getCenter())) { resetView(m); return } // 범위 밖이면 처음 위치로
+        // 범위 판정은 '눈에 보이는 영역'의 가운데로: 아래를 시트가 덮으면 실제 지도 가운데는 훨씬 남쪽이라,
+        // '조업·대기' 버튼으로 넓힌 화면이 범위 밖으로 판정돼 곧바로 처음 위치로 되돌아갔다(10/11 오너 제보)
+        const W = box.current?.clientWidth ?? 0, H = box.current?.clientHeight ?? 0
+        const seen = W && H ? m.getProjection().coordsFromContainerPoint(new kakao.maps.Point(W / 2, Math.max(0, H - padNow.current) / 2)) : m.getCenter()
+        if (!limit.contain(seen)) { resetView(m); return } // 범위 밖이면 처음 위치로
         const c = m.getCenter() as { getLat: () => number; getLng: () => number }
         const hc = h.center as { getLat: () => number; getLng: () => number }
         setMoved(m.getLevel() !== h.level || Math.abs(c.getLat() - hc.getLat()) > 1e-4 || Math.abs(c.getLng() - hc.getLng()) > 1e-4)
