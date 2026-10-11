@@ -114,12 +114,15 @@ export default function KakaoArrivalMap(p: Props) {
   // 지도: 한 번만 만든다. 처음엔 구룡포항 확대 화면. 끌기·확대·축소 가능(10/11 오너: 고정 해제), 범위를 벗어나면 원위치.
   const home = useRef<{ center: unknown; level: number } | null>(null)
   const [moved, setMoved] = useState(false)
-  const goHome = () => {
-    const m = map.current, h = home.current
-    if (!m || !h) return
-    m.setLevel(h.level, { animate: { duration: 300 } })
-    m.panTo(h.center)
+  // 처음 위치로: 확대 단계를 먼저(애니메이션 없이) 맞추고 가운데를 옮긴다. 확대 애니메이션과 panTo 를 동시에
+  // 보내면 이동이 무시돼 바다 한가운데 멈추는 일이 있었다(10/11 재현).
+  const resetView = (m: K) => {
+    const h = home.current
+    if (!h) return
+    m.setLevel(h.level)
+    m.setCenter(h.center)
   }
+  const goHome = () => { if (map.current) resetView(map.current) }
   useEffect(() => {
     let alive = true
     loadKakao().then((kakao) => {
@@ -141,11 +144,7 @@ export default function KakaoArrivalMap(p: Props) {
       kakao.maps.event.addListener(m, 'idle', () => {
         const h = home.current
         if (!h) return
-        if (!limit.contain(m.getCenter())) { // 범위 밖이면 처음 위치로
-          m.setLevel(h.level, { animate: { duration: 300 } })
-          m.panTo(h.center)
-          return
-        }
+        if (!limit.contain(m.getCenter())) { resetView(m); return } // 범위 밖이면 처음 위치로
         const c = m.getCenter() as { getLat: () => number; getLng: () => number }
         const hc = h.center as { getLat: () => number; getLng: () => number }
         setMoved(m.getLevel() !== h.level || Math.abs(c.getLat() - hc.getLat()) > 1e-4 || Math.abs(c.getLng() - hc.getLng()) > 1e-4)
