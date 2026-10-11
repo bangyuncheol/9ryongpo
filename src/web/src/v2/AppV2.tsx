@@ -78,9 +78,9 @@ export default function AppV2() {
   )
 }
 
-type VisitData = { auction_time: string; arrive_by: string; now?: string | null; advice: string }
+export type VisitData = { auction_time: string; arrive_by: string; now?: string | null; advice: string }
 
-function Tag({ children, tone = 'muted' }: { children: ReactNode; tone?: 'muted' | 'sun' }) {
+export function Tag({ children, tone = 'muted' }: { children: ReactNode; tone?: 'muted' | 'sun' }) {
   return (
     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-small font-bold ${
       tone === 'sun' ? 'bg-[var(--color-sunrise-soft)] text-arriving' : 'bg-chip text-muted'}`}>{children}</span>
@@ -88,7 +88,7 @@ function Tag({ children, tone = 'muted' }: { children: ReactNode; tone?: 'muted'
 }
 
 /** 한 줄 헤더 + 오늘의 구룡포 요약(보는 영역). 제목을 크게 두지 않고 상황을 먼저. */
-function Header({ today, arrivingCount, traffic }: { today: Today | null; arrivingCount: number; traffic: string | null }) {
+export function Header({ today, arrivingCount, traffic }: { today: Today | null; arrivingCount: number; traffic: string | null }) {
   const top = today?.species.overall[0]
   const now = today?.clock.now
   return (
@@ -113,8 +113,11 @@ function Header({ today, arrivingCount, traffic }: { today: Today | null; arrivi
 }
 
 /** 가장 먼저 들어오는 배를 크게, 나머지는 한 줄씩. 모든 배에 같은 공간을 주지 않는다. */
-function NextShip({ today, list, idle, selected, onSelect }: {
+export function NextShip({ today, list, idle, selected, onSelect, limit = 5, onMore, share = 'short' }: {
   today: Today | null; list: Arrival[]; idle: number; selected: number | null; onSelect: (id: number | null) => void
+  /** 큰 카드 아래 한 줄씩 보여 줄 배 수(버전 3 홈은 0) */ limit?: number
+  /** 있으면 '들어오는 배 N척 모두 보기' 버튼을 단다 */ onMore?: () => void
+  /** 어종 비율 표기: short='추정 79%', basis='최근 4년 10월 위판의 79%'(정확도로 오해 방지), none=말만 */ share?: 'short' | 'basis' | 'none'
 }) {
   if (!today) return <section className="rounded-card bg-card p-5 text-muted">불러오는 중입니다</section>
   const first = list[0]
@@ -145,13 +148,14 @@ function NextShip({ today, list, idle, selected, onSelect }: {
         <p className="mt-2 text-dialog font-bold">{first.name ?? '이름 미상'}</p>
         <p className="text-sub text-muted">{shortBiz(first.biz)}선 {first.gt ? `${Math.round(first.gt)}t` : ''} · 위판장까지 {first.d_km.toFixed(1)}km</p>
         <p className="mt-2 text-body font-bold">
-          {sp.top ? <>{sp.top.name} {likelihood(sp.top.share)} <span className="text-small font-medium text-muted">추정 {Math.round(sp.top.share * 100)}%</span></>
+          {sp.top ? <>{sp.top.name} {likelihood(sp.top.share)} {share !== 'none' && <span className="text-small font-medium text-muted">{
+            share === 'basis' ? `최근 4년 ${Number(today.clock.now.slice(5, 7))}월 위판의 ${Math.round(sp.top.share * 100)}%` : `추정 ${Math.round(sp.top.share * 100)}%`}</span>}</>
             : sp.categoryOnly ? <span className="text-muted">이 업종은 해마다 잡는 생선이 달라요</span> : null}
         </p>
       </button>
-      {list.length > 1 && (
+      {list.length > 1 && limit > 0 && (
         <ul className="mt-3 divide-y divide-line">
-          {list.slice(1, 6).map((a) => {
+          {list.slice(1, 1 + limit).map((a) => {
             const s = shipSpecies(today, a)
             return (
               <li key={a.ship_id}>
@@ -170,12 +174,17 @@ function NextShip({ today, list, idle, selected, onSelect }: {
         </ul>
       )}
       {today.arrived.length > 0 && <p className="mt-2 text-small text-muted">이미 들어온 배 {today.arrived.length}척</p>}
+      {onMore && (
+        <button onClick={onMore} className="mt-3 flex min-h-[var(--spacing-touch)] w-full items-center justify-between rounded-button bg-chip px-4 text-button font-bold">
+          들어오는 배 {list.length}척 모두 보기 <span aria-hidden>→</span>
+        </button>
+      )}
     </section>
   )
 }
 
 /** '언제 가면 되나'를 한 문장으로: 경매 시각 + 도착 권장 + 지금 위판장 앞(실측). */
-function Depart({ visit }: { visit: VisitData | null }) {
+export function Depart({ visit }: { visit: VisitData | null }) {
   if (!visit) return null
   const word = trafficWord(visit.now)
   return (
@@ -188,7 +197,7 @@ function Depart({ visit }: { visit: VisitData | null }) {
 }
 
 /** 채팅이 어려운 분을 위한 가장 쉬운 입구: 누르면 바로 전화. */
-function CallUs({ number }: { number: string }) {
+export function CallUs({ number }: { number: string }) {
   return (
     <a href={telHref(number)}
       className="flex items-center gap-4 rounded-card border-2 border-[var(--color-sunrise)] bg-card p-4 transition-[filter] duration-200 hover:brightness-95">
@@ -202,7 +211,7 @@ function CallUs({ number }: { number: string }) {
 }
 
 /** 새 입항 알림이 나가는 순간을 보이게: 위에서 내려오는 띠(6초). 처음 불러온 목록은 띄우지 않는다. */
-function Toast({ items }: { items: { vts: string; body: string }[] | null }) {
+export function Toast({ items }: { items: { vts: string; body: string }[] | null }) {
   const seen = useRef<Set<string> | null>(null)
   const [show, setShow] = useState<{ vts: string; body: string } | null>(null)
   useEffect(() => {

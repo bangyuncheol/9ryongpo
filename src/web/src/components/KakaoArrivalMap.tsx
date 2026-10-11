@@ -35,6 +35,8 @@ type Props = {
   onFail: () => void
   /** true 면 범례를 접어 두고 '범례' 버튼으로 연다(2차 시안, 10/11). 기본 false = 기존처럼 늘 펼침 */
   legendToggle?: boolean
+  /** true 면 지도 높이를 줄인다(버전 3 폰 홈의 작은 지도) */
+  compact?: boolean
 }
 
 type Track = { o: K; el: HTMLElement; from: [number, number]; to: [number, number]; t0: number; status: Ship['status'] }
@@ -314,7 +316,7 @@ export default function KakaoArrivalMap(p: Props) {
 
   return (
     <div ref={wrap} className="relative">
-      <div ref={box} className="h-80 w-full overflow-hidden rounded-card bg-primary-soft md:h-[460px]" aria-label="입항 지도" />
+      <div ref={box} className={`${p.compact ? 'h-52' : 'h-80 md:h-[460px]'} w-full overflow-hidden rounded-card bg-primary-soft`} aria-label="입항 지도" />
       <div ref={edgeBox} className="absolute inset-0 z-[400] overflow-hidden rounded-card [&>*]:pointer-events-auto" style={{ pointerEvents: 'none' }} />
       {idle.length > 0 && (
         <p className="pointer-events-none absolute right-2 top-2 z-[500] rounded-button bg-card/90 px-3 py-1.5 text-[12px] font-bold text-muted shadow-sm">
