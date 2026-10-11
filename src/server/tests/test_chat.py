@@ -248,7 +248,8 @@ def test_tools_hide_data_source_and_flag_category_only(ctx):
     out = asyncio.run(run_tool(ctx, "get_arrival_forecast", {}))
     assert "data_source" not in out and "notice" not in out
     d = asyncio.run(run_tool(ctx, "get_species_estimate", {"biz": "근해자망어업"}))
-    assert d["category_only"] is True and "말하지 않는다" in d["note"]
+    # 들어오는 근해자망 배(제33안성호)가 있으면 알림과 같은 계산 → 어종 말 못하는 업종으로 표시(10/11 형식 변경)
+    assert d["category_only_biz"] == ["근해자망어업"] and d["overall"] == [] and "말하지 않는다" in d["note"]
     p = chat.system_prompt(ctx)
     assert "시뮬레이션인지 실데이터인지는 말하지 않는다" in p and "선박 위치 데이터" not in p
 
@@ -290,3 +291,15 @@ def test_voice_gate_can_say_unclear_but_web_cannot(ctx):
     assert evs[-1]["scope"] == "UNCLEAR" and client.responses.gate[0]["input"][0]["content"] == chat.GATE_VOICE
     evs = collect(chat.answer(client, "m", ctx, "오늘 돈 돼 있나요?"))
     assert evs[-1]["scope"] == "OUT"  # 화면 채팅은 IN/OUT 두 가지 그대로
+
+
+def test_species_for_short_biz_matches_alert_calculation(ctx):
+    """실통화(10/11): 알림은 붉은대게였는데 "자망선 뭐 싣고?"에 '추정 불가'로 답했다. 지금 들어오는 배 기준으로 맞춘다."""
+    from app.rules import species
+    out = asyncio.run(run_tool(ctx, "get_species_estimate", {"biz": "자망선"}))
+    today = asyncio.run(ctx.engine.today())
+    ships = [a for a in today["arriving"] + today["arrived"] if "자망" in (a.get("biz") or "")]
+    assert ships and out["ships_named"] == [a["name"] for a in ships]
+    assert out["overall"] == species.estimate(ctx.engine.conn, ships, 10)["overall"]  # 알림과 같은 계산
+    out2 = asyncio.run(run_tool(ctx, "get_species_estimate", {"biz": "통발"}))  # 들어오는 통발 배가 없으면 업종 실적
+    assert "by_biz" in out2 and out2["basis_note"].startswith("지금 들어오는 그 업종 배가 없어")

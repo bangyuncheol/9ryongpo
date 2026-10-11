@@ -22,8 +22,8 @@ TOOLS: list[dict] = [
          "min_gt": {"type": "number", "description": "최소 톤수"}, "max_gt": {"type": "number", "description": "최대 톤수"}},
          "additionalProperties": False}},
     {"type": "function", "name": "get_species_estimate",
-     "description": "어종 추정. biz를 주면 그 어업종류가 이 달에 보통 무엇을 잡는지, 생략하면 지금 들어오는 배 전체의 어종 비중. 최근 4년 같은 달 구룡포 위판 실적 기준이며 확률이다.",
-     "parameters": {"type": "object", "properties": {"biz": {"type": "string", "description": "어업종류. 예: 연안자망어업"}},
+     "description": "어종 추정. biz를 주면 지금 들어오는 그 업종 배들 기준(입항 알림과 같은 계산), 그런 배가 없으면 그 업종이 이 달에 보통 무엇을 잡는지. 생략하면 지금 들어오는 배 전체. 최근 4년 같은 달 구룡포 위판 실적 기준이며 확률이다.",
+     "parameters": {"type": "object", "properties": {"biz": {"type": "string", "description": "어업종류. '자망', '연안자망', '채낚기'처럼 줄여도 된다"}},
                     "additionalProperties": False}},
     {"type": "function", "name": "get_traffic_now",
      "description": "위판장 80m 앞 교통센서3의 실측 교통량(최근 9시간 트럭·전체)과 혼잡율 비교. 실제 현재 시각 기준이며 미래 예측이 아니다.",
@@ -72,10 +72,7 @@ async def run_tool(ctx: ToolContext, name: str, args: dict[str, Any]) -> dict:
         if name == "get_species_estimate":
             month = ctx.engine.clock.now().month
             if args.get("biz"):
-                d = species.biz_distribution(ctx.engine.conn, args["biz"], month)
-                if d.get("category_only"):
-                    d["note"] = "해마다 1위 어종이 바뀌는 업종이라 특정 어종을 싣고 온다고 말하지 않는다."
-                return d
+                return await species_for_biz(ctx, args["biz"], month)
             est = (await ctx.engine.today())["species"]
             if est.get("category_only_biz"):
                 est["note"] = f"{', '.join(est['category_only_biz'])}은 해마다 어종이 달라 비율에서 뺐다. 이 업종 배의 어종은 말하지 않는다."
@@ -100,6 +97,40 @@ async def run_tool(ctx: ToolContext, name: str, args: dict[str, Any]) -> dict:
     except Exception:
         log.exception("도구 실행 실패: %s", name)
         return {"error": "이 정보를 지금 계산하지 못했습니다."}
+
+
+def _biz_key(raw: str) -> str:
+    """'자망선'·'연안자망 배'·'근해채낚기어업' → '자망'·'연안자망'·'근해채낚기'."""
+    k = raw.replace(" ", "")
+    for suf in ("어업", "선", "배"):
+        k = k.removesuffix(suf)
+    return k
+
+
+async def species_for_biz(ctx: ToolContext, raw: str, month: int) -> dict:
+    """업종을 지정한 어종 질문. 알림과 답이 어긋나지 않게, 지금 들어오는 그 업종 배가 있으면 알림과 같은
+    계산(species.estimate, 톤수 가중)을 쓴다. 실통화(10/11): 알림은 '붉은대게·골뱅이', "자망선 뭐 싣고?"엔
+    업종명 '자망'이 실적 업종명과 안 맞아 '추정 불가'로 답했다."""
+    key = _biz_key(raw)
+    today = await ctx.engine.today()
+    ships = [a for a in today["arriving"] + today["arrived"] if key and key in (a.get("biz") or "")]
+    if ships:
+        est = species.estimate(ctx.engine.conn, ships, month)
+        est["ships_named"] = [a.get("name") for a in ships]
+        est["basis_note"] = f"지금 들어오는 {key} 배 {len(ships)}척 기준(입항 알림과 같은 계산)"
+        if est.get("category_only_biz"):
+            est["note"] = f"{', '.join(est['category_only_biz'])}은 해마다 어종이 달라 비율에서 뺐다. 이 업종 배의 어종은 말하지 않는다."
+        return est
+    names = [r[0] for r in ctx.engine.conn.execute("SELECT DISTINCT biz FROM fleet WHERE biz IS NOT NULL").fetchall()]
+    full = [b for b in names if key and key in b] or [raw]
+    out = {"by_biz": []}
+    for b in full:
+        d = species.biz_distribution(ctx.engine.conn, b, month)
+        if d.get("category_only"):
+            d["note"] = "해마다 1위 어종이 바뀌는 업종이라 특정 어종을 싣고 온다고 말하지 않는다."
+        out["by_biz"].append(d)
+    out["basis_note"] = "지금 들어오는 그 업종 배가 없어, 업종의 이 달 보통 어종이다"
+    return out
 
 
 def past_auction(conn, sp: str, year: int | None, month: int | None) -> dict:
