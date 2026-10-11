@@ -40,6 +40,7 @@ class Settings:
     gemini_api_key: str = ""
     gemini_tts_model: str = "gemini-3.8-flash-tts"
     gemini_tts_voice: str = "Kore"
+    stt_record: bool = False  # STT 비교 시험용 질문 음성 저장(data/stt_clips/)
     eum_base_url: str = "https://genix.pohang-eum.kr/dpg"
     http_timeout_s: float = 15.0
 
@@ -83,6 +84,7 @@ def load_settings() -> Settings:
         gemini_api_key=os.getenv("GEMINI_API_KEY", "").strip(),
         gemini_tts_model=os.getenv("GEMINI_TTS_MODEL", "gemini-3.8-flash-tts").strip(),
         gemini_tts_voice=os.getenv("GEMINI_TTS_VOICE", "Kore").strip(),
+        stt_record=os.getenv("STT_RECORD", "0").strip() == "1",
     )
 
 

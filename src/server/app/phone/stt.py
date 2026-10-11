@@ -11,6 +11,9 @@ import base64
 import json
 import logging
 import math
+import time
+import wave
+from pathlib import Path
 from typing import AsyncIterator, Callable
 
 import websockets
@@ -26,10 +29,29 @@ HINT = "구룡포 위판장, 입항, 자망선, 채낚기, 통발, 붉은대게,
 class OpenAITranscribeSTT:
     def __init__(self, api_key: str, model: str = "gpt-4o-mini-transcribe", silence_ms: int = 800,
                  on_final: Callable[[str, float | None], None] | None = None,
-                 on_speech: Callable[[bool], None] | None = None) -> None:
+                 on_speech: Callable[[bool], None] | None = None, record_dir: Path | None = None) -> None:
         self._key, self._model, self._silence_ms = api_key, model, silence_ms
         self._on_final = on_final  # (확정 문장, 가장 낮은 글자 확신도 0~1) — 범위 밖 판정 때 '잘못 들음' 구분용
         self._on_speech = on_speech  # True=말 시작, False=그 말의 받아쓰기 확정. 말하는 중엔 답을 미루려고
+        # STT_RECORD=1 일 때만: 질문 음성을 잘라 저장(STT 비교 시험용, 10/11). 본인 목소리 시험에만 켜고 끝나면 지운다.
+        self._rec_dir = record_dir / time.strftime("%Y%m%d-%H%M%S") if record_dir else None
+        self._pcm16k = bytearray()
+        self._spans: dict[str, list[int]] = {}
+        self._n = 0
+
+    def _save_clip(self, item_id: str, text: str, conf: float | None, avg: float | None, low: int) -> None:
+        span = self._spans.pop(item_id, None)
+        if not (self._rec_dir and span and len(span) == 2):
+            return
+        a = max(0, (span[0] - 200) * 32)          # 16kHz·2바이트 = ms당 32바이트, 앞뒤 0.2초 여유
+        b = min(len(self._pcm16k), (span[1] + 200) * 32)
+        self._rec_dir.mkdir(parents=True, exist_ok=True)
+        self._n += 1
+        name = f"{self._n:02d}.wav"
+        with wave.open(str(self._rec_dir / name), "wb") as w:
+            w.setnchannels(1); w.setsampwidth(2); w.setframerate(16000); w.writeframes(bytes(self._pcm16k[a:b]))
+        with open(self._rec_dir / "manifest.jsonl", "a", encoding="utf-8") as f:
+            f.write(json.dumps({"file": name, "openai": text, "min": conf, "avg": avg, "low": low}, ensure_ascii=False) + "\n")
 
     def _session(self) -> dict:
         # 확신도(logprobs)는 확정 메시지에 같이 와서 지연이 늘지 않는다(10/11 실측: 켬·끔 모두 말 끝→확정 0.57초).
@@ -49,6 +71,8 @@ class OpenAITranscribeSTT:
 
             async def pump() -> None:
                 async for pcm16k in audio_stream:
+                    if self._rec_dir:
+                        self._pcm16k += pcm16k
                     pcm24k = resample_pcm16(pcm16k, from_rate=16000, to_rate=24000)
                     await ws.send(json.dumps({"type": "input_audio_buffer.append",
                                               "audio": base64.b64encode(pcm24k).decode("ascii")}))
@@ -58,6 +82,10 @@ class OpenAITranscribeSTT:
                 async for raw in ws:
                     m = json.loads(raw)
                     t = m.get("type", "")
+                    if t == "input_audio_buffer.speech_started" and self._rec_dir:
+                        self._spans[m.get("item_id", "")] = [int(m.get("audio_start_ms", 0))]
+                    if t == "input_audio_buffer.speech_stopped" and self._rec_dir:
+                        self._spans.setdefault(m.get("item_id", ""), [0]).append(int(m.get("audio_end_ms", 0)))
                     if t == "input_audio_buffer.speech_started":
                         if self._on_speech:
                             self._on_speech(True)
@@ -74,6 +102,7 @@ class OpenAITranscribeSTT:
                             # 판정에는 최저값만 쓴다. 평균·낮은 글자 수는 실통화로 기준을 다시 맞추려고 남긴다(10/11).
                             if lps:
                                 ps = [math.exp(x) for x in lps]
+                                self._save_clip(m.get("item_id", ""), text, conf, sum(ps) / len(ps), sum(p < 0.5 for p in ps))
                                 log.info("받아쓰기 확정: %r 최저 확신도 %.2f 평균 %.2f 낮은 글자(0.5 미만) %d/%d",
                                          text[:60], conf, sum(ps) / len(ps), sum(p < 0.5 for p in ps), len(ps))
                             else:

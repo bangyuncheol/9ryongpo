@@ -169,7 +169,8 @@ class PhoneService:
         state = brain.CallState(greeting, direction)
         state.log = self._line
         self._state = state
-        return _pipeline()(stt=OpenAITranscribeSTT(self.s.openai_api_key, on_final=state.heard, on_speech=state.speaking),
+        return _pipeline()(stt=OpenAITranscribeSTT(self.s.openai_api_key, on_final=state.heard, on_speech=state.speaking,
+                                                     record_dir=(self.cache_dir.parent / "stt_clips") if self.s.stt_record else None),
                                llm=brain.BaemajungLLM(self._answer_factory(), state),
                                tts=self._tts(state), system_prompt="", greeting=True)
 
