@@ -31,6 +31,7 @@ REASK = "죄송해요, 제가 잘 못 들었어요. 한 번만 다시 말씀해 
 CHOICES = "들어오는 배, 대게, 위판장 앞 교통 중에 어떤 게 궁금하세요?"
 OFFTOPIC = "그건 제가 안내해 드리기 어려워요. 들어오는 배나 어종, 위판장 앞 교통을 물어봐 주세요."
 FIXED = (HELLO, INBOUND_INTRO, ASK_MORE, CUSHION, CLOSING, CLOSING_OUT, SLOW, REASK, CHOICES, OFFTOPIC)
+QUIET_WAIT_S = 3.0  # 사용자가 아직 말하는 중이면 쿠션·답을 이만큼까지 미룬다(소음으로 '말 시작'만 오고 끝이 안 오는 경우 상한)
 LOW_CONF = 0.2  # 받아쓰기 최저 글자 확신도. 합성 음성 시험(10/11): 크게 틀린 문장 0.00~0.05, 맞은 문장 0.32~0.97
 
 ANSWER_TIMEOUT_S = 20.0
@@ -57,7 +58,24 @@ class CallState:
         self.hangup_after: str | None = None  # 이 문장을 다 말하면 끊는다
         self.conf: dict[str, float | None] = {}  # 받아쓰기 문장 → 최저 글자 확신도
         self.misses = 0  # 연속으로 못 알아들은 횟수
+        self._quiet = asyncio.Event()
+        self._quiet.set()
         self.log: Callable[[str, str], None] = lambda role, text: None
+
+    def speaking(self, on: bool) -> None:
+        """받아쓰기 연결의 말 시작(True)·말 끝(False) 신호."""
+        if on:
+            self._quiet.clear()
+        else:
+            self._quiet.set()
+
+    async def wait_quiet(self, max_s: float = QUIET_WAIT_S) -> None:
+        """말하는 중이면 끝날 때까지(최대 max_s) 기다린다. 그사이 뒷말이 확정되면 파이프라인이 이 응답을 취소하고
+        두 문장을 합쳐 다시 부른다(10/11 실통화: 말 중간에 쉬면 앞 절반에 먼저 답하던 문제)."""
+        try:
+            await asyncio.wait_for(self._quiet.wait(), timeout=max_s)
+        except asyncio.TimeoutError:
+            log.info("말 끝 신호가 %.0f초 안에 오지 않아 그대로 답함(소음일 수 있음)", max_s)
 
     def heard(self, text: str, conf: float | None) -> None:
         self.conf[text.strip()] = conf
@@ -93,8 +111,15 @@ class BaemajungLLM:
         return pairs
 
     async def generate(self, messages: list[dict[str, Any]], tools: list[dict[str, Any]] | None = None) -> AsyncIterator[str]:
-        users = [m for m in messages if m.get("role") == "user"]
-        last = (users[-1].get("content") or "").strip() if users else START
+        # 끝에 이어진 사용자 말(중간에 쉬어서 둘로 나뉜 문장)은 한 질문으로 합친다
+        tail: list[str] = []
+        for m in reversed(messages):
+            if m.get("role") != "user":
+                break
+            tail.insert(0, (m.get("content") or "").strip())
+        last = " ".join(t for t in tail if t) if tail else START
+        if START in tail:
+            last = START
         if last == START:
             for s in self.state.greeting:
                 yield s
@@ -105,7 +130,7 @@ class BaemajungLLM:
             self.state.hangup_after = bye
             yield bye
             return
-        history = self._history(messages[:-1])
+        history = self._history(messages[:len(messages) - len(tail)])
         result: dict[str, str] = {}
 
         async def run() -> None:
@@ -120,6 +145,7 @@ class BaemajungLLM:
 
         task = asyncio.create_task(run())
         try:
+            await self.state.wait_quiet()
             yield CUSHION
             try:
                 await asyncio.wait_for(asyncio.shield(task), timeout=ANSWER_TIMEOUT_S)
@@ -127,6 +153,7 @@ class BaemajungLLM:
                 log.warning("전화 답이 %.0f초 넘게 걸려 안내 문장으로 대신함", ANSWER_TIMEOUT_S)
                 yield SLOW
                 return
+            await self.state.wait_quiet()  # 답을 만드는 사이 다시 말을 시작했으면 끝날 때까지
             if result.get("scope", "IN") != "IN":
                 text = self.state.reply_for_out(last, result["scope"])
                 log.info("전화 범위 밖(%s, 확신도 %s) → %s", result["scope"], self.state.conf.get(last), text[:20])

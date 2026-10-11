@@ -161,3 +161,38 @@ def test_in_scope_answer_ignores_low_confidence():
     st = brain.CallState([], "inbound")
     st.heard("남진호 뭐 싣고 와요?", 0.05)  # 배 이름 같은 고유명사는 맞아도 확신도가 낮을 수 있다
     assert ask(st, fake_answer(0)[0], "남진호 뭐 싣고 와요?")[-1] == brain.ASK_MORE
+
+
+def test_split_question_is_merged_into_one():
+    fn, seen = fake_answer(0)
+    st = brain.CallState([], "inbound")
+    msgs = [{"role": "user", "content": brain.START}, {"role": "assistant", "content": "인사"},
+            {"role": "user", "content": "이런 것까지 맥락을 다 읽고"}, {"role": "user", "content": "2차 방정식이 뭔지 알려주세요."}]
+    collect(brain.BaemajungLLM(fn, st).generate(msgs))
+    assert seen[0][0] == "이런 것까지 맥락을 다 읽고 2차 방정식이 뭔지 알려주세요." and seen[0][1] == []
+
+
+def test_cushion_waits_while_user_is_still_speaking():
+    st = brain.CallState([], "inbound")
+    st.speaking(True)
+    order = []
+
+    async def run():
+        gen = brain.BaemajungLLM(fake_answer(0)[0], st).generate([{"role": "user", "content": "오늘 배"}])
+        first = asyncio.ensure_future(gen.__anext__())
+        await asyncio.sleep(0.2)
+        order.append(("나옴" if first.done() else "기다림"))
+        st.speaking(False)
+        order.append(await first)
+        await gen.aclose()
+    asyncio.run(run())
+    assert order == ["기다림", brain.CUSHION]
+
+
+def test_wait_quiet_gives_up_after_limit():
+    st = brain.CallState([], "inbound")
+    st.speaking(True)  # 소음으로 말 시작만 오고 끝이 안 오는 경우
+    import time
+    t = time.monotonic()
+    asyncio.run(st.wait_quiet(0.2))
+    assert 0.15 < time.monotonic() - t < 1.0

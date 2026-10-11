@@ -169,7 +169,7 @@ class PhoneService:
         state = brain.CallState(greeting, direction)
         state.log = self._line
         self._state = state
-        return _pipeline()(stt=OpenAITranscribeSTT(self.s.openai_api_key, on_final=state.heard),
+        return _pipeline()(stt=OpenAITranscribeSTT(self.s.openai_api_key, on_final=state.heard, on_speech=state.speaking),
                                llm=brain.BaemajungLLM(self._answer_factory(), state),
                                tts=self._tts(state), system_prompt="", greeting=True)
 

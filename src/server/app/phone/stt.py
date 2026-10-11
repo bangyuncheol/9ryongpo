@@ -25,9 +25,11 @@ HINT = "구룡포 위판장, 입항, 자망선, 채낚기, 통발, 붉은대게,
 
 class OpenAITranscribeSTT:
     def __init__(self, api_key: str, model: str = "gpt-4o-mini-transcribe", silence_ms: int = 800,
-                 on_final: Callable[[str, float | None], None] | None = None) -> None:
+                 on_final: Callable[[str, float | None], None] | None = None,
+                 on_speech: Callable[[bool], None] | None = None) -> None:
         self._key, self._model, self._silence_ms = api_key, model, silence_ms
         self._on_final = on_final  # (확정 문장, 가장 낮은 글자 확신도 0~1) — 범위 밖 판정 때 '잘못 들음' 구분용
+        self._on_speech = on_speech  # True=말 시작, False=말 끝(0.8초 침묵). 말하는 중엔 답을 미루려고
 
     def _session(self) -> dict:
         # 확신도(logprobs)는 확정 메시지에 같이 와서 지연이 늘지 않는다(10/11 실측: 켬·끔 모두 말 끝→확정 0.57초).
@@ -57,7 +59,12 @@ class OpenAITranscribeSTT:
                     m = json.loads(raw)
                     t = m.get("type", "")
                     if t == "input_audio_buffer.speech_started":
+                        if self._on_speech:
+                            self._on_speech(True)
                         yield SpeechEvent(type="interim", transcript="")
+                    elif t == "input_audio_buffer.speech_stopped":
+                        if self._on_speech:
+                            self._on_speech(False)
                     elif t == "conversation.item.input_audio_transcription.completed":
                         text = (m.get("transcript") or "").strip()
                         lps = [x.get("logprob") for x in (m.get("logprobs") or []) if x.get("logprob") is not None]
