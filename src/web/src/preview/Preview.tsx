@@ -99,18 +99,30 @@ function Panel() {
   const [clock, setClock] = useState<{ now: string; playing: boolean; speed: number } | null>(null)
   const [call, setCall] = useState<CallState | null>(null)
   const [msg, setMsg] = useState<string | null>(null)
+  const [flash, setFlash] = useState<string | null>(null) // 한 번 실행하는 버튼은 누른 뒤 1초 강조(10/11)
+  useEffect(() => {
+    if (!flash) return
+    const id = setTimeout(() => setFlash(null), 1000)
+    return () => clearTimeout(id)
+  }, [flash])
   const refresh = async () => {
     try { setClock(await (await fetch('/api/sim/state')).json()) } catch (e) { console.error(e) }
     try { setCall(await api.callState(true)) } catch (e) { console.error(e) }
   }
   useEffect(() => { refresh(); const id = setInterval(refresh, 1500); return () => clearInterval(id) }, [])
   const post = async (path: string) => {
-    setMsg(null)
+    setMsg(null); setFlash(path)
     const r = await fetch(path, { method: 'POST' })
     if (!r.ok) setMsg(((await r.json().catch(() => null)) as { detail?: string } | null)?.detail ?? '실패했습니다.')
     refresh()
   }
-  const btn = 'rounded-full bg-[#edf1ee] px-3 py-1.5 text-sub font-bold'
+  const btnBase = 'rounded-full px-3 py-1.5 text-sub font-bold transition-colors duration-200'
+  /** 상태가 이어지는 버튼은 지금 상태와 맞으면 계속, 한 번 실행하는 버튼은 누른 뒤 1초 파랗게 */
+  const cls = (path: string, active = false) => `${btnBase} ${active || flash === path ? 'bg-[#0072de] text-white' : 'bg-[#edf1ee]'}`
+  const b = (path: string, label: string, active = false) => (
+    <button className={cls(path, active)} aria-pressed={active || undefined} onClick={() => post(path)}>{label}</button>
+  )
+  const playing = !!clock?.playing
   return (
     <aside className="sticky top-5 w-[320px] shrink-0 space-y-3 text-sub">
       <section className="rounded-2xl bg-white p-4">
@@ -118,20 +130,19 @@ function Panel() {
         <p className="mt-1"><span className="text-[28px] font-extrabold tabular-nums text-[#193b50]">{hhmm(clock?.now)}</span>{' '}
           <span className="text-[#55636b]">{clock ? (clock.playing ? `재생 ×${clock.speed}` : '정지') : ''}</span></p>
         <div className="mt-2 flex flex-wrap gap-1.5">
-          {['03:00', '03:10', '03:50', '04:30'].map((t) => <button key={t} className={btn} onClick={() => post(`/api/sim/seek?t=${t}`)}>{t}</button>)}
+          {['03:00', '03:10', '03:50', '04:30'].map((t) => <span key={t}>{b(`/api/sim/seek?t=${t}`, t)}</span>)}
         </div>
         <div className="mt-1.5 flex flex-wrap gap-1.5">
-          <button className={btn} onClick={() => post('/api/sim/play?speed=60')}>재생 60배</button>
-          <button className={btn} onClick={() => post('/api/sim/play?speed=300')}>재생 300배</button>
-          <button className={btn} onClick={() => post('/api/sim/pause')}>일시정지</button>
+          {b('/api/sim/play?speed=60', '재생 60배', playing && clock?.speed === 60)}
+          {b('/api/sim/play?speed=300', '재생 300배', playing && clock?.speed === 300)}
+          {b('/api/sim/pause', '일시정지', !!clock && !playing)}
         </div>
         <div className="mt-1.5 flex flex-wrap gap-1.5">
           {call?.enabled && <>
-            <button className={call.calls_on ? `${btn} !bg-[#193b50] text-white` : btn} onClick={() => post(`/api/call/toggle?on=${!call.calls_on}`)}>
-              {call.calls_on ? '전화 끄기' : '전화 켜기'}</button>
-            <button className={btn} onClick={() => post('/api/call/test')}>시험 전화</button>
+            {b(`/api/call/toggle?on=${!call.calls_on}`, call.calls_on ? '전화 켜짐 · 끄기' : '전화 켜기', call.calls_on)}
+            {b('/api/call/test', '시험 전화')}
           </>}
-          <button className={btn} onClick={() => post('/api/push/test')}>시험 알림</button>
+          {b('/api/push/test', '시험 알림')}
         </div>
         {msg && <p role="alert" className="mt-2 text-[#b4501d]">{msg}</p>}
       </section>
