@@ -77,7 +77,7 @@ export const api = {
   traffic: () => get<Traffic>('/api/traffic/now'),
   trafficSensors: () => get<{ sensors: SensorTraffic[]; stale: boolean }>('/api/traffic/sensors'),
   visit: (visitor: boolean) => get<{ advice: string; basis: string; auction_time: string }>(`/api/visit?visitor=${visitor}`),
-  pushKey: () => get<{ publicKey: string; species: string[] }>('/api/push/key'),
+  pushKey: () => get<{ publicKey: string; species: string[]; more?: { name: string; season: string }[] }>('/api/push/key'),
   notifications: () => get<{ vts: string; title: string; body: string }[]>('/api/notifications'),
   callState: (admin = false) => get<CallState>(`/api/call/state${admin ? '?admin=1' : ''}`),
 }

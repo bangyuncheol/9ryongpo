@@ -15,7 +15,10 @@ from .feed.clock import real_now
 from .rules import brief, species
 
 log = logging.getLogger(__name__)
-ALLOWED_SPECIES = {None, "붉은대게", "살오징어", "골뱅이", "방어", "가자미류"}
+MAIN_SPECIES = ["붉은대게", "살오징어", "골뱅이", "방어", "가자미류"]  # 10월 대표 어종(칩 고정, 10/11 오너)
+# 다른 철 생선: 화면에선 접어 두고 펼치면 보인다(10/12 오너). 위판 실적 56개월 금액 상위 중 위 다섯을 뺀 것, 값은 많이 나는 달
+OTHER_SEASON = {"꽃게": "12~2월", "청어": "4~6월", "문어": "1~3월", "아귀": "7~8월", "대문어": "6~8월", "삼치": "8~10월"}
+ALLOWED_SPECIES = {None, *MAIN_SPECIES, *OTHER_SEASON}
 
 
 class PushConfigError(Exception):

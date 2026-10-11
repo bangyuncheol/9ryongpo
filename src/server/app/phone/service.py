@@ -24,6 +24,7 @@ from typing import Any
 
 from ..config import Settings, phone_digits
 from ..db import tx
+from .. import push
 from ..feed.clock import real_now
 from ..rules import brief
 from . import brain
@@ -36,7 +37,7 @@ MAX_OUTBOUND_S = 150.0  # 우리가 거는 알림 전화는 발신 시간(체험
 GRACE_S = 40.0          # 상한 뒤 하던 답·끝인사를 마칠 여유. 이것도 넘으면 그냥 끊는다
 CLOSING_PAUSE_S = 2.0  # 끝인사 음성 길이 + 이만큼 뒤 끊는다. 전화로 소리가 실제 나오는 시점이 보내는 시점보다 늦다(10/11 실통화: 0.8초는 말 끝나자마자 끊기는 느낌)
 MAX_LINES = 40
-ALLOWED_SPECIES = {None, "붉은대게", "살오징어", "골뱅이", "방어", "가자미류"}
+ALLOWED_SPECIES = push.ALLOWED_SPECIES  # 휴대폰 알림과 같은 목록(10/12)
 
 
 def mask(phone: str) -> str:

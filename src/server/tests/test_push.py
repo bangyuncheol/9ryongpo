@@ -45,6 +45,7 @@ def test_save_subscription_validates(conn):
     a = push.save_subscription(conn, SUB, {"species": "붉은대게"})
     b = push.save_subscription(conn, SUB, {"species": None})  # 같은 기기는 조건만 갱신
     assert a == b and conn.execute("SELECT COUNT(*) FROM subs").fetchone()[0] == 1
+    push.save_subscription(conn, {**SUB, "endpoint": SUB["endpoint"] + "crab"}, {"species": "꽃게"})  # 다른 철 생선도 신청 가능(10/12)
 
 
 class FakeResp:

@@ -214,7 +214,9 @@ def sim_feed(request: Request, mode: str = Query(..., pattern="^(sim|live)$")) -
 # --- 웹 푸시 (설계 §5.3) ---
 @app.get("/api/push/key")
 def push_key() -> dict:
-    return {"publicKey": settings.vapid_public_key, "species": sorted(s for s in pushmod.ALLOWED_SPECIES if s)}
+    # species: 10월 대표 어종(버전 1~3은 이것만), more: 다른 철 생선과 많이 나는 달(버전 4가 접어 두고 보여 줌)
+    return {"publicKey": settings.vapid_public_key, "species": sorted(pushmod.MAIN_SPECIES),
+            "more": [{"name": k, "season": v} for k, v in pushmod.OTHER_SEASON.items()]}
 
 
 @app.post("/api/subscribe")

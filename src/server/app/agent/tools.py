@@ -9,11 +9,12 @@ from typing import Any
 from ..collectors.traffic import TrafficService
 from ..engine import Engine
 from ..eum import EumError
+from .. import push
 from ..kakao import KakaoClient
 from ..rules import species, travel, visit
 
 log = logging.getLogger(__name__)
-SPECIES_CHOICES = ["붉은대게", "살오징어", "골뱅이", "방어", "가자미류", "전체"]
+SPECIES_CHOICES = [*push.MAIN_SPECIES, *push.OTHER_SEASON, "전체"]
 
 TOOLS: list[dict] = [
     {"type": "function", "name": "get_arrival_forecast",

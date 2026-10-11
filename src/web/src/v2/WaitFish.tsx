@@ -21,12 +21,16 @@ function b64ToBytes(b64: string) {
   return Uint8Array.from(raw, (c) => c.charCodeAt(0))
 }
 
-export default function WaitFish({ phoneEnabled, onChange }: {
+export default function WaitFish({ phoneEnabled, onChange, showMore = false }: {
   phoneEnabled: boolean
   /** 켜짐 상태가 바뀌면 알린다(버전 4 '생선 알림 받기' 버튼이 '붉은대게 알림 켜짐'으로 바뀜, 10/11) */
   onChange?: (s: { on: boolean; species: string }) => void
+  /** true 면 다른 철 생선을 '다른 철 생선 보기'로 접어 두고 펼쳐 고르게 한다(버전 4, 10/12 오너). 기본 false = 10월 대표 어종만 */
+  showMore?: boolean
 }) {
   const [options, setOptions] = useState<string[]>(['붉은대게'])
+  const [more, setMore] = useState<{ name: string; season: string }[]>([])
+  const [moreOpen, setMoreOpen] = useState(false)
   const [species, setSpecies] = useState(() => read(KEY) ?? '붉은대게')
   const [pushOn, setPushOn] = useState(false)
   const [phoneOn, setPhoneOn] = useState<string | null>(() => read(PHONE_KEY))
@@ -40,7 +44,10 @@ export default function WaitFish({ phoneEnabled, onChange }: {
   useEffect(() => {
     // 구룡포 10월 대표 어종을 앞에(나머지는 가나다순)
     const lead = ['붉은대게', '살오징어']
-    api.pushKey().then((k) => setOptions([...lead.filter((x) => k.species.includes(x)), ...k.species.filter((x) => !lead.includes(x))])).catch(console.error)
+    api.pushKey().then((k) => {
+      setOptions([...lead.filter((x) => k.species.includes(x)), ...k.species.filter((x) => !lead.includes(x))])
+      setMore(k.more ?? [])
+    }).catch(console.error)
     if (!supported()) return
     navigator.serviceWorker.getRegistration()
       .then(async (reg) => setPushOn(!!(reg && (await reg.pushManager.getSubscription()))))
@@ -137,6 +144,27 @@ export default function WaitFish({ phoneEnabled, onChange }: {
               </button>
             ))}
           </div>
+          {showMore && more.length > 0 && (
+            <>
+              {/* 고른 생선이 접힌 쪽에 있으면 펼쳐 둔다(무엇을 골랐는지 늘 보이게) */}
+              <button type="button" onClick={() => setMoreOpen((o) => !o)} aria-expanded={moreOpen || more.some((m) => m.name === species)} aria-controls="wait-more"
+                className="mt-3 min-h-[var(--spacing-touch)] text-sub font-bold text-primary-dark">
+                {moreOpen || more.some((m) => m.name === species) ? '다른 철 생선 접기 ▴' : '다른 철 생선 보기 ▾'}
+              </button>
+              {(moreOpen || more.some((m) => m.name === species)) && (
+                <div id="wait-more" className="mt-1 flex flex-wrap gap-2" role="radiogroup" aria-label="다른 철 생선">
+                  {more.map((m) => (
+                    <button key={m.name} role="radio" aria-checked={species === m.name} onClick={() => setSpecies(m.name)}
+                      disabled={waiting}
+                      className={`v2-press min-h-[var(--spacing-touch)] rounded-button px-4 text-button font-bold disabled:opacity-60 ${
+                        species === m.name ? 'bg-primary-dark text-on-primary' : 'bg-chip text-ink hover:brightness-95'}`}>
+                      {m.name} <span className="text-small font-medium opacity-80">{m.season}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
           <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-body">
             {supported() && !pushOn && (
               <label className="flex min-h-[var(--spacing-touch)] items-center gap-2">
