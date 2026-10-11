@@ -27,8 +27,7 @@ from clawops.agent.pipeline import SpeechEvent
 log = logging.getLogger(__name__)
 
 URL = "wss://api.openai.com/v1/realtime?intent=transcription"
-HINT = ("구룡포 위판장, 입항, 자망선, 채낚기, 통발, 붉은대게, 홍게, 대게, 골뱅이, 오징어, 방어, 가자미, 경매, 트럭, 교통, "
-        "뭐 싣고 와요, 언제 들어와요")
+BACKCHANNEL_1 = {"네", "예", "응"}  # 한 글자 받아쓰기 중 맞장구로 받아 주는 것. 나머지 한 글자는 잡음·잘못 들음으로 버린다(10/11 실통화 '다')
 CLOVA_ADDR = "clovaspeech-gw.ncloud.com:50051"
 KEYWORDS = ["구룡포", "위판장", "입항", "경매", "자망선", "채낚기", "통발", "붉은대게", "홍게", "대게", "골뱅이",
             "오징어", "방어", "가자미", "싣고"]
@@ -79,7 +78,9 @@ class PhoneSTT:
         return {"type": "session.update", "session": {"type": "transcription",
             "include": ["item.input_audio_transcription.logprobs"], "audio": {"input": {
             "format": {"type": "audio/pcm", "rate": 24000},
-            "transcription": {"model": "gpt-4o-mini-transcribe", "language": "ko", "prompt": HINT},
+            # 힌트(prompt)는 넣지 않는다: 알아듣기 어려운 음성에서 힌트 문장을 그대로 받아쓰기로 내뱉었다(10/11 실통화 2회).
+            # 이 연결은 말 시작 감지와 CLOVA 실패 때 대비책이라 힌트가 없어도 된다.
+            "transcription": {"model": "gpt-4o-mini-transcribe", "language": "ko"},
             # 말 끝 판정: interview_bridge 는 긴 면접 답변이라 2.4초 침묵을 기다렸다. 전화 질문은 짧아 0.8초.
             "turn_detection": {"type": "server_vad", "threshold": 0.5, "prefix_padding_ms": 300,
                                "silence_duration_ms": self._silence_ms},
@@ -113,6 +114,10 @@ class PhoneSTT:
         if self._on_speech:
             self._on_speech(False)  # '말 끝'이 아니라 확정에서 대기를 푼다(쿠션이 먼저 나갔다 끊기는 일 방지)
         if not text:
+            return
+        bare = re.sub(r"[\s.,!?~]", "", text)
+        if len(bare) <= 1 and bare not in BACKCHANNEL_1:
+            log.info("한 글자 받아쓰기 무시(%s): %r", src, text)
             return
         fixed = fix_text(text)
         if fixed != text:

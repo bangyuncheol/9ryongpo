@@ -48,7 +48,7 @@ def test_slow_answer_gets_cushion_and_logs():
             {"role": "user", "content": "43톤 자망선 언제 와?"}, {"role": "assistant", "content": f"{brain.CUSHION} 4시 45분쯤입니다. {brain.ASK_MORE}"},
             {"role": "user", "content": "그 배 뭐 싣고 와?"}]
     out = collect(brain.BaemajungLLM(fn, st).generate(msgs))
-    assert out == [brain.CUSHION, "제33안성호가 4시 45분쯤 들어옵니다.", brain.ASK_MORE]
+    assert out == [brain.CUSHION, "제33안성호가 4시 45분쯤 들어옵니다.", brain.ASK_MORE]  # "그 배 뭐 싣고" → 주제 있음
     assert seen[0][1] == [{"q": "43톤 자망선 언제 와?", "a": "4시 45분쯤입니다."}]  # 인사·쿠션·되묻기는 이력에서 뺌
     assert [r for r, _ in lines] == ["user", "tool", "ai"]
 
@@ -143,18 +143,18 @@ def ask(st, fn, q):
 def test_low_confidence_out_is_reasked_then_choices():
     st = brain.CallState([], "inbound")
     st.heard("오늘 돈 돼 있나요?", 0.03)
-    assert ask(st, out_answer("OUT"), "오늘 돈 돼 있나요?") == [brain.CUSHION, brain.REASK]
+    assert ask(st, out_answer("OUT"), "오늘 돈 돼 있나요?") == [brain.SHORT_CUSHION, brain.REASK]
     st.heard("오늘 해보고 있나요?", 0.0)
-    assert ask(st, out_answer("OUT"), "오늘 해보고 있나요?") == [brain.CUSHION, brain.CHOICES]  # 같은 말을 반복하지 않는다
+    assert ask(st, out_answer("OUT"), "오늘 해보고 있나요?") == [brain.SHORT_CUSHION, brain.CHOICES]  # 같은 말을 반복하지 않는다
     assert ask(st, fake_answer(0)[0], "오늘 배 들어와 있나요?")[-1] == brain.ASK_MORE and st.misses == 0
 
 
 def test_confident_offtopic_gets_soft_guide_and_unclear_is_reasked():
     st = brain.CallState([], "inbound")
     st.heard("이차방정식 좀 풀어 주세요.", 0.82)
-    assert ask(st, out_answer("OUT"), "이차방정식 좀 풀어 주세요.") == [brain.CUSHION, brain.OFFTOPIC]
+    assert ask(st, out_answer("OUT"), "이차방정식 좀 풀어 주세요.") == [brain.SHORT_CUSHION, brain.OFFTOPIC]
     st.heard("옥외 광고가 있나요?", 0.9)  # 확신도는 높아도 말이 안 되는 문장이면 잘못 들은 것
-    assert ask(st, out_answer("UNCLEAR"), "옥외 광고가 있나요?") == [brain.CUSHION, brain.REASK]
+    assert ask(st, out_answer("UNCLEAR"), "옥외 광고가 있나요?") == [brain.SHORT_CUSHION, brain.REASK]
 
 
 def test_in_scope_answer_ignores_low_confidence():
@@ -218,7 +218,7 @@ def test_ship_names_for_stt_hint(tmp_path):
     from app.phone.stt import PhoneSTT
     stt = PhoneSTT("k", "c", ship_names=["남진호"])
     assert "남진호" in stt._clova_config()["keywordBoosting"]["boostings"][0]["words"]
-    assert "남진호" not in stt._openai_session()["session"]["audio"]["input"]["transcription"]["prompt"]  # 힌트 누출 방지
+    assert "prompt" not in stt._openai_session()["session"]["audio"]["input"]["transcription"]  # 힌트 누출 방지
     assert stt._clova_config()["semanticEpd"]["gapThreshold"] == 800 and stt.clova_ok
     assert not PhoneSTT("k").clova_ok  # CLOVA 키가 없으면 OpenAI 받아쓰기만
 
@@ -237,3 +237,28 @@ def test_fix_common_misrecognitions():
     assert fix_text("오늘 댁에 들어오나요.") == "오늘 대게 들어오나요."
     assert fix_text("남진호 말고 지33 안성호 뭐 있고") == "남진호 말고 제33안성호 뭐 싣고"  # 명부 표기(제33안성호)로 붙는다
     assert fix_text("오늘 날씨 멋있네요") == "오늘 날씨 멋있네요"  # 맥락 없는 '멋있'은 그대로
+
+
+def test_cushion_depends_on_topic_words():
+    assert brain.cushion_for("오늘 남진호 들어오나") == brain.CUSHION
+    assert brain.cushion_for("위판장 앞에 차 많아요?") == brain.CUSHION
+    assert brain.cushion_for("작년 10월 대게 얼마였어?") == brain.CUSHION
+    assert brain.cushion_for("포항 맛집 알려 주세요") == brain.CUSHION  # '알려'가 있어 주제로 본다(알림 요청과 구분 못 함)
+    assert brain.cushion_for("이차방정식 풀어 주세요") == brain.SHORT_CUSHION
+    assert brain.cushion_for("안녕하세요") == brain.SHORT_CUSHION
+    assert brain.cushion_for("오늘 들어오는 배 있어요?") == brain.CUSHION and brain.cushion_for("차가 많아요?") == brain.CUSHION
+
+
+def test_single_char_transcripts_are_dropped_unless_backchannel():
+    from app.phone.stt import PhoneSTT
+    got = []
+    stt = PhoneSTT("k", on_final=lambda t, c: got.append(t))
+    q = asyncio.Queue()
+    for t in ("다", "네.", "아", "오늘 배 들어와요?"):
+        stt._final(q, t, 1.0, "CLOVA")
+    assert got == ["네.", "오늘 배 들어와요?"]
+
+
+def test_openai_connection_has_no_prompt():
+    from app.phone.stt import PhoneSTT
+    assert "prompt" not in PhoneSTT("k")._openai_session()["session"]["audio"]["input"]["transcription"]

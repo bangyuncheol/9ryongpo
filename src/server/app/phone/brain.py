@@ -24,6 +24,11 @@ INBOUND_INTRO = "구룡포 위판장 입항과 어종, 위판장 앞 교통을 �
 ASK_FIRST = "궁금하신 거 있으세요?"  # 걸려 온 전화 첫인사: 아직 안내한 게 없어 '더'를 빼다(10/11)
 ASK_MORE = "더 궁금하신 거 있으세요?"
 CUSHION = "네, 확인해 볼게요."
+SHORT_CUSHION = "네."  # 주제 단어가 없는 말(잘못 들음·엉뚱한 질문일 가능성)엔 짧게. '확인해 볼게요' 뒤 '잘 못 들었어요'가 어색했다(10/11)
+# '배'·'차'처럼 한 글자 단어는 띄어 쓰였거나 조사가 붙을 때만('이차방정식'의 '차'를 주제로 보지 않게)
+TOPIC_RE = re.compile(r"[가-힣0-9]+호|들어오|들어와|들어온|언제|입항|싣고|실고|어종|대게|홍게|오징어|골뱅이|방어|가자미|고기|"
+                      r"교통|막히|주차|트럭|얼마|가격|시세|경매|위판|몇 ?시|알림|알려|"
+                      r"(?:^|\s)(?:배|차)(?=\s|$|[가는들도랑요량])")
 CLOSING = "네, 전화 주셔서 감사합니다. 좋은 하루 보내세요."
 CLOSING_OUT = "네, 알겠습니다. 좋은 하루 보내세요."
 SLOW = "확인이 늦어지고 있어요. 잠시 뒤에 다시 여쭤 봐 주세요."
@@ -32,7 +37,7 @@ TIME_UP = "통화가 길어져 이만 끊을게요. 다시 걸어 주시면 이�
 REASK = "죄송해요, 제가 잘 못 들었어요. 한 번만 다시 말씀해 주세요."
 CHOICES = "들어오는 배, 대게, 위판장 앞 교통 중에 어떤 게 궁금하세요?"
 OFFTOPIC = "그건 제가 안내해 드리기 어려워요. 들어오는 배나 어종, 위판장 앞 교통을 물어봐 주세요."
-FIXED = (HELLO, INBOUND_INTRO, ASK_FIRST, ASK_MORE, CUSHION, CLOSING, CLOSING_OUT, SLOW, REASK, CHOICES, OFFTOPIC, TIME_UP)
+FIXED = (HELLO, INBOUND_INTRO, ASK_FIRST, ASK_MORE, CUSHION, SHORT_CUSHION, CLOSING, CLOSING_OUT, SLOW, REASK, CHOICES, OFFTOPIC, TIME_UP)
 QUIET_WAIT_S = 3.0  # 사용자가 아직 말하는 중이면 쿠션·답을 이만큼까지 미룬다(소음으로 '말 시작'만 오고 끝이 안 오는 경우 상한)
 LOW_CONF = 0.2  # 받아쓰기 최저 글자 확신도. 합성 음성 시험(10/11): 크게 틀린 문장 0.00~0.05, 맞은 문장 0.32~0.97
 
@@ -149,7 +154,7 @@ class BaemajungLLM:
         task = asyncio.create_task(run())
         try:
             await self.state.wait_quiet()
-            yield CUSHION
+            yield cushion_for(last)
             try:
                 await asyncio.wait_for(asyncio.shield(task), timeout=ANSWER_TIMEOUT_S)
             except asyncio.TimeoutError:
@@ -176,6 +181,10 @@ class BaemajungLLM:
         finally:
             if not task.done():  # 말 끊기(barge-in)로 응답이 취소되면 엔진 호출도 멈춘다
                 task.cancel()
+
+
+def cushion_for(question: str) -> str:
+    return CUSHION if TOPIC_RE.search(question) else SHORT_CUSHION
 
 
 def outbound_greeting(alert_body: str) -> list[str]:
