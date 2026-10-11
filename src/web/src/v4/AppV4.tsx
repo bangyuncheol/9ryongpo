@@ -156,7 +156,7 @@ function Sheet({ today, list, idle, visit, call, selected, onSelect, admin, onWa
 
       <div className="-mx-5 mt-8 border-t border-line pt-3">
         {admin && <div className="empty:hidden"><CallCard call={call} /></div>}
-        <WaitFish phoneEnabled={!!call?.enabled} onChange={setWait} showMore />
+        <WaitFish phoneEnabled={!!call?.enabled} onChange={setWait} showMore oneTap />
         {/* 시트 안에선 카드 경계가 사라지므로 구역은 선으로 나눈다(10/11 오너: 알림과 물어보기가 붙어 보임) */}
         <div aria-hidden className="border-t border-line" />
         <ChatCard onSubscribe={toWait} />

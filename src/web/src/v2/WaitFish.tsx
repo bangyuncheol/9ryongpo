@@ -21,12 +21,14 @@ function b64ToBytes(b64: string) {
   return Uint8Array.from(raw, (c) => c.charCodeAt(0))
 }
 
-export default function WaitFish({ phoneEnabled, onChange, showMore = false }: {
+export default function WaitFish({ phoneEnabled, onChange, showMore = false, oneTap = false }: {
   phoneEnabled: boolean
   /** 켜짐 상태가 바뀌면 알린다(버전 4 '생선 알림 받기' 버튼이 '붉은대게 알림 켜짐'으로 바뀜, 10/11) */
   onChange?: (s: { on: boolean; species: string }) => void
   /** true 면 다른 철 생선을 '다른 철 생선 보기'로 접어 두고 펼쳐 고르게 한다(버전 4, 10/12 오너). 기본 false = 10월 대표 어종만 */
   showMore?: boolean
+  /** true 면 체크박스 + '알림 신청하기' 대신 '휴대폰 알림 받기'·'전화로 알림 받기' 버튼을 누르면 바로 신청(버전 4, 10/12 오너). 전화는 번호를 넣고 한 번 더 */
+  oneTap?: boolean
 }) {
   const [options, setOptions] = useState<string[]>(['붉은대게'])
   const [more, setMore] = useState<{ name: string; season: string }[]>([])
@@ -65,13 +67,13 @@ export default function WaitFish({ phoneEnabled, onChange, showMore = false }: {
     await postJson('/api/subscribe', { subscription: sub.toJSON(), species: sp })
   }
 
-  const apply = async () => {
-    if (wantPhone && !phoneOn && !phoneValid(tel)) { setTelTouched(true); return } // 아무것도 보내지 않는다
+  const apply = async (doPush = wantPush, doPhone = wantPhone) => {
+    if (doPhone && !phoneOn && !phoneValid(tel)) { setTelTouched(true); return } // 아무것도 보내지 않는다
     setMsg(null); setBusy(true)
     const sp = species === '전체' ? null : species
     try {
-      if (wantPush && !pushOn) { await subscribePush(sp); setPushOn(true) }
-      if (wantPhone && !phoneOn) {
+      if (doPush && !pushOn) { await subscribePush(sp); setPushOn(true) }
+      if (doPhone && !phoneOn) {
         const r = await fetch('/api/call/subscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ phone: tel, species: sp }) })
         const b = await r.json().catch(() => null)
@@ -165,6 +167,21 @@ export default function WaitFish({ phoneEnabled, onChange, showMore = false }: {
               )}
             </>
           )}
+          {oneTap ? (
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              {supported() && !pushOn && (
+                <Button emphasis="high" onClick={() => apply(true, false)} disabled={busy} className={`flex items-center justify-center gap-1.5 ${phoneEnabled && !phoneOn ? '' : 'col-span-2'}`}>
+                  <Icon name="bell" />휴대폰 알림 받기
+                </Button>
+              )}
+              {phoneEnabled && !phoneOn && (
+                <Button onClick={() => setWantPhone((w) => !w)} aria-expanded={wantPhone} aria-controls="wait-tel-box"
+                  className={`flex items-center justify-center gap-1.5 ${supported() && !pushOn ? '' : 'col-span-2'}`}>
+                  <Icon name="phone" />전화로 알림 받기
+                </Button>
+              )}
+            </div>
+          ) : (
           <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-body">
             {supported() && !pushOn && (
               <label className="flex min-h-[var(--spacing-touch)] items-center gap-2">
@@ -179,8 +196,9 @@ export default function WaitFish({ phoneEnabled, onChange, showMore = false }: {
               </label>
             )}
           </div>
+          )}
           {wantPhone && !phoneOn && (
-            <div className="mt-2">
+            <div id="wait-tel-box" className="mt-2">
               <label htmlFor="wait-tel" className="text-sub font-bold">전화 받을 번호</label>
               {/* 숫자만 받고 하이픈은 화면이 넣는다: 숫자 키패드에는 하이픈 키가 없거나 찾기 어렵다(10/11 오너) */}
               <input id="wait-tel" name="tel" type="tel" inputMode="numeric" autoComplete="tel-national" placeholder="숫자만 입력 (예: 01012345678)"
@@ -190,9 +208,15 @@ export default function WaitFish({ phoneEnabled, onChange, showMore = false }: {
               {telHint && <p id="wait-tel-hint" className="mt-1 text-sub text-arriving">{telHint}</p>}
             </div>
           )}
-          <Button emphasis="high" onClick={apply} disabled={busy || !canApply} className="mt-4 w-full">
-            {busy ? '신청하는 중…' : '알림 신청하기'}
-          </Button>
+          {oneTap ? wantPhone && !phoneOn && (
+            <Button emphasis="high" onClick={() => apply(false, true)} disabled={busy || !phoneValid(tel)} className="mt-3 w-full">
+              {busy ? '신청하는 중…' : '이 번호로 전화 알림 신청'}
+            </Button>
+          ) : (
+            <Button emphasis="high" onClick={() => apply()} disabled={busy || !canApply} className="mt-4 w-full">
+              {busy ? '신청하는 중…' : '알림 신청하기'}
+            </Button>
+          )}
         </>
       )}
       {msg && <p role="alert" className="mt-2 text-sub text-arriving">{msg}</p>}
