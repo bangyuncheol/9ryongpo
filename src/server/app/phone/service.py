@@ -165,15 +165,15 @@ class PhoneService:
             log.info("전화 고정 문장 음성 %d개 생성(저장 위치 %s)", len(missing), self.cache_dir)
 
     def _new_session(self):
-        from .stt import OpenAITranscribeSTT
+        from .stt import PhoneSTT
         greeting, direction = (self._pending_greeting, "outbound") if self._pending_greeting else (brain.inbound_greeting(), "inbound")
         self._pending_greeting = None
         state = brain.CallState(greeting, direction)
         state.log = self._line
         self._state = state
-        return _pipeline()(stt=OpenAITranscribeSTT(self.s.openai_api_key, on_final=state.heard, on_speech=state.speaking,
+        return _pipeline()(stt=PhoneSTT(self.s.openai_api_key, self.s.clova_secret_key, on_final=state.heard, on_speech=state.speaking,
                                                      record_dir=(self.cache_dir.parent / "stt_clips") if self.s.stt_record else None,
-                                                     ship_names=None),  # OpenAI 는 긴 힌트를 그대로 받아쓰기로 내뱉는 일이 있어(10/11 녹음 04) 배 이름은 넣지 않는다
+                                                     ship_names=self.ship_names()),  # CLOVA 키워드 부스팅에만 쓴다(OpenAI 힌트엔 안 넣음)
                                llm=brain.BaemajungLLM(self._answer_factory(), state),
                                tts=self._tts(state), system_prompt="", greeting=True)
 

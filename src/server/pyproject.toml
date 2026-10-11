@@ -12,6 +12,8 @@ dependencies = [
     "openai>=1.50",
     "python-dotenv>=1.0",
     "clawops[agent]==0.62.0",
+    "grpcio>=1.75",
+    "protobuf>=6.31.1,<7",
 ]
 
 [dependency-groups]

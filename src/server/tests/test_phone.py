@@ -215,5 +215,25 @@ def test_ship_names_for_stt_hint(tmp_path):
     conn.execute("INSERT INTO fleet (ship_id, name, biz, gt, sign, raw_json, updated_at) VALUES (1, '남진호', '연안자망', 9, 's', '{}', 'x')")
     conn.execute("INSERT INTO forecast (ts, ship_id, d_km, eta) VALUES ('2026-10-11T03:40', 1, 9.0, '2026-10-11T04:26')")
     assert ph.ship_names()[0] == "남진호"
-    from app.phone.stt import OpenAITranscribeSTT
-    assert "남진호" in OpenAITranscribeSTT("k", ship_names=["남진호"])._session()["session"]["audio"]["input"]["transcription"]["prompt"]
+    from app.phone.stt import PhoneSTT
+    stt = PhoneSTT("k", "c", ship_names=["남진호"])
+    assert "남진호" in stt._clova_config()["keywordBoosting"]["boostings"][0]["words"]
+    assert "남진호" not in stt._openai_session()["session"]["audio"]["input"]["transcription"]["prompt"]  # 힌트 누출 방지
+    assert stt._clova_config()["semanticEpd"]["gapThreshold"] == 800 and stt.clova_ok
+    assert not PhoneSTT("k").clova_ok  # CLOVA 키가 없으면 OpenAI 받아쓰기만
+
+
+def test_clova_confidence_ignores_spaces():
+    from app.phone.stt import _clova_conf
+    tr = {"confidence": 0.9, "alignInfos": [{"word": "남", "confidence": 0.8}, {"word": " ", "confidence": 0.1},
+                                            {"word": "진", "confidence": 0.6}]}
+    assert _clova_conf(tr) == 0.6 and _clova_conf({"confidence": 0.7}) == 0.7
+
+
+def test_fix_common_misrecognitions():
+    from app.phone.stt import fix_text
+    assert fix_text("뭐 남진호가 멋있고 들어오는지") == "뭐 남진호가 뭐 싣고 들어오는지"
+    assert fix_text("예남진호 혹시 지금 뭐 씻고 들어오나요.") == "예남진호 혹시 지금 뭐 싣고 들어오나요."
+    assert fix_text("오늘 댁에 들어오나요.") == "오늘 대게 들어오나요."
+    assert fix_text("남진호 말고 지33 안성호 뭐 있고") == "남진호 말고 제33안성호 뭐 싣고"  # 명부 표기(제33안성호)로 붙는다
+    assert fix_text("오늘 날씨 멋있네요") == "오늘 날씨 멋있네요"  # 맥락 없는 '멋있'은 그대로
