@@ -292,8 +292,9 @@ export default function KakaoArrivalMap(p: Props) {
     for (const [id, t] of tracks.current) if (!seen.has(id)) { t.o.setMap(null); tracks.current.delete(id) }
   }, [ready, p.ships, p.selected, onSelect])
 
-  // 조업·대기 배: 작은 회색 점(10/11). 처음 화면 밖이라 지도를 옮기거나 축소해야 보인다. 올리면 이름.
-  const idleDots = useRef(new Map<number, K>())
+  // 조업·대기 배: 회색 배 모양(10/11 오너: 점 → 배 모양, 들어오는·정박한 배와 같은 그림). 처음 화면 밖이라 지도를 옮기거나
+  // 축소해야 보인다. 마우스를 올리면(폰은 누르면) 다른 배와 같은 정보 표지. 고르기(onSelect)는 입항 목록용이라 쓰지 않는다.
+  const idleBoats = useRef(new Map<number, { o: K; el: HTMLElement; t: Track }>())
   useEffect(() => {
     const kakao = k.current, m = map.current
     if (!ready || !kakao || !m) return
@@ -302,17 +303,23 @@ export default function KakaoArrivalMap(p: Props) {
       if (s.status !== '조업·대기') continue
       seen.add(s.ship_id)
       const pos = new kakao.maps.LatLng(s.lat, s.lon)
-      const o = idleDots.current.get(s.ship_id)
-      if (o) { o.setPosition(pos); continue }
-      const el = document.createElement('div')
-      el.title = `${s.name ?? '어선'} · 조업·대기`
-      el.setAttribute('aria-label', `${s.name ?? '어선'} 조업·대기`)
-      el.style.cssText = 'width:9px;height:9px;border-radius:9999px;background:var(--color-idle);border:1.5px solid #fff;box-shadow:0 0 1px rgba(0,0,0,.4)'
-      const dot = new kakao.maps.CustomOverlay({ position: pos, content: el, xAnchor: 0.5, yAnchor: 0.5, zIndex: 5 })
-      dot.setMap(m)
-      idleDots.current.set(s.ship_id, dot)
+      let b = idleBoats.current.get(s.ship_id)
+      if (!b) {
+        const id = s.ship_id
+        const el = boatEl(() => setHovered((h) => (h === id ? null : id)), (on) => setHovered((h) => (on ? id : h === id ? null : h)))
+        const o = new kakao.maps.CustomOverlay({ position: pos, content: el, xAnchor: 0.5, yAnchor: 0.5, zIndex: 5 })
+        o.setMap(m)
+        const course = s.course ?? 270
+        b = { o, el, t: { heading: course, rot: course } as Track }
+        idleBoats.current.set(id, b)
+      } else b.o.setPosition(pos)
+      const hull = b.el.querySelector('[data-hull]') as HTMLElement
+      hull.innerHTML = boatSvg('var(--color-idle)')
+      hull.style.transform = `rotate(${turnTo(b.t, s.course ?? b.t.heading)}deg) scale(0.75)`
+      ;(b.el.firstChild as HTMLElement).className = ''
+      b.el.setAttribute('aria-label', `${s.name ?? '어선'} 조업·대기`)
     }
-    for (const [id, o] of idleDots.current) if (!seen.has(id)) { o.setMap(null); idleDots.current.delete(id) }
+    for (const [id, b] of idleBoats.current) if (!seen.has(id)) { b.o.setMap(null); idleBoats.current.delete(id) }
   }, [ready, p.ships])
 
   /** '조업·대기 N척 ▸' 버튼: 조업 중인 배와 위판장이 한 화면에 들어오게 맞춘다. */
@@ -460,6 +467,7 @@ export default function KakaoArrivalMap(p: Props) {
         <div className="flex flex-wrap gap-x-3">
           <span><span aria-hidden style={{ color: 'var(--color-arriving)' }}>⛴</span> 들어오는 배</span>
           <span><span aria-hidden style={{ color: 'var(--color-arrived)' }}>⛴</span> 정박</span>
+          <span><span aria-hidden style={{ color: 'var(--color-idle)' }}>⛴</span> 조업·대기</span>
           <span><span aria-hidden style={{ color: 'var(--color-arriving)' }}>◀</span> 화면 밖(거리)</span>
         </div>
         {/* 버전 4(fill)는 범례를 그림 설명만으로(10/11 오너) */}

@@ -22,7 +22,7 @@
   --color-chip: #e8eaed;           /* [제품] 중간 강조(회색) 버튼 */
   --color-arriving: #d32f2f;       /* [제품] 4.77 */
   --color-arrived: #1e7d45;        /* [제품] 4.94 */
-  --color-idle: #8a9099;           /* [제품] 지도 점 전용(글자에 쓰지 않음) */
+  --color-idle: #8a9099;           /* [제품] 지도 조업·대기 배 전용(글자에 쓰지 않음) */
   --color-sim: #e07b22;            /* [제품] 배지 점 전용 */
   --color-live: #1e7d45;
 
