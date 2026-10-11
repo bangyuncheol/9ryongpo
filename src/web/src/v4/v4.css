@@ -63,6 +63,10 @@
 .v4-sheet-anim { transition: transform 340ms cubic-bezier(0.22, 0.25, 0, 1); }
 @media (prefers-reduced-motion: reduce) { .v4-sheet-anim { transition: none; } }
 
+/* 옆으로 넘기는 장: 놓으면 그 장으로(끝에선 고무줄에서 돌아옴) */
+.v4-pager-anim { transition: transform 320ms cubic-bezier(0.22, 0.25, 0, 1); }
+@media (prefers-reduced-motion: reduce) { .v4-pager-anim { transition: none; } }
+
 /* 다음 배 도착까지 남은 시간이 1분 단위로 바뀔 때 숫자가 살짝 올라온다(시그니처 움직임 하나) */
 @keyframes v4-tick { from { transform: translateY(35%); opacity: 0 } to { transform: none; opacity: 1 } }
 .v4-tick { display: inline-block; animation: v4-tick 320ms cubic-bezier(0.22, 0.25, 0, 1); }

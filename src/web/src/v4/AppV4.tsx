@@ -11,6 +11,7 @@ import type { VisitData } from '../v2/AppV2'
 import WaitFish from '../v2/WaitFish'
 import Icon from '../v2/Icon'
 import BottomSheet from './BottomSheet'
+import Pager from './Pager'
 import { snapHeights, useViewportHeight } from './sheet'
 import type { Snap } from './sheet'
 import { byEta, likelihood, minutesUntil, shipSpecies, shortBiz, telHref, telText, trafficWord, useThemeColor, useWide } from '../v2/bits'
@@ -34,7 +35,8 @@ export default function AppV4() {
   const [sensor, setSensor] = useState<Sensor | null>(null)
   const [selected, setSelected] = useState<number | null>(null)
   const onSelect = useCallback((id: number | null) => setSelected(id), [])
-  const [snap, setSnap] = useState<Snap>('mid') // 폰 시트: 내림·기본·다 펼침
+  const [snap, setSnap] = useState<Snap>('mid') // 폰 시트: 내림·기본(다 펼침은 입력할 때만 저절로)
+  const [page, setPage] = useState(0) // 폰 시트의 장: 들어오는 배 · 알림 · 물어보기(10/12)
   const hs = snapHeights(useViewportHeight())
   const today = usePoll(api.today, 2000)
   const ships = usePoll(api.ships, 2000)
@@ -63,14 +65,16 @@ export default function AppV4() {
       arrivedCount={t?.arrived.length ?? 0} truck={truck} trucks={trucks.data?.sensors ?? []} sensor={sensor}
       notice={t?.notice ?? null} selected={selected} onSelect={onSelect} legendToggle fill padBottom={wide ? 0 : hs[snap]} />
   )
-  // '들어오면 알림'·질문창의 알림 준비: 알림 신청 칸으로. 폰은 시트를 먼저 다 펼친다
+  // '생선 알림 받기'·질문창의 알림 준비: 알림 신청 칸으로. 폰은 알림 장으로 넘긴다
   const toWait = () => {
-    const go = () => document.getElementById('wait-title')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    if (wide || snap === 'full') go(); else { setSnap('full'); setTimeout(go, 380) }
+    if (wide) { document.getElementById('wait-title')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); return }
+    if (snap === 'peek') setSnap('mid')
+    setPage(1)
   }
-  const sheet = (
+  const sheet = (pages?: { height: number }) => (
     <Sheet today={t} list={arriving} idle={idle} visit={visit.data as VisitData | null} call={call.data}
-      selected={selected} onSelect={onSelect} admin={admin} onWait={toWait} />
+      selected={selected} onSelect={onSelect} admin={admin} onWait={toWait}
+      pages={pages && { page, onPage: setPage, height: pages.height }} />
   )
 
   return (
@@ -82,17 +86,19 @@ export default function AppV4() {
           <aside className="v4-sheet relative z-10 h-dvh overflow-y-auto bg-card" aria-label="입항 정보">
             <div className="sticky top-0 z-10 bg-card/95 px-6 pb-2 pt-5 backdrop-blur-sm"><Badge today={t} /></div>
             {admin && <div className="py-2"><AdminBar clock={t?.clock ?? null} feed={t?.source.feed ?? null} call={call.data} /></div>}
-            {sheet}
+            {sheet()}
           </aside>
         </div>
       ) : (
         <>
           <div className="absolute inset-x-0 top-0 z-40 h-[52px] bg-page px-4 py-3"><Badge today={t} /></div>
-          {/* 지도는 헤더 아래 전체. 시트가 그 위를 덮고 3단으로 오르내린다 */}
+          {/* 지도는 헤더 아래 전체. 시트가 그 위를 덮고 두 단(내림·기본)으로 오르내린다 */}
           <div className="absolute inset-x-0 bottom-0 top-[52px]">{map}</div>
           <BottomSheet snap={snap} onSnap={setSnap} peek={<Peek today={t} first={arriving[0]} onOpen={() => setSnap('mid')} />}>
-            {admin && <div className="pb-2"><AdminBar clock={t?.clock ?? null} feed={t?.source.feed ?? null} call={call.data} /></div>}
-            <div className="pb-10">{sheet}</div>
+            {(h) => <>
+              {admin && <div className="pb-2"><AdminBar clock={t?.clock ?? null} feed={t?.source.feed ?? null} call={call.data} /></div>}
+              {sheet({ height: Math.max(0, h - TABS_H) })}
+            </>}
           </BottomSheet>
         </>
       )}
@@ -124,14 +130,21 @@ function Badge({ today }: { today: Today | null }) {
   )
 }
 
-function Sheet({ today, list, idle, visit, call, selected, onSelect, admin, onWait: toWait }: {
+const TABS_H = 45 // 장 탭 줄 높이(44 + 밑줄 1)
+
+/**
+ * 시트 내용. 웹은 한 칸에 세로로 잇고, 폰은 세 장(들어오는 배 · 알림 · 물어보기)으로 나눠 옆으로 넘긴다(10/12 오너:
+ * 끝까지 끌어올려 보는 대신 지도와 같이 보게).
+ */
+function Sheet({ today, list, idle, visit, call, selected, onSelect, admin, onWait: toWait, pages }: {
   today: Today | null; list: Arrival[]; idle: number; visit: VisitData | null; call: CallState | null
   selected: number | null; onSelect: (id: number | null) => void; admin: boolean; onWait: () => void
+  pages?: { page: number; onPage: (i: number) => void; height: number }
 }) {
   const number = call?.enabled ? call.number : null
   const [wait, setWait] = useState<{ on: boolean; species: string }>({ on: false, species: '' })
-  return (
-    <div className="flex flex-col px-6">
+  const ships = (
+    <>
       <Next today={today} list={list} idle={idle} selected={selected} onSelect={onSelect} />
 
       {/* 행동 두 개: 엄지가 닿는 시트 위쪽에 바로. 전화가 꺼져 있으면 알림 하나만 */}
@@ -153,13 +166,35 @@ function Sheet({ today, list, idle, visit, call, selected, onSelect, admin, onWa
       {visit && <Visit visit={visit} />}
 
       {list.length > 1 && <Queue today={today} list={list} selected={selected} onSelect={onSelect} />}
+    </>
+  )
+  const alerts = (
+    <>
+      {admin && <div className="empty:hidden"><CallCard call={call} /></div>}
+      <WaitFish phoneEnabled={!!call?.enabled} onChange={setWait} showMore oneTap multi />
+    </>
+  )
+  const ask = <ChatCard onSubscribe={toWait} quick={QUICK} placeholder="예: 대게랑 오징어 들어오면 알려줘" aside={null} />
 
+  if (pages) {
+    return (
+      <Pager tabs={['들어오는 배', '알림', '물어보기']} page={pages.page} onPage={pages.onPage} height={pages.height}>
+        {[
+          <div key="ships" className="flex flex-col px-6 pb-8">{ships}</div>,
+          <div key="alerts" className="px-1 pb-8">{alerts}</div>,
+          <div key="ask" className="px-1 pb-8">{ask}</div>,
+        ]}
+      </Pager>
+    )
+  }
+  return (
+    <div className="flex flex-col px-6 pb-10">
+      {ships}
       <div className="-mx-5 mt-8 border-t border-line pt-3">
-        {admin && <div className="empty:hidden"><CallCard call={call} /></div>}
-        <WaitFish phoneEnabled={!!call?.enabled} onChange={setWait} showMore oneTap multi />
+        {alerts}
         {/* 시트 안에선 카드 경계가 사라지므로 구역은 선으로 나눈다(10/11 오너: 알림과 물어보기가 붙어 보임) */}
         <div aria-hidden className="border-t border-line" />
-        <ChatCard onSubscribe={toWait} quick={QUICK} placeholder="예: 대게랑 오징어 들어오면 알려줘" aside={null} />
+        {ask}
       </div>
     </div>
   )
