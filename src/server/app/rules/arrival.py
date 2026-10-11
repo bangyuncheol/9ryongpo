@@ -9,6 +9,10 @@ MAX_KM = 15.0
 MIN_SPEED_KN = 2.0
 MAX_HEADING_DIFF = 35.0
 ARRIVED_KM = 0.5
+# 항구 안(위판장 1.5km 이내)에서는 방향 조건을 보지 않는다(10/11 오너 승인). 방파제 입구를 돌 때 배가
+# 서남서→북으로 꺾어 위판장 방향과 80° 가까이 어긋나, 0.5~0.6km 구간에서 1~2분 동안 '입항 중'에서 빠졌다.
+# 거리가 줄어드는 조건·2노트 이상 조건은 그대로라 항구에서 나가는 배는 계속 제외된다.
+HARBOR_KM = 1.5
 
 
 def judge(current: list[dict], previous: list[dict], fleet: dict[int, dict], now: datetime,
@@ -28,7 +32,7 @@ def judge(current: list[dict], previous: list[dict], fleet: dict[int, dict], now
         speed, course = p.get("speed") or 0.0, p.get("course")
         if d > MAX_KM or speed < MIN_SPEED_KN or course is None:
             continue
-        if geo.angle_diff(float(course), geo.bearing_deg(p["lat"], p["lon"], *place)) > MAX_HEADING_DIFF:
+        if d > HARBOR_KM and geo.angle_diff(float(course), geo.bearing_deg(p["lat"], p["lon"], *place)) > MAX_HEADING_DIFF:
             continue
         closing = None
         if sid in prev_d:

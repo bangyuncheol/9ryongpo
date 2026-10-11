@@ -63,6 +63,37 @@ def test_not_closing_is_dropped():
     assert arrival.judge(cur, prev, {}, at("04:00"), PLACE)["arriving"] == []
 
 
+def test_turning_at_harbor_entrance_stays_arriving():
+    """방파제 입구에서 서남서로 꺾는 배(위판장 방향과 약 80° 어긋남)도 1.5km 안에서는 '입항 중'(10/11)."""
+    prev = [{"ship_id": 9, "lat": 35.9862, "lon": 129.5604, "course": 245.0, "speed": 3.0}]
+    cur = [{"ship_id": 9, "lat": 35.9856, "lon": 129.5588, "course": 241.4, "speed": 3.0}]
+    out = arrival.judge(cur, prev, {}, at("04:28"), PLACE)
+    assert [a["ship_id"] for a in out["arriving"]] == [9]
+    far = [{"ship_id": 8, "lat": 35.99, "lon": 129.60, "course": 200.0, "speed": 8.0}]  # 1.5km 밖은 방향 조건 그대로
+    assert arrival.judge(far, [], {}, at("04:00"), PLACE)["arriving"] == []
+
+
+def test_leaving_harbor_is_still_dropped():
+    prev = [{"ship_id": 9, "lat": 35.9856, "lon": 129.5588, "course": 60.0, "speed": 4.0}]
+    cur = [{"ship_id": 9, "lat": 35.9862, "lon": 129.5604, "course": 60.0, "speed": 4.0}]  # 항구 안이지만 멀어짐
+    assert arrival.judge(cur, prev, {}, at("04:00"), PLACE)["arriving"] == []
+
+
+def test_key_ships_never_drop_out_until_docked(simulator):
+    """대본 배가 출발 뒤 정박까지 1분 간격으로 늘 '입항 중' 또는 '입항'이다(입구에서 빠지던 문제, 10/11)."""
+    day = date(2026, 10, 13)
+    for tr in simulator.tracks(day):
+        if tr.ship_id not in FLEET or tr.depart is None:
+            continue
+        end = sim.arrival_time(tr, PLACE)
+        t = max(tr.depart + timedelta(minutes=12), end - timedelta(minutes=40))
+        while t <= end + timedelta(minutes=2):
+            out = arrival.judge(simulator.snapshot(t), simulator.snapshot(t - timedelta(minutes=10)), FLEET, t, PLACE)
+            ids = {a["ship_id"] for a in out["arriving"] + out["arrived"]}
+            assert tr.ship_id in ids, (FLEET[tr.ship_id]["name"], t.strftime("%H:%M"))
+            t += timedelta(minutes=1)
+
+
 @pytest.fixture(scope="module")
 def conn(tmp_path_factory, auction_dir):
     c = db.connect(tmp_path_factory.mktemp("db") / "t.db")
