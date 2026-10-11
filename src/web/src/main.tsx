@@ -4,12 +4,16 @@ import 'leaflet/dist/leaflet.css'
 import './index.css'
 import App from './App.tsx'
 import AppV2 from './v2/AppV2.tsx'
+import Preview from './preview/Preview.tsx'
 
 // 2차 시안은 ?v=2 로만 연다(10/11). 기본 화면은 그대로.
-const v2 = new URLSearchParams(location.search).get('v') === '2'
+const q = new URLSearchParams(location.search)
+const v2 = q.get('v') === '2'
+// 팀 내부 미리보기(?preview=1): 폰·웹 × 버전 1·2 를 한 화면에서. iframe 안에서는 다시 미리보기를 띄우지 않는다
+const preview = q.has('preview') && window.self === window.top
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    {v2 ? <AppV2 /> : <App />}
+    {preview ? <Preview /> : v2 ? <AppV2 /> : <App />}
   </StrictMode>,
 )
