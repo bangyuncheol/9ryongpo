@@ -120,3 +120,21 @@ def test_earliest_arrival_gets_berth_nearest_auction_place(simulator):
     tracks = [t for t in simulator.tracks(DAY) if t.depart is not None]
     first = min(tracks, key=lambda t: sim.arrival_time(t, PLACE))
     assert first.berth == SLOTS[0]
+
+
+def test_remaining_route_lists_unpassed_harbor_corners():
+    """빠른 재생에서 화면이 방파제를 가로지르지 않게, 남은 꺾이는 지점을 준다(10/11)."""
+    from datetime import timedelta
+    from app import geo
+    from app.feed.harbor import APPROACH
+    from app.feed.sim import Simulator, arrival_time, remaining_route
+    sim = Simulator(geo.AUCTION_PLACE)
+    day = __import__("datetime").date(2026, 10, 13)
+    tr = next(t for t in sim.tracks(day) if t.depart is not None and t.berth is not None)
+    assert remaining_route(tr, tr.depart - timedelta(minutes=1), geo.AUCTION_PLACE) == []  # 출발 전
+    r0 = remaining_route(tr, tr.depart + timedelta(seconds=1), geo.AUCTION_PLACE)
+    assert r0[0] == APPROACH[0] and r0[-1] == (tr.berth.lat, tr.berth.lon)  # 바다 → 입구 → … → 자리
+    end = arrival_time(tr, geo.AUCTION_PLACE)
+    assert remaining_route(tr, end + timedelta(minutes=1), geo.AUCTION_PLACE) == []  # 정박 뒤
+    mid = remaining_route(tr, end - timedelta(minutes=2), geo.AUCTION_PLACE)
+    assert 0 < len(mid) < len(r0) and mid == r0[len(r0) - len(mid):]  # 남은 경로는 처음 경로의 뒷부분

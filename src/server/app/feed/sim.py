@@ -143,6 +143,25 @@ def position(track: Track, t: datetime, place: tuple[float, float]) -> dict:
     return {"lat": cur[0], "lon": cur[1], "course": course, "speed": 0.0}
 
 
+def remaining_route(track: Track, t: datetime, place: tuple[float, float]) -> list[tuple[float, float]]:
+    """시각 t에 아직 지나지 않은 꺾이는 지점(정박 자리까지). 움직이지 않으면 빈 목록.
+    화면은 2초마다 위치를 받아 사이를 잇는데, 빠른 재생에선 그 사이에 방파제 모서리를 지나 직선으로 그리면
+    육지·방파제를 가로지른다(10/11). 이 목록으로 화면이 모서리를 거쳐 움직인다."""
+    if track.depart is None or t < track.depart:
+        return []
+    left_h = (t - track.depart).total_seconds() / 3600
+    cur = track.start
+    pts = path_of(track, place)
+    for i, (pt, kn) in enumerate(pts):
+        seg = _seg_km(cur, pt)
+        need_h = seg / (kn * KMH_PER_KN) if seg else 0.0
+        if left_h < need_h:
+            return [p for p, _ in pts[i:]]
+        left_h -= need_h
+        cur = pt
+    return []
+
+
 class Simulator:
     def __init__(self, place: tuple[float, float], starts: dict[int, tuple[float, float]] | None = None,
                  seed: int = SEED):
@@ -160,6 +179,15 @@ class Simulator:
             self._tracks = [replace(tr, berth=berth.get(tr.ship_id)) for tr in raw]
             self._day = day
         return self._tracks
+
+    def routes(self, t: datetime) -> dict[int, list[list[float]]]:
+        """움직이는 배의 남은 꺾이는 지점(위도, 경도). 화면 보간용."""
+        out = {}
+        for tr in self.tracks(t.date()):
+            r = remaining_route(tr, t, self.place)
+            if r:
+                out[tr.ship_id] = [[round(a, 6), round(b, 6)] for a, b in r]
+        return out
 
     def snapshot(self, t: datetime) -> list[dict]:
         ts = t.isoformat(timespec="seconds")

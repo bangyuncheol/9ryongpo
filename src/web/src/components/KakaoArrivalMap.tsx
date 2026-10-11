@@ -44,7 +44,8 @@ type Props = {
   compact?: boolean
 }
 
-type Track = { o: K; el: HTMLElement; from: [number, number]; to: [number, number]; t0: number; status: Ship['status'] }
+// path: 이번 2초 동안 그릴 꺾은선(지금 그린 위치 → 지나친 모서리들 → 새 위치). route: 마지막으로 받은 남은 꺾이는 지점
+type Track = { o: K; el: HTMLElement; from: [number, number]; to: [number, number]; path: [number, number][]; route: [number, number][]; t0: number; status: Ship['status'] }
 
 const boatSvg = (fill: string) =>
   `<svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c2.8 3 4 6.4 4 10v7.5c0 1-.8 1.8-1.8 1.8H9.8c-1 0-1.8-.8-1.8-1.8V12c0-3.6 1.2-7 4-10z" fill="${fill}" stroke="#fff" stroke-width="1.6"/><circle cx="12" cy="12" r="1.8" fill="#fff"/></svg>`
@@ -240,10 +241,16 @@ export default function KakaoArrivalMap(p: Props) {
         const el = boatEl(() => onSelect(selRef.current === id ? null : id), (on) => setHovered((h) => (on ? id : h === id ? null : h)))
         const o = new kakao.maps.CustomOverlay({ position: new kakao.maps.LatLng(...to), content: el, xAnchor: 0.5, yAnchor: 0.5, zIndex: 10 })
         o.setMap(m)
-        t = { o, el, from: to, to, t0: now, status: s.status }
+        t = { o, el, from: to, to, path: [to, to], route: s.route ?? [], t0: now, status: s.status }
         tracks.current.set(id, t)
       } else {
-        t.from = lerpPos(t, now); t.to = to; t.t0 = now
+        const here = lerpPos(t, now)
+        const next = s.route ?? []
+        // 지난 2초 사이에 지나친 모서리 = 이전 남은 경로 중 새 남은 경로에 없는 앞부분(남은 경로는 항상 뒷부분이 같다)
+        const passed = t.route.length >= next.length ? t.route.slice(0, t.route.length - next.length) : []
+        t.from = here; t.to = to; t.t0 = now
+        t.path = [here, ...passed, to]
+        t.route = next
       }
       t.status = s.status
       paintBoat(t.el, s, p.selected === s.ship_id)
@@ -423,5 +430,18 @@ export default function KakaoArrivalMap(p: Props) {
 function lerpPos(t: Track, now: number): [number, number] {
   if (reduceMotion()) return t.to
   const f = Math.min(1, (now - t.t0) / POLL_MS)
-  return [t.from[0] + (t.to[0] - t.from[0]) * f, t.from[1] + (t.to[1] - t.from[1]) * f]
+  // 꺾은선을 거리 비율로 따라간다(직선으로 이으면 빠른 재생에서 방파제·육지를 가로지른다, 10/11)
+  const pts = t.path
+  const seg = pts.slice(1).map((p, i) => Math.hypot(p[0] - pts[i][0], (p[1] - pts[i][1]) * 0.81))
+  const total = seg.reduce((a, b) => a + b, 0)
+  if (!total) return t.to
+  let d = f * total
+  for (let i = 0; i < seg.length; i++) {
+    if (d <= seg[i] || i === seg.length - 1) {
+      const g = seg[i] ? Math.min(1, d / seg[i]) : 1
+      return [pts[i][0] + (pts[i + 1][0] - pts[i][0]) * g, pts[i][1] + (pts[i + 1][1] - pts[i][1]) * g]
+    }
+    d -= seg[i]
+  }
+  return t.to
 }

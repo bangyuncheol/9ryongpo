@@ -23,6 +23,8 @@ export type Ship = {
   ship_id: number; name: string | null; biz: string | null; gt: number | null
   lat: number; lon: number; course: number | null; speed: number | null
   status: '입항 중' | '입항' | '조업·대기' | '미갱신'
+  /** 시뮬레이터: 아직 지나지 않은 꺾이는 지점(위도, 경도). 화면이 방파제를 가로지르지 않게 거쳐 간다 */
+  route?: [number, number][]
 }
 
 export type SensorTraffic = { name: string; nickname: string | null; lat: number; lon: number; dist_m: number; hour: string; truck: number; total: number }
