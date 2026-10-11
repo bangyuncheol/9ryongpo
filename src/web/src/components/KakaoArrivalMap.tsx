@@ -45,7 +45,7 @@ type Props = {
 }
 
 // path: 이번 2초 동안 그릴 꺾은선(지금 그린 위치 → 지나친 모서리들 → 새 위치). route: 마지막으로 받은 남은 꺾이는 지점
-type Track = { o: K; el: HTMLElement; from: [number, number]; to: [number, number]; path: [number, number][]; route: [number, number][]; t0: number; status: Ship['status'] }
+type Track = { o: K; el: HTMLElement; from: [number, number]; to: [number, number]; path: [number, number][]; route: [number, number][]; t0: number; status: Ship['status']; docked: boolean; heading: number }
 
 const boatSvg = (fill: string) =>
   `<svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c2.8 3 4 6.4 4 10v7.5c0 1-.8 1.8-1.8 1.8H9.8c-1 0-1.8-.8-1.8-1.8V12c0-3.6 1.2-7 4-10z" fill="${fill}" stroke="#fff" stroke-width="1.6"/><circle cx="12" cy="12" r="1.8" fill="#fff"/></svg>`
@@ -241,19 +241,23 @@ export default function KakaoArrivalMap(p: Props) {
         const el = boatEl(() => onSelect(selRef.current === id ? null : id), (on) => setHovered((h) => (on ? id : h === id ? null : h)))
         const o = new kakao.maps.CustomOverlay({ position: new kakao.maps.LatLng(...to), content: el, xAnchor: 0.5, yAnchor: 0.5, zIndex: 10 })
         o.setMap(m)
-        t = { o, el, from: to, to, path: [to, to], route: s.route ?? [], t0: now, status: s.status }
+        t = { o, el, from: to, to, path: [to, to], route: s.route ?? [], t0: now, status: s.status, docked: isDocked(s), heading: s.course ?? 270 }
         tracks.current.set(id, t)
       } else {
         const here = lerpPos(t, now)
         const next = s.route ?? []
         // 지난 2초 사이에 지나친 모서리 = 이전 남은 경로 중 새 남은 경로에 없는 앞부분(남은 경로는 항상 뒷부분이 같다)
         const passed = t.route.length >= next.length ? t.route.slice(0, t.route.length - next.length) : []
-        t.from = here; t.to = to; t.t0 = now
-        t.path = [here, ...passed, to]
+        const rewound = next.length > t.route.length // 남은 경로가 늘었다 = 시계를 되감았다 → 거꾸로 미끄러지지 않게 바로 옮긴다
+        t.from = rewound ? to : here; t.to = to; t.t0 = now
+        t.path = rewound ? [to, to] : [here, ...passed, to]
         t.route = next
+        if (rewound) t.heading = s.course ?? t.heading // 되감은 뒤 멈춰 있으면 서버 침로로(되감기 전 방향이 남지 않게)
       }
       t.status = s.status
+      t.docked = isDocked(s)
       paintBoat(t.el, s, p.selected === s.ship_id)
+      if (!t.docked) setHeading(t, t.heading) // 움직이는 배는 그리는 위치의 진행 방향(애니메이션 루프가 매 프레임 갱신)
     }
     for (const [id, t] of tracks.current) if (!seen.has(id)) { t.o.setMap(null); tracks.current.delete(id) }
   }, [ready, p.ships, p.selected, onSelect])
@@ -322,6 +326,7 @@ export default function KakaoArrivalMap(p: Props) {
         const [la, lo] = lerpPos(t, now)
         const pos = new kakao.maps.LatLng(la, lo)
         t.o.setPosition(pos)
+        if (!t.docked) { const h = lerpHeading(t, now); if (h !== null && Math.abs(h - t.heading) > 0.5) setHeading(t, h) }
         if (id === (selRef.current) || id === hoveredRef.current) info.current?.setPosition(pos)
         const inView = bounds.contain(pos)
         t.el.style.visibility = inView ? 'visible' : 'hidden'
@@ -425,6 +430,30 @@ export default function KakaoArrivalMap(p: Props) {
       )}
     </div>
   )
+}
+
+/** 지금 그리는 구간의 진행 방향(°, 북=0 동=90). 서버 침로는 2초 앞선 위치 기준이라 모서리 앞에서 미리 꺾여 보였다(10/11). */
+function lerpHeading(t: Track, now: number): number | null {
+  const f = reduceMotion() ? 1 : Math.min(1, (now - t.t0) / POLL_MS)
+  const pts = t.path
+  const seg = pts.slice(1).map((p, i) => Math.hypot(p[0] - pts[i][0], (p[1] - pts[i][1]) * 0.81))
+  const total = seg.reduce((a, b) => a + b, 0)
+  if (total < 1e-7) return null // 멈춤: 마지막 방향 유지
+  let d = Math.min(f * total, total - 1e-9)
+  for (let i = 0; i < seg.length; i++) {
+    if (seg[i] > 1e-9 && d <= seg[i]) {
+      const dy = pts[i + 1][0] - pts[i][0], dx = (pts[i + 1][1] - pts[i][1]) * 0.81
+      return (Math.atan2(dx, dy) * 180 / Math.PI + 360) % 360
+    }
+    d -= seg[i]
+  }
+  return null
+}
+
+function setHeading(t: Track, deg: number) {
+  t.heading = deg
+  const hull = t.el.querySelector('[data-hull]') as HTMLElement | null
+  if (hull) hull.style.transform = `rotate(${deg}deg) scale(1)`
 }
 
 function lerpPos(t: Track, now: number): [number, number] {
