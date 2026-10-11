@@ -123,6 +123,7 @@ function Sheet({ today, list, idle, visit, call, selected, onSelect, admin, onWa
   selected: number | null; onSelect: (id: number | null) => void; admin: boolean; onWait: () => void
 }) {
   const number = call?.enabled ? call.number : null
+  const [wait, setWait] = useState<{ on: boolean; species: string }>({ on: false, species: '' })
   return (
     <div className="flex flex-col px-6">
       <Next today={today} list={list} idle={idle} selected={selected} onSelect={onSelect} />
@@ -134,8 +135,10 @@ function Sheet({ today, list, idle, visit, call, selected, onSelect, admin, onWa
             <Icon name="phone" />전화로 묻기
           </a>
         )}
-        <button onClick={toWait} className="v2-press flex min-h-12 items-center justify-center gap-2 rounded-button bg-chip px-3 text-button font-bold text-ink hover:brightness-95">
-          <Icon name="bell" />들어오면 알림
+        {/* 배 한 척이 아니라 '생선' 기준 알림이라는 게 보이게(10/11 오너: '들어오면 알림'은 남진호 알림으로 읽힘) */}
+        <button onClick={toWait} className="v2-press flex min-h-12 min-w-0 items-center justify-center gap-2 rounded-button bg-chip px-3 text-button font-bold text-ink hover:brightness-95">
+          <Icon name="bell" className={wait.on ? 'text-arriving' : ''} />
+          <span className="truncate">{wait.on ? `${wait.species === '전체' ? '모든 배' : wait.species} 알림 켜짐` : '생선 알림 받기'}</span>
         </button>
       </div>
       {number && <p className="mt-2 text-center text-small text-muted">말로 물으면 말로 알려 드려요 · <span className="tabular-nums">{telText(number)}</span></p>}
@@ -146,7 +149,7 @@ function Sheet({ today, list, idle, visit, call, selected, onSelect, admin, onWa
 
       <div className="-mx-5 mt-8 border-t border-line pt-3">
         {admin && <div className="empty:hidden"><CallCard call={call} /></div>}
-        <WaitFish phoneEnabled={!!call?.enabled} />
+        <WaitFish phoneEnabled={!!call?.enabled} onChange={setWait} />
         <ChatCard onSubscribe={toWait} />
       </div>
     </div>

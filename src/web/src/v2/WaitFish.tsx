@@ -20,7 +20,11 @@ function b64ToBytes(b64: string) {
   return Uint8Array.from(raw, (c) => c.charCodeAt(0))
 }
 
-export default function WaitFish({ phoneEnabled }: { phoneEnabled: boolean }) {
+export default function WaitFish({ phoneEnabled, onChange }: {
+  phoneEnabled: boolean
+  /** 켜짐 상태가 바뀌면 알린다(버전 4 '생선 알림 받기' 버튼이 '붉은대게 알림 켜짐'으로 바뀜, 10/11) */
+  onChange?: (s: { on: boolean; species: string }) => void
+}) {
   const [options, setOptions] = useState<string[]>(['붉은대게'])
   const [species, setSpecies] = useState(() => read(KEY) ?? '붉은대게')
   const [pushOn, setPushOn] = useState(false)
@@ -88,6 +92,7 @@ export default function WaitFish({ phoneEnabled }: { phoneEnabled: boolean }) {
 
   const waiting = pushOn || !!phoneOn
   const current = read(KEY) ?? species
+  useEffect(() => { onChange?.({ on: waiting, species: current }) }, [onChange, waiting, current])
   const canApply = (wantPush && !pushOn) || (wantPhone && !phoneOn && tel.replace(/\D/g, '').length >= 10)
 
   return (
