@@ -10,7 +10,12 @@ const KEEP = 3 // 최근 질문 3개만 보관·표시하고 AI 맥락으로도 
 
 type Turn = { q: string; log: string[]; answer: string | null; mode?: string; error?: string }
 
-export default function ChatCard({ onSubscribe }: { onSubscribe: (species: string) => void }) {
+export default function ChatCard({ onSubscribe, quick = QUICK, placeholder = '예: 대게 들어오면 알려줘' }: {
+  onSubscribe: (species: string) => void
+  /** 자주 묻는 질문 칩(버전 4는 발표 이야기에 맞춘 네 개, 10/12) */
+  quick?: string[]
+  placeholder?: string
+}) {
   const [input, setInput] = useState('')
   const [turns, setTurns] = useState<Turn[]>([])
   const [busy, setBusy] = useState(false)
@@ -63,14 +68,14 @@ export default function ChatCard({ onSubscribe }: { onSubscribe: (species: strin
         })}
       </div>
       <div className="mt-4 flex flex-wrap gap-2">
-        {QUICK.map((q) => (
+        {quick.map((q) => (
           <Button key={q} compact onClick={() => ask(q)} disabled={busy}>{q}</Button>
         ))}
       </div>
       <form className="mt-3 flex gap-2" onSubmit={(e) => { e.preventDefault(); ask(input) }}>
         <label htmlFor="chat-input" className="sr-only">질문</label>
         <input id="chat-input" value={input} onChange={(e) => setInput(e.target.value)} maxLength={300}
-          placeholder="예: 대게 들어오면 알려줘"
+          placeholder={placeholder}
           className="min-h-[var(--spacing-touch)] min-w-0 flex-1 rounded-button border border-line bg-card px-4 text-body text-ink placeholder:text-muted focus:border-primary focus:outline-none" />
         <Button emphasis="high" disabled={busy || !input.trim()}>묻기</Button>
       </form>

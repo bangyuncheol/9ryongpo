@@ -159,7 +159,7 @@ function Sheet({ today, list, idle, visit, call, selected, onSelect, admin, onWa
         <WaitFish phoneEnabled={!!call?.enabled} onChange={setWait} showMore oneTap multi />
         {/* 시트 안에선 카드 경계가 사라지므로 구역은 선으로 나눈다(10/11 오너: 알림과 물어보기가 붙어 보임) */}
         <div aria-hidden className="border-t border-line" />
-        <ChatCard onSubscribe={toWait} />
+        <ChatCard onSubscribe={toWait} quick={QUICK} placeholder="예: 대게랑 오징어 들어오면 알려줘" />
       </div>
     </div>
   )
@@ -217,6 +217,12 @@ function Peek({ today, first, onOpen }: { today: Today | null; first?: Arrival; 
     </button>
   )
 }
+
+/**
+ * 물어보기 칩(10/12 오너, 발표에서 소개). 발표 문제 장면의 사장님 질문('오늘 붉은대게 들어오나? 몇 척이나? 몇 시에 가면
+ * 되나?')과 도구 넷을 한 번씩: 어종 추정 · 입항 예보 · 가는 시간(카카오) · 과거 실적. 04:00 장면에서 답 확인함.
+ */
+const QUICK = ['오늘 붉은대게 들어와?', '지금 들어오는 배 몇 척이야?', '포항시청에서 몇 시에 출발하면 돼?', '작년 10월 붉은대게 얼마였어?']
 
 /** 경매 시작과 권장 도착 사이 분(서버 visit.EARLY_MIN 을 화면에 다시 적지 않으려고 두 시각에서 계산). */
 function early(v: VisitData) {
