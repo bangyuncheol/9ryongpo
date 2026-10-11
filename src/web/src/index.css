@@ -23,6 +23,10 @@
   --color-arriving: #d32f2f;       /* [제품] 4.77 */
   --color-arrived: #1e7d45;        /* [제품] 4.94 */
   --color-idle: #8a9099;           /* [제품] 지도 조업·대기 배 전용(글자에 쓰지 않음) */
+  /* [제품] 지도 트럭 딱지(흰 굵은 12px 글자). 도로 교통 지도와 같은 초록·주황·빨강. 지도 위라 라이트·다크 같은 값(10/11) */
+  --color-traffic-free: #1e7d45;   /* 흰 글자 4.94 */
+  --color-traffic-mid: #b45309;    /* 흰 글자 5.0 */
+  --color-traffic-busy: #b91c1c;   /* 흰 글자 6.5 */
   --color-sim: #e07b22;            /* [제품] 배지 점 전용 */
   --color-live: #1e7d45;
 

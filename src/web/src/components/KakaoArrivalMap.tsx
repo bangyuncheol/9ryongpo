@@ -105,6 +105,21 @@ function infoText(s: Ship, a: Arrival | undefined) {
   return `${s.name} · ${kind} · ${s.status}`
 }
 
+/**
+ * 지난 1시간 트럭 수 → 여유·보통·붐빔(10/11 오너 A안). 제품 가정: 과거를 쌓지 않아 평소 기준이 없어서, 위판장 앞
+ * 센서 하루 실측(밤 3대 ~ 오후 310대)을 셋으로 나눈 대수 기준. 색만으로 알리지 않게 늘 말과 함께 쓴다.
+ */
+const TRUCK_LEVELS = [
+  { max: 30, word: '여유', color: '--color-traffic-free' },
+  { max: 100, word: '보통', color: '--color-traffic-mid' },
+  { max: Infinity, word: '붐빔', color: '--color-traffic-busy' },
+] as const
+const truckLevel = (n: number) => TRUCK_LEVELS.find((l) => n < l.max) ?? TRUCK_LEVELS[2]
+
+function TrafficTag({ lv }: { lv: (typeof TRUCK_LEVELS)[number] }) {
+  return <span className="rounded-full px-1.5 font-bold text-white" style={{ background: `var(${lv.color})` }}>{lv.word}</span>
+}
+
 export default function KakaoArrivalMap(p: Props) {
   const wrap = useRef<HTMLDivElement>(null)
   const box = useRef<HTMLDivElement>(null)
@@ -227,27 +242,28 @@ export default function KakaoArrivalMap(p: Props) {
     prevArrived.current = dockedCount
   }, [ready, dockedCount])
 
-  // 트럭 아이콘: 위판장 1km 안 교통 센서 자리. 크기는 지난 1시간 트럭 수(트럭의 위치가 아니라 그 지점을 지난 수)
+  // 트럭 아이콘: 위판장 1km 안 교통 센서 자리. 크기는 모두 같고 옆 딱지의 색+말로 지난 1시간 트럭 수를 알린다
+  // (10/11 오너: 크기로 많고 적음을 읽는 건 직관적이지 않다는 피드백). 숫자는 올리거나 누르면.
   useEffect(() => {
     const kakao = k.current, m = map.current
     if (!ready || !kakao || !m) return
     truckOs.current.forEach((o) => o.setMap(null))
     truckOs.current = p.trucks.map((t) => {
-      const size = Math.round(14 + Math.min(12, Math.sqrt(t.truck) * 1.3))
+      const lv = truckLevel(t.truck)
       const el = document.createElement('button')
       el.type = 'button'
-      el.setAttribute('aria-label', `${t.nickname ?? t.name} 지난 1시간 트럭 ${t.truck}대`)
-      // 흰 원 배경 없이 트럭 모양만. 둘레에 흰 테두리를 둘러 지도 위에서도 또렷하게(10/10)
-      el.style.cssText = `display:grid;place-items:center;background:transparent;border:0;padding:2px;cursor:pointer;` +
-        `font-size:${size}px;line-height:1;filter:drop-shadow(0 0 1px #fff) drop-shadow(0 0 1px #fff) drop-shadow(0 0 2px #fff) drop-shadow(0 1px 2px rgba(0,0,0,.25))`
-      el.textContent = '🚚'
+      el.setAttribute('aria-label', `${t.nickname ?? t.name} 트럭 ${lv.word}, 지난 1시간 ${t.truck}대`)
+      el.style.cssText = 'display:flex;align-items:center;gap:3px;background:transparent;border:0;padding:2px;cursor:pointer'
+      // 트럭은 흰 테두리를 둘러 지도 위에서도 또렷하게(10/10)
+      el.innerHTML = '<span aria-hidden style="font-size:20px;line-height:1;filter:drop-shadow(0 0 1px #fff) drop-shadow(0 0 1px #fff) drop-shadow(0 0 2px #fff) drop-shadow(0 1px 2px rgba(0,0,0,.25))">🚚</span>' +
+        `<span aria-hidden style="padding:1px 6px;border-radius:9999px;font-size:12px;font-weight:700;line-height:18px;color:#fff;background:var(${lv.color});box-shadow:0 0 0 1.5px #fff,0 1px 3px rgba(0,0,0,.25)">${lv.word}</span>`
       el.addEventListener('click', (e) => { e.stopPropagation(); onSelect(null); setSensorFocus((f) => (f === t.name ? null : t.name)) })
       el.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') setSensorFocus(t.name) })
       el.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') setSensorFocus((f) => (f === t.name ? null : f)) })
-      // 위판장 앞 센서는 위판장에서 77m라 별·이름표를 가린다 → 육지 쪽(왼쪽 위)으로 비켜 놓는다
+      // 위판장 앞 센서는 위판장에서 77m라 별을 가린다 → 육지 쪽(왼쪽 위)으로 비켜 놓는다
       const near = t.dist_m < 150
       const o = new kakao.maps.CustomOverlay({ position: new kakao.maps.LatLng(t.lat, t.lon), content: el,
-        xAnchor: near ? 1.35 : 0.5, yAnchor: near ? 1.0 : 0.5, zIndex: 7 })
+        xAnchor: near ? 1.1 : 0.15, yAnchor: near ? 1.0 : 0.5, zIndex: 7 })
       o.setMap(m)
       return o
     })
@@ -263,7 +279,7 @@ export default function KakaoArrivalMap(p: Props) {
     if (!t) return
     const main = t === p.trucks[0]
     const extra = main && p.truck?.level ? ` · ${p.truck.level}` : ''
-    const el = chip(`🚚 ${t.nickname ?? t.name} · 지난 1시간 트럭 ${t.truck}대 · 전체 ${t.total}대${extra}`)
+    const el = chip(`🚚 ${t.nickname ?? t.name} · 트럭 ${truckLevel(t.truck).word} · 지난 1시간 트럭 ${t.truck}대 · 전체 ${t.total}대${extra}`)
     sensorInfo.current = new kakao.maps.CustomOverlay({ position: new kakao.maps.LatLng(t.lat, t.lon), content: el, yAnchor: 2.2, zIndex: 41 })
     sensorInfo.current.setMap(m)
     if (el.parentElement) el.parentElement.style.pointerEvents = 'none'
@@ -484,7 +500,7 @@ export default function KakaoArrivalMap(p: Props) {
         <p className="sr-only">지도 범례</p>
         <div className="flex flex-wrap gap-x-3">
           <span><span aria-hidden style={{ color: 'var(--color-primary-dark)' }}>★</span> 위판장</span>
-          <span><span aria-hidden>🚚</span> 지난 1시간 트럭 수(클수록 많음)</span>
+          <span><span aria-hidden>🚚</span> 지난 1시간 트럭 <TrafficTag lv={TRUCK_LEVELS[0]} /> <TrafficTag lv={TRUCK_LEVELS[1]} /> <TrafficTag lv={TRUCK_LEVELS[2]} /></span>
         </div>
         <div className="flex flex-wrap gap-x-3">
           <span><span aria-hidden style={{ color: 'var(--color-arriving)' }}>⛴</span> 들어오는 배</span>
