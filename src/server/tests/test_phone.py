@@ -276,3 +276,13 @@ def test_call_state_hides_lines_without_admin(tmp_path, monkeypatch):
     pub = main.call_state(Req, admin=False)
     assert pub["lines"] == [] and "who" not in pub and pub["enabled"] is True
     assert main.call_state(Req, admin=True)["lines"][0]["text"] == "비밀"
+
+
+def test_unsubscribe_by_masked_number(tmp_path):
+    from app.phone.service import delete_call_sub_masked
+    ph, conn = _service(tmp_path)
+    save_call_sub(conn, "01011112222", None)
+    save_call_sub(conn, "01033334444", None)
+    assert delete_call_sub_masked(conn, "010-****-2222") == 1
+    assert call_sub_of(conn, "01011112222") is None and call_sub_of(conn, "01033334444") is not None
+    assert delete_call_sub_masked(conn, "아무거나") == 0

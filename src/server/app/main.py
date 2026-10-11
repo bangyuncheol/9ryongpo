@@ -341,8 +341,13 @@ async def call_subscribe(request: Request) -> dict:
 @app.post("/api/call/unsubscribe")
 async def call_unsubscribe(request: Request) -> dict:
     body = await request.json()
-    phonemod.delete_call_sub(request.app.state.db, phone_digits(str(body.get("phone", ""))))
-    return {"ok": True}
+    raw = str(body.get("phone", ""))
+    digits = phone_digits(raw)
+    if digits:
+        phonemod.delete_call_sub(request.app.state.db, digits)
+        return {"ok": True}
+    # 가린 번호(010-****-5678)로도 끈다 — 화면이 저장해 둔 표시용 번호 그대로
+    return {"ok": True, "deleted": phonemod.delete_call_sub_masked(request.app.state.db, raw)}
 
 
 @app.post("/api/call/toggle")

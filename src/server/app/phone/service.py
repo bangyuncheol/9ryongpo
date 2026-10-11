@@ -57,6 +57,15 @@ def delete_call_sub(conn: sqlite3.Connection, phone: str) -> None:
         conn.execute("DELETE FROM call_subs WHERE phone=?", (phone,))
 
 
+def delete_call_sub_masked(conn: sqlite3.Connection, masked: str) -> int:
+    """화면에 남은 가린 번호(010-****-5678)로 해지. 번호를 다시 묻지 않으려고(10/11 오너). 지운 개수."""
+    phones = [r[0] for r in conn.execute("SELECT phone FROM call_subs").fetchall() if mask(r[0]) == masked.strip()]
+    with tx(conn):
+        for ph in phones:
+            conn.execute("DELETE FROM call_subs WHERE phone=?", (ph,))
+    return len(phones)
+
+
 def call_sub_of(conn: sqlite3.Connection, phone: str) -> dict | None:
     r = conn.execute("SELECT cond_json FROM call_subs WHERE phone=?", (phone,)).fetchone()
     return json.loads(r[0]) if r else None
