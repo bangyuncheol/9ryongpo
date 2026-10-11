@@ -33,6 +33,8 @@ type Props = {
   selected: number | null
   onSelect: (id: number | null) => void
   onFail: () => void
+  /** true 면 범례를 접어 두고 '범례' 버튼으로 연다(2차 시안, 10/11). 기본 false = 기존처럼 늘 펼침 */
+  legendToggle?: boolean
 }
 
 type Track = { o: K; el: HTMLElement; from: [number, number]; to: [number, number]; t0: number; status: Ship['status'] }
@@ -85,6 +87,7 @@ export default function KakaoArrivalMap(p: Props) {
   const wrap = useRef<HTMLDivElement>(null)
   const box = useRef<HTMLDivElement>(null)
   const edgeBox = useRef<HTMLDivElement>(null)
+  const [legendOpen, setLegendOpen] = useState(false)
   const k = useRef<K>(null)
   const map = useRef<K>(null)
   const tracks = useRef(new Map<number, Track>())
@@ -321,7 +324,13 @@ export default function KakaoArrivalMap(p: Props) {
       {p.notice && (
         <p className="pointer-events-none absolute inset-x-3 bottom-8 z-[500] rounded-button bg-card/95 px-3 py-2 text-center text-sub shadow-sm">{p.notice}</p>
       )}
-      <div className="pointer-events-none absolute left-2 top-2 z-[500] rounded-button bg-card/90 px-3 py-2 text-[12px] leading-5 text-ink shadow-sm">
+      {p.legendToggle && !legendOpen ? (
+        <button type="button" onClick={() => setLegendOpen(true)} aria-expanded={false}
+          className="absolute left-2 top-2 z-[500] rounded-button bg-card/90 px-3 py-1.5 text-[12px] font-bold text-ink shadow-sm">
+          ⓘ 범례
+        </button>
+      ) : (
+      <div className={`${p.legendToggle ? '' : 'pointer-events-none '}absolute left-2 top-2 z-[500] rounded-button bg-card/90 px-3 py-2 text-[12px] leading-5 text-ink shadow-sm`}>
         <p className="sr-only">지도 범례</p>
         <div className="flex flex-wrap gap-x-3">
           <span><span aria-hidden style={{ color: 'var(--color-primary-dark)' }}>★</span> 위판장</span>
@@ -333,7 +342,9 @@ export default function KakaoArrivalMap(p: Props) {
           <span><span aria-hidden style={{ color: 'var(--color-arriving)' }}>◀</span> 화면 밖(거리)</span>
         </div>
         <p className="text-muted">배를 누르거나 마우스를 올리면 정보가 보입니다</p>
+        {p.legendToggle && <button type="button" onClick={() => setLegendOpen(false)} aria-expanded className="mt-1 font-bold text-primary-dark">접기</button>}
       </div>
+      )}
     </div>
   )
 }

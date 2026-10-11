@@ -66,7 +66,7 @@ export default function AppV2() {
             </div>
             <MapView place={place} ships={ships.data?.ships ?? []} arriving={t?.arriving ?? []}
               arrivedCount={t?.arrived.length ?? 0} truck={truck} trucks={trucks.data?.sensors ?? []} sensor={sensor}
-              notice={t?.notice ?? null} selected={selected} onSelect={onSelect} />
+              notice={t?.notice ?? null} selected={selected} onSelect={onSelect} legendToggle />
           </section>
           <ChatCard onSubscribe={() => document.getElementById('wait-title')?.scrollIntoView({ behavior: 'smooth', block: 'center' })} />
         </div>
