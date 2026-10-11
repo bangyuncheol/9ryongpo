@@ -10,11 +10,13 @@ const KEEP = 3 // 최근 질문 3개만 보관·표시하고 AI 맥락으로도 
 
 type Turn = { q: string; log: string[]; answer: string | null; mode?: string; error?: string }
 
-export default function ChatCard({ onSubscribe, quick = QUICK, placeholder = '예: 대게 들어오면 알려줘' }: {
+export default function ChatCard({ onSubscribe, quick = QUICK, placeholder = '예: 대게 들어오면 알려줘', aside = '숫자는 데이터에서만 가져옵니다' }: {
   onSubscribe: (species: string) => void
   /** 자주 묻는 질문 칩(버전 4는 발표 이야기에 맞춘 네 개, 10/12) */
   quick?: string[]
   placeholder?: string
+  /** 제목 옆 안내. 버전 4는 빼고(10/12 오너) 나머지는 그대로 */
+  aside?: string | null
 }) {
   const [input, setInput] = useState('')
   const [turns, setTurns] = useState<Turn[]>([])
@@ -40,7 +42,7 @@ export default function ChatCard({ onSubscribe, quick = QUICK, placeholder = '�
   }
 
   return (
-    <Card id="chat-card" title="물어보기" aside="숫자는 데이터에서만 가져옵니다">
+    <Card id="chat-card" title="물어보기" aside={aside ?? undefined}>
       {/* 최근 질문 하나만 펼친다. 조회 기록은 답을 만드는 동안만 흐르고, 답이 나오면 한 줄로 접힌다. */}
       <More open={showOld} hidden={turns.length - 1} label="이전 질문" onToggle={() => setShowOld(!showOld)} />
       <div className="space-y-4">

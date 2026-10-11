@@ -159,7 +159,7 @@ function Sheet({ today, list, idle, visit, call, selected, onSelect, admin, onWa
         <WaitFish phoneEnabled={!!call?.enabled} onChange={setWait} showMore oneTap multi />
         {/* 시트 안에선 카드 경계가 사라지므로 구역은 선으로 나눈다(10/11 오너: 알림과 물어보기가 붙어 보임) */}
         <div aria-hidden className="border-t border-line" />
-        <ChatCard onSubscribe={toWait} quick={QUICK} placeholder="예: 대게랑 오징어 들어오면 알려줘" />
+        <ChatCard onSubscribe={toWait} quick={QUICK} placeholder="예: 대게랑 오징어 들어오면 알려줘" aside={null} />
       </div>
     </div>
   )
