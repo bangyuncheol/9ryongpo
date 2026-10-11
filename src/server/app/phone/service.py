@@ -12,6 +12,7 @@ ClawOps 가 하는 일: 번호·발신·전화 음성 변환·부품 사이 전�
 from __future__ import annotations
 
 import asyncio
+import functools
 import json
 import logging
 import os
@@ -56,6 +57,23 @@ def delete_call_sub(conn: sqlite3.Connection, phone: str) -> None:
 def call_sub_of(conn: sqlite3.Connection, phone: str) -> dict | None:
     r = conn.execute("SELECT cond_json FROM call_subs WHERE phone=?", (phone,)).fetchone()
     return json.loads(r[0]) if r else None
+
+
+DEBOUNCE_S = 0.1
+
+
+@functools.cache
+def _pipeline():
+    """ClawOps 파이프라인은 받아쓰기 확정 뒤 0.5초를 더 기다린다(이어 말하면 합치려고). 우리 받아쓰기가 이미
+    0.8초 침묵을 기다려 확정하므로 같은 기다림이 두 번이다 → 0.1초로 줄여 쿠션을 당긴다(10/11 실통화).
+    SDK 내부 메서드라 clawops==0.62.0 고정에 기댄다."""
+    from clawops.agent.pipeline import PipelineSession
+
+    class FastPipeline(PipelineSession):
+        async def _debounced_respond(self, delay: float) -> None:
+            await super()._debounced_respond(min(delay, DEBOUNCE_S))
+
+    return FastPipeline
 
 
 class PhoneService:
@@ -144,14 +162,13 @@ class PhoneService:
             log.info("전화 고정 문장 음성 %d개 생성(저장 위치 %s)", len(missing), self.cache_dir)
 
     def _new_session(self):
-        from clawops.agent.pipeline import PipelineSession
         from .stt import OpenAITranscribeSTT
         greeting, direction = (self._pending_greeting, "outbound") if self._pending_greeting else (brain.inbound_greeting(), "inbound")
         self._pending_greeting = None
         state = brain.CallState(greeting, direction)
         state.log = self._line
         self._state = state
-        return PipelineSession(stt=OpenAITranscribeSTT(self.s.openai_api_key),
+        return _pipeline()(stt=OpenAITranscribeSTT(self.s.openai_api_key),
                                llm=brain.BaemajungLLM(self._answer_factory(), state),
                                tts=self._tts(state), system_prompt="", greeting=True)
 

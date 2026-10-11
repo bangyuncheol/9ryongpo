@@ -40,7 +40,7 @@ def test_greeting_is_fixed_sentences():
 
 
 def test_slow_answer_gets_cushion_and_logs():
-    fn, seen = fake_answer(brain.CUSHION_AFTER_S + 0.3)
+    fn, seen = fake_answer(0.3)
     st = brain.CallState([], "outbound")
     lines = []
     st.log = lambda r, t: lines.append((r, t))
@@ -53,10 +53,24 @@ def test_slow_answer_gets_cushion_and_logs():
     assert [r for r, _ in lines] == ["user", "tool", "ai"]
 
 
-def test_fast_answer_has_no_cushion():
+def test_cushion_comes_first_even_for_fast_answer():
     out = collect(brain.BaemajungLLM(fake_answer(0)[0], brain.CallState([], "inbound")).generate(
         [{"role": "user", "content": "차 많아?"}]))
-    assert brain.CUSHION not in out
+    assert out[0] == brain.CUSHION  # 실통화(10/11): 답이 0.6초 안에 나온 적이 없어 기다리지 않고 바로 낸다
+
+
+def test_pipeline_debounce_is_shortened(monkeypatch):
+    import clawops.agent.pipeline as cp
+    from app.phone import service
+    seen = []
+
+    async def fake(self, delay):
+        seen.append(delay)
+    monkeypatch.setattr(cp.PipelineSession, "_debounced_respond", fake)
+    fast = service._pipeline()
+    assert fast is service._pipeline() and issubclass(fast, cp.PipelineSession)
+    asyncio.run(fast._debounced_respond(object.__new__(fast), 0.5))
+    assert seen == [service.DEBOUNCE_S]
 
 
 def test_closing_words_end_the_call():

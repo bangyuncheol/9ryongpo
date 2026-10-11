@@ -2,7 +2,7 @@
 
 화면 질문창과 같은 엔진(범위 판정 + 도구 6개 + 규칙)을 그대로 쓰고, 전화 말투 규칙만 덧붙인다.
 - 첫마디: 파이프라인이 "[통화 시작]"을 넣으면 인사 + 알림 문장 + "더 궁금하신 거 있으세요?"
-- 질문: 답이 CUSHION_AFTER_S 안에 안 나오면 쿠션("확인해 볼게요.")을 먼저 내보낸다.
+- 질문: 쿠션("네, 확인해 볼게요.")을 바로 먼저 내보낸다. 범위 판정 + 답변만 2초가 넘어 기다릴 이유가 없다(10/11 실통화).
   쿠션·인사·되묻기는 고정 문장이라 음성이 저장돼 있어 바로 재생된다(interview_bridge 쿠션 설계).
 - 끝: "없어요"·"괜찮아요" 같은 짧은 끝맺음이면 끝인사 후 통화를 끊는다.
 문장마다 마침표로 끝나게 내보내야 파이프라인이 문장 단위로 끊어 말하기 부품에 넘긴다.
@@ -28,7 +28,6 @@ CLOSING_OUT = "네, 알겠습니다. 좋은 하루 보내세요."
 SLOW = "확인이 늦어지고 있어요. 잠시 뒤에 다시 여쭤 봐 주세요."
 FIXED = (HELLO, INBOUND_INTRO, ASK_MORE, CUSHION, CLOSING, CLOSING_OUT, SLOW)
 
-CUSHION_AFTER_S = 0.6
 ANSWER_TIMEOUT_S = 20.0
 _END_RE = re.compile(r"^(아니(요|에요|오)?|없(어|어요|습니다)|괜찮(아|아요|습니다)|됐(어|어요|습니다)|끊(을게요|어요|겠습니다)|"
                      r"고마(워|워요|웠어요)|감사(해요|합니다)|그게 다(예요|에요)?|이제 됐(어|어요)|수고(하세요|하셨습니다))")
@@ -100,9 +99,7 @@ class BaemajungLLM:
 
         task = asyncio.create_task(run())
         try:
-            done, _ = await asyncio.wait({task}, timeout=CUSHION_AFTER_S)
-            if not done:
-                yield CUSHION
+            yield CUSHION
             try:
                 await asyncio.wait_for(asyncio.shield(task), timeout=ANSWER_TIMEOUT_S)
             except asyncio.TimeoutError:
