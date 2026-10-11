@@ -10,7 +10,8 @@ import More from './More'
 type State = 'idle' | 'busy' | 'on' | 'unsupported' | 'denied'
 type Item = { vts: string; title: string; body: string }
 const KEY = 'wipan_sub_species'
-const PHONE_KEY = 'wipan_call_phone' // 가린 번호만 저장(예: 010-****-5678)
+const PHONE_KEY = 'wipan_call_phone' // 화면 표시용 가린 번호(예: 010-****-5678)
+const PHONE_FULL_KEY = 'wipan_call_phone_full' // 해지용 전체 번호. 이 브라우저에만 둔다
 const SHOW = 2
 
 function b64ToBytes(b64: string) {
@@ -22,6 +23,7 @@ function b64ToBytes(b64: string) {
 const supported = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window
 const saved = () => { try { return localStorage.getItem(KEY) } catch { return null } }
 const savedPhone = () => { try { return localStorage.getItem(PHONE_KEY) } catch { return null } }
+const savedPhoneFull = () => { try { return localStorage.getItem(PHONE_FULL_KEY) } catch { return null } }
 
 export default function AlertsCard({ items, preset, phone = false }: { items: Item[]; preset?: { species: string; at: number } | null; phone?: boolean }) {
   const [species, setSpecies] = useState<string>(() => saved() ?? '붉은대게')
@@ -34,6 +36,7 @@ export default function AlertsCard({ items, preset, phone = false }: { items: It
   const [telOn, setTelOn] = useState<string | null>(savedPhone)
   const [telMsg, setTelMsg] = useState<string | null>(null)
   const [telBusy, setTelBusy] = useState(false)
+  const [telOff, setTelOff] = useState(false) // 전체 번호가 저장돼 있지 않아 번호를 다시 받아 끄는 중
 
   const callOn = async () => {
     setTelMsg(null); setTelBusy(true)
@@ -42,7 +45,7 @@ export default function AlertsCard({ items, preset, phone = false }: { items: It
         body: JSON.stringify({ phone: tel, species: species === '전체' ? null : species }) })
       const b = await r.json().catch(() => null)
       if (!r.ok) throw new Error(b?.detail ?? '전화 알림을 켜지 못했습니다. 잠시 후 다시 시도해 주세요.')
-      try { localStorage.setItem(PHONE_KEY, b.phone) } catch { /* 표시만 못 함 */ }
+      try { localStorage.setItem(PHONE_KEY, b.phone); localStorage.setItem(PHONE_FULL_KEY, tel.replace(/\D/g, '')) } catch { /* 표시만 못 함 */ }
       setTelOn(b.phone); setTel('')
     } catch (e) {
       setTelMsg(e instanceof Error ? e.message : '전화 알림을 켜지 못했습니다.')
@@ -85,6 +88,22 @@ export default function AlertsCard({ items, preset, phone = false }: { items: It
     }
   }
 
+  const callOff = async (phoneNo: string) => {
+    setTelMsg(null); setTelBusy(true)
+    try {
+      await postJson('/api/call/unsubscribe', { phone: phoneNo })
+      try { localStorage.removeItem(PHONE_KEY); localStorage.removeItem(PHONE_FULL_KEY) } catch { /* 표시만 남음 */ }
+      setTelOn(null); setTelOff(false); setTel('')
+    } catch (e) {
+      setTelMsg(e instanceof Error ? e.message : '전화 알림을 끄지 못했습니다. 잠시 후 다시 시도해 주세요.')
+    } finally { setTelBusy(false) }
+  }
+  const askOff = () => {
+    const full = savedPhoneFull()
+    if (full) callOff(full)
+    else setTelOff(true) // 예전에 등록해 전체 번호가 없으면 번호를 다시 받는다
+  }
+
   const label = species === '전체' ? '배가 들어오면' : `${species} 들어오면`
   const current = saved() ?? species
   const shown = open ? items : items.slice(0, SHOW)
@@ -112,15 +131,19 @@ export default function AlertsCard({ items, preset, phone = false }: { items: It
         )}
         {msg && <p role="alert" className="mt-2 text-sub text-arriving">{msg}</p>}
 
-        {phone && (telOn ? (
-          <p role="status" className="mt-3 text-sub font-bold text-arrived">✓ 전화로도 알려 드립니다 · {telOn}</p>
+        {phone && (telOn && !telOff ? (
+          <div className="mt-3 flex items-center justify-between gap-2">
+            <p role="status" className="text-sub font-bold text-arrived">✓ 전화로도 알려 드립니다 · {telOn}</p>
+            <Button compact onClick={askOff} disabled={telBusy}>전화 끄기</Button>
+          </div>
         ) : (
-          <form className="mt-3 flex flex-wrap items-center gap-2" onSubmit={(e) => { e.preventDefault(); callOn() }}>
-            <label className="text-sub text-muted" htmlFor="call-phone">전화로도 받기</label>
+          <form className="mt-3 flex flex-wrap items-center gap-2" onSubmit={(e) => { e.preventDefault(); if (telOff) callOff(tel); else callOn() }}>
+            <label className="text-sub text-muted" htmlFor="call-phone">{telOff ? '끌 번호' : '전화로도 받기'}</label>
             <input id="call-phone" type="tel" inputMode="numeric" autoComplete="tel" placeholder="010-0000-0000" value={tel}
               onChange={(e) => setTel(e.target.value)}
               className="min-h-[var(--spacing-touch)] min-w-0 flex-1 rounded-button border border-line bg-card px-3 text-body text-ink" />
-            <Button type="submit" disabled={telBusy || tel.replace(/\D/g, '').length < 10}>전화 알림 받기</Button>
+            <Button type="submit" disabled={telBusy || tel.replace(/\D/g, '').length < 10}>{telOff ? '전화 알림 끄기' : '전화 알림 받기'}</Button>
+            {telOff && <Button type="button" compact onClick={() => setTelOff(false)}>취소</Button>}
           </form>
         ))}
         {telMsg && <p role="alert" className="mt-2 text-sub text-arriving">{telMsg}</p>}
