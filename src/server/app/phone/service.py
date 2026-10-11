@@ -31,6 +31,7 @@ from . import brain
 log = logging.getLogger(__name__)
 
 IDLE_HANGUP_S = 25.0
+CLOSING_PAUSE_S = 2.0  # 끝인사 음성 길이 + 이만큼 뒤 끊는다. 전화로 소리가 실제 나오는 시점이 보내는 시점보다 늦다(10/11 실통화: 0.8초는 말 끝나자마자 끊기는 느낌)
 MAX_CALL_S = 150.0
 MAX_LINES = 40
 ALLOWED_SPECIES = {None, "붉은대게", "살오징어", "골뱅이", "방어", "가자미류"}
@@ -146,7 +147,7 @@ class PhoneService:
         def spoken(text: str, seconds: float) -> None:
             self._last_activity = time.monotonic()
             if state.hangup_after and text.strip() == state.hangup_after:
-                asyncio.create_task(self._hangup_later(seconds + 0.8))
+                asyncio.create_task(self._hangup_later(seconds + CLOSING_PAUSE_S))
 
         return CachedTTS(self.cache_dir, self.s.gemini_api_key, self.s.gemini_tts_model, self.s.gemini_tts_voice,
                          openai_key=self.s.openai_api_key, on_spoken=spoken)
