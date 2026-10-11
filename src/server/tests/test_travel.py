@@ -47,6 +47,7 @@ def test_auction_mode_gives_depart_by_from_future_route():
     assert r["origin"] == "포항과학기술고등학교" and r["distance_km"] == 1.5
     assert (r["drive_min"], r["last_mile_min"], r["total_min"]) == (4, travel.FUTURE_EXTRA, 7)
     assert (r["arrive_by"], r["depart_by"]) == ("08:30", "08:20") and not r["approx"]
+    assert "30분 이른 08:30까지 도착하려면" in r["note"]  # 9시 경매인데 왜 8시 20분인지 답에 넣게(10/11 실통화)
     assert k.departs[0] == datetime(2026, 10, 12, 7, 30, tzinfo=travel.KST)  # 내일 08:30 도착보다 1시간 앞 출발 예측으로 물음
 
 

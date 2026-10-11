@@ -36,8 +36,9 @@ TOOLS: list[dict] = [
          "visitor": {"type": "boolean"}}, "additionalProperties": False}},
     {"type": "function", "name": "estimate_travel",
      "description": "다른 곳에서 구룡포 위판장까지 차로 걸리는 시간과 출발 권장 시각. 카카오 길찾기(지금 도로 상황 또는 그 시각 예측 교통) + 위판장 앞 여유. "
-                    "'OO에서 몇 시에 출발하면 돼?'는 depart_time 없이(경매 도착 권장 시각에 맞춘 depart_by), '지금 출발하면 얼마나 걸려?'는 depart_time='지금', "
-                    "'8시에 출발하면 언제 도착해?'는 depart_time='08:00'. 출발지를 모르면 부르지 말고 어디서 출발하는지 먼저 묻는다.",
+                    "'OO에서 몇 시에 출발하면 돼?'는 depart_time 없이(경매 도착 권장 시각에 맞춘 depart_by) — 문장에 '지금 OO에서 출발하는데'처럼 '지금'이 있어도 출발 시각을 묻는 질문이면 생략한다. "
+                    "'지금 출발하면 얼마나 걸려?'처럼 걸리는 시간만 물을 때만 depart_time='지금', '8시에 출발하면 언제 도착해?'는 depart_time='08:00'. "
+                    "한 질문에 한 번만 부른다. 출발지를 모르면 부르지 말고 어디서 출발하는지 먼저 묻는다.",
      "parameters": {"type": "object", "properties": {
          "origin": {"type": "string", "description": "출발지 이름 그대로. 예: 포항과학기술고등학교, 포항시청, 구룡포읍사무소"},
          "depart_time": {"type": "string", "description": "'지금' 또는 HH:MM. 생략하면 경매에 맞춰 출발 시각을 계산"},
