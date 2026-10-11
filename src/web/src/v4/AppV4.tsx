@@ -100,6 +100,17 @@ export default function AppV4() {
   )
 }
 
+/** 앱 아이콘(public/icon.svg, 파도 위 돛)과 같은 그림을 버전 4 청록으로. 파일 아이콘은 다른 버전도 써서 그대로 둔다 */
+function Logo() {
+  return (
+    <svg aria-hidden viewBox="0 0 64 64" className="h-6 w-6 shrink-0">
+      <rect width="64" height="64" rx="14" fill="var(--color-primary-dark)" />
+      <path d="M12 40c6 4 12 4 20 0s14-4 20 0" stroke="var(--color-on-primary)" strokeWidth="4" fill="none" strokeLinecap="round" />
+      <path d="M22 34l10-18 10 18z" fill="var(--color-on-primary)" />
+    </svg>
+  )
+}
+
 /** 이름 + 어떤 데이터가 언제 기준인지. 위치가 멈췄을 때는 그 사실이 이 줄을 대신한다. */
 function Badge({ today }: { today: Today | null }) {
   const sim = today?.source.feed === 'sim'
@@ -107,10 +118,12 @@ function Badge({ today }: { today: Today | null }) {
   return (
     <div>
       <div className="flex items-center justify-between gap-3">
-        <h1 className="text-main font-extrabold tracking-tight text-primary-dark">배마중 <span className="text-sub font-medium text-muted">구룡포항</span></h1>
-        <p className="flex items-center gap-1.5 text-small text-muted">
+        <h1 className="flex items-center gap-2 text-main font-extrabold tracking-tight text-primary-dark"><Logo />배마중</h1>
+        {/* 시연이어도 실제처럼 보이게 시각만 둔다(10/11 오너 결정, CLAUDE.md '데이터 소스 표시'의 버전 4 헤더 예외). 시연·실시간은 점 색과 읽기 이름으로만 */}
+        <p className="flex items-center gap-1.5 text-small text-muted" title={sim ? '선박 위치 시연' : '실시간'}>
           <span aria-hidden className={`h-2 w-2 rounded-full ${sim ? 'bg-[var(--color-sunrise)]' : 'bg-arrived'}`} />
-          {sim ? '선박 위치 시연' : '실시간'}{now && <span className="tabular-nums"> · {hhmm(now)} 기준</span>}
+          <span className="sr-only">{sim ? '선박 위치 시연' : '실시간'}</span>
+          {now && <span className="tabular-nums">{hhmm(now)}</span>}
         </p>
       </div>
       {today?.notice && <p role="status" className="mt-2 text-sub font-bold text-arriving">{today.notice}</p>}
