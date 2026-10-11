@@ -144,7 +144,7 @@ function Sheet({ today, list, idle, visit, call, selected, onSelect, admin, onWa
         {/* 배 한 척이 아니라 '생선' 기준 알림이라는 게 보이게(10/11 오너: '들어오면 알림'은 남진호 알림으로 읽힘) */}
         <button onClick={toWait} className="v2-press flex min-h-12 min-w-0 items-center justify-center gap-2 rounded-button bg-chip px-3 text-button font-bold text-ink hover:brightness-95">
           <Icon name="bell" className={wait.on ? 'text-arriving' : ''} />
-          <span className="truncate">{wait.on ? `${wait.species === '전체' ? '모든 배' : wait.species} 알림 켜짐` : '생선 알림 받기'}</span>
+          <span className="truncate">{wait.on ? `${wait.species === '전체' ? '모든 생선' : wait.species} 알림 켜짐` : '생선 알림 받기'}</span>
         </button>
       </div>
       {/* 사람이 받는 수협 문의 전화로 오해하지 않게 AI가 받는다는 것부터(10/11 오너) */}

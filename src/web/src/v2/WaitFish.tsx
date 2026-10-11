@@ -119,7 +119,7 @@ export default function WaitFish({ phoneEnabled, onChange, showMore = false }: {
         <ul className="mt-4 space-y-2">
           {pushOn && (
             <li className="flex items-center justify-between gap-2 rounded-button bg-[var(--color-sunrise-soft)] px-3 py-2">
-              <span className="flex items-center gap-2 text-sub font-bold"><Icon name="bell" className="text-arriving" />{current === '전체' ? '어떤 배든' : current} 기다리는 중 · 휴대폰 알림</span>
+              <span className="flex items-center gap-2 text-sub font-bold"><Icon name="bell" className="text-arriving" />{current === '전체' ? '모든 생선' : current} 기다리는 중 · 휴대폰 알림</span>
               <Button compact onClick={pushOff} disabled={busy}>끄기</Button>
             </li>
           )}
@@ -140,7 +140,7 @@ export default function WaitFish({ phoneEnabled, onChange, showMore = false }: {
                 disabled={waiting}
                 className={`v2-press min-h-[var(--spacing-touch)] rounded-button px-4 text-button font-bold disabled:opacity-60 ${
                   species === o ? 'bg-primary-dark text-on-primary' : 'bg-chip text-ink hover:brightness-95'}`}>
-                {o === '전체' ? '어떤 배든' : o}
+                {o === '전체' ? '모두' : o}
               </button>
             ))}
           </div>
