@@ -169,8 +169,9 @@ export default function WaitFish({ phoneEnabled, onChange, showMore = false, one
           )}
           {oneTap ? (
             <div className="mt-4 grid grid-cols-2 gap-2">
+              {/* 둘 중 고르는 버튼이라 둘 다 회색(색 칠한 버튼은 위 '전화로 묻기' 하나, 10/12 오너) */}
               {supported() && !pushOn && (
-                <Button emphasis="high" onClick={() => apply(true, false)} disabled={busy} className={`flex items-center justify-center gap-1.5 ${phoneEnabled && !phoneOn ? '' : 'col-span-2'}`}>
+                <Button onClick={() => apply(true, false)} disabled={busy} className={`flex items-center justify-center gap-1.5 ${phoneEnabled && !phoneOn ? '' : 'col-span-2'}`}>
                   <Icon name="bell" />휴대폰 알림 받기
                 </Button>
               )}
