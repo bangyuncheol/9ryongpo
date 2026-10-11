@@ -184,7 +184,7 @@ export default function KakaoArrivalMap(p: Props) {
         const lat = Math.min(LIMIT.n - IN, Math.max(LIMIT.s + IN, seen.getLat())), lng = Math.min(LIMIT.e - IN, Math.max(LIMIT.w + IN, seen.getLng()))
         const c = mm.getCenter() as LL
         const from = [c.getLat(), c.getLng()], to = [from[0] + lat - seen.getLat(), from[1] + lng - seen.getLng()]
-        if (reduceMotion()) { mm.setCenter(new kakao.maps.LatLng(to[0], to[1])); return }
+        if (reduceMotion()) { mm.setCenter(new kakao.maps.LatLng(to[0], to[1])); checkMoved(); return }
         bouncing = true
         const t0 = performance.now(), D = 380, k1 = 1.6
         const step = (now: number) => {
@@ -192,9 +192,16 @@ export default function KakaoArrivalMap(p: Props) {
           const e = 1 + (k1 + 1) * (x - 1) ** 3 + k1 * (x - 1) ** 2
           mm.setCenter(new kakao.maps.LatLng(from[0] + (to[0] - from[0]) * e, from[1] + (to[1] - from[1]) * e))
           if (x < 1) requestAnimationFrame(step)
-          else bouncing = false
+          else { bouncing = false; checkMoved() } // 튕기는 동안의 idle 은 건너뛰므로 끝난 뒤 한 번 더(안 그러면 '처음 위치'가 안 떴다, 10/12 오너 제보)
         }
         requestAnimationFrame(step)
+      }
+      const checkMoved = () => {
+        const h = home.current
+        if (!h) return
+        const c = m.getCenter() as LL
+        const hc = h.center as LL
+        setMoved(m.getLevel() !== h.level || Math.abs(c.getLat() - hc.getLat()) > 1e-4 || Math.abs(c.getLng() - hc.getLng()) > 1e-4)
       }
       kakao.maps.event.addListener(m, 'idle', () => {
         const h = home.current
@@ -205,9 +212,7 @@ export default function KakaoArrivalMap(p: Props) {
         const seen = W && H ? m.getProjection().coordsFromContainerPoint(new kakao.maps.Point(W / 2, Math.max(0, H - padNow.current) / 2)) : m.getCenter()
         if (bouncing) return
         if (!limit.contain(seen)) { bounceBack(m, seen); return }
-        const c = m.getCenter() as { getLat: () => number; getLng: () => number }
-        const hc = h.center as { getLat: () => number; getLng: () => number }
-        setMoved(m.getLevel() !== h.level || Math.abs(c.getLat() - hc.getLat()) > 1e-4 || Math.abs(c.getLng() - hc.getLng()) > 1e-4)
+        checkMoved()
       })
       kakao.maps.event.addListener(m, 'click', () => { onSelect(null); setSensorFocus(null) })
       setReady(true)
