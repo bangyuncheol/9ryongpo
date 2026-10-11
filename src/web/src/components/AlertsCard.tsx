@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { api, hhmm, postJson } from '../api'
 import Card, { Button } from './Card'
 import More from './More'
+import { phoneDisplay, phoneOnlyDigits, phoneValid } from '../phone'
 
 /*
  * 알림 카드 = 알림 받기(구독) + 알림함(보낸 알림). "켜고, 온 것을 보는 곳"을 한자리에(10/10 변경).
@@ -30,12 +31,18 @@ export default function AlertsCard({ items, preset, phone = false }: { items: It
   const [editing, setEditing] = useState(false)
   const [msg, setMsg] = useState<string | null>(null)
   const [open, setOpen] = useState(false)
-  const [tel, setTel] = useState('')
+  const [tel, setTel] = useState('') // 숫자만(하이픈은 화면이 넣는다, 10/11)
+  const [telTouched, setTelTouched] = useState(false)
   const [telOn, setTelOn] = useState<string | null>(savedPhone)
   const [telMsg, setTelMsg] = useState<string | null>(null)
   const [telBusy, setTelBusy] = useState(false)
 
+  // 앞자리가 01 이 아니면 바로, 덜 쳤으면 칸을 벗어났을 때 알려 준다(버튼이 왜 안 눌리는지 보이게)
+  const telHint = tel && !phoneValid(tel) && (!tel.startsWith('01'.slice(0, tel.length)) || telTouched)
+    ? '010으로 시작하는 휴대폰 번호를 끝까지 입력해 주세요.' : null
+
   const callOn = async () => {
+    if (!phoneValid(tel)) { setTelTouched(true); return } // 틀린 번호는 보내지 않는다
     setTelMsg(null); setTelBusy(true)
     try {
       const r = await fetch('/api/call/subscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -43,7 +50,7 @@ export default function AlertsCard({ items, preset, phone = false }: { items: It
       const b = await r.json().catch(() => null)
       if (!r.ok) throw new Error(b?.detail ?? '전화 알림을 켜지 못했습니다. 잠시 후 다시 시도해 주세요.')
       try { localStorage.setItem(PHONE_KEY, b.phone) } catch { /* 표시만 못 함 */ }
-      setTelOn(b.phone); setTel('')
+      setTelOn(b.phone); setTel(''); setTelTouched(false)
     } catch (e) {
       setTelMsg(e instanceof Error ? e.message : '전화 알림을 켜지 못했습니다.')
     } finally { setTelBusy(false) }
@@ -150,10 +157,13 @@ export default function AlertsCard({ items, preset, phone = false }: { items: It
         ) : (
           <form className="mt-3 flex flex-wrap items-center gap-2" onSubmit={(e) => { e.preventDefault(); callOn() }}>
             <label className="text-sub text-muted" htmlFor="call-phone">전화로도 받기</label>
-            <input id="call-phone" type="tel" inputMode="numeric" autoComplete="tel" placeholder="010-0000-0000" value={tel}
-              onChange={(e) => setTel(e.target.value)}
-              className="min-h-[var(--spacing-touch)] min-w-0 flex-1 rounded-button border border-line bg-card px-3 text-body text-ink" />
-            <Button type="submit" disabled={telBusy || tel.replace(/\D/g, '').length < 10}>전화 알림 받기</Button>
+            {/* 숫자만 받고 하이픈은 화면이 넣는다(숫자 키패드엔 하이픈 키가 없거나 찾기 어렵다). 010 은 11자리만(10/11) */}
+            <input id="call-phone" name="tel" type="tel" inputMode="numeric" autoComplete="tel-national" placeholder="숫자만 입력 (예: 01012345678)"
+              value={phoneDisplay(tel)} onChange={(e) => { setTel(phoneOnlyDigits(e.target.value)); setTelMsg(null) }} onBlur={() => setTelTouched(true)}
+              aria-invalid={!!telHint} aria-describedby={telHint ? 'call-phone-hint' : undefined}
+              className="min-h-[var(--spacing-touch)] min-w-0 flex-1 rounded-button border border-line bg-card px-3 text-body tabular-nums tracking-wide text-ink placeholder:tracking-normal placeholder:text-muted" />
+            <Button type="submit" disabled={telBusy || !phoneValid(tel)}>전화 알림 받기</Button>
+            {telHint && <p id="call-phone-hint" className="basis-full text-sub text-arriving">{telHint}</p>}
           </form>
         ))}
         {telMsg && <p role="alert" className="mt-2 text-sub text-arriving">{telMsg}</p>}

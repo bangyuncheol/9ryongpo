@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { api, postJson } from '../api'
 import { Button } from '../components/Card'
 import Icon from './Icon'
-import { phoneDisplay, phoneOnlyDigits, phoneValid } from './bits'
+import { phoneDisplay, phoneOnlyDigits, phoneValid } from '../phone'
 
 /*
  * 2차 시안 알림 카드: '알림 설정' 대신 "기다리는 생선이 있나요?" — 어종을 고르고, 휴대폰 알림·전화를 한 번에 신청.
