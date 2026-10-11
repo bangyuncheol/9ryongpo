@@ -315,7 +315,7 @@ export default function KakaoArrivalMap(p: Props) {
   const stale = idle[0]?.status === '미갱신'
 
   return (
-    <div ref={wrap} className="relative">
+    <div ref={wrap} className="relative isolate">{/* isolate: 지도 안 표시(z-400~500)가 지도 밖 고정 탭 막대 위로 올라오지 않게(10/11) */}
       <div ref={box} className={`${p.compact ? 'h-52' : 'h-80 md:h-[460px]'} w-full overflow-hidden rounded-card bg-primary-soft`} aria-label="입항 지도" />
       <div ref={edgeBox} className="absolute inset-0 z-[400] overflow-hidden rounded-card [&>*]:pointer-events-auto" style={{ pointerEvents: 'none' }} />
       {idle.length > 0 && (

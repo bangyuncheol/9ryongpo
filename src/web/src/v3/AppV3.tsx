@@ -134,7 +134,7 @@ function PhoneV3() {
         </main>
       )}
 
-      <nav aria-label="화면 이동" className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-card/95 backdrop-blur">
+      <nav aria-label="화면 이동" className="fixed inset-x-0 bottom-0 z-[1000] border-t border-line bg-card/95 backdrop-blur">
         <ul className="mx-auto flex max-w-xl">
           {TABS.map(([k, label]) => (
             <li key={k} className="flex-1">
