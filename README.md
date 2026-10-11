@@ -73,7 +73,25 @@ npm run build      # 결과(dist/)를 서버가 http://localhost:8000/ 에서 �
 npm run dev        # 화면만 고칠 때. http://localhost:5173 (API는 8000으로 자동 연결)
 ```
 
-데모 진행 막대는 주소 끝에 `?admin=1`을 붙이면 나온다(토큰 없음).
+화면 주소 (서버를 띄우고 `npm run build`까지 한 뒤):
+
+| 주소 | 보이는 것 |
+|---|---|
+| `http://localhost:8000/` | 지금 화면(버전 1) |
+| `http://localhost:8000/?v=2` | 2차 시안: 폰·웹 모두 긴 한 페이지 |
+| `http://localhost:8000/?v=3` | 3차 시안: 웹은 2차와 같고, 폰만 홈+아래 탭 4개 |
+| 위 주소 + `admin=1` (예: `/?admin=1`, `/?v=3&admin=1`) | 데모 진행 막대(시각 이동·재생·전화 켜기·시험 전화·시험 알림, 토큰 없음) |
+| `http://localhost:8000/?preview=1` | **팀 미리보기**: 한 화면에서 폰(390×844)·웹(1440 축소) × 버전 1·2·3 을 버튼으로 바꿔 보고, 오른쪽 패널에서 데모 진행과 실시간 통화 내역을 본다 |
+
+전화 기능(070 전화 알림·전화로 물어보기)은 **기본 꺼짐**이다. 꺼져 있어도 화면은 모두 보이고, 전화 버튼·통화 내역만 숨는다.
+켜려면 서버를 띄울 때 `PHONE_ENABLED=1`을 준다 — **070 번호 하나에 서버 하나만 붙으므로 맥·윈도우·VM 중 한 곳에서만 켠다**(동시에 켜면 서로 밀어낸다).
+
+```
+# 맥
+PHONE_ENABLED=1 uv run uvicorn app.main:app --port 8000
+# 윈도우 PowerShell
+$env:PHONE_ENABLED=1; uv run uvicorn app.main:app --port 8000
+```
 
 테스트: `cd src/server` 후 `uv run pytest`.
 
