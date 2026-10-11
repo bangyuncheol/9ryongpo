@@ -52,6 +52,9 @@
 .v4 p { text-wrap: pretty; }
 .v4 :is(button, a, label) { touch-action: manipulation; }
 
+/* 물어보기(공용 ChatCard) 제목을 시트의 다른 구역 제목과 같은 색으로(버전 4 안에서만) */
+.v4 #chat-card-title { color: var(--color-primary-dark); }
+
 /* 시트: 지도 위로 올라오는 면. 위쪽으로만 그림자(빛은 위에서), 손잡이는 끌 수 있다는 표시 */
 .v4-sheet { box-shadow: 0 -10px 28px -12px rgb(12 40 48 / 0.35); }
 @media (prefers-color-scheme: dark) { .v4-sheet { box-shadow: 0 -10px 28px -12px rgb(0 0 0 / 0.7), 0 -1px 0 var(--color-line); } }
