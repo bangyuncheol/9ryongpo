@@ -315,8 +315,12 @@ from .phone.brain import outbound_greeting  # noqa: E402
 
 
 @app.get("/api/call/state")
-def call_state(request: Request) -> dict:
-    return request.app.state.phone.state()
+def call_state(request: Request, admin: bool = False) -> dict:
+    """통화 내역(대화·가린 번호)은 시연 화면(?admin=1)에서만 돌려준다(10/11 오너 결정). 일반 화면은 기능 켜짐 여부만."""
+    st = request.app.state.phone.state()
+    if not admin:
+        st = {k: st[k] for k in ("enabled", "connected", "calls_on", "number")} | {"active": False, "status": "idle", "lines": []}
+    return st
 
 
 @app.post("/api/call/subscribe")

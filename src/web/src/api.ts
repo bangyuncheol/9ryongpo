@@ -77,7 +77,7 @@ export const api = {
   visit: (visitor: boolean) => get<{ advice: string; basis: string; auction_time: string }>(`/api/visit?visitor=${visitor}`),
   pushKey: () => get<{ publicKey: string; species: string[] }>('/api/push/key'),
   notifications: () => get<{ vts: string; title: string; body: string }[]>('/api/notifications'),
-  callState: () => get<CallState>('/api/call/state'),
+  callState: (admin = false) => get<CallState>(`/api/call/state${admin ? '?admin=1' : ''}`),
 }
 
 export async function adminPost(path: string): Promise<Clock & { feed: string }> {

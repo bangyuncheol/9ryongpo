@@ -30,9 +30,10 @@ export default function App() {
   const trucks = usePoll(api.trafficSensors, 60000)
   const inbox = usePoll(api.notifications, 3000)
   const visit = usePoll(() => api.visit(false), 60000)
-  const call = usePoll(api.callState, 1500)
   const [subPreset, setSubPreset] = useState<{ species: string; at: number } | null>(null)
   const admin = new URLSearchParams(location.search).has('admin')
+  // 통화 내역은 시연 화면(?admin=1)에서만(10/11). 일반 화면은 '전화로도 받기' 표시용으로 켜짐 여부만 받는다
+  const call = usePoll(() => api.callState(admin), admin ? 1500 : 60000)
 
   useEffect(() => {
     api.place().then(setPlace).catch(console.error)
@@ -63,7 +64,7 @@ export default function App() {
               notice={today.data?.notice ?? null} selected={selected} onSelect={onSelect} />
             <ErrorLine message={today.error ?? ships.error} />
           </div>
-          <div className="order-6 empty:hidden"><CallCard call={call.data} /></div>
+          {admin && <div className="order-6 empty:hidden"><CallCard call={call.data} /></div>}
           <div className="order-6"><ChatCard onSubscribe={(species) => setSubPreset({ species, at: Date.now() })} /></div>
         </div>
       </main>

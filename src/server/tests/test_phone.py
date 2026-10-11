@@ -262,3 +262,17 @@ def test_single_char_transcripts_are_dropped_unless_backchannel():
 def test_openai_connection_has_no_prompt():
     from app.phone.stt import PhoneSTT
     assert "prompt" not in PhoneSTT("k")._openai_session()["session"]["audio"]["input"]["transcription"]
+
+
+def test_call_state_hides_lines_without_admin(tmp_path, monkeypatch):
+    from app import main
+    ph, _ = _service(tmp_path)
+    ph.live = {"active": True, "status": "in-progress", "who": "010-****-2222", "lines": [{"role": "user", "text": "비밀", "t": "x"}]}
+
+    class Req:
+        class app:
+            class state:
+                phone = ph
+    pub = main.call_state(Req, admin=False)
+    assert pub["lines"] == [] and "who" not in pub and pub["enabled"] is True
+    assert main.call_state(Req, admin=True)["lines"][0]["text"] == "비밀"
