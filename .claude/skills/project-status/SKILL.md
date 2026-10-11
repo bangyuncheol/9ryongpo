@@ -24,7 +24,7 @@ description: 미구현·보류·기술부채·진행 중 과제의 현재 상태
 - 화면 `src/web/` (Vite + React 19 + Tailwind 4 + react-leaflet 5): 지도(위판장★·센서▲·배●), 입항 예보·어종·교통 카드(모드 구분 없이 한 화면, 관광객 한 줄은 교통 카드), sim/live 배지, `?admin=1` 진행 막대. 2초마다 `/api/today`·`/api/ships`, 1분마다 `/api/traffic/now`. 색은 `src/web/src/index.css` 토큰.
 - 서버가 `src/web/dist`가 있으면 `/`에서 화면을 서빙.
 - 웹 푸시: `app/push.py`(구독 저장·검증, 조건 매칭, 만료 구독 삭제, 발송 기록), 알림 문구 템플릿 `rules/brief.py`, 서비스 워커 `src/web/public/sw.js`, 알림 받기·알림함 카드. 03:10 틱에 "04:25~04:35 자망선 3척 입항 예정 · 붉은대게·골뱅이 가능성. 경매 09:00" 확인('(기본값)' 표시는 10/10에 뺌).
-- 질문창: `app/agent/tools.py`(도구 6개: 입항 예보·어종·교통·방문 권장·과거 실적·알림 준비), `app/agent/chat.py`(OpenAI Responses API, `gpt-6.1-sol` medium, 최대 5회 도구 왕복). LLM 실패 시 간단 모드, 크레딧·인증 오류면 5분 쿨다운. 범위 밖 질문은 판정 호출(본 답변과 동시, `chat.guarded_answer`)로 거절, 이전 대화는 참고 기록으로만 넣음(10/10, 설계 §4.2). 화면 `ChatCard`(자주 묻는 질문 4개, 도구 호출 기록 스트리밍, '알려줘'면 알림 받기 버튼 준비).
+- 질문창: `app/agent/tools.py`(도구 7개: 입항 예보·어종·교통·방문 권장·과거 실적·알림 준비·가는 시간), `app/agent/chat.py`(OpenAI Responses API, `gpt-6.1-sol` medium, 최대 5회 도구 왕복). LLM 실패 시 간단 모드, 크레딧·인증 오류면 5분 쿨다운. 범위 밖 질문은 판정 호출(본 답변과 동시, `chat.guarded_answer`)로 거절, 이전 대화는 참고 기록으로만 넣음(10/10, 설계 §4.2). 화면 `ChatCard`(자주 묻는 질문 4개, 도구 호출 기록 스트리밍, '알려줘'면 알림 받기 버튼 준비).
 - 방문 권장 `rules/visit.py` + `/api/visit`, 교통 카드에 표시.
 - 알림 문장: 템플릿을 LLM(`reasoning low`)이 다듬되, 숫자 집합·'가능성'·길이가 템플릿과 다르면 버리고 템플릿 사용(`rules/brief.py accept`). 크레딧 쿨다운은 질문창과 공유.
 - `VAPID_SUBJECT`는 주소만 넣어도 `mailto:`를 자동으로 붙인다.
@@ -48,6 +48,7 @@ description: 미구현·보류·기술부채·진행 중 과제의 현재 상태
 - 미리보기(10/11, `?preview=1`): `src/web/src/preview/Preview.tsx`. 폰(390×844)·웹(1440 축소) × 버전 1·2·3 을 한 화면에서 바꿔 보고, 시연 진행 버튼·실시간 통화 내역은 오른쪽 패널. 팀 내부 도구.
 - 버전 2·3 다듬기(10/11): 디자인 하네스 `.claude/rules/design-v2.md`(멘토 레퍼런스를 이 제품에 맞게 추림). 덜어 낸 것 — 인사·요약 카드(아래 카드와 중복), 시연 태그 중복, 3차 '들어오는 배' 탭의 언제 가면·트럭 줄, 알림 탭 부제, 웹 푸터. 고친 것 — 이모지→선 아이콘(`v2/Icon.tsx`, Runeicons), 오렌지는 입항 시각에만·행동은 네이비, 다음 배 '46분 뒤'를 큰 시각 옆으로·카드 안 카드 제거, 헤더에 'HH:MM 기준', 웹 지도 칸 고정(sticky), 누름 반응, 다크에서 '언제 가면' 면을 어두운 네이비로·체크박스 다크. Impeccable detect 0건. 버전 3 탭은 `?tab=`으로 주소에 남아 뒤로 가기가 이전 탭으로 온다. 버전 2·3은 상단 바 색(theme-color)도 v2 바탕. 버전 1·공용 부품은 그대로.
 - 프런트 4차 시안(10/11, `?v=4`): `src/web/src/v4/AppV4.tsx`, 정본 `.claude/rules/design-v4.md`. '새벽 바다 지도' — 지도가 화면 주인공, 정보는 지도 위 3단 하단 시트(폰: 내림·기본·다 펼침, 끌기·탭·휠, `v4/BottomSheet.tsx`), 웹은 지도 왼쪽 전체 + 오른쪽 440px 칸. 시트 첫 화면은 다음 배(남은 분 크게)와 행동 두 개(전화로 묻기·생선 알림 받기, 신청 후 '붉은대게 알림 켜짐'). 청록·산호 팔레트(`v4/v4.css`). 공용 지도에 `fill`·`padBottom` 옵션 추가(버전 1~3 영향 없음). 미리보기 4번. 채택하면 main.tsx 기본값만 바꾸면 된다.
+- 가는 시간(10/11): 질문창·전화가 '어디서 몇 시에 출발?'·'지금 출발하면 얼마나?'에 답한다. 도구 `estimate_travel`(`rules/travel.py`, `kakao.py`), 설계 §4.2. 키 `KAKAO_REST_KEY`(지도 키와 같은 앱의 REST 키, 맥 `.env`에 있음 — **윈도우·VM `.env`에도 필요**). 카카오 결과는 10분 기억. 실기: '포항과학기술고등학교' 1.5km 7분 → 08:20 출발, '양덕동' 29.2km 51분 → 07:35 출발(전화 말투로도 확인).
 - 디자인 스킬(10/11, 맥 작성자 PC 사용자 전역 설치·저장소 밖): ponytail·impeccable(플러그인), design-taste-frontend·redesign-existing-projects·ui-ux-pro-max·web-design-guidelines(`~/.claude/skills`). 윈도우 작업자는 필요하면 같은 이름으로 설치. 없어도 `design-v2.md`만 따르면 된다.
 
 **다음 할 일**

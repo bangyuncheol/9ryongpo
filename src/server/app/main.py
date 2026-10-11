@@ -22,6 +22,7 @@ from . import push as pushmod
 from .agent import chat as chatmod
 from .agent.tools import ToolContext
 from .eum import EumClient, EumError
+from .kakao import KakaoClient
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 log = logging.getLogger("wipan")
@@ -59,6 +60,7 @@ async def lifespan(app: FastAPI):
     app.state.db = db.connect(settings.db_path)
     db.init_schema(app.state.db)
     app.state.eum = EumClient(settings)
+    app.state.kakao = KakaoClient(settings.kakao_rest_key)
     app.state.place_info = None
     await bootstrap(app)
     engine = Engine(app.state.db, app.state.eum, app.state.place, settings.feed)
@@ -73,7 +75,7 @@ async def lifespan(app: FastAPI):
     app.state.pusher = pushmod.Pusher(app.state.db, settings, llm=app.state.llm)
     engine.hooks.append(app.state.pusher.on_new_arrivals)
     from .phone.service import PhoneService
-    ctx = ToolContext(engine=engine, traffic=app.state.traffic)
+    ctx = ToolContext(engine=engine, traffic=app.state.traffic, kakao=app.state.kakao)
     from .phone.brain import chat_answer_fn
     app.state.phone = PhoneService(settings, app.state.db, lambda: chat_answer_fn(app.state.llm, settings.openai_model, ctx),
                                    settings.db_path.parent / "tts_cache")
@@ -88,6 +90,7 @@ async def lifespan(app: FastAPI):
     sched.shutdown(wait=False)
     await app.state.phone.stop()
     await app.state.eum.aclose()
+    await app.state.kakao.aclose()
     app.state.db.close()
 
 
@@ -287,7 +290,7 @@ async def chat(request: Request) -> StreamingResponse:
     question = str(body.get("message", ""))
     ip = request.client.host if request.client else "?"
     limited = _rate_limit(ip)
-    ctx = ToolContext(engine=request.app.state.engine, traffic=request.app.state.traffic)
+    ctx = ToolContext(engine=request.app.state.engine, traffic=request.app.state.traffic, kakao=request.app.state.kakao)
 
     async def stream():
         if limited:

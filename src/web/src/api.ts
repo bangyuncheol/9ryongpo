@@ -50,7 +50,7 @@ export type CallState = {
 /** 도구 이름 → 화면 문구. 질문창과 통화 내역이 같이 쓴다. */
 export const TOOL_LABEL: Record<string, string> = {
   get_arrival_forecast: '입항 예보 조회', get_species_estimate: '어종 추정', get_traffic_now: '위판장 앞 교통 조회',
-  recommend_visit_time: '방문 시각 계산', get_past_auction: '과거 경매 실적 조회', subscribe: '알림 준비', llm: 'AI',
+  recommend_visit_time: '방문 시각 계산', estimate_travel: '가는 시간 계산', get_past_auction: '과거 경매 실적 조회', subscribe: '알림 준비', llm: 'AI',
 }
 
 export class ApiError extends Error {}

@@ -9,7 +9,8 @@ from typing import Any
 from ..collectors.traffic import TrafficService
 from ..engine import Engine
 from ..eum import EumError
-from ..rules import species, visit
+from ..kakao import KakaoClient
+from ..rules import species, travel, visit
 
 log = logging.getLogger(__name__)
 SPECIES_CHOICES = ["붉은대게", "살오징어", "골뱅이", "방어", "가자미류", "전체"]
@@ -33,6 +34,15 @@ TOOLS: list[dict] = [
      "parameters": {"type": "object", "properties": {
          "auction_time": {"type": "string", "description": "HH:MM. 기본 09:00(대게·홍게), 잡어·문어는 07:00"},
          "visitor": {"type": "boolean"}}, "additionalProperties": False}},
+    {"type": "function", "name": "estimate_travel",
+     "description": "다른 곳에서 구룡포 위판장까지 차로 걸리는 시간과 출발 권장 시각. 카카오 길찾기(지금 도로 상황 또는 그 시각 예측 교통) + 위판장 앞 여유. "
+                    "'OO에서 몇 시에 출발하면 돼?'는 depart_time 없이(경매 도착 권장 시각에 맞춘 depart_by), '지금 출발하면 얼마나 걸려?'는 depart_time='지금', "
+                    "'8시에 출발하면 언제 도착해?'는 depart_time='08:00'. 출발지를 모르면 부르지 말고 어디서 출발하는지 먼저 묻는다.",
+     "parameters": {"type": "object", "properties": {
+         "origin": {"type": "string", "description": "출발지 이름 그대로. 예: 포항과학기술고등학교, 포항시청, 구룡포읍사무소"},
+         "depart_time": {"type": "string", "description": "'지금' 또는 HH:MM. 생략하면 경매에 맞춰 출발 시각을 계산"},
+         "auction_time": {"type": "string", "description": "HH:MM. 기본 09:00(대게·홍게), 잡어·문어는 07:00"}},
+         "required": ["origin"], "additionalProperties": False}},
     {"type": "function", "name": "get_past_auction",
      "description": "과거 구룡포수협 본소 경매 실적(그 달 kg당 평균 경매가=금액÷중량, 물량, 거래일수). '그때 얼마였나'에만 쓴다. 오늘·내일 가격 예측에 쓰지 않는다. 경매가는 도매가다.",
      "parameters": {"type": "object", "properties": {
@@ -50,6 +60,7 @@ TOOLS: list[dict] = [
 class ToolContext:
     engine: Engine
     traffic: TrafficService
+    kakao: KakaoClient | None = None  # 출발지 → 위판장 길찾기(10/11). 없으면 그 도구만 '설정 없음'으로 답한다
 
 
 async def run_tool(ctx: ToolContext, name: str, args: dict[str, Any]) -> dict:
@@ -86,6 +97,14 @@ async def run_tool(ctx: ToolContext, name: str, args: dict[str, Any]) -> dict:
             except EumError:
                 t = None
             return visit.recommend(t, args.get("auction_time") or visit.AUCTION_DEFAULT, bool(args.get("visitor")))
+        if name == "estimate_travel":
+            try:
+                t = await ctx.traffic.now()
+            except EumError:
+                t = None
+            lat, lon = ctx.engine.place
+            return await travel.estimate(ctx.kakao, (lon, lat), args.get("origin", ""), t,
+                                         args.get("auction_time") or visit.AUCTION_DEFAULT, args.get("depart_time"))
         if name == "get_past_auction":
             return past_auction(ctx.engine.conn, args["species"], args.get("year"), args.get("month"))
         if name == "subscribe":
