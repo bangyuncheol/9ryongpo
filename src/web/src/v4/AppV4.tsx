@@ -182,7 +182,7 @@ function Sheet({ today, list, idle, visit, call, selected, onSelect, admin, onWa
         {[
           <div key="ships" className="flex flex-col px-6 pb-8">{ships}</div>,
           <div key="alerts" className="px-1 pb-8">{alerts}</div>,
-          <div key="ask" className="px-1 pb-8">{ask}</div>,
+          <div key="ask" className="v4-no-title px-1 pb-8">{ask}</div>,
         ]}
       </Pager>
     )

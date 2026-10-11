@@ -19,6 +19,7 @@ export default function Pager({ tabs, page, onPage, height, children }: {
   const [dx, setDx] = useState<number | null>(null) // 끄는 중 옆으로 움직인 거리
   const dragged = useRef(false)
   const panels = useRef<(HTMLDivElement | null)[]>([])
+  const wheel = useRef({ sum: 0, lockUntil: 0, last: 0 })
   const n = tabs.length
 
   // 다른 장으로 가면 그 장은 맨 위부터
@@ -68,6 +69,23 @@ export default function Pager({ tabs, page, onPage, height, children }: {
     dragged.current = false
     e.preventDefault(); e.stopPropagation()
   }
+  // 트랙패드 두 손가락 옆 스크롤·가로 휠(10/12 오너: '옆으로 스크롤해도 안 넘어간다'). 한 번 밀면 한 장,
+  // 관성으로 이어지는 휠은 멈출 때까지 무시한다. 끝 장에선 살짝 밀렸다 돌아온다.
+  const onWheel = (e: React.WheelEvent) => {
+    if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return // 위아래 스크롤은 장 안에서
+    const w = wheel.current, now = e.timeStamp
+    if (now < w.lockUntil) { w.lockUntil = now + 180; return }
+    if (now - w.last > 200) w.sum = 0
+    w.last = now
+    w.sum += e.deltaX
+    if (Math.abs(w.sum) < 40) return
+    const d = Math.sign(w.sum)
+    w.sum = 0; w.lockUntil = now + 180
+    const next = page + d
+    if (next < 0 || next > n - 1) { setDx(-d * 28); setTimeout(() => setDx(null), 120); return }
+    onPage(next)
+  }
+
   // 탭 목록: 화살표 키로도 옮긴다(WAI-ARIA tabs)
   const onTabKey = (e: React.KeyboardEvent) => {
     const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0
@@ -90,7 +108,7 @@ export default function Pager({ tabs, page, onPage, height, children }: {
           </button>
         ))}
       </div>
-      <div ref={box} className="overflow-hidden" style={{ height }} onPointerDown={onPointerDown} onClickCapture={onClickCapture}>
+      <div ref={box} className="overflow-hidden" style={{ height }} onPointerDown={onPointerDown} onClickCapture={onClickCapture} onWheel={onWheel}>
         <div className={`flex h-full ${dx === null ? 'v4-pager-anim' : ''}`}
           style={{ transform: `translateX(calc(${-page * 100}% + ${dx ?? 0}px))`, touchAction: 'pan-y', userSelect: dx === null ? undefined : 'none' }}>
           {children.map((c, i) => (
