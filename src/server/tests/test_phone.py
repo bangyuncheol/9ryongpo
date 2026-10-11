@@ -196,3 +196,8 @@ def test_wait_quiet_gives_up_after_limit():
     t = time.monotonic()
     asyncio.run(st.wait_quiet(0.2))
     assert 0.15 < time.monotonic() - t < 1.0
+
+
+def test_inbound_greeting_asks_without_more():
+    assert brain.inbound_greeting()[-1] == "궁금하신 거 있으세요?"
+    assert brain.outbound_greeting("알림")[-1] == brain.ASK_MORE

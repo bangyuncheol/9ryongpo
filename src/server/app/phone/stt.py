@@ -29,7 +29,7 @@ class OpenAITranscribeSTT:
                  on_speech: Callable[[bool], None] | None = None) -> None:
         self._key, self._model, self._silence_ms = api_key, model, silence_ms
         self._on_final = on_final  # (확정 문장, 가장 낮은 글자 확신도 0~1) — 범위 밖 판정 때 '잘못 들음' 구분용
-        self._on_speech = on_speech  # True=말 시작, False=말 끝(0.8초 침묵). 말하는 중엔 답을 미루려고
+        self._on_speech = on_speech  # True=말 시작, False=그 말의 받아쓰기 확정. 말하는 중엔 답을 미루려고
 
     def _session(self) -> dict:
         # 확신도(logprobs)는 확정 메시지에 같이 와서 지연이 늘지 않는다(10/11 실측: 켬·끔 모두 말 끝→확정 0.57초).
@@ -62,11 +62,12 @@ class OpenAITranscribeSTT:
                         if self._on_speech:
                             self._on_speech(True)
                         yield SpeechEvent(type="interim", transcript="")
-                    elif t == "input_audio_buffer.speech_stopped":
-                        if self._on_speech:
-                            self._on_speech(False)
                     elif t == "conversation.item.input_audio_transcription.completed":
                         text = (m.get("transcript") or "").strip()
+                        # '말 끝'(0.8초 침묵)이 아니라 받아쓰기 확정에서 대기를 푼다. 말 끝과 확정 사이(약 0.6초)에
+                        # 앞 응답의 쿠션이 먼저 나갔다가 뒷말 확정으로 끊기는 일을 막는다(10/11).
+                        if self._on_speech:
+                            self._on_speech(False)
                         lps = [x.get("logprob") for x in (m.get("logprobs") or []) if x.get("logprob") is not None]
                         conf = math.exp(min(lps)) if lps else None
                         if text:

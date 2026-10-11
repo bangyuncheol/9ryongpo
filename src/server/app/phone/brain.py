@@ -21,6 +21,7 @@ log = logging.getLogger(__name__)
 START = "[통화 시작]"
 HELLO = "안녕하세요, 배마중입니다."
 INBOUND_INTRO = "구룡포 위판장 입항과 어종, 위판장 앞 교통을 알려 드려요."
+ASK_FIRST = "궁금하신 거 있으세요?"  # 걸려 온 전화 첫인사: 아직 안내한 게 없어 '더'를 빼다(10/11)
 ASK_MORE = "더 궁금하신 거 있으세요?"
 CUSHION = "네, 확인해 볼게요."
 CLOSING = "네, 전화 주셔서 감사합니다. 좋은 하루 보내세요."
@@ -30,7 +31,7 @@ SLOW = "확인이 늦어지고 있어요. 잠시 뒤에 다시 여쭤 봐 주세
 REASK = "죄송해요, 제가 잘 못 들었어요. 한 번만 다시 말씀해 주세요."
 CHOICES = "들어오는 배, 대게, 위판장 앞 교통 중에 어떤 게 궁금하세요?"
 OFFTOPIC = "그건 제가 안내해 드리기 어려워요. 들어오는 배나 어종, 위판장 앞 교통을 물어봐 주세요."
-FIXED = (HELLO, INBOUND_INTRO, ASK_MORE, CUSHION, CLOSING, CLOSING_OUT, SLOW, REASK, CHOICES, OFFTOPIC)
+FIXED = (HELLO, INBOUND_INTRO, ASK_FIRST, ASK_MORE, CUSHION, CLOSING, CLOSING_OUT, SLOW, REASK, CHOICES, OFFTOPIC)
 QUIET_WAIT_S = 3.0  # 사용자가 아직 말하는 중이면 쿠션·답을 이만큼까지 미룬다(소음으로 '말 시작'만 오고 끝이 안 오는 경우 상한)
 LOW_CONF = 0.2  # 받아쓰기 최저 글자 확신도. 합성 음성 시험(10/11): 크게 틀린 문장 0.00~0.05, 맞은 문장 0.32~0.97
 
@@ -175,7 +176,7 @@ def outbound_greeting(alert_body: str) -> list[str]:
 
 
 def inbound_greeting() -> list[str]:
-    return [HELLO, INBOUND_INTRO, ASK_MORE]
+    return [HELLO, INBOUND_INTRO, ASK_FIRST]
 
 
 def chat_answer_fn(llm: Any, model: str, ctx: Any) -> Callable[[str, list[dict]], AsyncIterator[dict]]:
