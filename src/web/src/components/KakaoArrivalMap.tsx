@@ -49,7 +49,7 @@ type Props = {
 }
 
 // path: 이번 2초 동안 그릴 꺾은선(지금 그린 위치 → 지나친 모서리들 → 새 위치). route: 마지막으로 받은 남은 꺾이는 지점
-type Track = { o: K; el: HTMLElement; from: [number, number]; to: [number, number]; path: [number, number][]; route: [number, number][]; t0: number; status: Ship['status']; docked: boolean; heading: number; dockAt: Ship | null }
+type Track = { o: K; el: HTMLElement; from: [number, number]; to: [number, number]; path: [number, number][]; route: [number, number][]; t0: number; status: Ship['status']; docked: boolean; heading: number; rot: number; dockAt: Ship | null }
 
 const boatSvg = (fill: string) =>
   `<svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c2.8 3 4 6.4 4 10v7.5c0 1-.8 1.8-1.8 1.8H9.8c-1 0-1.8-.8-1.8-1.8V12c0-3.6 1.2-7 4-10z" fill="${fill}" stroke="#fff" stroke-width="1.6"/><circle cx="12" cy="12" r="1.8" fill="#fff"/></svg>`
@@ -68,12 +68,22 @@ function boatEl(onTap: () => void, onHover: (on: boolean) => void) {
 /** 정박 = 위판장 500m 안('입항')이면서 멈춘 배. 항구 안에서 아직 움직이면 들어오는 배로 그린다. */
 const isDocked = (s: Ship) => s.status === '입항' && !(s.speed && s.speed > 0)
 
-function paintBoat(el: HTMLElement, s: Ship, selected: boolean) {
+/**
+ * 화면에 줄 회전 각도: 지금 각도에서 가까운 쪽으로 돈 값(연속 각도). 0~360 숫자를 그대로 주면 300°→20° 를
+ * 거꾸로 280° 돌아 정박할 때 배가 뱅글뱅글 돌았다(10/11 오너 제보, 구룡포농협 앞 북쪽 자리).
+ */
+function turnTo(t: Track, deg: number) {
+  t.heading = deg
+  t.rot += ((deg - t.rot) % 360 + 540) % 360 - 180
+  return t.rot
+}
+
+function paintBoat(el: HTMLElement, s: Ship, selected: boolean, t: Track) {
   const docked = isDocked(s)
   const hull = el.querySelector('[data-hull]') as HTMLElement
   hull.innerHTML = boatSvg(docked ? 'var(--color-arrived)' : 'var(--color-arriving)')
   // 정박한 배 방향은 서버가 자리마다 정한 값(부두와 나란히 / 뱃머리를 해안에, harbor.py)
-  hull.style.transform = `rotate(${s.course ?? 270}deg) scale(${docked ? 0.8 : 1})`
+  hull.style.transform = `rotate(${turnTo(t, s.course ?? 270)}deg) scale(${docked ? 0.8 : 1})`
   hull.style.filter = selected ? 'drop-shadow(0 0 3px var(--color-primary)) drop-shadow(0 0 2px var(--color-primary))' : ''
   ;(el.firstChild as HTMLElement).className = docked ? '' : 'boat-bob'
   el.setAttribute('aria-label', `${s.name ?? '배'} ${s.status}`)
@@ -247,7 +257,7 @@ export default function KakaoArrivalMap(p: Props) {
         const el = boatEl(() => onSelect(selRef.current === id ? null : id), (on) => setHovered((h) => (on ? id : h === id ? null : h)))
         const o = new kakao.maps.CustomOverlay({ position: new kakao.maps.LatLng(...to), content: el, xAnchor: 0.5, yAnchor: 0.5, zIndex: 10 })
         o.setMap(m)
-        t = { o, el, from: to, to, path: [to, to], route: s.route ?? [], t0: now, status: s.status, docked: isDocked(s), heading: s.course ?? 270, dockAt: null }
+        t = { o, el, from: to, to, path: [to, to], route: s.route ?? [], t0: now, status: s.status, docked: isDocked(s), heading: s.course ?? 270, rot: s.course ?? 270, dockAt: null }
         tracks.current.set(id, t)
       } else if (t.dockAt && isDocked(s)) {
         // 이미 정박하러 가는 중: 새 위치(같은 자리)가 와도 시간을 다시 재지 않는다. 다시 재면 도착 직전마다
@@ -269,8 +279,9 @@ export default function KakaoArrivalMap(p: Props) {
       const arriving = isDocked(s) && !t.docked && (!!t.dockAt || pathLength(t.path) > DOCK_SNAP)
       t.dockAt = arriving ? (t.dockAt ?? s) : null
       t.docked = isDocked(s) && !arriving
-      paintBoat(t.el, arriving ? { ...s, status: '입항 중', speed: HARBOR_SPEED } : s, p.selected === s.ship_id)
-      if (!t.docked) setHeading(t, t.heading) // 움직이는 배는 그리는 위치의 진행 방향(애니메이션 루프가 매 프레임 갱신)
+      const keep = t.heading // 움직이는 배는 아래에서 진행 방향으로 되돌린다(서버 침로로 잠깐 돌지 않게)
+      paintBoat(t.el, arriving ? { ...s, status: '입항 중', speed: HARBOR_SPEED } : s, p.selected === s.ship_id, t)
+      if (!t.docked) setHeading(t, keep) // 움직이는 배는 그리는 위치의 진행 방향(애니메이션 루프가 매 프레임 갱신)
     }
     for (const [id, t] of tracks.current) if (!seen.has(id)) { t.o.setMap(null); tracks.current.delete(id) }
   }, [ready, p.ships, p.selected, onSelect])
@@ -345,7 +356,7 @@ export default function KakaoArrivalMap(p: Props) {
           t.dockAt = null; t.docked = true
           const hull = t.el.querySelector('[data-hull]') as HTMLElement | null
           if (hull) hull.style.transition = 'transform 600ms cubic-bezier(0.22, 0.25, 0, 1)'
-          paintBoat(t.el, d, selRef.current === id)
+          paintBoat(t.el, d, selRef.current === id, t)
           setTimeout(() => { if (hull) hull.style.transition = '' }, 700)
         }
         if (id === (selRef.current) || id === hoveredRef.current) info.current?.setPosition(pos)
@@ -479,9 +490,9 @@ function lerpHeading(t: Track, now: number): number | null {
 }
 
 function setHeading(t: Track, deg: number) {
-  t.heading = deg
+  const r = turnTo(t, deg)
   const hull = t.el.querySelector('[data-hull]') as HTMLElement | null
-  if (hull) hull.style.transform = `rotate(${deg}deg) scale(1)`
+  if (hull) hull.style.transform = `rotate(${r}deg) scale(1)`
 }
 
 function lerpPos(t: Track, now: number): [number, number] {
