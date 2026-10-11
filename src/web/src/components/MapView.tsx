@@ -11,6 +11,7 @@ type Props = {
   legendToggle?: boolean // 2차 시안: 범례를 접어 두고 버튼으로 연다(카카오 지도만)
   compact?: boolean // 버전 3 폰 홈: 지도 높이를 줄인다(카카오 지도만)
   fill?: boolean // 버전 4: 부모 높이를 꽉 채운다(카카오 지도만)
+  padBottom?: number // 버전 4: 아래를 덮는 시트 높이(px)
 }
 
 export default function MapView(props: Props) {

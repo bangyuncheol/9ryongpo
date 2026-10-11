@@ -44,6 +44,8 @@ type Props = {
   compact?: boolean
   /** true 면 부모 높이를 꽉 채우고 모서리를 둥글리지 않는다(버전 4 전체 화면 지도, 10/11) */
   fill?: boolean
+  /** 지도 아래쪽을 덮는 면의 높이(px). 처음 위치·가장자리 화살표·버튼을 그 위로 올린다(버전 4 시트, 10/11) */
+  padBottom?: number
 }
 
 // path: 이번 2초 동안 그릴 꺾은선(지금 그린 위치 → 지나친 모서리들 → 새 위치). route: 마지막으로 받은 남은 꺾이는 지점
@@ -110,6 +112,8 @@ export default function KakaoArrivalMap(p: Props) {
   const [ready, setReady] = useState(false)
   const [hovered, setHovered] = useState<number | null>(null)
   const { place, onFail, onSelect } = p
+  const pad = p.padBottom ?? 0
+  const padAtInit = useRef(pad) // 처음 위치는 지도를 만들 때의 여백(시트 기본 높이)으로 한 번 잡는다
   const selRef = useRef<number | null>(p.selected)
   selRef.current = p.selected
   arrRef.current = new Map(p.arriving.map((a) => [a.ship_id, a]))
@@ -138,7 +142,7 @@ export default function KakaoArrivalMap(p: Props) {
       const m = map.current
       const b = new kakao.maps.LatLngBounds()
       b.extend(new kakao.maps.LatLng(VIEW.s, VIEW.w)); b.extend(new kakao.maps.LatLng(VIEW.n, VIEW.e))
-      m.setBounds(b, 0, 0, 0, 0)
+      m.setBounds(b, 0, 0, padAtInit.current, 0)
       const lv = m.getLevel()
       home.current = { center: m.getCenter(), level: lv }
       if (m.setMinLevel) m.setMinLevel(Math.max(1, lv - ZOOM_IN))
@@ -301,7 +305,7 @@ export default function KakaoArrivalMap(p: Props) {
     const b = new kakao.maps.LatLngBounds()
     b.extend(new kakao.maps.LatLng(place.lat, place.lon))
     for (const s of p.ships) if (s.status === '조업·대기') b.extend(new kakao.maps.LatLng(s.lat, s.lon))
-    m.setBounds(b, 30, 30, 30, 30)
+    m.setBounds(b, 30, 30, 30 + pad, 30)
   }
 
   // 정보 표지: 올린 배 → 고른 배. 화면 안에 있을 때만(화면 밖이면 가장자리 화살표가 펼쳐진다).
@@ -408,7 +412,7 @@ export default function KakaoArrivalMap(p: Props) {
   return (
     <div ref={wrap} className={`relative isolate ${p.fill ? 'h-full' : ''}`}>{/* isolate: 지도 안 표시(z-400~500)가 지도 밖 고정 탭 막대 위로 올라오지 않게(10/11) */}
       <div ref={box} className={`${p.fill ? 'h-full' : `${p.compact ? 'h-52' : 'h-80 md:h-[460px]'} rounded-card`} w-full overflow-hidden bg-primary-soft`} aria-label="입항 지도" />
-      <div ref={edgeBox} className={`absolute inset-0 z-[400] overflow-hidden ${p.fill ? '' : 'rounded-card'} [&>*]:pointer-events-auto`} style={{ pointerEvents: 'none' }} />
+      <div ref={edgeBox} className={`absolute inset-x-0 top-0 z-[400] overflow-hidden ${p.fill ? '' : 'rounded-card'} [&>*]:pointer-events-auto`} style={{ pointerEvents: 'none', bottom: pad }} />
       {idle.length > 0 && (
         <button type="button" onClick={showIdle} title="조업 중인 배가 보이게 지도를 넓힙니다"
           className="absolute right-2 top-2 z-[500] rounded-button bg-card/90 px-3 py-1.5 text-[12px] font-bold text-muted shadow-sm hover:text-ink">
@@ -417,12 +421,12 @@ export default function KakaoArrivalMap(p: Props) {
       )}
       {moved && (
         <button type="button" onClick={goHome}
-          className="absolute bottom-7 left-2 z-[500] rounded-button bg-card/95 px-3 py-1.5 text-[12px] font-bold text-ink shadow-sm">
+          className="absolute bottom-7 left-2 z-[500] rounded-button bg-card/95 px-3 py-1.5 text-[12px] font-bold text-ink shadow-sm" style={pad ? { bottom: pad + 12 } : undefined}>
           ⟲ 처음 위치
         </button>
       )}
       {p.notice && (
-        <p className="pointer-events-none absolute inset-x-3 bottom-8 z-[500] rounded-button bg-card/95 px-3 py-2 text-center text-sub shadow-sm">{p.notice}</p>
+        <p className="pointer-events-none absolute inset-x-3 bottom-8 z-[500] rounded-button bg-card/95 px-3 py-2 text-center text-sub shadow-sm" style={pad ? { bottom: pad + 12 } : undefined}>{p.notice}</p>
       )}
       {p.legendToggle && !legendOpen ? (
         <button type="button" onClick={() => setLegendOpen(true)} aria-expanded={false}

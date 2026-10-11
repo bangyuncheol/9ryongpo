@@ -10,6 +10,9 @@ import { Toast } from '../v2/AppV2'
 import type { VisitData } from '../v2/AppV2'
 import WaitFish from '../v2/WaitFish'
 import Icon from '../v2/Icon'
+import BottomSheet from './BottomSheet'
+import { snapHeights, useViewportHeight } from './sheet'
+import type { Snap } from './sheet'
 import { byEta, likelihood, minutesUntil, shipSpecies, shortBiz, telHref, telText, trafficWord, useThemeColor, useWide } from '../v2/bits'
 import '../v2/v2.css'
 import './v4.css'
@@ -31,6 +34,8 @@ export default function AppV4() {
   const [sensor, setSensor] = useState<Sensor | null>(null)
   const [selected, setSelected] = useState<number | null>(null)
   const onSelect = useCallback((id: number | null) => setSelected(id), [])
+  const [snap, setSnap] = useState<Snap>('mid') // 폰 시트: 내림·기본·다 펼침
+  const hs = snapHeights(useViewportHeight())
   const today = usePoll(api.today, 2000)
   const ships = usePoll(api.ships, 2000)
   const visit = usePoll(() => api.visit(false), 60000)
@@ -56,34 +61,39 @@ export default function AppV4() {
   const map = (
     <MapView place={place} ships={ships.data?.ships ?? []} arriving={t?.arriving ?? []}
       arrivedCount={t?.arrived.length ?? 0} truck={truck} trucks={trucks.data?.sensors ?? []} sensor={sensor}
-      notice={t?.notice ?? null} selected={selected} onSelect={onSelect} legendToggle fill />
+      notice={t?.notice ?? null} selected={selected} onSelect={onSelect} legendToggle fill padBottom={wide ? 0 : hs[snap]} />
   )
+  // '들어오면 알림'·질문창의 알림 준비: 알림 신청 칸으로. 폰은 시트를 먼저 다 펼친다
+  const toWait = () => {
+    const go = () => document.getElementById('wait-title')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    if (wide || snap === 'full') go(); else { setSnap('full'); setTimeout(go, 380) }
+  }
   const sheet = (
     <Sheet today={t} list={arriving} idle={idle} visit={visit.data as VisitData | null} call={call.data}
-      selected={selected} onSelect={onSelect} admin={admin} />
+      selected={selected} onSelect={onSelect} admin={admin} onWait={toWait} />
   )
 
   return (
-    <div className="v4 min-h-dvh bg-page text-ink">
+    <div className={`v4 bg-page text-ink ${wide ? 'min-h-dvh' : 'fixed inset-0 overflow-hidden'}`}>
       <Toast items={inbox.data} />
-      {admin && <div className="relative z-30 bg-page py-2"><AdminBar clock={t?.clock ?? null} feed={t?.source.feed ?? null} call={call.data} /></div>}
       {wide ? (
         <div className="grid h-dvh grid-cols-[1fr_440px]">
           <div className="relative h-dvh">{map}</div>
           <aside className="v4-sheet relative z-10 h-dvh overflow-y-auto bg-card" aria-label="입항 정보">
             <div className="sticky top-0 z-10 bg-card/95 px-6 pb-2 pt-5 backdrop-blur-sm"><Badge today={t} /></div>
+            {admin && <div className="py-2"><AdminBar clock={t?.clock ?? null} feed={t?.source.feed ?? null} call={call.data} /></div>}
             {sheet}
           </aside>
         </div>
       ) : (
         <>
-          <div className="sticky top-0 z-20 bg-page px-4 py-3"><Badge today={t} /></div>
-          {/* 지도는 헤더 아래 고정. 시트가 스크롤로 그 위를 덮으며 올라온다 */}
-          <div className="sticky top-[52px] h-[calc(58dvh-52px)]">{map}</div>
-          <main className="v4-sheet relative z-10 -mt-5 min-h-[70dvh] rounded-t-[24px] bg-card pb-10">
-            <div aria-hidden className="mx-auto mb-1 h-1.5 w-10 translate-y-2.5 rounded-full bg-line" />
-            {sheet}
-          </main>
+          <div className="absolute inset-x-0 top-0 z-40 h-[52px] bg-page px-4 py-3"><Badge today={t} /></div>
+          {/* 지도는 헤더 아래 전체. 시트가 그 위를 덮고 3단으로 오르내린다 */}
+          <div className="absolute inset-x-0 bottom-0 top-[52px]">{map}</div>
+          <BottomSheet snap={snap} onSnap={setSnap} peek={<Peek today={t} first={arriving[0]} onOpen={() => setSnap('mid')} />}>
+            {admin && <div className="pb-2"><AdminBar clock={t?.clock ?? null} feed={t?.source.feed ?? null} call={call.data} /></div>}
+            <div className="pb-10">{sheet}</div>
+          </BottomSheet>
         </>
       )}
     </div>
@@ -108,12 +118,11 @@ function Badge({ today }: { today: Today | null }) {
   )
 }
 
-function Sheet({ today, list, idle, visit, call, selected, onSelect, admin }: {
+function Sheet({ today, list, idle, visit, call, selected, onSelect, admin, onWait: toWait }: {
   today: Today | null; list: Arrival[]; idle: number; visit: VisitData | null; call: CallState | null
-  selected: number | null; onSelect: (id: number | null) => void; admin: boolean
+  selected: number | null; onSelect: (id: number | null) => void; admin: boolean; onWait: () => void
 }) {
   const number = call?.enabled ? call.number : null
-  const toWait = () => document.getElementById('wait-title')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
   return (
     <div className="flex flex-col px-6">
       <Next today={today} list={list} idle={idle} selected={selected} onSelect={onSelect} />
@@ -180,6 +189,20 @@ function Next({ today, list, idle, selected, onSelect }: {
         <p className="mt-1 text-small text-muted">{shortBiz(first.biz)}선{first.gt ? ` ${Math.round(first.gt)}t` : ''} · 위판장까지 {first.d_km.toFixed(1)}km · 예측(신뢰도 {first.confidence ?? '보통'})</p>
       </button>
     </section>
+  )
+}
+
+/** 시트를 내렸을 때 손잡이 아래 남는 한 줄: 다음 배만. 누르면 기본 높이로. */
+function Peek({ today, first, onOpen }: { today: Today | null; first?: Arrival; onOpen: () => void }) {
+  const mins = first ? minutesUntil(today?.clock.now, first.eta) : null
+  return (
+    <button type="button" onClick={onOpen} className="flex h-11 w-full shrink-0 items-baseline gap-2 px-6 text-left">
+      {first ? <>
+        <span className="text-main font-extrabold tabular-nums text-arriving">{mins === 0 ? '곧 도착' : `${mins}분 뒤`}</span>
+        <span className="min-w-0 truncate text-body font-bold">{first.name ?? '이름 미상'}</span>
+        <span className="ml-auto text-sub tabular-nums text-muted">{hhmm(first.eta)}</span>
+      </> : <span className="text-body font-bold">아직 항구로 오는 배가 없어요</span>}
+    </button>
   )
 }
 
