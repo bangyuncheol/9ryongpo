@@ -1,0 +1,45 @@
+/*
+ * 2차 시안(?v=2) 색 토큰 — `.v2` 안에서만 기존 토큰을 덮는다. 기존 화면(/)에는 영향 없음.
+ * 방향: '새벽의 구룡포' — 아이보리·흰 바탕에 딥 네이비와 해 뜨는 오렌지를 포인트로(10/11 프런트 검토).
+ * 대비: 글자에 쓰는 색은 4.5:1 이상. 밝은 오렌지 #f18a54 는 흰 바탕 2.5:1 이라 장식(점·띠)에만, 글자는 짙은 오렌지.
+ */
+.v2 {
+  --color-page: #f7f8f5;          /* 웜 아이보리 */
+  --color-card: #ffffff;
+  --color-ink: #263238;           /* 흰 위 13.4:1 */
+  --color-muted: #55636b;         /* 아이보리 위 5.9:1 */
+  --color-line: #e3e7e4;
+  --color-chip: #edf1ee;          /* 중간 강조 버튼 */
+  --color-primary: #2a6f97;       /* 포커스 테두리 */
+  --color-primary-dark: #193b50;  /* 딥 오션 네이비. 강조 버튼(흰 글자 11.6:1)·제목 */
+  --color-on-primary: #ffffff;
+  --color-primary-soft: #d9eae5;  /* 씨글래스 민트. 지도 바탕·조회 기록 */
+  --color-arriving: #b4501d;      /* 입항 시각 글자용 짙은 오렌지(흰 위 4.7:1) */
+  --color-arrived: #1e7d45;
+  --color-sunrise: #f18a54;       /* 선라이즈 오렌지 — 장식 전용 */
+  --color-sunrise-soft: #fdf0e8;
+}
+
+@media (prefers-color-scheme: dark) {
+  .v2 {
+    --color-page: #0e1a21;
+    --color-card: #15242d;
+    --color-ink: #eef2f1;
+    --color-muted: #a3b2b8;
+    --color-line: #24363f;
+    --color-chip: #22343d;
+    --color-primary: #7fb8d8;
+    --color-primary-dark: #9fd0ea;  /* 다크에선 밝은 네이비 버튼 + 어두운 글자 */
+    --color-on-primary: #0e1a21;
+    --color-primary-soft: #1d3a3a;
+    --color-arriving: #ffa576;
+    --color-arrived: #5fcf8c;
+    --color-sunrise: #f18a54;
+    --color-sunrise-soft: #2c2119;
+  }
+}
+
+/* 새 입항 알림 띠: 위에서 내려왔다 올라간다(100~500ms 규칙) */
+@keyframes v2-drop { from { transform: translateY(-120%); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
+.v2-toast { animation: v2-drop 400ms cubic-bezier(0.22, 0.25, 0, 1); }
+@media (prefers-reduced-motion: reduce) { .v2-toast { animation: none; } }
