@@ -100,7 +100,8 @@ async def _tool_events(ctx: ToolContext, name: str, args: dict) -> AsyncIterator
     out = await run_tool(ctx, name, args)
     yield {"type": "tool_result", "name": name, "summary": _summary(name, out)}, out
     if out.get("action") == "subscribe":
-        yield {"type": "action", "name": "subscribe", "species": out["species"]}, {}
+        # 화면(ChatCard)은 어종 하나를 받는다 → 첫 어종(여럿이면 화면에서 더 고른다)
+        yield {"type": "action", "name": "subscribe", "species": (out.get("species_list") or ["전체"])[0]}, {}
 
 
 def clean_history(history: Any) -> list[dict]:
@@ -216,10 +217,21 @@ SPECIES_WORDS = {"대게": "붉은대게", "홍게": "붉은대게", "붉은대�
 BIZ_WORDS = ["자망", "채낚기", "통발", "선망", "트롤", "정치망"]
 
 
+def species_in(q: str) -> list[str]:
+    """질문 속 어종 낱말 전부(10/12 여러 개 알림). 찾은 낱말은 지워 '대문어' 속 '문어'를 또 세지 않는다."""
+    out: list[str] = []
+    for k, v in SPECIES_WORDS.items():
+        if k in q:
+            q = q.replace(k, " ")
+            if v not in out:
+                out.append(v)
+    return out
+
+
 def route(q: str) -> list[tuple[str, dict]]:
     sp = next((v for k, v in SPECIES_WORDS.items() if k in q), None)
     if re.search(r"알려|알림|구독", q):
-        return [("subscribe", {"species": sp or "전체"})]
+        return [("subscribe", {"species": species_in(q) or ["전체"]})]
     if re.search(r"얼마|가격|시세|값", q):
         return [("get_past_auction", {"species": sp or "붉은대게", "month": 10})]
     if re.search(r"막히|교통|트럭|붐비|몇 시에 가|언제 가|가면", q):

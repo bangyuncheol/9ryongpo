@@ -21,6 +21,24 @@ OTHER_SEASON = {"꽃게": "12~2월", "청어": "4~6월", "문어": "1~3월", "�
 ALLOWED_SPECIES = {None, *MAIN_SPECIES, *OTHER_SEASON}
 
 
+def norm_species(v) -> list[str] | None:
+    """구독 조건의 어종 → None(모두) 또는 중복 없는 목록(10/12 여러 개 고르기). 옛 형식 문자열 하나도 받는다.
+    cond_json 의 species 는 이 함수를 거친 값만 저장하고, 읽을 때도 이 함수로 옛 문자열을 목록으로 맞춘다."""
+    if v is None or v == "" or v == "전체":
+        return None
+    if isinstance(v, str):
+        v = [v]
+    if not isinstance(v, list) or not v:
+        raise ValueError("지원하지 않는 어종입니다. 목록에서 골라 주세요.")
+    out: list[str] = []
+    for s in v:
+        if not isinstance(s, str) or s not in ALLOWED_SPECIES:
+            raise ValueError("지원하지 않는 어종입니다. 목록에서 골라 주세요.")
+        if s not in out:
+            out.append(s)
+    return out
+
+
 class PushConfigError(Exception):
     pass
 
@@ -30,8 +48,7 @@ def save_subscription(conn: sqlite3.Connection, sub: dict, cond: dict) -> int:
     keys = sub.get("keys") or {}
     if not isinstance(endpoint, str) or not endpoint.startswith("https://") or not keys.get("p256dh") or not keys.get("auth"):
         raise ValueError("알림 구독 정보가 올바르지 않습니다. 알림 받기를 다시 눌러 주세요.")
-    if cond.get("species") not in ALLOWED_SPECIES:
-        raise ValueError("지원하지 않는 어종입니다. 목록에서 골라 주세요.")
+    cond = {**cond, "species": norm_species(cond.get("species"))}
     with tx(conn):
         conn.execute(
             """INSERT INTO subs (endpoint, keys_json, cond_json, created_at) VALUES (?,?,?,?)

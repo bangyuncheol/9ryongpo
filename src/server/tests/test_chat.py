@@ -78,9 +78,10 @@ def test_simple_mode_when_no_llm(ctx):
 def test_simple_mode_routes(ctx):
     assert chat.route("오늘 오징어 있어?")[0][0] == "get_arrival_forecast"
     assert chat.route("붉은대게 작년엔 얼마였어?")[0] == ("get_past_auction", {"species": "붉은대게", "month": 10})
-    assert chat.route("대게 들어오면 알려줘")[0] == ("subscribe", {"species": "붉은대게"})
-    assert chat.route("꽃게 들어오면 알려줘")[0] == ("subscribe", {"species": "꽃게"})
-    assert chat.route("대문어 들어오면 알려줘")[0] == ("subscribe", {"species": "대문어"})  # 문어로 잡히지 않게
+    assert chat.route("대게 들어오면 알려줘")[0] == ("subscribe", {"species": ["붉은대게"]})
+    assert chat.route("꽃게 들어오면 알려줘")[0] == ("subscribe", {"species": ["꽃게"]})
+    assert chat.route("대문어 들어오면 알려줘")[0] == ("subscribe", {"species": ["대문어"]})  # 문어로 잡히지 않게
+    assert chat.route("대게랑 오징어 들어오면 알려줘")[0] == ("subscribe", {"species": ["붉은대게", "살오징어"]})  # 여러 개(10/12)
     assert chat.route("몇 시에 가면 안 막혀?")[0][0] == "recommend_visit_time"
 
 

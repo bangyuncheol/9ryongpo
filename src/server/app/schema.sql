@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS subs (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     endpoint    TEXT NOT NULL UNIQUE,
     keys_json   TEXT NOT NULL,
-    cond_json   TEXT NOT NULL,
+    cond_json   TEXT NOT NULL,           -- {"species": null | ["붉은대게", ...]} (10/12 여러 개, 옛 문자열도 읽음)
     created_at  TEXT NOT NULL
 );
 
@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS subs (
 CREATE TABLE IF NOT EXISTS call_subs (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     phone       TEXT NOT NULL UNIQUE,    -- 숫자만, 예: 01012345678
-    cond_json   TEXT NOT NULL,           -- {"species": null | "붉은대게" ...} (subs 와 같은 형식)
+    cond_json   TEXT NOT NULL,           -- {"species": null | ["붉은대게", ...]} (subs 와 같은 형식)
     created_at  TEXT NOT NULL
 );
 

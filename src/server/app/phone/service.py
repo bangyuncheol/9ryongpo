@@ -46,7 +46,8 @@ def mask(phone: str) -> str:
 
 
 # --- 전화 구독(call_subs) ---
-def save_call_sub(conn: sqlite3.Connection, phone: str, species: str | None) -> None:
+def save_call_sub(conn: sqlite3.Connection, phone: str, species) -> None:
+    species = push.norm_species(species)  # 휴대폰 알림과 같은 형식(None 또는 목록)
     with tx(conn):
         conn.execute("""INSERT INTO call_subs (phone, cond_json, created_at) VALUES (?,?,?)
                         ON CONFLICT(phone) DO UPDATE SET cond_json=excluded.cond_json""",

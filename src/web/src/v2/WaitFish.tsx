@@ -15,13 +15,20 @@ const supported = () => 'serviceWorker' in navigator && 'PushManager' in window 
 const read = (k: string) => { try { return localStorage.getItem(k) } catch { return null } }
 const write = (k: string, v: string | null) => { try { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v) } catch { /* 표시만 못 함 */ } }
 
+/** 저장값('붉은대게·살오징어') → 화면 글: 모두면 '모든 생선', 셋 이상이면 '붉은대게 외 2종' */
+function label(saved: string) {
+  const a = saved.split('·').filter(Boolean)
+  if (a.length === 0 || a.includes('전체')) return '모든 생선'
+  return a.length <= 2 ? a.join('·') : `${a[0]} 외 ${a.length - 1}종`
+}
+
 function b64ToBytes(b64: string) {
   const pad = '='.repeat((4 - (b64.length % 4)) % 4)
   const raw = atob((b64 + pad).replace(/-/g, '+').replace(/_/g, '/'))
   return Uint8Array.from(raw, (c) => c.charCodeAt(0))
 }
 
-export default function WaitFish({ phoneEnabled, onChange, showMore = false, oneTap = false }: {
+export default function WaitFish({ phoneEnabled, onChange, showMore = false, oneTap = false, multi = false }: {
   phoneEnabled: boolean
   /** 켜짐 상태가 바뀌면 알린다(버전 4 '생선 알림 받기' 버튼이 '붉은대게 알림 켜짐'으로 바뀜, 10/11) */
   onChange?: (s: { on: boolean; species: string }) => void
@@ -29,11 +36,21 @@ export default function WaitFish({ phoneEnabled, onChange, showMore = false, one
   showMore?: boolean
   /** true 면 체크박스 + '알림 신청하기' 대신 '휴대폰 알림 받기'·'전화로 알림 받기' 버튼을 누르면 바로 신청(버전 4, 10/12 오너). 전화는 번호를 넣고 한 번 더 */
   oneTap?: boolean
+  /** true 면 생선을 여러 개 고른다('모두'와 다른 칩은 서로 끈다, 버전 4, 10/12 오너). 기본 false = 하나만 */
+  multi?: boolean
 }) {
   const [options, setOptions] = useState<string[]>(['붉은대게'])
   const [more, setMore] = useState<{ name: string; season: string }[]>([])
   const [moreOpen, setMoreOpen] = useState(false)
-  const [species, setSpecies] = useState(() => read(KEY) ?? '붉은대게')
+  // 고른 생선들. 저장값은 '·'로 이은 문자열(버전 1이 읽어도 글자로 보인다). '전체' = 모두
+  const [picks, setPicks] = useState<string[]>(() => (read(KEY) ?? '붉은대게').split('·').filter(Boolean))
+  const species = picks.join('·')
+  const isOn = (o: string) => picks.includes(o)
+  const pick = (o: string) => setPicks((cur) => {
+    if (!multi || o === '전체') return [o]
+    const rest = cur.filter((x) => x !== '전체')
+    return rest.includes(o) ? rest.filter((x) => x !== o) : [...rest, o]
+  })
   const [pushOn, setPushOn] = useState(false)
   const [phoneOn, setPhoneOn] = useState<string | null>(() => read(PHONE_KEY))
   const [wantPush, setWantPush] = useState(supported())
@@ -56,7 +73,7 @@ export default function WaitFish({ phoneEnabled, onChange, showMore = false, one
       .catch(console.error)
   }, [])
 
-  const subscribePush = async (sp: string | null) => {
+  const subscribePush = async (sp: string[] | null) => {
     const perm = await Notification.requestPermission()
     if (perm !== 'granted') throw new Error('알림이 차단돼 있습니다. 크롬 설정 › 사이트 설정 › 알림에서 허용해 주세요.')
     const reg = await navigator.serviceWorker.register('/sw.js')
@@ -70,7 +87,7 @@ export default function WaitFish({ phoneEnabled, onChange, showMore = false, one
   const apply = async (doPush = wantPush, doPhone = wantPhone) => {
     if (doPhone && !phoneOn && !phoneValid(tel)) { setTelTouched(true); return } // 아무것도 보내지 않는다
     setMsg(null); setBusy(true)
-    const sp = species === '전체' ? null : species
+    const sp = picks.includes('전체') ? null : picks  // 서버는 목록(여러 개)·null(모두)을 받는다(10/12)
     try {
       if (doPush && !pushOn) { await subscribePush(sp); setPushOn(true) }
       if (doPhone && !phoneOn) {
@@ -103,7 +120,7 @@ export default function WaitFish({ phoneEnabled, onChange, showMore = false, one
   }
 
   const waiting = pushOn || !!phoneOn
-  const current = read(KEY) ?? species
+  const current = label(read(KEY) ?? species)
   useEffect(() => { onChange?.({ on: waiting, species: current }) }, [onChange, waiting, current])
   // 전화를 골랐으면 번호가 맞아야만 신청한다. 휴대폰 알림만 먼저 신청되고 전화는 거절되는 반쪽 신청을 막는다(10/11 오너 재현)
   const phoneNeeded = wantPhone && !phoneOn
@@ -121,7 +138,7 @@ export default function WaitFish({ phoneEnabled, onChange, showMore = false, one
         <ul className="mt-4 space-y-2">
           {pushOn && (
             <li className="flex items-center justify-between gap-2 rounded-button bg-[var(--color-sunrise-soft)] px-3 py-2">
-              <span className="flex items-center gap-2 text-sub font-bold"><Icon name="bell" className="text-arriving" />{current === '전체' ? '모든 생선' : current} 기다리는 중 · 휴대폰 알림</span>
+              <span className="flex items-center gap-2 text-sub font-bold"><Icon name="bell" className="text-arriving" />{current} 기다리는 중 · 휴대폰 알림</span>
               <Button compact onClick={pushOff} disabled={busy}>끄기</Button>
             </li>
           )}
@@ -136,12 +153,12 @@ export default function WaitFish({ phoneEnabled, onChange, showMore = false, one
 
       {!(pushOn && (phoneOn || !phoneEnabled)) && (
         <>
-          <div className="mt-4 flex flex-wrap gap-2" role="radiogroup" aria-label="기다리는 생선">
+          <div className="mt-4 flex flex-wrap gap-2" role={multi ? 'group' : 'radiogroup'} aria-label={multi ? '기다리는 생선(여러 개 고를 수 있음)' : '기다리는 생선'}>
             {[...options, '전체'].map((o) => (
-              <button key={o} role="radio" aria-checked={species === o} onClick={() => setSpecies(o)}
+              <button key={o} role={multi ? 'checkbox' : 'radio'} aria-checked={isOn(o)} onClick={() => pick(o)}
                 disabled={waiting}
                 className={`v2-press min-h-[var(--spacing-touch)] rounded-button px-4 text-button font-bold disabled:opacity-60 ${
-                  species === o ? 'bg-primary-dark text-on-primary' : 'bg-chip text-ink hover:brightness-95'}`}>
+                  isOn(o) ? 'bg-primary-dark text-on-primary' : 'bg-chip text-ink hover:brightness-95'}`}>
                 {o === '전체' ? '모두' : o}
               </button>
             ))}
@@ -149,17 +166,17 @@ export default function WaitFish({ phoneEnabled, onChange, showMore = false, one
           {showMore && more.length > 0 && (
             <>
               {/* 고른 생선이 접힌 쪽에 있으면 펼쳐 둔다(무엇을 골랐는지 늘 보이게) */}
-              <button type="button" onClick={() => setMoreOpen((o) => !o)} aria-expanded={moreOpen || more.some((m) => m.name === species)} aria-controls="wait-more"
+              <button type="button" onClick={() => setMoreOpen((o) => !o)} aria-expanded={moreOpen || more.some((m) => isOn(m.name))} aria-controls="wait-more"
                 className="mt-3 min-h-[var(--spacing-touch)] text-sub font-bold text-primary-dark">
-                {moreOpen || more.some((m) => m.name === species) ? '다른 철 생선 접기 ▴' : '다른 철 생선 보기 ▾'}
+                {moreOpen || more.some((m) => isOn(m.name)) ? '다른 철 생선 접기 ▴' : '다른 철 생선 보기 ▾'}
               </button>
-              {(moreOpen || more.some((m) => m.name === species)) && (
-                <div id="wait-more" className="mt-1 flex flex-wrap gap-2" role="radiogroup" aria-label="다른 철 생선">
+              {(moreOpen || more.some((m) => isOn(m.name))) && (
+                <div id="wait-more" className="mt-1 flex flex-wrap gap-2" role={multi ? 'group' : 'radiogroup'} aria-label="다른 철 생선">
                   {more.map((m) => (
-                    <button key={m.name} role="radio" aria-checked={species === m.name} onClick={() => setSpecies(m.name)}
+                    <button key={m.name} role={multi ? 'checkbox' : 'radio'} aria-checked={isOn(m.name)} onClick={() => pick(m.name)}
                       disabled={waiting}
                       className={`v2-press min-h-[var(--spacing-touch)] rounded-button px-4 text-button font-bold disabled:opacity-60 ${
-                        species === m.name ? 'bg-primary-dark text-on-primary' : 'bg-chip text-ink hover:brightness-95'}`}>
+                        isOn(m.name) ? 'bg-primary-dark text-on-primary' : 'bg-chip text-ink hover:brightness-95'}`}>
                       {m.name} <span className="text-small font-medium opacity-80">{m.season}</span>
                     </button>
                   ))}
@@ -171,7 +188,7 @@ export default function WaitFish({ phoneEnabled, onChange, showMore = false, one
             <div className="mt-4 grid grid-cols-2 gap-2">
               {/* 둘 중 고르는 버튼이라 둘 다 회색(색 칠한 버튼은 위 '전화로 묻기' 하나, 10/12 오너) */}
               {supported() && !pushOn && (
-                <Button onClick={() => apply(true, false)} disabled={busy} className={`flex items-center justify-center gap-1.5 ${phoneEnabled && !phoneOn ? '' : 'col-span-2'}`}>
+                <Button onClick={() => apply(true, false)} disabled={busy || picks.length === 0} className={`flex items-center justify-center gap-1.5 ${phoneEnabled && !phoneOn ? '' : 'col-span-2'}`}>
                   <Icon name="bell" />휴대폰 알림 받기
                 </Button>
               )}
@@ -210,11 +227,11 @@ export default function WaitFish({ phoneEnabled, onChange, showMore = false, one
             </div>
           )}
           {oneTap ? wantPhone && !phoneOn && (
-            <Button emphasis="high" onClick={() => apply(false, true)} disabled={busy || !phoneValid(tel)} className="mt-3 w-full">
+            <Button emphasis="high" onClick={() => apply(false, true)} disabled={busy || !phoneValid(tel) || picks.length === 0} className="mt-3 w-full">
               {busy ? '신청하는 중…' : '이 번호로 전화 알림 신청'}
             </Button>
           ) : (
-            <Button emphasis="high" onClick={() => apply()} disabled={busy || !canApply} className="mt-4 w-full">
+            <Button emphasis="high" onClick={() => apply()} disabled={busy || !canApply || picks.length === 0} className="mt-4 w-full">
               {busy ? '신청하는 중…' : '알림 신청하기'}
             </Button>
           )}

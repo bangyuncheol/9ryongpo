@@ -114,7 +114,7 @@ def test_alert_calls_only_when_switched_on_and_allowed(tmp_path):
     ph.calls_on = True
     asyncio.run(ph.on_alert(__import__("datetime").datetime(2026, 10, 10, 3, 10), "본문", est))
     assert ph.agent.calls == ["01011112222"] and ph._pending_greeting == brain.outbound_greeting("본문")
-    assert call_sub_of(conn, "01011112222") == {"species": "붉은대게"}
+    assert call_sub_of(conn, "01011112222") == {"species": ["붉은대게"]}  # 10/12부터 목록으로 저장(옛 문자열도 읽음)
 
 
 def test_dial_refuses_unlisted_number_and_queues_second(tmp_path):

@@ -53,7 +53,8 @@ TOOLS: list[dict] = [
          "required": ["species"], "additionalProperties": False}},
     {"type": "function", "name": "subscribe",
      "description": "사용자가 특정 어종이 들어오면 알림을 받고 싶어 할 때. 화면의 알림 받기 버튼을 그 어종으로 준비시킨다(브라우저 권한은 사용자가 직접 누른다).",
-     "parameters": {"type": "object", "properties": {"species": {"type": "string", "enum": SPECIES_CHOICES}},
+     "parameters": {"type": "object", "properties": {"species": {"type": "array", "items": {"type": "string", "enum": SPECIES_CHOICES},
+                                                                "description": "기다리는 어종들. 여러 개면 모두 넣는다. 아무 배나면 ['전체']"}},
                     "required": ["species"], "additionalProperties": False}},
 ]
 
@@ -110,8 +111,13 @@ async def run_tool(ctx: ToolContext, name: str, args: dict[str, Any]) -> dict:
         if name == "get_past_auction":
             return past_auction(ctx.engine.conn, args["species"], args.get("year"), args.get("month"))
         if name == "subscribe":
-            sp = args.get("species") if args.get("species") in SPECIES_CHOICES else "전체"
-            return {"action": "subscribe", "species": sp, "note": "화면의 알림 받기 버튼을 눌러야 알림이 켜집니다."}
+            raw = args.get("species")
+            raw = [raw] if isinstance(raw, str) else (raw or [])
+            sp = [x for x in dict.fromkeys(raw) if x in SPECIES_CHOICES and x != "전체"]
+            if "전체" in raw:
+                sp = []
+            return {"action": "subscribe", "species": "·".join(sp) or "전체", "species_list": sp,
+                    "note": "화면의 알림 받기 버튼을 눌러야 알림이 켜집니다."}
         return {"error": f"모르는 도구입니다: {name}"}
     except EumError:
         return {"error": "디지털트윈 데이터를 지금 불러올 수 없습니다."}

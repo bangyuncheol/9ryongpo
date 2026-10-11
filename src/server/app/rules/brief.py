@@ -36,11 +36,14 @@ def template(new: list[dict], est: dict) -> tuple[str, str]:
 
 
 def matches(cond: dict, est: dict) -> bool:
-    """구독 조건: {'species': None} 이면 모든 입항, {'species': '붉은대게'} 면 그 어종 비중 20% 이상."""
+    """구독 조건: {'species': None} 이면 모든 입항, {'species': ['붉은대게', '살오징어']} 면 그중 하나라도 비중 20% 이상.
+    옛 형식 {'species': '붉은대게'}(문자열)도 같은 뜻으로 읽는다(10/12). 여럿이 맞아도 알림은 입항 한 번에 한 번."""
     want = cond.get("species")
     if not want:
         return True
-    return any(s["name"] == want and s["share"] >= 0.2 for s in est.get("overall", []))
+    if isinstance(want, str):
+        want = [want]
+    return any(s["name"] in want and s["share"] >= 0.2 for s in est.get("overall", []))
 
 
 NUM_RE = re.compile(r"\d+(?::\d+)?")

@@ -224,7 +224,7 @@ async def subscribe(request: Request) -> dict:
     body = await request.json()
     try:
         sub_id = pushmod.save_subscription(request.app.state.db, body.get("subscription") or {},
-                                           {"species": body.get("species") or None})
+                                           {"species": body.get("species")})
     except ValueError as err:
         raise HTTPException(422, detail=str(err)) from None
     return {"ok": True, "id": sub_id}
@@ -332,11 +332,12 @@ def call_state(request: Request, admin: bool = False) -> dict:
 async def call_subscribe(request: Request) -> dict:
     body = await request.json()
     phone = phone_digits(str(body.get("phone", "")))
-    species = body.get("species") or None
     if not phone:
         raise HTTPException(422, detail="휴대폰 번호를 010으로 시작하는 숫자로 입력해 주세요.")
-    if species not in phonemod.ALLOWED_SPECIES:
-        raise HTTPException(422, detail="지원하지 않는 어종입니다. 목록에서 골라 주세요.")
+    try:
+        species = pushmod.norm_species(body.get("species"))  # 문자열 하나(버전 1~3) 또는 목록(버전 4)
+    except ValueError as err:
+        raise HTTPException(422, detail=str(err)) from None
     if not request.app.state.phone.allowed(phone):
         raise HTTPException(403, detail="시연 중에는 미리 등록한 번호로만 전화 알림을 받을 수 있습니다.")
     phonemod.save_call_sub(request.app.state.db, phone, species)

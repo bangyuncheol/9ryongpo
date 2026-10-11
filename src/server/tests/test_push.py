@@ -134,3 +134,22 @@ def test_inbox_keeps_latest_five(conn):
 
 def test_polish_rejects_default_label():
     assert not brief.accept(TEMPLATE, "04:25~04:35 자망선 3척 입항 예정 · 붉은대게·골뱅이 가능성 · 경매 06:00(기본값)")
+
+
+def test_species_list_and_legacy_string():
+    # 10/12 여러 개 알림: 목록으로 저장, 옛 문자열 구독도 같은 뜻으로 읽는다
+    est = {"overall": [{"name": "붉은대게", "share": 0.79}, {"name": "살오징어", "share": 0.1}]}
+    assert brief.matches({"species": "붉은대게"}, est)                      # 옛 형식
+    assert brief.matches({"species": ["살오징어", "붉은대게"]}, est)          # 하나만 맞아도
+    assert not brief.matches({"species": ["살오징어", "꽃게"]}, est)          # 20% 미만·없음
+    assert push.norm_species("붉은대게") == ["붉은대게"]
+    assert push.norm_species(["꽃게", "꽃게", "청어"]) == ["꽃게", "청어"]
+    assert push.norm_species(None) is None and push.norm_species("전체") is None
+    for bad in ([], ["고래"], [None], 3):
+        with pytest.raises(ValueError):
+            push.norm_species(bad)
+
+
+def test_saved_condition_is_list(conn):
+    push.save_subscription(conn, SUB, {"species": ["붉은대게", "살오징어"]})
+    assert json.loads(conn.execute("SELECT cond_json FROM subs").fetchone()[0]) == {"species": ["붉은대게", "살오징어"]}
