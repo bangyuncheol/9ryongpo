@@ -55,11 +55,13 @@ def _vapid_subject(raw: str) -> str:
 
 
 def phone_digits(raw: str) -> str:
-    """'010-1234-5678' · '+82 10 1234 5678' → '01012345678'. 국내 휴대폰 형식이 아니면 ''."""
+    """'010-1234-5678' · '+82 10 1234 5678' → '01012345678'. 국내 휴대폰 형식이 아니면 ''.
+    010 은 늘 11자리, 옛 번호(011·016~019)만 10자리도 있다(10/11: 010 10자리가 통과하던 문제)."""
     d = "".join(ch for ch in raw if ch.isdigit())
-    if d.startswith("8210"):
+    if d.startswith("821"):
         d = "0" + d[2:]
-    return d if d.startswith("01") and len(d) in (10, 11) else ""
+    ok = (d.startswith("010") and len(d) == 11) or (d[:3] in ("011", "016", "017", "018", "019") and len(d) in (10, 11))
+    return d if ok else ""
 
 
 def load_settings() -> Settings:

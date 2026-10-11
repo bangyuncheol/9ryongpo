@@ -30,6 +30,9 @@ def test_phone_digits_and_mask():
     assert phone_digits("010-1234-5678") == "01012345678"
     assert phone_digits("+82 10 1234 5678") == "01012345678"
     assert phone_digits("070-5276-7121") == "" and phone_digits("abc") == ""
+    assert phone_digits("010-232-3232") == ""  # 010 은 11자리만
+    assert phone_digits("011-232-3232") == "0112323232"  # 옛 번호는 10자리도
+    assert phone_digits("02-343-4343") == ""
     assert mask("01012345678") == "010-****-5678"
 
 
