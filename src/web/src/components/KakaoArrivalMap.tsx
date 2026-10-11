@@ -21,7 +21,7 @@ const reduceMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)
 // 서쪽은 위판장 1km 안 교통 센서(병포리 교차로·행정복지센터)까지 들어오게(10/10)
 const VIEW = { s: 35.9822, n: 35.9935, w: 129.5465, e: 129.5672 }
 // 움직일 수 있는 범위(10/11): 처음 화면(VIEW) 둘레 약 1.5km + 조업 해역(동쪽 6~11km, 남쪽 약 4km)까지.
-// 지도 가운데가 이 밖으로 나가면 움직임이 멈출 때 처음 위치로 돌아간다. 확대는 처음 단계에서 2단계, 축소는 4단계(조업 해역이 한 화면에).
+// 보이는 가운데가 이 밖으로 나가면 움직임이 멈출 때 범위 끝으로 튕겨 돌아온다(처음 위치로 가는 건 '처음 위치' 버튼). 확대는 처음 단계에서 2단계, 축소는 4단계(조업 해역이 한 화면에).
 const LIMIT = { s: 35.945, n: VIEW.n + 0.014, w: VIEW.w - 0.017, e: 129.69 }
 const ZOOM_IN = 2
 const ZOOM_OUT = 4
@@ -160,6 +160,27 @@ export default function KakaoArrivalMap(p: Props) {
       if (m.setMinLevel) m.setMinLevel(Math.max(1, lv - ZOOM_IN))
       if (m.setMaxLevel) m.setMaxLevel(lv + ZOOM_OUT)
       const limit = new kakao.maps.LatLngBounds(new kakao.maps.LatLng(LIMIT.s, LIMIT.w), new kakao.maps.LatLng(LIMIT.n, LIMIT.e))
+      // 범위 밖으로 끌면 처음 위치로 확 돌아가던 것을, 다른 지도 앱처럼 범위 끝까지 '팅' 튕겨 돌아오게(10/11 오너).
+      // 보이는 가운데를 범위 안으로 당긴 만큼 지도 가운데를 옮긴다. 살짝 넘쳤다 자리 잡는 곡선(easeOutBack)
+      let bouncing = false
+      type LL = { getLat: () => number; getLng: () => number }
+      const bounceBack = (mm: K, seen: LL) => {
+        const IN = 2e-4 // 경계 바로 안쪽(약 20m)에 세워 다음 판정에서 다시 튕기지 않게
+        const lat = Math.min(LIMIT.n - IN, Math.max(LIMIT.s + IN, seen.getLat())), lng = Math.min(LIMIT.e - IN, Math.max(LIMIT.w + IN, seen.getLng()))
+        const c = mm.getCenter() as LL
+        const from = [c.getLat(), c.getLng()], to = [from[0] + lat - seen.getLat(), from[1] + lng - seen.getLng()]
+        if (reduceMotion()) { mm.setCenter(new kakao.maps.LatLng(to[0], to[1])); return }
+        bouncing = true
+        const t0 = performance.now(), D = 380, k1 = 1.6
+        const step = (now: number) => {
+          const x = Math.min(1, (now - t0) / D)
+          const e = 1 + (k1 + 1) * (x - 1) ** 3 + k1 * (x - 1) ** 2
+          mm.setCenter(new kakao.maps.LatLng(from[0] + (to[0] - from[0]) * e, from[1] + (to[1] - from[1]) * e))
+          if (x < 1) requestAnimationFrame(step)
+          else bouncing = false
+        }
+        requestAnimationFrame(step)
+      }
       kakao.maps.event.addListener(m, 'idle', () => {
         const h = home.current
         if (!h) return
@@ -167,7 +188,8 @@ export default function KakaoArrivalMap(p: Props) {
         // '조업·대기' 버튼으로 넓힌 화면이 범위 밖으로 판정돼 곧바로 처음 위치로 되돌아갔다(10/11 오너 제보)
         const W = box.current?.clientWidth ?? 0, H = box.current?.clientHeight ?? 0
         const seen = W && H ? m.getProjection().coordsFromContainerPoint(new kakao.maps.Point(W / 2, Math.max(0, H - padNow.current) / 2)) : m.getCenter()
-        if (!limit.contain(seen)) { resetView(m); return } // 범위 밖이면 처음 위치로
+        if (bouncing) return
+        if (!limit.contain(seen)) { bounceBack(m, seen); return }
         const c = m.getCenter() as { getLat: () => number; getLng: () => number }
         const hc = h.center as { getLat: () => number; getLng: () => number }
         setMoved(m.getLevel() !== h.level || Math.abs(c.getLat() - hc.getLat()) > 1e-4 || Math.abs(c.getLng() - hc.getLng()) > 1e-4)
