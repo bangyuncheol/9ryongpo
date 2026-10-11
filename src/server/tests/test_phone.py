@@ -128,3 +128,36 @@ def test_events_kind_call_is_logged(tmp_path):
     ph._log_event({"status": "completed", "seconds": 42})
     row = conn.execute("SELECT kind, payload FROM events WHERE kind='call'").fetchone()
     assert json.loads(row[1])["seconds"] == 42
+
+
+def out_answer(scope):
+    async def fn(q, history):
+        yield {"type": "answer", "text": "배마중은 …만 안내해 드려요.", "mode": "llm", "scope": scope}
+    return fn
+
+
+def ask(st, fn, q):
+    return collect(brain.BaemajungLLM(fn, st).generate([{"role": "user", "content": q}]))
+
+
+def test_low_confidence_out_is_reasked_then_choices():
+    st = brain.CallState([], "inbound")
+    st.heard("오늘 돈 돼 있나요?", 0.03)
+    assert ask(st, out_answer("OUT"), "오늘 돈 돼 있나요?") == [brain.CUSHION, brain.REASK]
+    st.heard("오늘 해보고 있나요?", 0.0)
+    assert ask(st, out_answer("OUT"), "오늘 해보고 있나요?") == [brain.CUSHION, brain.CHOICES]  # 같은 말을 반복하지 않는다
+    assert ask(st, fake_answer(0)[0], "오늘 배 들어와 있나요?")[-1] == brain.ASK_MORE and st.misses == 0
+
+
+def test_confident_offtopic_gets_soft_guide_and_unclear_is_reasked():
+    st = brain.CallState([], "inbound")
+    st.heard("이차방정식 좀 풀어 주세요.", 0.82)
+    assert ask(st, out_answer("OUT"), "이차방정식 좀 풀어 주세요.") == [brain.CUSHION, brain.OFFTOPIC]
+    st.heard("옥외 광고가 있나요?", 0.9)  # 확신도는 높아도 말이 안 되는 문장이면 잘못 들은 것
+    assert ask(st, out_answer("UNCLEAR"), "옥외 광고가 있나요?") == [brain.CUSHION, brain.REASK]
+
+
+def test_in_scope_answer_ignores_low_confidence():
+    st = brain.CallState([], "inbound")
+    st.heard("남진호 뭐 싣고 와요?", 0.05)  # 배 이름 같은 고유명사는 맞아도 확신도가 낮을 수 있다
+    assert ask(st, fake_answer(0)[0], "남진호 뭐 싣고 와요?")[-1] == brain.ASK_MORE

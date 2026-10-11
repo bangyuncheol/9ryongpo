@@ -10,7 +10,8 @@ import asyncio
 import base64
 import json
 import logging
-from typing import AsyncIterator
+import math
+from typing import AsyncIterator, Callable
 
 import websockets
 from clawops.agent._audio import resample_pcm16
@@ -23,11 +24,15 @@ HINT = "구룡포 위판장, 입항, 자망선, 채낚기, 통발, 붉은대게,
 
 
 class OpenAITranscribeSTT:
-    def __init__(self, api_key: str, model: str = "gpt-4o-mini-transcribe", silence_ms: int = 800) -> None:
+    def __init__(self, api_key: str, model: str = "gpt-4o-mini-transcribe", silence_ms: int = 800,
+                 on_final: Callable[[str, float | None], None] | None = None) -> None:
         self._key, self._model, self._silence_ms = api_key, model, silence_ms
+        self._on_final = on_final  # (확정 문장, 가장 낮은 글자 확신도 0~1) — 범위 밖 판정 때 '잘못 들음' 구분용
 
     def _session(self) -> dict:
-        return {"type": "session.update", "session": {"type": "transcription", "audio": {"input": {
+        # 확신도(logprobs)는 확정 메시지에 같이 와서 지연이 늘지 않는다(10/11 실측: 켬·끔 모두 말 끝→확정 0.57초).
+        return {"type": "session.update", "session": {"type": "transcription",
+            "include": ["item.input_audio_transcription.logprobs"], "audio": {"input": {
             "format": {"type": "audio/pcm", "rate": 24000},
             "transcription": {"model": self._model, "language": "ko", "prompt": HINT},
             # 말 끝 판정: interview_bridge 는 긴 면접 답변이라 2.4초 침묵을 기다렸다. 전화 질문은 짧아 0.8초.
@@ -55,7 +60,12 @@ class OpenAITranscribeSTT:
                         yield SpeechEvent(type="interim", transcript="")
                     elif t == "conversation.item.input_audio_transcription.completed":
                         text = (m.get("transcript") or "").strip()
+                        lps = [x.get("logprob") for x in (m.get("logprobs") or []) if x.get("logprob") is not None]
+                        conf = math.exp(min(lps)) if lps else None
                         if text:
+                            log.info("받아쓰기 확정: %r 최저 확신도 %s", text[:60], f"{conf:.2f}" if conf is not None else "-")
+                            if self._on_final:
+                                self._on_final(text, conf)
                             yield SpeechEvent(type="final", transcript=text)
                     elif t == "error":
                         log.warning("받아쓰기 오류: %s", (m.get("error") or {}).get("message", "")[:200])

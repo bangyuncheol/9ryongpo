@@ -113,7 +113,7 @@ class FakeResponses:
     verdict: str = "IN"
 
     async def create(self, **kw):
-        if kw["input"][0]["content"] == chat.GATE:  # 범위 판정 호출은 따로 기록
+        if kw["input"][0]["content"] in (chat.GATE, chat.GATE_VOICE):  # 범위 판정 호출은 따로 기록
             self.gate.append(kw)
             return Resp([], self.verdict)
         self.seen.append(kw)
@@ -257,7 +257,7 @@ def test_out_of_scope_question_is_refused_without_tools(ctx):
     client = FakeClient()
     client.responses.verdict = "OUT"
     evs = collect(chat.answer(client, "m", ctx, "이차방정식 x^2-5x+6=0 풀어줘"))
-    assert evs == [{"type": "answer", "text": chat.REFUSAL, "mode": "llm"}]
+    assert evs == [{"type": "answer", "text": chat.REFUSAL, "mode": "llm", "scope": "OUT"}]  # scope: 전화가 문장을 바꿀 때 씀(10/11)
     assert client.responses.gate[0]["reasoning"] == {"effort": "low"}
 
 
@@ -281,3 +281,12 @@ def test_prompts_do_not_assume_visitor(ctx):
     desc = next(t["description"] for t in chat.TOOLS if t["name"] == "recommend_visit_time")
     assert "참여 불가" not in desc
     assert "단정하지 않는다" in chat.system_prompt(ctx) and "경매에 참여할 수 있는지는 말하지 않는다" in chat.system_prompt(ctx)
+
+
+def test_voice_gate_can_say_unclear_but_web_cannot(ctx):
+    client = FakeClient()
+    client.responses.verdict = "UNCLEAR"
+    evs = collect(chat.answer(client, "m", ctx, "오늘 돈 돼 있나요?", voice=True))
+    assert evs[-1]["scope"] == "UNCLEAR" and client.responses.gate[0]["input"][0]["content"] == chat.GATE_VOICE
+    evs = collect(chat.answer(client, "m", ctx, "오늘 돈 돼 있나요?"))
+    assert evs[-1]["scope"] == "OUT"  # 화면 채팅은 IN/OUT 두 가지 그대로

@@ -26,7 +26,12 @@ CUSHION = "네, 확인해 볼게요."
 CLOSING = "네, 전화 주셔서 감사합니다. 좋은 하루 보내세요."
 CLOSING_OUT = "네, 알겠습니다. 좋은 하루 보내세요."
 SLOW = "확인이 늦어지고 있어요. 잠시 뒤에 다시 여쭤 봐 주세요."
-FIXED = (HELLO, INBOUND_INTRO, ASK_MORE, CUSHION, CLOSING, CLOSING_OUT, SLOW)
+# 범위 밖 판정일 때(10/11): 잘못 들은 것 같으면 다시 묻고, 두 번째부터는 선택지를 준다. 분명한 엉뚱한 질문은 부드럽게 안내.
+REASK = "죄송해요, 제가 잘 못 들었어요. 한 번만 다시 말씀해 주세요."
+CHOICES = "들어오는 배, 대게, 위판장 앞 교통 중에 어떤 게 궁금하세요?"
+OFFTOPIC = "그건 제가 안내해 드리기 어려워요. 들어오는 배나 어종, 위판장 앞 교통을 물어봐 주세요."
+FIXED = (HELLO, INBOUND_INTRO, ASK_MORE, CUSHION, CLOSING, CLOSING_OUT, SLOW, REASK, CHOICES, OFFTOPIC)
+LOW_CONF = 0.2  # 받아쓰기 최저 글자 확신도. 합성 음성 시험(10/11): 크게 틀린 문장 0.00~0.05, 맞은 문장 0.32~0.97
 
 ANSWER_TIMEOUT_S = 20.0
 _END_RE = re.compile(r"^(아니(요|에요|오)?|없(어|어요|습니다)|괜찮(아|아요|습니다)|됐(어|어요|습니다)|끊(을게요|어요|겠습니다)|"
@@ -50,7 +55,22 @@ class CallState:
         self.greeting = greeting
         self.direction = direction
         self.hangup_after: str | None = None  # 이 문장을 다 말하면 끊는다
+        self.conf: dict[str, float | None] = {}  # 받아쓰기 문장 → 최저 글자 확신도
+        self.misses = 0  # 연속으로 못 알아들은 횟수
         self.log: Callable[[str, str], None] = lambda role, text: None
+
+    def heard(self, text: str, conf: float | None) -> None:
+        self.conf[text.strip()] = conf
+
+    def reply_for_out(self, question: str, scope: str) -> str:
+        """범위 밖 판정을 전화 문장으로. 확신도가 낮거나 말이 안 되는 문장이면 잘못 들은 것으로 본다."""
+        conf = self.conf.get(question.strip())
+        misheard = scope == "UNCLEAR" or (conf is not None and conf < LOW_CONF)
+        if not misheard:
+            self.misses = 0
+            return OFFTOPIC
+        self.misses += 1
+        return REASK if self.misses == 1 else CHOICES
 
 
 class BaemajungLLM:
@@ -94,6 +114,7 @@ class BaemajungLLM:
                     self.state.log("tool", f"{ev.get('name')}: {ev.get('summary')}")
                 elif ev["type"] == "answer":
                     result["text"] = ev["text"]
+                    result["scope"] = ev.get("scope", "IN")
                 elif ev["type"] == "error":
                     result["text"] = ev["message"]
 
@@ -106,6 +127,13 @@ class BaemajungLLM:
                 log.warning("전화 답이 %.0f초 넘게 걸려 안내 문장으로 대신함", ANSWER_TIMEOUT_S)
                 yield SLOW
                 return
+            if result.get("scope", "IN") != "IN":
+                text = self.state.reply_for_out(last, result["scope"])
+                log.info("전화 범위 밖(%s, 확신도 %s) → %s", result["scope"], self.state.conf.get(last), text[:20])
+                self.state.log("ai", text)
+                yield text  # 되묻는 문장이라 '더 궁금하신 거'를 붙이지 않는다
+                return
+            self.state.misses = 0
             text = result.get("text") or SLOW
             self.state.log("ai", text)
             yield _sentence(text)
