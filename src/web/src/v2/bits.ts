@@ -36,6 +36,16 @@ export function trafficWord(now?: string | null) {
   return now.replace(/^오늘 하루 중 /, '').replace(/(입니다|합니다)\.?$/, '').trim()
 }
 
+/** 휴대폰 번호 입력: 숫자만 11자리까지 받고, 보이기는 010-1234-5678 처럼 끊어서(10/11). 서버(config.phone_digits)와 같은 기준 */
+export const phoneOnlyDigits = (raw: string) => raw.replace(/\D/g, '').slice(0, 11)
+export const phoneValid = (d: string) => /^01\d{8,9}$/.test(d)
+export function phoneDisplay(d: string) {
+  if (d.length <= 3) return d
+  if (d.length <= 7) return `${d.slice(0, 3)}-${d.slice(3)}`
+  const mid = d.length === 10 ? 3 : 4 // 10자리(011 등)는 3-3-4
+  return `${d.slice(0, 3)}-${d.slice(3, 3 + mid)}-${d.slice(3 + mid)}`
+}
+
 export const telHref = (num: string) => `tel:${num.replace(/\D/g, '')}`
 export const telText = (num: string) => num.replace(/^(\d{3})(\d{3,4})(\d{4})$/, '$1-$2-$3')
 

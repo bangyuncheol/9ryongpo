@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { api, postJson } from '../api'
 import { Button } from '../components/Card'
 import Icon from './Icon'
+import { phoneDisplay, phoneOnlyDigits, phoneValid } from './bits'
 
 /*
  * 2차 시안 알림 카드: '알림 설정' 대신 "기다리는 생선이 있나요?" — 어종을 고르고, 휴대폰 알림·전화를 한 번에 신청.
@@ -31,7 +32,8 @@ export default function WaitFish({ phoneEnabled, onChange }: {
   const [phoneOn, setPhoneOn] = useState<string | null>(() => read(PHONE_KEY))
   const [wantPush, setWantPush] = useState(supported())
   const [wantPhone, setWantPhone] = useState(false)
-  const [tel, setTel] = useState('')
+  const [tel, setTel] = useState('') // 숫자만
+  const [telTouched, setTelTouched] = useState(false)
   const [busy, setBusy] = useState(false)
   const [msg, setMsg] = useState<string | null>(null)
 
@@ -66,7 +68,7 @@ export default function WaitFish({ phoneEnabled, onChange }: {
           body: JSON.stringify({ phone: tel, species: sp }) })
         const b = await r.json().catch(() => null)
         if (!r.ok) throw new Error(b?.detail ?? '전화 알림을 신청하지 못했습니다. 잠시 후 다시 시도해 주세요.')
-        write(PHONE_KEY, b.phone); setPhoneOn(b.phone); setTel('')
+        write(PHONE_KEY, b.phone); setPhoneOn(b.phone); setTel(''); setTelTouched(false)
       }
       write(KEY, species)
     } catch (e) {
@@ -93,7 +95,10 @@ export default function WaitFish({ phoneEnabled, onChange }: {
   const waiting = pushOn || !!phoneOn
   const current = read(KEY) ?? species
   useEffect(() => { onChange?.({ on: waiting, species: current }) }, [onChange, waiting, current])
-  const canApply = (wantPush && !pushOn) || (wantPhone && !phoneOn && tel.replace(/\D/g, '').length >= 10)
+  const canApply = (wantPush && !pushOn) || (wantPhone && !phoneOn && phoneValid(tel))
+  // 앞자리가 01 이 아니면 바로, 자릿수가 모자라면 칸을 벗어났을 때 알려 준다(버튼이 왜 안 눌리는지 보이게)
+  const telHint = wantPhone && !phoneOn && tel && !phoneValid(tel) && (!tel.startsWith('01'.slice(0, tel.length)) || telTouched)
+    ? '010으로 시작하는 휴대폰 번호를 끝까지 입력해 주세요.' : null
 
   return (
     <section className="rounded-card bg-card p-5" aria-labelledby="wait-title">
@@ -144,9 +149,15 @@ export default function WaitFish({ phoneEnabled, onChange }: {
             )}
           </div>
           {wantPhone && !phoneOn && (
-            <input type="tel" inputMode="numeric" autoComplete="tel" placeholder="전화 받을 번호 010-0000-0000" value={tel}
-              aria-label="전화 받을 번호" onChange={(e) => setTel(e.target.value)}
-              className="mt-2 min-h-[var(--spacing-touch)] w-full rounded-button border border-line bg-card px-3 text-body text-ink" />
+            <div className="mt-2">
+              <label htmlFor="wait-tel" className="text-sub font-bold">전화 받을 번호</label>
+              {/* 숫자만 받고 하이픈은 화면이 넣는다: 숫자 키패드에는 하이픈 키가 없거나 찾기 어렵다(10/11 오너) */}
+              <input id="wait-tel" name="tel" type="tel" inputMode="numeric" autoComplete="tel-national" placeholder="숫자만 입력 (예: 01012345678)"
+                value={phoneDisplay(tel)} onChange={(e) => setTel(phoneOnlyDigits(e.target.value))} onBlur={() => setTelTouched(true)}
+                aria-invalid={!!telHint} aria-describedby={telHint ? 'wait-tel-hint' : undefined}
+                className="mt-1 min-h-[var(--spacing-touch)] w-full rounded-button border border-line bg-card px-3 text-body tabular-nums tracking-wide text-ink placeholder:tracking-normal placeholder:text-muted" />
+              {telHint && <p id="wait-tel-hint" className="mt-1 text-sub text-arriving">{telHint}</p>}
+            </div>
           )}
           <Button emphasis="high" onClick={apply} disabled={busy || !canApply} className="mt-4 w-full">
             {busy ? '신청하는 중…' : '알림 신청하기'}
