@@ -63,7 +63,13 @@ class OpenAITranscribeSTT:
                         lps = [x.get("logprob") for x in (m.get("logprobs") or []) if x.get("logprob") is not None]
                         conf = math.exp(min(lps)) if lps else None
                         if text:
-                            log.info("받아쓰기 확정: %r 최저 확신도 %s", text[:60], f"{conf:.2f}" if conf is not None else "-")
+                            # 판정에는 최저값만 쓴다. 평균·낮은 글자 수는 실통화로 기준을 다시 맞추려고 남긴다(10/11).
+                            if lps:
+                                ps = [math.exp(x) for x in lps]
+                                log.info("받아쓰기 확정: %r 최저 확신도 %.2f 평균 %.2f 낮은 글자(0.5 미만) %d/%d",
+                                         text[:60], conf, sum(ps) / len(ps), sum(p < 0.5 for p in ps), len(ps))
+                            else:
+                                log.info("받아쓰기 확정: %r 확신도 없음", text[:60])
                             if self._on_final:
                                 self._on_final(text, conf)
                             yield SpeechEvent(type="final", transcript=text)
