@@ -243,6 +243,9 @@ export default function KakaoArrivalMap(p: Props) {
         o.setMap(m)
         t = { o, el, from: to, to, path: [to, to], route: s.route ?? [], t0: now, status: s.status, docked: isDocked(s), heading: s.course ?? 270, dockAt: null }
         tracks.current.set(id, t)
+      } else if (t.dockAt && isDocked(s)) {
+        // 이미 정박하러 가는 중: 새 위치(같은 자리)가 와도 시간을 다시 재지 않는다. 다시 재면 도착 직전마다
+        // '남은 몇 m를 또 2초'가 반복돼 부두 앞에서 한참 머물렀다(300배 재생, 10/11)
       } else {
         const here = lerpPos(t, now)
         const next = s.route ?? []
@@ -257,8 +260,8 @@ export default function KakaoArrivalMap(p: Props) {
       t.status = s.status
       // 막 정박한 배: 화면에선 아직 부두까지 2초 동안 가는 중이다. 그동안은 진행 방향을 보며 빨간 배로 가고,
       // 닿은 뒤에 뱃머리를 부두 방향으로 돌리며 초록으로 바꾼다(애니메이션 루프). 미리 돌리면 옆·뒤로 가 보였다(10/11).
-      const arriving = isDocked(s) && !t.docked && pathLength(t.path) > 1e-7
-      t.dockAt = arriving ? s : null
+      const arriving = isDocked(s) && !t.docked && (!!t.dockAt || pathLength(t.path) > DOCK_SNAP)
+      t.dockAt = arriving ? (t.dockAt ?? s) : null
       t.docked = isDocked(s) && !arriving
       paintBoat(t.el, arriving ? { ...s, status: '입항 중', speed: HARBOR_SPEED } : s, p.selected === s.ship_id)
       if (!t.docked) setHeading(t, t.heading) // 움직이는 배는 그리는 위치의 진행 방향(애니메이션 루프가 매 프레임 갱신)
@@ -445,6 +448,7 @@ export default function KakaoArrivalMap(p: Props) {
 }
 
 const HARBOR_SPEED = 3 // 정박 직전 표시용(항구 안 속도, harbor.py HARBOR_KN)
+const DOCK_SNAP = 0.00006 // 남은 거리가 이보다 짧으면(약 6m) 바로 정박
 
 function pathLength(pts: [number, number][]) {
   return pts.slice(1).reduce((a, p, i) => a + Math.hypot(p[0] - pts[i][0], (p[1] - pts[i][1]) * 0.81), 0)
