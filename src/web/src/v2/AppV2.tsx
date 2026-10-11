@@ -225,7 +225,8 @@ export function Toast({ items }: { items: { vts: string; body: string }[] | null
       <div className="v2-shadow flex gap-3 rounded-card bg-card p-4">
         <span aria-hidden className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[var(--color-sunrise-soft)] text-arriving"><Icon name="bell" /></span>
         <div>
-          <p className="text-sub font-bold text-arriving"><span className="tabular-nums">{hhmm(show.vts)}</span> 입항 알림을 보냈어요</p>
+          {/* 화면 안 띠는 푸시 신청과 상관없이 누구에게나 뜬다 → '보냈어요'가 아니라 소식으로(10/11 오너) */}
+          <p className="text-sub font-bold text-arriving">새 입항 소식 <span className="font-medium tabular-nums text-muted">· {hhmm(show.vts)}</span></p>
           <p className="mt-1 text-body">{show.body}</p>
         </div>
       </div>
