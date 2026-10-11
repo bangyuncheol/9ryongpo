@@ -20,6 +20,10 @@ const reduceMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)
 // 항구 확대 범위: 위판장 주변 육지 + 항구 + 입구 바깥 접근로(harbor.py APPROACH[0])까지
 // 서쪽은 위판장 1km 안 교통 센서(병포리 교차로·행정복지센터)까지 들어오게(10/10)
 const VIEW = { s: 35.9822, n: 35.9935, w: 129.5465, e: 129.5672 }
+// 움직일 수 있는 범위(10/11): 처음 화면(VIEW) 둘레 약 1.5km, 배가 들어오는 동쪽 바다는 약 11km까지.
+// 지도 가운데가 이 밖으로 나가면 움직임이 멈출 때 처음 위치로 돌아간다. 확대·축소는 처음 단계에서 ±2단계.
+const LIMIT = { s: VIEW.s - 0.014, n: VIEW.n + 0.014, w: VIEW.w - 0.017, e: VIEW.e + 0.12 }
+const ZOOM_RANGE = 2
 
 type Props = {
   place: Place | null
@@ -106,21 +110,46 @@ export default function KakaoArrivalMap(p: Props) {
   selRef.current = p.selected
   arrRef.current = new Map(p.arriving.map((a) => [a.ship_id, a]))
 
-  // 지도: 한 번만 만든다. 구룡포항 확대로 고정, 끌기·확대 없음.
+  // 지도: 한 번만 만든다. 처음엔 구룡포항 확대 화면. 끌기·확대·축소 가능(10/11 오너: 고정 해제), 범위를 벗어나면 원위치.
+  const home = useRef<{ center: unknown; level: number } | null>(null)
+  const [moved, setMoved] = useState(false)
+  const goHome = () => {
+    const m = map.current, h = home.current
+    if (!m || !h) return
+    m.setLevel(h.level, { animate: { duration: 300 } })
+    m.panTo(h.center)
+  }
   useEffect(() => {
     let alive = true
     loadKakao().then((kakao) => {
       if (!alive || !box.current || map.current) return
       k.current = kakao
       map.current = new kakao.maps.Map(box.current, {
-        center: new kakao.maps.LatLng(35.988, 129.558), level: 5, draggable: false, scrollwheel: false,
-        disableDoubleClick: true, disableDoubleClickZoom: true, keyboardShortcuts: false,
+        center: new kakao.maps.LatLng(35.988, 129.558), level: 5, draggable: true, scrollwheel: true,
+        keyboardShortcuts: false,
       })
-      map.current.setZoomable(false)
+      const m = map.current
       const b = new kakao.maps.LatLngBounds()
       b.extend(new kakao.maps.LatLng(VIEW.s, VIEW.w)); b.extend(new kakao.maps.LatLng(VIEW.n, VIEW.e))
-      map.current.setBounds(b, 0, 0, 0, 0)
-      kakao.maps.event.addListener(map.current, 'click', () => { onSelect(null); setSensorFocus(null) })
+      m.setBounds(b, 0, 0, 0, 0)
+      const lv = m.getLevel()
+      home.current = { center: m.getCenter(), level: lv }
+      if (m.setMinLevel) m.setMinLevel(Math.max(1, lv - ZOOM_RANGE))
+      if (m.setMaxLevel) m.setMaxLevel(lv + ZOOM_RANGE)
+      const limit = new kakao.maps.LatLngBounds(new kakao.maps.LatLng(LIMIT.s, LIMIT.w), new kakao.maps.LatLng(LIMIT.n, LIMIT.e))
+      kakao.maps.event.addListener(m, 'idle', () => {
+        const h = home.current
+        if (!h) return
+        if (!limit.contain(m.getCenter())) { // 범위 밖이면 처음 위치로
+          m.setLevel(h.level, { animate: { duration: 300 } })
+          m.panTo(h.center)
+          return
+        }
+        const c = m.getCenter() as { getLat: () => number; getLng: () => number }
+        const hc = h.center as { getLat: () => number; getLng: () => number }
+        setMoved(m.getLevel() !== h.level || Math.abs(c.getLat() - hc.getLat()) > 1e-4 || Math.abs(c.getLng() - hc.getLng()) > 1e-4)
+      })
+      kakao.maps.event.addListener(m, 'click', () => { onSelect(null); setSensorFocus(null) })
       setReady(true)
     }).catch((e: unknown) => { console.error(e); onFail() })
     return () => { alive = false }
@@ -322,6 +351,12 @@ export default function KakaoArrivalMap(p: Props) {
         <p className="pointer-events-none absolute right-2 top-2 z-[500] rounded-button bg-card/90 px-3 py-1.5 text-[12px] font-bold text-muted shadow-sm">
           {stale ? '선박 위치 미갱신' : '조업·대기'} {idle.length}척 · 동쪽 약 {Math.round(idleKm)}km ▸
         </p>
+      )}
+      {moved && (
+        <button type="button" onClick={goHome}
+          className="absolute bottom-7 left-2 z-[500] rounded-button bg-card/95 px-3 py-1.5 text-[12px] font-bold text-ink shadow-sm">
+          ⟲ 처음 위치
+        </button>
       )}
       {p.notice && (
         <p className="pointer-events-none absolute inset-x-3 bottom-8 z-[500] rounded-button bg-card/95 px-3 py-2 text-center text-sub shadow-sm">{p.notice}</p>
