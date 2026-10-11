@@ -8,7 +8,7 @@ import { shortBiz } from './ArrivalsCard'
  * 입항 지도(10/10 2차 개편). 지도는 구룡포항 확대(위판장 주변 육지가 자세히 보임)로 고정.
  * - 화면 안: 들어오는 배(빨간 배 모양, 진행 방향 회전, 부드러운 이동), 정박한 배(초록, 위판장 앞 부두 자리)
  * - 화면 밖 들어오는 배: 오른쪽 가장자리 화살표 + 거리. 가까워지면 화면 안으로 들어와 배 모양이 된다
- * - 조업·대기 배: 오른쪽 위 표지 하나(척수·평균 거리)
+ * - 조업·대기 배: 작은 회색 점 + 오른쪽 위 버튼(척수·평균 거리, 누르면 조업 해역이 보이게 넓힘)
  * - 배 정보는 마우스를 올리거나 탭했을 때(또는 입항 예보 목록에서 골랐을 때)만
  */
 
@@ -20,10 +20,11 @@ const reduceMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)
 // 항구 확대 범위: 위판장 주변 육지 + 항구 + 입구 바깥 접근로(harbor.py APPROACH[0])까지
 // 서쪽은 위판장 1km 안 교통 센서(병포리 교차로·행정복지센터)까지 들어오게(10/10)
 const VIEW = { s: 35.9822, n: 35.9935, w: 129.5465, e: 129.5672 }
-// 움직일 수 있는 범위(10/11): 처음 화면(VIEW) 둘레 약 1.5km, 배가 들어오는 동쪽 바다는 약 11km까지.
-// 지도 가운데가 이 밖으로 나가면 움직임이 멈출 때 처음 위치로 돌아간다. 확대·축소는 처음 단계에서 ±2단계.
-const LIMIT = { s: VIEW.s - 0.014, n: VIEW.n + 0.014, w: VIEW.w - 0.017, e: VIEW.e + 0.12 }
-const ZOOM_RANGE = 2
+// 움직일 수 있는 범위(10/11): 처음 화면(VIEW) 둘레 약 1.5km + 조업 해역(동쪽 6~11km, 남쪽 약 4km)까지.
+// 지도 가운데가 이 밖으로 나가면 움직임이 멈출 때 처음 위치로 돌아간다. 확대는 처음 단계에서 2단계, 축소는 4단계(조업 해역이 한 화면에).
+const LIMIT = { s: 35.945, n: VIEW.n + 0.014, w: VIEW.w - 0.017, e: 129.69 }
+const ZOOM_IN = 2
+const ZOOM_OUT = 4
 
 type Props = {
   place: Place | null
@@ -134,8 +135,8 @@ export default function KakaoArrivalMap(p: Props) {
       m.setBounds(b, 0, 0, 0, 0)
       const lv = m.getLevel()
       home.current = { center: m.getCenter(), level: lv }
-      if (m.setMinLevel) m.setMinLevel(Math.max(1, lv - ZOOM_RANGE))
-      if (m.setMaxLevel) m.setMaxLevel(lv + ZOOM_RANGE)
+      if (m.setMinLevel) m.setMinLevel(Math.max(1, lv - ZOOM_IN))
+      if (m.setMaxLevel) m.setMaxLevel(lv + ZOOM_OUT)
       const limit = new kakao.maps.LatLngBounds(new kakao.maps.LatLng(LIMIT.s, LIMIT.w), new kakao.maps.LatLng(LIMIT.n, LIMIT.e))
       kakao.maps.event.addListener(m, 'idle', () => {
         const h = home.current
@@ -251,6 +252,39 @@ export default function KakaoArrivalMap(p: Props) {
     for (const [id, t] of tracks.current) if (!seen.has(id)) { t.o.setMap(null); tracks.current.delete(id) }
   }, [ready, p.ships, p.selected, onSelect])
 
+  // 조업·대기 배: 작은 회색 점(10/11). 처음 화면 밖이라 지도를 옮기거나 축소해야 보인다. 올리면 이름.
+  const idleDots = useRef(new Map<number, K>())
+  useEffect(() => {
+    const kakao = k.current, m = map.current
+    if (!ready || !kakao || !m) return
+    const seen = new Set<number>()
+    for (const s of p.ships) {
+      if (s.status !== '조업·대기') continue
+      seen.add(s.ship_id)
+      const pos = new kakao.maps.LatLng(s.lat, s.lon)
+      const o = idleDots.current.get(s.ship_id)
+      if (o) { o.setPosition(pos); continue }
+      const el = document.createElement('div')
+      el.title = `${s.name ?? '어선'} · 조업·대기`
+      el.setAttribute('aria-label', `${s.name ?? '어선'} 조업·대기`)
+      el.style.cssText = 'width:9px;height:9px;border-radius:9999px;background:var(--color-idle);border:1.5px solid #fff;box-shadow:0 0 1px rgba(0,0,0,.4)'
+      const dot = new kakao.maps.CustomOverlay({ position: pos, content: el, xAnchor: 0.5, yAnchor: 0.5, zIndex: 5 })
+      dot.setMap(m)
+      idleDots.current.set(s.ship_id, dot)
+    }
+    for (const [id, o] of idleDots.current) if (!seen.has(id)) { o.setMap(null); idleDots.current.delete(id) }
+  }, [ready, p.ships])
+
+  /** '조업·대기 N척 ▸' 버튼: 조업 중인 배와 위판장이 한 화면에 들어오게 맞춘다. */
+  const showIdle = () => {
+    const kakao = k.current, m = map.current
+    if (!kakao || !m || !place) return
+    const b = new kakao.maps.LatLngBounds()
+    b.extend(new kakao.maps.LatLng(place.lat, place.lon))
+    for (const s of p.ships) if (s.status === '조업·대기') b.extend(new kakao.maps.LatLng(s.lat, s.lon))
+    m.setBounds(b, 30, 30, 30, 30)
+  }
+
   // 정보 표지: 올린 배 → 고른 배. 화면 안에 있을 때만(화면 밖이면 가장자리 화살표가 펼쳐진다).
   useEffect(() => {
     const kakao = k.current, m = map.current
@@ -348,9 +382,10 @@ export default function KakaoArrivalMap(p: Props) {
       <div ref={box} className={`${p.compact ? 'h-52' : 'h-80 md:h-[460px]'} w-full overflow-hidden rounded-card bg-primary-soft`} aria-label="입항 지도" />
       <div ref={edgeBox} className="absolute inset-0 z-[400] overflow-hidden rounded-card [&>*]:pointer-events-auto" style={{ pointerEvents: 'none' }} />
       {idle.length > 0 && (
-        <p className="pointer-events-none absolute right-2 top-2 z-[500] rounded-button bg-card/90 px-3 py-1.5 text-[12px] font-bold text-muted shadow-sm">
+        <button type="button" onClick={showIdle} title="조업 중인 배가 보이게 지도를 넓힙니다"
+          className="absolute right-2 top-2 z-[500] rounded-button bg-card/90 px-3 py-1.5 text-[12px] font-bold text-muted shadow-sm hover:text-ink">
           {stale ? '선박 위치 미갱신' : '조업·대기'} {idle.length}척 · 동쪽 약 {Math.round(idleKm)}km ▸
-        </p>
+        </button>
       )}
       {moved && (
         <button type="button" onClick={goHome}
