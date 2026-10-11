@@ -9,7 +9,7 @@ import AppV2, { CallUs, Depart, Header, NextShip, Toast } from '../v2/AppV2'
 import type { VisitData } from '../v2/AppV2'
 import WaitFish from '../v2/WaitFish'
 import Icon from '../v2/Icon'
-import { byEta, telHref, telText } from '../v2/bits'
+import { byEta, telHref, telText, useThemeColor } from '../v2/bits'
 import '../v2/v2.css'
 
 /*
@@ -19,6 +19,12 @@ import '../v2/v2.css'
  */
 type Tab = 'home' | 'ships' | 'alerts' | 'ask'
 const TABS: [Tab, string][] = [['home', '홈'], ['ships', '들어오는 배'], ['alerts', '알림'], ['ask', '물어보기']]
+
+/** 탭은 주소(?tab=)에 남긴다 — 폰의 뒤로 가기가 앱을 닫지 않고 이전 탭으로 돌아오게(10/11). 홈은 주소에서 뺀다 */
+function readTab(): Tab {
+  const t = new URLSearchParams(location.search).get('tab')
+  return TABS.find(([k]) => k === t)?.[0] ?? 'home'
+}
 
 function useWide() {
   const q = '(min-width: 1024px)'
@@ -37,9 +43,23 @@ export default function AppV3() {
 }
 
 function PhoneV3() {
+  useThemeColor()
   const admin = new URLSearchParams(location.search).has('admin')
-  const [tab, setTabRaw] = useState<Tab>('home')
-  const setTab = (t: Tab) => { setTabRaw(t); window.scrollTo({ top: 0 }) }
+  const [tab, setTabRaw] = useState<Tab>(readTab)
+  useEffect(() => {
+    const onPop = () => { setTabRaw(readTab()); window.scrollTo({ top: 0 }) }
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [])
+  const setTab = (t: Tab) => {
+    if (t !== tab) {
+      const q = new URLSearchParams(location.search)
+      if (t === 'home') q.delete('tab'); else q.set('tab', t)
+      history.pushState(null, '', `${location.pathname}?${q}`)
+      setTabRaw(t)
+    }
+    window.scrollTo({ top: 0 })
+  }
   const [place, setPlace] = useState<Place | null>(null)
   const [sensor, setSensor] = useState<Sensor | null>(null)
   const [selected, setSelected] = useState<number | null>(null)

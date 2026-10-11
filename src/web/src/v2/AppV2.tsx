@@ -9,7 +9,7 @@ import AdminBar from '../components/AdminBar'
 import CallCard from '../components/CallCard'
 import WaitFish from './WaitFish'
 import Icon from './Icon'
-import { byEta, likelihood, minutesUntil, shipSpecies, shortBiz, telHref, telText, trafficWord } from './bits'
+import { byEta, likelihood, useThemeColor, minutesUntil, shipSpecies, shortBiz, telHref, telText, trafficWord } from './bits'
 import './v2.css'
 
 /*
@@ -19,6 +19,7 @@ import './v2.css'
  * 라벨: 예측(입항 시각)·추정(어종)·실측(교통)·시연(선박 위치 시뮬레이션)을 작게 붙여 믿어도 되는 정도를 알린다.
  */
 export default function AppV2() {
+  useThemeColor()
   const admin = new URLSearchParams(location.search).has('admin')
   const [place, setPlace] = useState<Place | null>(null)
   const [sensor, setSensor] = useState<Sensor | null>(null)
