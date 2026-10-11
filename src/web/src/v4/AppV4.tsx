@@ -217,12 +217,20 @@ function Peek({ today, first, onOpen }: { today: Today | null; first?: Arrival; 
   )
 }
 
+/** 경매 시작과 권장 도착 사이 분(서버 visit.EARLY_MIN 을 화면에 다시 적지 않으려고 두 시각에서 계산). */
+function early(v: VisitData) {
+  const m = (t: string) => { const [h, mm] = t.split(':').map(Number); return h * 60 + mm }
+  return (m(v.auction_time) - m(v.arrive_by) + 1440) % 1440
+}
+
 /** 언제 가면 되나: 시트 안에서는 띠가 아니라 한 줄 정보로(지도와 다음 배가 주인공). */
 function Visit({ visit }: { visit: VisitData }) {
   const word = trafficWord(visit.now)
   return (
     <section className="mt-6 rounded-button bg-page px-4 py-3" aria-label="언제 가면 되나">
-      <p className="text-body font-bold">경매 {visit.auction_time} · <span className="tabular-nums">{visit.arrive_by}</span>까지 도착하면 돼요</p>
+      {/* 왜 그 시각인지 한 번에 읽히게: 경매 시작 → 몇 분 전 → 도착 시각(10/11 오너) */}
+      <p className="text-body font-bold">경매가 <span className="tabular-nums">{visit.auction_time}</span>에 시작해요.<br />
+        {early(visit) > 0 ? `${early(visit)}분 전인 ` : ''}<span className="tabular-nums">{visit.arrive_by}</span>까지 도착하세요</p>
       {/* '· 실측'이 줄 끝에서 혼자 넘어가지 않게 붙여 둔다(10/11) */}
       {word && <p className="mt-1 flex items-start gap-1.5 text-sub text-muted"><Icon name="truck" className="mt-[3px]" /><span>지금 위판장 앞은 {word} <span className="whitespace-nowrap">· 실측</span></span></p>}
     </section>

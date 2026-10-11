@@ -462,7 +462,8 @@ export default function KakaoArrivalMap(p: Props) {
           <span><span aria-hidden style={{ color: 'var(--color-arrived)' }}>⛴</span> 정박</span>
           <span><span aria-hidden style={{ color: 'var(--color-arriving)' }}>◀</span> 화면 밖(거리)</span>
         </div>
-        <p className="text-muted">배를 누르거나 마우스를 올리면 정보가 보입니다</p>
+        {/* 버전 4(fill)는 범례를 그림 설명만으로(10/11 오너) */}
+        {!p.fill && <p className="text-muted">배를 누르거나 마우스를 올리면 정보가 보입니다</p>}
         {p.legendToggle && <button type="button" onClick={() => setLegendOpen(false)} aria-expanded className="mt-1 font-bold text-primary-dark">접기</button>}
       </div>
       )}
