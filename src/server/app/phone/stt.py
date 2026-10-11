@@ -23,14 +23,18 @@ from clawops.agent.pipeline import SpeechEvent
 log = logging.getLogger(__name__)
 
 URL = "wss://api.openai.com/v1/realtime?intent=transcription"
-HINT = "구룡포 위판장, 입항, 자망선, 채낚기, 통발, 붉은대게, 홍게, 대게, 골뱅이, 오징어, 방어, 가자미, 경매, 트럭, 교통"
+HINT = ("구룡포 위판장, 입항, 자망선, 채낚기, 통발, 붉은대게, 홍게, 대게, 골뱅이, 오징어, 방어, 가자미, 경매, 트럭, 교통, "
+        "뭐 싣고 와요, 언제 들어와요")  # 실통화 녹음(10/11): '뭐 싣고'를 '멋있고'로 자주 잘못 들음
 
 
 class OpenAITranscribeSTT:
     def __init__(self, api_key: str, model: str = "gpt-4o-mini-transcribe", silence_ms: int = 800,
                  on_final: Callable[[str, float | None], None] | None = None,
-                 on_speech: Callable[[bool], None] | None = None, record_dir: Path | None = None) -> None:
+                 on_speech: Callable[[bool], None] | None = None, record_dir: Path | None = None,
+                 ship_names: list[str] | None = None) -> None:
         self._key, self._model, self._silence_ms = api_key, model, silence_ms
+        # 배 이름 힌트: 녹음 6개 비교(10/11)에서 '남진호' 1/5 → 4/5로 늘었지만, 다시 돌리면 힌트 전체를 받아쓰기로 내뱉은 적이 있어 지금은 끔
+        self._hint = HINT + (", " + ", ".join(ship_names) if ship_names else "")
         self._on_final = on_final  # (확정 문장, 가장 낮은 글자 확신도 0~1) — 범위 밖 판정 때 '잘못 들음' 구분용
         self._on_speech = on_speech  # True=말 시작, False=그 말의 받아쓰기 확정. 말하는 중엔 답을 미루려고
         # STT_RECORD=1 일 때만: 질문 음성을 잘라 저장(STT 비교 시험용, 10/11). 본인 목소리 시험에만 켜고 끝나면 지운다.
@@ -58,7 +62,7 @@ class OpenAITranscribeSTT:
         return {"type": "session.update", "session": {"type": "transcription",
             "include": ["item.input_audio_transcription.logprobs"], "audio": {"input": {
             "format": {"type": "audio/pcm", "rate": 24000},
-            "transcription": {"model": self._model, "language": "ko", "prompt": HINT},
+            "transcription": {"model": self._model, "language": "ko", "prompt": self._hint},
             # 말 끝 판정: interview_bridge 는 긴 면접 답변이라 2.4초 침묵을 기다렸다. 전화 질문은 짧아 0.8초.
             "turn_detection": {"type": "server_vad", "threshold": 0.5, "prefix_padding_ms": 300,
                                "silence_duration_ms": self._silence_ms},

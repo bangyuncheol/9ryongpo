@@ -27,11 +27,12 @@ CUSHION = "네, 확인해 볼게요."
 CLOSING = "네, 전화 주셔서 감사합니다. 좋은 하루 보내세요."
 CLOSING_OUT = "네, 알겠습니다. 좋은 하루 보내세요."
 SLOW = "확인이 늦어지고 있어요. 잠시 뒤에 다시 여쭤 봐 주세요."
+TIME_UP = "통화가 길어져 이만 끊을게요. 다시 걸어 주시면 이어서 알려 드릴게요."  # 상한 시간이 지나면 하던 답 뒤에(10/11)
 # 범위 밖 판정일 때(10/11): 잘못 들은 것 같으면 다시 묻고, 두 번째부터는 선택지를 준다. 분명한 엉뚱한 질문은 부드럽게 안내.
 REASK = "죄송해요, 제가 잘 못 들었어요. 한 번만 다시 말씀해 주세요."
 CHOICES = "들어오는 배, 대게, 위판장 앞 교통 중에 어떤 게 궁금하세요?"
 OFFTOPIC = "그건 제가 안내해 드리기 어려워요. 들어오는 배나 어종, 위판장 앞 교통을 물어봐 주세요."
-FIXED = (HELLO, INBOUND_INTRO, ASK_FIRST, ASK_MORE, CUSHION, CLOSING, CLOSING_OUT, SLOW, REASK, CHOICES, OFFTOPIC)
+FIXED = (HELLO, INBOUND_INTRO, ASK_FIRST, ASK_MORE, CUSHION, CLOSING, CLOSING_OUT, SLOW, REASK, CHOICES, OFFTOPIC, TIME_UP)
 QUIET_WAIT_S = 3.0  # 사용자가 아직 말하는 중이면 쿠션·답을 이만큼까지 미룬다(소음으로 '말 시작'만 오고 끝이 안 오는 경우 상한)
 LOW_CONF = 0.2  # 받아쓰기 최저 글자 확신도. 합성 음성 시험(10/11): 크게 틀린 문장 0.00~0.05, 맞은 문장 0.32~0.97
 
@@ -59,6 +60,7 @@ class CallState:
         self.hangup_after: str | None = None  # 이 문장을 다 말하면 끊는다
         self.conf: dict[str, float | None] = {}  # 받아쓰기 문장 → 최저 글자 확신도
         self.misses = 0  # 연속으로 못 알아들은 횟수
+        self.time_up = False  # 통화 상한이 지나면 서비스가 켠다 → 다음 답 뒤에 끝인사하고 끊는다
         self._quiet = asyncio.Event()
         self._quiet.set()
         self.log: Callable[[str, str], None] = lambda role, text: None
@@ -165,6 +167,11 @@ class BaemajungLLM:
             text = result.get("text") or SLOW
             self.state.log("ai", text)
             yield _sentence(text)
+            if self.state.time_up:
+                self.state.hangup_after = TIME_UP
+                self.state.log("ai", TIME_UP)
+                yield TIME_UP
+                return
             yield ASK_MORE
         finally:
             if not task.done():  # 말 끊기(barge-in)로 응답이 취소되면 엔진 호출도 멈춘다

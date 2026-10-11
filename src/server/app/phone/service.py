@@ -31,8 +31,10 @@ from . import brain
 log = logging.getLogger(__name__)
 
 IDLE_HANGUP_S = 25.0
+MAX_INBOUND_S = 300.0   # 걸려 온 전화는 수신 무료라 넉넉히(10/11 오너: 150초에 답 도중 끊김)
+MAX_OUTBOUND_S = 150.0  # 우리가 거는 알림 전화는 발신 시간(체험 10분)을 아낀다
+GRACE_S = 40.0          # 상한 뒤 하던 답·끝인사를 마칠 여유. 이것도 넘으면 그냥 끊는다
 CLOSING_PAUSE_S = 2.0  # 끝인사 음성 길이 + 이만큼 뒤 끊는다. 전화로 소리가 실제 나오는 시점이 보내는 시점보다 늦다(10/11 실통화: 0.8초는 말 끝나자마자 끊기는 느낌)
-MAX_CALL_S = 150.0
 MAX_LINES = 40
 ALLOWED_SPECIES = {None, "붉은대게", "살오징어", "골뱅이", "방어", "가자미류"}
 
@@ -170,9 +172,26 @@ class PhoneService:
         state.log = self._line
         self._state = state
         return _pipeline()(stt=OpenAITranscribeSTT(self.s.openai_api_key, on_final=state.heard, on_speech=state.speaking,
-                                                     record_dir=(self.cache_dir.parent / "stt_clips") if self.s.stt_record else None),
+                                                     record_dir=(self.cache_dir.parent / "stt_clips") if self.s.stt_record else None,
+                                                     ship_names=None),  # OpenAI 는 긴 힌트를 그대로 받아쓰기로 내뱉는 일이 있어(10/11 녹음 04) 배 이름은 넣지 않는다
                                llm=brain.BaemajungLLM(self._answer_factory(), state),
                                tts=self._tts(state), system_prompt="", greeting=True)
+
+    def ship_names(self) -> list[str]:
+        """받아쓰기 힌트용 배 이름: 최신 예보(들어오는 배) + 데모 대본 핵심 배. 최대 15척."""
+        try:
+            from ..feed.sim import KEY_SHIPS
+            rows = self.conn.execute(
+                "SELECT fl.name FROM forecast f JOIN fleet fl USING(ship_id) "
+                "WHERE f.ts=(SELECT MAX(ts) FROM forecast) ORDER BY f.eta LIMIT 10").fetchall()
+            names = [r[0] for r in rows]
+            ids = [k.ship_id for k in KEY_SHIPS]
+            q = f"SELECT name FROM fleet WHERE ship_id IN ({','.join('?' * len(ids))})"
+            names += [r[0] for r in self.conn.execute(q, ids).fetchall()]
+            return list(dict.fromkeys(n for n in names if n))[:15]
+        except sqlite3.Error as e:
+            log.warning("배 이름 힌트 조회 실패: %s", e)
+            return []
 
     # --- 통화 이벤트 ---
     async def _on_start(self, call) -> None:
@@ -219,7 +238,11 @@ class PhoneService:
             if not self._call:
                 continue
             now = time.monotonic()
-            if now - self._last_activity > IDLE_HANGUP_S or now - self._started_at > MAX_CALL_S:
+            limit = MAX_INBOUND_S if self.live.get("direction") == "inbound" else MAX_OUTBOUND_S
+            if self._state and not self._state.time_up and now - self._started_at > limit:
+                self._state.time_up = True  # 다음 답 뒤에 TIME_UP 끝인사 → 끊기(brain)
+                log.info("통화 상한 %.0f초 도달: 다음 답 뒤에 끝인사하고 끊음", limit)
+            if now - self._last_activity > IDLE_HANGUP_S or now - self._started_at > limit + GRACE_S:
                 log.info("통화 자동 종료(말 없음 또는 시간 초과)")
                 try:
                     await self._call.hangup()

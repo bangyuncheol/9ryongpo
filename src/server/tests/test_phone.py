@@ -201,3 +201,19 @@ def test_wait_quiet_gives_up_after_limit():
 def test_inbound_greeting_asks_without_more():
     assert brain.inbound_greeting()[-1] == "궁금하신 거 있으세요?"
     assert brain.outbound_greeting("알림")[-1] == brain.ASK_MORE
+
+
+def test_time_up_ends_after_current_answer():
+    st = brain.CallState([], "inbound")
+    st.time_up = True
+    out = ask(st, fake_answer(0)[0], "오늘 배 들어와요?")
+    assert out[-1] == brain.TIME_UP and st.hangup_after == brain.TIME_UP and brain.ASK_MORE not in out
+
+
+def test_ship_names_for_stt_hint(tmp_path):
+    ph, conn = _service(tmp_path)
+    conn.execute("INSERT INTO fleet (ship_id, name, biz, gt, sign, raw_json, updated_at) VALUES (1, '남진호', '연안자망', 9, 's', '{}', 'x')")
+    conn.execute("INSERT INTO forecast (ts, ship_id, d_km, eta) VALUES ('2026-10-11T03:40', 1, 9.0, '2026-10-11T04:26')")
+    assert ph.ship_names()[0] == "남진호"
+    from app.phone.stt import OpenAITranscribeSTT
+    assert "남진호" in OpenAITranscribeSTT("k", ship_names=["남진호"])._session()["session"]["audio"]["input"]["transcription"]["prompt"]
