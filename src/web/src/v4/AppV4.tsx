@@ -217,7 +217,8 @@ function Visit({ visit }: { visit: VisitData }) {
   return (
     <section className="mt-6 rounded-button bg-page px-4 py-3" aria-label="언제 가면 되나">
       <p className="text-body font-bold">경매 {visit.auction_time} · <span className="tabular-nums">{visit.arrive_by}</span>까지 도착하면 돼요</p>
-      {word && <p className="mt-1 flex items-center gap-1.5 text-sub text-muted"><Icon name="truck" />지금 위판장 앞은 {word} · 실측</p>}
+      {/* '· 실측'이 줄 끝에서 혼자 넘어가지 않게 붙여 둔다(10/11) */}
+      {word && <p className="mt-1 flex items-start gap-1.5 text-sub text-muted"><Icon name="truck" className="mt-[3px]" /><span>지금 위판장 앞은 {word} <span className="whitespace-nowrap">· 실측</span></span></p>}
     </section>
   )
 }
@@ -226,7 +227,7 @@ function Visit({ visit }: { visit: VisitData }) {
 function Queue({ today, list, selected, onSelect }: { today: Today | null; list: Arrival[]; selected: number | null; onSelect: (id: number | null) => void }) {
   return (
     <section className="mt-7" aria-labelledby="v4-queue">
-      <h2 id="v4-queue" className="text-title font-bold">그다음 들어오는 배 <span className="text-sub font-medium text-muted">{list.length - 1}척</span></h2>
+      <h2 id="v4-queue" className="text-title font-bold text-primary-dark">그다음 들어오는 배 <span className="text-sub font-medium text-muted">{list.length - 1}척</span></h2>
       <ul className="mt-2 divide-y divide-line">
         {list.slice(1).map((a) => {
           const s = shipSpecies(today, a)

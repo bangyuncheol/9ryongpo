@@ -182,7 +182,7 @@ export function Depart({ visit }: { visit: VisitData | null }) {
     <section className="rounded-card bg-[var(--color-hero)] p-5 text-[var(--color-on-hero)]" aria-label="언제 가면 되나">
       {/* 머리말("언제 가면 될까요?") 없이 답이 곧 제목(10/11 다듬기) */}
       <p className="text-dialog font-bold">경매 {visit.auction_time} · <span className="tabular-nums">{visit.arrive_by}</span>까지 도착하면 돼요</p>
-      {word && <p className="mt-2 flex items-center gap-1.5 text-sub opacity-90"><Icon name="truck" />지금 위판장 앞은 {word} <span className="opacity-75">· 실측</span></p>}
+      {word && <p className="mt-2 flex items-center gap-1.5 text-sub opacity-90"><Icon name="truck" />지금 위판장 앞은 {word} <span className="whitespace-nowrap opacity-75">· 실측</span></p>}
     </section>
   )
 }
