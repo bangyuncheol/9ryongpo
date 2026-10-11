@@ -59,6 +59,7 @@ export default function WaitFish({ phoneEnabled, onChange }: {
   }
 
   const apply = async () => {
+    if (wantPhone && !phoneOn && !phoneValid(tel)) { setTelTouched(true); return } // 아무것도 보내지 않는다
     setMsg(null); setBusy(true)
     const sp = species === '전체' ? null : species
     try {
@@ -95,7 +96,9 @@ export default function WaitFish({ phoneEnabled, onChange }: {
   const waiting = pushOn || !!phoneOn
   const current = read(KEY) ?? species
   useEffect(() => { onChange?.({ on: waiting, species: current }) }, [onChange, waiting, current])
-  const canApply = (wantPush && !pushOn) || (wantPhone && !phoneOn && phoneValid(tel))
+  // 전화를 골랐으면 번호가 맞아야만 신청한다. 휴대폰 알림만 먼저 신청되고 전화는 거절되는 반쪽 신청을 막는다(10/11 오너 재현)
+  const phoneNeeded = wantPhone && !phoneOn
+  const canApply = ((wantPush && !pushOn) || phoneNeeded) && (!phoneNeeded || phoneValid(tel))
   // 앞자리가 01 이 아니면 바로, 자릿수가 모자라면 칸을 벗어났을 때 알려 준다(버튼이 왜 안 눌리는지 보이게)
   const telHint = wantPhone && !phoneOn && tel && !phoneValid(tel) && (!tel.startsWith('01'.slice(0, tel.length)) || telTouched)
     ? '010으로 시작하는 휴대폰 번호를 끝까지 입력해 주세요.' : null
@@ -153,7 +156,7 @@ export default function WaitFish({ phoneEnabled, onChange }: {
               <label htmlFor="wait-tel" className="text-sub font-bold">전화 받을 번호</label>
               {/* 숫자만 받고 하이픈은 화면이 넣는다: 숫자 키패드에는 하이픈 키가 없거나 찾기 어렵다(10/11 오너) */}
               <input id="wait-tel" name="tel" type="tel" inputMode="numeric" autoComplete="tel-national" placeholder="숫자만 입력 (예: 01012345678)"
-                value={phoneDisplay(tel)} onChange={(e) => setTel(phoneOnlyDigits(e.target.value))} onBlur={() => setTelTouched(true)}
+                value={phoneDisplay(tel)} onChange={(e) => { setTel(phoneOnlyDigits(e.target.value)); setMsg(null) }} onBlur={() => setTelTouched(true)}
                 aria-invalid={!!telHint} aria-describedby={telHint ? 'wait-tel-hint' : undefined}
                 className="mt-1 min-h-[var(--spacing-touch)] w-full rounded-button border border-line bg-card px-3 text-body tabular-nums tracking-wide text-ink placeholder:tracking-normal placeholder:text-muted" />
               {telHint && <p id="wait-tel-hint" className="mt-1 text-sub text-arriving">{telHint}</p>}
