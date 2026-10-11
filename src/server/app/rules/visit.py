@@ -3,7 +3,9 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta
 
-AUCTION_DEFAULT = "09:00"
+# 경매 시작 06:00 고정(10/11 오너 결정). 9시면 배가 닿은 뒤 전화로 물어봐도 충분해 새벽 예보가 쓸모없어진다.
+# 대본상 04:25~04:35 정박 → 05:30 도착 권장까지 내리고 고를 시간 1시간. 실제 위판장 시각은 수협 확인 전 가정
+AUCTION_DEFAULT = "06:00"
 EARLY_MIN = 30  # 경매 30분 전 도착 권장 — 제품 가정(수협 확인 전), 화면에 '기본값' 표기
 
 

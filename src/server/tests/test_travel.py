@@ -43,12 +43,12 @@ def run(**kw):
 def test_auction_mode_gives_depart_by_from_future_route():
     k = FakeKakao()
     r = run(kakao=k)
-    # 실제 응답: 1,481m · 230초 → 4분, 미래 시각 여유 3분 → 7분. 08:30 도착이면 08:23 → 5분 단위로 당겨 08:20
+    # 실제 응답: 1,481m · 230초 → 4분, 미래 시각 여유 3분 → 7분. 05:30 도착이면 05:23 → 5분 단위로 당겨 05:20(경매 06:00)
     assert r["origin"] == "포항과학기술고등학교" and r["distance_km"] == 1.5
     assert (r["drive_min"], r["last_mile_min"], r["total_min"]) == (4, travel.FUTURE_EXTRA, 7)
-    assert (r["arrive_by"], r["depart_by"]) == ("08:30", "08:20") and not r["approx"]
-    assert "30분 이른 08:30까지 도착하려면" in r["note"]  # 9시 경매인데 왜 8시 20분인지 답에 넣게(10/11 실통화)
-    assert k.departs[0] == datetime(2026, 10, 12, 7, 30, tzinfo=travel.KST)  # 내일 08:30 도착보다 1시간 앞 출발 예측으로 물음
+    assert (r["arrive_by"], r["depart_by"]) == ("05:30", "05:20") and not r["approx"]
+    assert "30분 이른 05:30까지 도착하려면" in r["note"]  # 9시 경매인데 왜 8시 20분인지 답에 넣게(10/11 실통화)
+    assert k.departs[0] == datetime(2026, 10, 12, 4, 30, tzinfo=travel.KST)  # 내일 05:30 도착보다 1시간 앞 출발 예측으로 물음
 
 
 def test_now_mode_uses_realtime_and_eum_level():

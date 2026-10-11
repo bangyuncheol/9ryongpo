@@ -135,7 +135,7 @@ async def estimate(kakao: KakaoClient | None, dest: tuple[float, float], origin:
         dep = floor5(datetime.strptime(arrive_by, "%H:%M") - timedelta(minutes=total))
         out |= {"auction_time": auction, "arrive_by": arrive_by, "depart_by": dep.strftime("%H:%M"),
                 "early_min": visit.EARLY_MIN,
-                # 9시 경매인데 왜 8시 20분이냐는 질문이 나왔다(10/11 실통화) → 30분 일찍 도착하는 이유를 답에 꼭 넣게 한다
+                # (당시 경매 09:00) 9시 경매인데 왜 8시 20분이냐는 질문이 나왔다(10/11 실통화) → 30분 일찍 도착하는 이유를 답에 꼭 넣게 한다
                 "note": f"출발 시각을 말할 때 반드시 '경매 {auction}보다 {visit.EARLY_MIN}분 이른 {arrive_by}까지 도착하려면'을 함께 말한다. "
                         f"{arrive_by} 도착 기준 {dep:%H:%M}까지 출발(5분 단위로 당김)."}
     return out

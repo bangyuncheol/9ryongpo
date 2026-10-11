@@ -7,9 +7,9 @@ import re
 from collections import Counter
 from typing import Any
 
-log = logging.getLogger(__name__)
+from .visit import AUCTION_DEFAULT
 
-AUCTION_DEFAULT = "09:00"
+log = logging.getLogger(__name__)
 
 
 def short_biz(biz: str | None) -> str:
@@ -22,7 +22,7 @@ def short_biz(biz: str | None) -> str:
 
 
 def template(new: list[dict], est: dict) -> tuple[str, str]:
-    """(제목, 본문). 예: '04:25~04:35 자망선 3척 입항 예정 · 붉은대게·골뱅이. 경매 09:00'"""
+    """(제목, 본문). 예: '04:25~04:35 자망선 3척 입항 예정 · 붉은대게·골뱅이. 경매 06:00'"""
     etas = sorted(a["eta"][11:16] for a in new if a.get("eta"))
     when = (etas[0] if etas[0] == etas[-1] else f"{etas[0]}~{etas[-1]}") if etas else "곧"
     kinds = Counter(short_biz(a.get("biz")) for a in new)

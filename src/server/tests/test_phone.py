@@ -37,9 +37,9 @@ def test_phone_digits_and_mask():
 
 
 def test_greeting_is_fixed_sentences():
-    st = brain.CallState(brain.outbound_greeting("04:25~04:35 자망선 3척 입항 예정 · 경매 09:00"), "outbound")
+    st = brain.CallState(brain.outbound_greeting("04:25~04:35 자망선 3척 입항 예정 · 경매 06:00"), "outbound")
     out = collect(brain.BaemajungLLM(fake_answer(0)[0], st).generate([{"role": "user", "content": brain.START}]))
-    assert out == [brain.HELLO, "04:25~04:35 자망선 3척 입항 예정 · 경매 09:00.", brain.ASK_MORE]
+    assert out == [brain.HELLO, "04:25~04:35 자망선 3척 입항 예정 · 경매 06:00.", brain.ASK_MORE]
 
 
 def test_slow_answer_gets_cushion_and_logs():

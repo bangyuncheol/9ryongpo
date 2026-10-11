@@ -147,7 +147,8 @@ function Sheet({ today, list, idle, visit, call, selected, onSelect, admin, onWa
           <span className="truncate">{wait.on ? `${wait.species === '전체' ? '모든 배' : wait.species} 알림 켜짐` : '생선 알림 받기'}</span>
         </button>
       </div>
-      {number && <p className="mt-2 text-center text-small text-muted">말로 물으면 말로 알려 드려요 · <span className="tabular-nums">{telText(number)}</span></p>}
+      {/* 사람이 받는 수협 문의 전화로 오해하지 않게 AI가 받는다는 것부터(10/11 오너) */}
+      {number && <p className="mt-2 text-center text-small text-muted"><span className="tabular-nums">{telText(number)}</span>로 걸면 AI가 바로 받아요</p>}
 
       {visit && <Visit visit={visit} />}
 

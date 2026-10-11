@@ -32,7 +32,7 @@ TOOLS: list[dict] = [
     {"type": "function", "name": "recommend_visit_time",
      "description": "경매 시각과 지금 위판장 앞 실측 교통으로 방문 권장 문구. visitor=true는 질문한 사람이 스스로 관광·구경이라고 밝혔을 때만 쓴다(그때는 경매 시작 시각만 알린다).",
      "parameters": {"type": "object", "properties": {
-         "auction_time": {"type": "string", "description": "HH:MM. 기본 09:00(대게·홍게), 잡어·문어는 07:00"},
+         "auction_time": {"type": "string", "description": "HH:MM. 기본 06:00"},
          "visitor": {"type": "boolean"}}, "additionalProperties": False}},
     {"type": "function", "name": "estimate_travel",
      "description": "다른 곳에서 구룡포 위판장까지 차로 걸리는 시간과 출발 권장 시각. 카카오 길찾기(지금 도로 상황 또는 그 시각 예측 교통) + 위판장 앞 여유. "
@@ -42,7 +42,7 @@ TOOLS: list[dict] = [
      "parameters": {"type": "object", "properties": {
          "origin": {"type": "string", "description": "출발지 이름 그대로. 예: 포항과학기술고등학교, 포항시청, 구룡포읍사무소"},
          "depart_time": {"type": "string", "description": "'지금' 또는 HH:MM. 생략하면 경매에 맞춰 출발 시각을 계산"},
-         "auction_time": {"type": "string", "description": "HH:MM. 기본 09:00(대게·홍게), 잡어·문어는 07:00"}},
+         "auction_time": {"type": "string", "description": "HH:MM. 기본 06:00"}},
          "required": ["origin"], "additionalProperties": False}},
     {"type": "function", "name": "get_past_auction",
      "description": "과거 구룡포수협 본소 경매 실적(그 달 kg당 평균 경매가=금액÷중량, 물량, 거래일수). '그때 얼마였나'에만 쓴다. 오늘·내일 가격 예측에 쓰지 않는다. 경매가는 도매가다.",
