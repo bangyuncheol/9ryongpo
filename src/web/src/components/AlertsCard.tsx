@@ -126,10 +126,7 @@ export default function AlertsCard({ items, preset, phone = false }: { items: It
         {state === 'on' && !editing ? (
           <div className="flex items-center justify-between gap-2">
             <p role="status" className="text-body font-bold text-arrived">✓ {current === '전체' ? '모든 입항' : current} 알림 켜짐</p>
-            <div className="flex gap-2">
-              <Button compact onClick={() => setEditing(true)}>바꾸기</Button>
-              <Button compact onClick={unsubscribe}>끄기</Button>
-            </div>
+            <Button compact onClick={unsubscribe}>끄기</Button>{/* 어종을 바꾸려면 끄고 다시 켠다(10/11 '바꾸기' 제거) */}
           </div>
         ) : (state === 'idle' || state === 'busy' || state === 'on') && (
           <div className="flex flex-wrap items-center gap-2">
