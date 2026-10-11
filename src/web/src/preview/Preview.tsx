@@ -9,7 +9,7 @@ import type { CallState } from '../api'
  * 제품 화면이 아니라 시연 도구라 색은 토큰 대신 2차 시안 팔레트 값을 직접 쓴다(ui-design 규칙의 예외).
  */
 type Device = 'phone' | 'web'
-type Version = 1 | 2 | 3
+type Version = 1 | 2 | 3 | 4
 const WEB_W = 1440
 const WEB_H = 900
 const STATUS: Record<string, string> = {
@@ -33,7 +33,7 @@ export default function Preview() {
       <div className="flex flex-wrap items-center gap-3 border-b border-black/10 bg-white px-5 py-3">
         <b className="mr-2 text-main">배마중 미리보기</b>
         <Seg label="기기" value={device} onChange={setDevice} items={[['phone', '📱 폰'], ['web', '🖥 웹']]} />
-        <Seg label="시안" value={version} onChange={setVersion} items={[[1, '버전 1 (지금 화면)'], [2, '버전 2 (한 페이지)'], [3, '버전 3 (폰 홈+탭)']]} />
+        <Seg label="시안" value={version} onChange={setVersion} items={[[1, '버전 1 (지금 화면)'], [2, '버전 2 (한 페이지)'], [3, '버전 3 (폰 홈+탭)'], [4, '버전 4 (지도+시트)']]} />
         <button onClick={() => setReloadKey((k) => k + 1)} className="rounded-full bg-[#edf1ee] px-3 py-1.5 text-sub font-bold">↻ 새로고침</button>
         <a href={src} target="_blank" rel="noreferrer" className="text-sub font-bold text-[#193b50] underline">새 탭에서 열기</a>
       </div>

@@ -42,6 +42,8 @@ type Props = {
   legendToggle?: boolean
   /** true 면 지도 높이를 줄인다(버전 3 폰 홈의 작은 지도) */
   compact?: boolean
+  /** true 면 부모 높이를 꽉 채우고 모서리를 둥글리지 않는다(버전 4 전체 화면 지도, 10/11) */
+  fill?: boolean
 }
 
 // path: 이번 2초 동안 그릴 꺾은선(지금 그린 위치 → 지나친 모서리들 → 새 위치). route: 마지막으로 받은 남은 꺾이는 지점
@@ -404,9 +406,9 @@ export default function KakaoArrivalMap(p: Props) {
   const stale = idle[0]?.status === '미갱신'
 
   return (
-    <div ref={wrap} className="relative isolate">{/* isolate: 지도 안 표시(z-400~500)가 지도 밖 고정 탭 막대 위로 올라오지 않게(10/11) */}
-      <div ref={box} className={`${p.compact ? 'h-52' : 'h-80 md:h-[460px]'} w-full overflow-hidden rounded-card bg-primary-soft`} aria-label="입항 지도" />
-      <div ref={edgeBox} className="absolute inset-0 z-[400] overflow-hidden rounded-card [&>*]:pointer-events-auto" style={{ pointerEvents: 'none' }} />
+    <div ref={wrap} className={`relative isolate ${p.fill ? 'h-full' : ''}`}>{/* isolate: 지도 안 표시(z-400~500)가 지도 밖 고정 탭 막대 위로 올라오지 않게(10/11) */}
+      <div ref={box} className={`${p.fill ? 'h-full' : `${p.compact ? 'h-52' : 'h-80 md:h-[460px]'} rounded-card`} w-full overflow-hidden bg-primary-soft`} aria-label="입항 지도" />
+      <div ref={edgeBox} className={`absolute inset-0 z-[400] overflow-hidden ${p.fill ? '' : 'rounded-card'} [&>*]:pointer-events-auto`} style={{ pointerEvents: 'none' }} />
       {idle.length > 0 && (
         <button type="button" onClick={showIdle} title="조업 중인 배가 보이게 지도를 넓힙니다"
           className="absolute right-2 top-2 z-[500] rounded-button bg-card/90 px-3 py-1.5 text-[12px] font-bold text-muted shadow-sm hover:text-ink">

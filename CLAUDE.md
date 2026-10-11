@@ -65,6 +65,7 @@
 - `git-workflow.md` — 브랜치·커밋 규칙 (항상 적용)
 - `ui-design.md` — UI 컴포넌트·스타일 규칙 (기준 디자인 언어: 삼성 One UI)
 - `design-v2.md` — 프런트 버전 2·3 디자인 하네스(스타일 정본·스킬 순서·완료 관문). `src/web/src/v2/`·`v3/` 작업 때 자동 적용
+- `design-v4.md` — 프런트 버전 4(지도 전체 + 올라오는 시트) 디자인 정본. `src/web/src/v4/` 작업 때 자동 적용
 - `samsung-one-ui.md` — 삼성 One UI 공개 자료 카탈로그(비공식, 출처 포함). `src/web/` 작업 때만 로드, ui-design.md가 여기서 골라 쓴다
 
 **`.claude/skills/`** — 상세 스펙·절차·추적·아카이브. 필요할 때만 로드.

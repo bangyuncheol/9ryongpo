@@ -9,7 +9,7 @@ import AppV2, { CallUs, Depart, Header, NextShip, Toast } from '../v2/AppV2'
 import type { VisitData } from '../v2/AppV2'
 import WaitFish from '../v2/WaitFish'
 import Icon from '../v2/Icon'
-import { byEta, telHref, telText, useThemeColor } from '../v2/bits'
+import { byEta, telHref, telText, useThemeColor, useWide } from '../v2/bits'
 import '../v2/v2.css'
 
 /*
@@ -24,18 +24,6 @@ const TABS: [Tab, string][] = [['home', '홈'], ['ships', '들어오는 배'], [
 function readTab(): Tab {
   const t = new URLSearchParams(location.search).get('tab')
   return TABS.find(([k]) => k === t)?.[0] ?? 'home'
-}
-
-function useWide() {
-  const q = '(min-width: 1024px)'
-  const [wide, setWide] = useState(() => window.matchMedia(q).matches)
-  useEffect(() => {
-    const m = window.matchMedia(q)
-    const on = () => setWide(m.matches)
-    m.addEventListener('change', on)
-    return () => m.removeEventListener('change', on)
-  }, [])
-  return wide
 }
 
 export default function AppV3() {
