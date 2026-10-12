@@ -30,7 +30,7 @@ sed -e "s|__USER__|$USER|g" -e "s|__REPO__|$REPO|g" -e "s|__HOME__|$HOME|g" \
 sudo systemctl daemon-reload
 sudo systemctl enable --now wipan
 sleep 3
-curl -fsS http://127.0.0.1:8000/api/health && echo
+curl -fsS http://127.0.0.1:8731/api/health && echo
 
 echo "== 5/5 HTTPS"
 if [ -n "$HOST" ]; then
@@ -42,5 +42,25 @@ if [ -n "$HOST" ]; then
   sudo systemctl reload caddy
   echo "완료: https://$HOST  (80·443 포트가 열려 있어야 인증서가 발급됩니다)"
 else
-  echo "HTTPS 호스트를 주지 않았습니다. 포트가 막혀 있으면 deploy 스킬의 'Cloudflare 터널' 절차를 따르세요."
+  # 공유 VM이라 80·443을 잡지 않고 Cloudflare 임시 터널로 내보낸다. 주소는 터널이 다시 뜰 때마다 바뀐다.
+  if ! command -v cloudflared >/dev/null; then
+    curl -fsSL -o /tmp/cloudflared.deb "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-$(dpkg --print-architecture).deb"
+    sudo dpkg -i /tmp/cloudflared.deb
+  fi
+  sudo tee /etc/systemd/system/wipan-tunnel.service >/dev/null <<EOF
+[Unit]
+Description=배마중 HTTPS 임시 터널
+After=wipan.service
+[Service]
+User=$USER
+ExecStart=$(command -v cloudflared) tunnel --no-autoupdate --url http://127.0.0.1:8731
+Restart=always
+RestartSec=5
+[Install]
+WantedBy=multi-user.target
+EOF
+  sudo systemctl daemon-reload
+  sudo systemctl enable --now wipan-tunnel
+  sleep 8
+  echo "터널 주소: $(sudo journalctl -u wipan-tunnel --no-pager | grep -o 'https://[a-z0-9-]*\.trycloudflare\.com' | tail -1)"
 fi

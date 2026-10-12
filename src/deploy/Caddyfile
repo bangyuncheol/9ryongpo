@@ -2,5 +2,5 @@
 # 고정 도메인이 없으면 IP 기반 무료 호스트를 쓴다: 외부 IP 34.64.1.2 → 34-64-1-2.sslip.io
 __HOST__ {
 	encode gzip
-	reverse_proxy 127.0.0.1:8000
+	reverse_proxy 127.0.0.1:8731
 }
