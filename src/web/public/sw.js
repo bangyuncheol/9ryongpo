@@ -6,7 +6,7 @@ self.addEventListener('push', (event) => {
   let data = { title: '배마중', body: '새 입항 예보가 있습니다.', url: '/' }
   try { data = { ...data, ...event.data.json() } } catch (err) { console.error('푸시 내용 해석 실패', err) }
   event.waitUntil(self.registration.showNotification(data.title, {
-    body: data.body, icon: '/icon.svg', badge: '/icon.svg', data: { url: data.url }, tag: 'wipan', renotify: true,
+    body: data.body, icon: '/icon-192.png', badge: '/icon.svg', data: { url: data.url }, tag: 'wipan', renotify: true,
   }))
 })
 

@@ -24,7 +24,7 @@ import './v4.css'
  * 웹(1024px 이상): 지도가 왼쪽 전체, 시트는 오른쪽 고정 칸.
  * 데이터·동작은 버전 2와 같다(같은 API, 같은 알림 신청 부품). 숫자는 서버 값 그대로.
  */
-const PAGE = { light: '#eef3f2', dark: '#eef3f2' } // v4.css --color-page(상단 바 색). 다크 모드 기기에서도 라이트(10/12 오너)
+const PAGE = { light: '#c8dcde', dark: '#c8dcde' } // v4.css --color-band(헤더 띠 색). 다크 모드 기기에서도 라이트(10/12 오너)
 
 export default function AppV4() {
   useThemeColor(PAGE)
@@ -85,16 +85,16 @@ export default function AppV4() {
         <div className="grid h-dvh grid-cols-[1fr_440px]">
           <div className="relative h-dvh">{map}</div>
           <aside className="v4-sheet relative z-10 h-dvh overflow-y-auto bg-card" aria-label="입항 정보">
-            <div className="sticky top-0 z-10 bg-card/95 px-6 pb-2 pt-5 backdrop-blur-sm"><Badge today={t} /></div>
+            <div className="sticky top-0 z-10 bg-band px-6 py-4"><Badge today={t} /></div>
             {admin && <div className="py-2"><AdminBar clock={t?.clock ?? null} feed={t?.source.feed ?? null} call={call.data} /></div>}
             {sheet()}
           </aside>
         </div>
       ) : (
         <>
-          <div className="absolute inset-x-0 top-0 z-40 h-[52px] bg-page px-4 py-3"><Badge today={t} /></div>
+          <div className="absolute inset-x-0 top-0 z-40 bg-band px-4 py-3" style={{ height: HEADER_H }}><Badge today={t} /></div>
           {/* 지도는 헤더 아래 전체. 시트가 그 위를 덮고 두 단(내림·기본)으로 오르내린다 */}
-          <div className="absolute inset-x-0 bottom-0 top-[52px]">{map}</div>
+          <div className="absolute inset-x-0 bottom-0" style={{ top: HEADER_H }}>{map}</div>
           <BottomSheet snap={snap} onSnap={setSnap} fit={fit} peek={<Peek today={t} first={arriving[0]} onOpen={() => setSnap('mid')} />}>
             {(h) => <>
               {admin && <div className="pb-2"><AdminBar clock={t?.clock ?? null} feed={t?.source.feed ?? null} call={call.data} /></div>}
@@ -107,9 +107,19 @@ export default function AppV4() {
   )
 }
 
-/** 앱 아이콘 파일 그대로(탭·홈 화면·푸시와 같은 청록 로고, 10/11 오너) */
+const HEADER_H = 72 // 폰 헤더 띠: 아이콘 + 워드마크 + 한 줄 소개(10/13 브랜드 시안)
+
+/** 앱 아이콘(탭·홈 화면·푸시와 같은 그림)과 '배마중' 워드마크. 원본: 03_발표/design-preview/(10/13 오너) */
 function Logo() {
-  return <img src="/icon.svg" alt="" aria-hidden className="h-6 w-6 shrink-0" />
+  return (
+    <span className="flex min-w-0 items-center gap-2.5">
+      <img src="/icon-192.png" alt="" aria-hidden className="h-12 w-12 shrink-0" />
+      <span className="flex min-w-0 flex-col">
+        <img src="/wordmark.png" alt="배마중" className="h-7 w-auto self-start" />
+        <span className="mt-0.5 truncate text-small font-medium text-muted">구룡포 새벽 입항·어종 알림</span>
+      </span>
+    </span>
+  )
 }
 
 /** 이름 + 어떤 데이터가 언제 기준인지. 위치가 멈췄을 때는 그 사실이 이 줄을 대신한다. */
@@ -119,9 +129,9 @@ function Badge({ today }: { today: Today | null }) {
   return (
     <div>
       <div className="flex items-center justify-between gap-3">
-        <h1 className="flex items-center gap-2 text-main font-extrabold tracking-tight text-primary-dark"><Logo />배마중</h1>
+        <h1 className="min-w-0"><Logo /></h1>
         {/* 시연이어도 실제처럼 보이게 시각만 둔다(10/11 오너 결정, CLAUDE.md '데이터 소스 표시'의 버전 4 헤더 예외). 시연·실시간은 화면 읽기 이름·title로만 */}
-        <p className="text-small text-muted" title={sim ? '선박 위치 시연' : '실시간'}>
+        <p className="shrink-0 text-main font-medium text-ink" title={sim ? '선박 위치 시연' : '실시간'}>
           <span className="sr-only">{sim ? '선박 위치 시연' : '실시간'}</span>
           {now && <span className="tabular-nums">{hhmm(now)}</span>}
         </p>
@@ -148,19 +158,21 @@ function Sheet({ today, list, idle, visit, call, selected, onSelect, admin, onWa
     <>
       <Next today={today} list={list} idle={idle} selected={selected} onSelect={onSelect} />
 
-      {/* 행동 두 개: 엄지가 닿는 시트 위쪽에 바로. 전화가 꺼져 있으면 알림 하나만 */}
-      <div className={`mt-5 grid gap-2 ${number ? 'grid-cols-2' : 'grid-cols-1'}`}>
-        {number && (
-          <a href={telHref(number)} className="v2-press flex min-h-12 items-center justify-center gap-2 rounded-button bg-primary-dark px-3 text-button font-bold text-on-primary hover:brightness-110">
-            <Icon name="phone" />전화로 묻기
-          </a>
-        )}
-        {/* 배 한 척이 아니라 '생선' 기준 알림이라는 게 보이게(10/11 오너: '들어오면 알림'은 남진호 알림으로 읽힘) */}
-        <button onClick={toWait} className="v2-press flex min-h-12 min-w-0 items-center justify-center gap-2 rounded-button bg-chip px-3 text-button font-bold text-ink hover:brightness-95">
-          <Icon name="bell" className={wait.on ? 'text-arriving' : ''} />
-          <span className="truncate">{wait.on ? `${wait.species} 알림 켜짐` : '생선 알림 받기'}</span>
-        </button>
-      </div>
+      {/* 행동 두 개: 엄지가 닿는 시트 위쪽에 바로. 알림은 브랜드 시안의 민트 카드(10/13), 전화가 꺼져 있으면 알림 하나만.
+          배 한 척이 아니라 '생선' 기준 알림이라는 게 보이게(10/11 오너: '들어오면 알림'은 남진호 알림으로 읽힘) */}
+      <button onClick={toWait} className="v2-press mt-3 flex w-full items-center gap-4 rounded-card bg-mint px-5 py-4 text-left hover:brightness-[0.98]">
+        <Icon name="bell" className={`text-[28px] fill-current ${wait.on ? 'text-arriving' : 'text-primary-dark'}`} />
+        <span className="min-w-0 flex-1">
+          <span className="block text-main font-bold text-ink">{wait.on ? `${wait.species} 알림 켜짐` : '생선 알림 받기'}</span>
+          <span className="mt-0.5 block text-sub text-muted">{wait.on ? '다른 생선도 고를 수 있어요' : '들어오면 바로 알려 드려요'}</span>
+        </span>
+        <Icon name="chevron" className="text-[22px] text-muted" />
+      </button>
+      {number && (
+        <a href={telHref(number)} className="v2-press mt-2 flex min-h-12 items-center justify-center gap-2 rounded-button bg-primary-dark px-3 text-button font-bold text-on-primary hover:brightness-110">
+          <Icon name="phone" />전화로 묻기
+        </a>
+      )}
       {/* 사람이 받는 수협 문의 전화로 오해하지 않게 AI가 받는다는 것부터(10/11 오너) */}
       {number && <p className="mt-2 text-center text-small text-muted"><span className="tabular-nums">{telText(number)}</span>로 걸면 AI가 바로 받아요</p>}
 
@@ -219,22 +231,28 @@ function Next({ today, list, idle, selected, onSelect }: {
   const sp = shipSpecies(today, first)
   const on = selected === first.ship_id
   return (
-    <section className="pt-5" aria-labelledby="v4-next">
+    <section className="pt-4" aria-labelledby="v4-next">
       <h2 id="v4-next" className="sr-only">곧 들어오는 배</h2>
+      {/* 브랜드 시안(10/13)의 다음 배 카드: 큰 산호 숫자 · 옆에 '분 뒤 도착'과 시각 · 선 · 배 이름 · 어종 한 줄 */}
       <button onClick={() => onSelect(on ? null : first.ship_id)} aria-pressed={on}
-        className={`v2-press -mx-3 block w-[calc(100%+1.5rem)] rounded-button px-3 py-2 text-left ${on ? 'bg-[var(--color-sunrise-soft)]' : 'hover:bg-chip'}`}>
-        <p className="flex items-baseline gap-2 text-arriving">
+        className={`v2-press block w-full rounded-card px-5 py-4 text-left ring-2 transition-colors ${on ? 'bg-[var(--color-sunrise-soft)] ring-arriving/40' : 'bg-surface ring-transparent hover:brightness-[0.98]'}`}>
+        <p className="flex items-center gap-3 text-arriving">
           {mins === 0
-            ? <span className="text-[44px] font-extrabold leading-none tracking-tight">곧 도착</span>
-            : <><span key={mins} className="v4-tick text-[56px] font-extrabold leading-none tracking-tight tabular-nums">{mins}</span><span className="text-dialog font-bold">분 뒤 도착</span></>}
-          <span className="ml-auto text-main font-bold tabular-nums">{hhmm(first.eta)}</span>
+            ? <span className="text-[48px] font-extrabold leading-none tracking-tight">곧 도착</span>
+            : <><span key={mins} className="v4-tick text-[64px] font-extrabold leading-none tracking-tighter tabular-nums">{mins}</span>
+              <span className="flex flex-col">
+                <span className="text-dialog font-bold leading-tight">분 뒤 도착</span>
+                <span className="text-dialog font-semibold leading-tight tabular-nums text-muted">{hhmm(first.eta)}</span>
+              </span></>}
+          {mins === 0 && <span className="ml-auto text-dialog font-semibold tabular-nums text-muted">{hhmm(first.eta)}</span>}
         </p>
-        <p className="mt-3 text-dialog font-bold text-ink">{first.name ?? '이름 미상'}</p>
-        <p className="mt-0.5 text-body text-ink">
-          {sp.top ? <><b>{sp.top.name}</b> {likelihood(sp.top.share)} <span className="text-small text-muted">추정 {Math.round(sp.top.share * 100)}%</span></>
-            : sp.categoryOnly ? '이 업종은 해마다 잡는 생선이 달라요' : null}
+        <div aria-hidden className="my-3 border-t border-line" />
+        <p className="text-[24px] font-extrabold leading-tight text-ink">{first.name ?? '이름 미상'}</p>
+        <p className="mt-1 text-main font-bold text-arriving">
+          {sp.top ? <>{sp.top.name} {likelihood(sp.top.share)} <span className="text-small font-medium text-muted">추정 {Math.round(sp.top.share * 100)}%</span></>
+            : sp.categoryOnly ? <span className="text-ink">이 업종은 해마다 잡는 생선이 달라요</span> : null}
         </p>
-        <p className="mt-1 text-small text-muted">{shortBiz(first.biz)}선{first.gt ? ` ${Math.round(first.gt)}t` : ''} · 위판장까지 {first.d_km.toFixed(1)}km · 예측(신뢰도 {first.confidence ?? '보통'})</p>
+        <p className="mt-1.5 text-small text-muted">{shortBiz(first.biz)}선{first.gt ? ` ${Math.round(first.gt)}t` : ''} · 위판장까지 {first.d_km.toFixed(1)}km · 예측(신뢰도 {first.confidence ?? '보통'})</p>
       </button>
     </section>
   )
@@ -270,7 +288,7 @@ function early(v: VisitData) {
 function Visit({ visit }: { visit: VisitData }) {
   const word = trafficWord(visit.now)
   return (
-    <section className="mt-6 rounded-button bg-page px-4 py-3" aria-label="언제 가면 되나">
+    <section className="mt-3 rounded-card bg-surface px-5 py-4" aria-label="언제 가면 되나">
       {/* 왜 그 시각인지 한 번에 읽히게: 경매 시작 → 몇 분 전 → 도착 시각(10/11 오너) */}
       <p className="text-body font-bold">경매가 <span className="tabular-nums">{visit.auction_time}</span>에 시작해요.<br />
         {early(visit) > 0 ? `${early(visit)}분 전인 ` : ''}<span className="tabular-nums">{visit.arrive_by}</span>까지 오시면 돼요</p>
