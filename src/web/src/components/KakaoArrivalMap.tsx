@@ -346,19 +346,25 @@ export default function KakaoArrivalMap(p: Props) {
         const el = boatEl(() => onSelect(selRef.current === id ? null : id), (on) => setHovered((h) => (on ? id : h === id ? null : h)))
         const o = new kakao.maps.CustomOverlay({ position: new kakao.maps.LatLng(...to), content: el, xAnchor: 0.5, yAnchor: 0.5, zIndex: 10 })
         o.setMap(m)
-        t = { o, el, from: to, to, path: [to, to], route: s.route ?? [], t0: now, status: s.status, docked: isDocked(s), heading: s.course ?? 270, rot: s.course ?? 270, dockAt: null }
+        // 조업·대기(회색 배)에서 막 출발한 배는 회색 배가 있던 자리부터 이어 간다(300배에선 그새 1~2km 가 있어 순간이동해 보였다, 10/13)
+        const idle = idleBoats.current.get(id)?.o.getPosition()
+        const from: [number, number] = idle ? [idle.getLat(), idle.getLng()] : to
+        t = { o, el, from, to, path: [from, to], route: s.route ?? [], t0: now, status: s.status, docked: isDocked(s), heading: s.course ?? 270, rot: s.course ?? 270, dockAt: null }
         tracks.current.set(id, t)
       } else if (t.dockAt && isDocked(s)) {
         // 이미 정박하러 가는 중: 새 위치(같은 자리)가 와도 시간을 다시 재지 않는다. 다시 재면 도착 직전마다
         // '남은 몇 m를 또 2초'가 반복돼 부두 앞에서 한참 머물렀다(300배 재생, 10/11)
       } else {
         const here = lerpPos(t, now)
+        const ahead = restOfPath(t, now) // 아직 못 그린 모서리(이전 2초 애니메이션이 덜 끝났을 때)
         const next = s.route ?? []
         // 지난 2초 사이에 지나친 모서리 = 이전 남은 경로 중 새 남은 경로에 없는 앞부분(남은 경로는 항상 뒷부분이 같다)
         const passed = t.route.length >= next.length ? t.route.slice(0, t.route.length - next.length) : []
         const rewound = next.length > t.route.length // 남은 경로가 늘었다 = 시계를 되감았다 → 거꾸로 미끄러지지 않게 바로 옮긴다
         t.from = rewound ? to : here; t.to = to; t.t0 = now
-        t.path = rewound ? [to, to] : [here, ...passed, to]
+        // 줄 세우기(10/13): 덜 그린 모서리 → 새로 지나친 모서리 → 새 위치 순서로 이어 그린다. 덜 그린 부분을 버리고
+        // 지금 그린 위치에서 바로 가면 빠른 재생(300배)에서 방파제를 건너뛰어 보였다. 밀린 만큼 이번 2초에 조금 빨리 따라잡는다.
+        t.path = rewound ? [to, to] : dedupe([here, ...ahead, ...passed, to])
         t.route = next
         if (rewound) t.heading = s.course ?? t.heading // 되감은 뒤 멈춰 있으면 서버 침로로(되감기 전 방향이 남지 않게)
       }
@@ -630,6 +636,25 @@ function setHeading(t: Track, deg: number) {
   const r = turnTo(t, deg)
   const hull = t.el.querySelector('[data-hull]') as HTMLElement | null
   if (hull) hull.style.transform = `rotate(${r}deg) scale(1)`
+}
+
+/** 지금 그리는 꺾은선에서 아직 지나지 않은 모서리들(지금 위치·끝점 제외). 새 위치가 오면 이 뒤에 줄 세운다. */
+function restOfPath(t: Track, now: number): [number, number][] {
+  if (reduceMotion()) return []
+  const f = Math.min(1, (now - t.t0) / POLL_MS)
+  const pts = t.path
+  const seg = pts.slice(1).map((p, i) => Math.hypot(p[0] - pts[i][0], (p[1] - pts[i][1]) * 0.81))
+  let d = f * seg.reduce((a, b) => a + b, 0)
+  for (let i = 0; i < seg.length; i++) {
+    if (d < seg[i]) return pts.slice(i + 1)
+    d -= seg[i]
+  }
+  return []
+}
+
+function dedupe(pts: [number, number][]): [number, number][] {
+  const out = pts.filter((p, i) => i === 0 || p[0] !== pts[i - 1][0] || p[1] !== pts[i - 1][1])
+  return out.length > 1 ? out : [out[0], out[0]]
 }
 
 function lerpPos(t: Track, now: number): [number, number] {
