@@ -25,7 +25,7 @@ import './v4.css'
  * 웹(1024px 이상): 지도가 왼쪽 전체, 시트는 오른쪽 고정 칸.
  * 데이터·동작은 버전 2와 같다(같은 API, 같은 알림 신청 부품). 숫자는 서버 값 그대로.
  */
-const PAGE = { light: '#eef3f2', dark: '#0b1519' } // v4.css --color-page(상단 바 색)
+const PAGE = { light: '#eef3f2', dark: '#eef3f2' } // v4.css --color-page(상단 바 색). 다크 모드 기기에서도 라이트(10/12 오너)
 
 export default function AppV4() {
   useThemeColor(PAGE)
