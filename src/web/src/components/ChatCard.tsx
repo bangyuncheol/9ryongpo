@@ -47,8 +47,19 @@ export default function ChatCard({ onSubscribe, quick = QUICK, placeholder = '�
   }
 
   const last = useRef<HTMLDivElement>(null)
-  const lastAnswer = turns[turns.length - 1]?.answer
-  useEffect(() => { if (bubbles) last.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }) }, [bubbles, turns.length, lastAnswer])
+  const inputBox = useRef<HTMLDivElement>(null)
+  const [room, setRoom] = useState(0) // 마지막 질문 칸의 최소 높이: 장 높이 - 입력 칸(그래야 맨 위까지 올라간다)
+  // 새 질문은 장 맨 위로 올려 바로 읽히게(10/13 오너: 이전 질문 밑에 생겨 스크롤해야 했음). 메신저처럼 마지막 질문 칸이
+  // 보이는 높이만큼 자리를 차지해, 이전 대화는 위로 밀려 올라가고 답은 질문 바로 아래에 붙는다.
+  useEffect(() => {
+    if (!bubbles || !turns.length) return
+    const el = last.current
+    let sc = el?.parentElement ?? null
+    while (sc && !/(auto|scroll)/.test(getComputedStyle(sc).overflowY)) sc = sc.parentElement
+    // 시트가 내용에 맞춰 커지기 전에 재므로(폰 기본 단은 화면의 최대 60%) 그 높이까지는 넉넉히
+    if (sc) setRoom(Math.max(0, Math.max(sc.clientHeight, window.innerHeight * 0.6) - (inputBox.current?.offsetHeight ?? 0) - 32))
+    requestAnimationFrame(() => el?.scrollIntoView({ block: 'start', behavior: 'smooth' }))
+  }, [bubbles, turns.length])
 
   if (bubbles) {
     return (
@@ -60,7 +71,7 @@ export default function ChatCard({ onSubscribe, quick = QUICK, placeholder = '�
             const logOpen = running || openLog === i
             const lookups = t.log.filter((l) => l.startsWith('→')).length
             return (
-              <div key={i} ref={latest ? last : undefined} className="space-y-2 text-body">
+              <div key={i} ref={latest ? last : undefined} className="scroll-mt-3 space-y-2 text-body" style={latest && turns.length > 1 ? { minHeight: room } : undefined}>
                 <p className="ml-auto w-fit max-w-[85%] rounded-[18px] rounded-br-md bg-primary-soft px-4 py-2.5 text-ink">{t.q}</p>
                 <div className="max-w-[95%] space-y-1.5">
                   {t.answer && <p>{t.answer}{t.mode === 'simple' && <span className="ml-1 text-small text-muted">(간단 모드)</span>}</p>}
@@ -84,7 +95,7 @@ export default function ChatCard({ onSubscribe, quick = QUICK, placeholder = '�
           </div>
         )}
         {/* 입력 칸: 장 아래에 붙어 대화와 갈린다(선 + 바탕). 물은 뒤엔 자주 묻는 질문이 이 위 한 줄로 */}
-        <div className="sticky bottom-0 -mx-5 mt-4 border-t border-line bg-card px-5 pb-3 pt-3">
+        <div ref={inputBox} className="sticky bottom-0 -mx-5 mt-4 border-t border-line bg-card px-5 pb-3 pt-3">
           {turns.length > 0 && (
             <div className="v4-noscrollbar -mx-5 mb-2 flex gap-2 overflow-x-auto px-5">
               {quick.map((q) => <Button key={q} compact onClick={() => ask(q)} disabled={busy} className="shrink-0 whitespace-nowrap">{q}</Button>)}
