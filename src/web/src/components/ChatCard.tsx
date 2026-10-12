@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { askStream, TOOL_LABEL } from '../api'
 import type { ChatEvent } from '../api'
 import Card, { Button } from './Card'
@@ -10,13 +10,18 @@ const KEEP = 3 // 최근 질문 3개만 보관·표시하고 AI 맥락으로도 
 
 type Turn = { q: string; log: string[]; answer: string | null; mode?: string; error?: string }
 
-export default function ChatCard({ onSubscribe, quick = QUICK, placeholder = '예: 대게 들어오면 알려줘', aside = '숫자는 데이터에서만 가져옵니다' }: {
+export default function ChatCard({ onSubscribe, quick = QUICK, placeholder = '예: 대게 들어오면 알려줘', aside = '숫자는 데이터에서만 가져옵니다', bubbles = false }: {
   onSubscribe: (species: string) => void
   /** 자주 묻는 질문 칩(버전 4는 발표 이야기에 맞춘 네 개, 10/12) */
   quick?: string[]
   placeholder?: string
   /** 제목 옆 안내. 버전 4는 빼고(10/12 오너) 나머지는 그대로 */
   aside?: string | null
+  /**
+   * 대화 모양(버전 4, 10/12 오너: 쌓이면 '나무위키 읽는 것 같다'). 질문은 오른쪽 색 말풍선, 답은 왼쪽 글.
+   * 입력창은 장 아래에 붙여 대화와 갈라 두고, 한 번 물은 뒤엔 자주 묻는 질문을 입력창 위 한 줄로 줄인다.
+   */
+  bubbles?: boolean
 }) {
   const [input, setInput] = useState('')
   const [turns, setTurns] = useState<Turn[]>([])
@@ -39,6 +44,62 @@ export default function ChatCard({ onSubscribe, quick = QUICK, placeholder = '�
       else if (e.type === 'error') patch((t) => ({ ...t, error: e.message }))
     })
     setBusy(false)
+  }
+
+  const last = useRef<HTMLDivElement>(null)
+  const lastAnswer = turns[turns.length - 1]?.answer
+  useEffect(() => { if (bubbles) last.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }) }, [bubbles, turns.length, lastAnswer])
+
+  if (bubbles) {
+    return (
+      <Card id="chat-card" title="물어보기" aside={aside ?? undefined}>
+        <div className="space-y-5">
+          {turns.map((t, i) => {
+            const latest = i === turns.length - 1
+            const running = latest && busy && !t.answer && !t.error
+            const logOpen = running || openLog === i
+            const lookups = t.log.filter((l) => l.startsWith('→')).length
+            return (
+              <div key={i} ref={latest ? last : undefined} className="space-y-2 text-body">
+                <p className="ml-auto w-fit max-w-[85%] rounded-[18px] rounded-br-md bg-primary-soft px-4 py-2.5 text-ink">{t.q}</p>
+                <div className="max-w-[95%] space-y-1.5">
+                  {t.answer && <p>{t.answer}{t.mode === 'simple' && <span className="ml-1 text-small text-muted">(간단 모드)</span>}</p>}
+                  {t.error && <p role="alert" className="text-sub text-arriving">{t.error}</p>}
+                  {running && <p className="text-muted" role="status">확인하는 중…</p>}
+                  {t.log.length > 0 && (logOpen ? (
+                    <pre className="whitespace-pre-wrap rounded-button bg-page px-3 py-2 font-mono text-small text-muted" aria-label="데이터 조회 기록">{t.log.join('\n')}</pre>
+                  ) : (
+                    <button onClick={() => setOpenLog(i)} className="text-small text-muted underline-offset-2 hover:underline">
+                      데이터 {lookups}건 조회 · 기록 보기
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+        {turns.length === 0 && (
+          <div className="flex flex-wrap gap-2">
+            {quick.map((q) => <Button key={q} compact onClick={() => ask(q)} disabled={busy}>{q}</Button>)}
+          </div>
+        )}
+        {/* 입력 칸: 장 아래에 붙어 대화와 갈린다(선 + 바탕). 물은 뒤엔 자주 묻는 질문이 이 위 한 줄로 */}
+        <div className="sticky bottom-0 -mx-5 mt-4 border-t border-line bg-card px-5 pb-3 pt-3">
+          {turns.length > 0 && (
+            <div className="v4-noscrollbar -mx-5 mb-2 flex gap-2 overflow-x-auto px-5">
+              {quick.map((q) => <Button key={q} compact onClick={() => ask(q)} disabled={busy} className="shrink-0 whitespace-nowrap">{q}</Button>)}
+            </div>
+          )}
+          <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); ask(input) }}>
+            <label htmlFor="chat-input" className="sr-only">질문</label>
+            <input id="chat-input" value={input} onChange={(e) => setInput(e.target.value)} maxLength={300}
+              placeholder={placeholder}
+              className="min-h-[var(--spacing-touch)] min-w-0 flex-1 rounded-button border border-line bg-card px-4 text-body text-ink placeholder:text-muted focus:border-primary focus:outline-none" />
+            <Button emphasis="high" disabled={busy || !input.trim()}>묻기</Button>
+          </form>
+        </div>
+      </Card>
+    )
   }
 
   return (

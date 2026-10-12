@@ -176,15 +176,15 @@ function Sheet({ today, list, idle, visit, call, selected, onSelect, admin, onWa
       <WaitFish phoneEnabled={!!call?.enabled} onChange={setWait} showMore oneTap multi />
     </>
   )
-  const ask = <ChatCard onSubscribe={toWait} quick={QUICK} placeholder="예: 대게랑 오징어 들어오면 알려줘" aside={null} />
+  const ask = <ChatCard onSubscribe={toWait} quick={QUICK} placeholder="예: 대게랑 오징어 들어오면 알려줘" aside={null} bubbles={!!pages} />
 
   if (pages) {
     return (
-      <Pager tabs={['들어오는 배', '알림', '물어보기']} page={pages.page} onPage={pages.onPage} height={pages.height} onContentHeight={pages.onContentHeight}>
+      <Pager tabs={['들어오는 배', '알림', '물어보기']} noFade={[2]} page={pages.page} onPage={pages.onPage} height={pages.height} onContentHeight={pages.onContentHeight}>
         {[
           <div key="ships" className="flex flex-col px-6 pb-8">{ships}</div>,
           <div key="alerts" className="px-1 pb-8">{alerts}</div>,
-          <div key="ask" className="v4-no-title px-1 pb-8">{ask}</div>,
+          <div key="ask" className="v4-no-title px-1">{ask}</div>,
         ]}
       </Pager>
     )

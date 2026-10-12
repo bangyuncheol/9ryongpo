@@ -12,8 +12,9 @@ const FADE = 'linear-gradient(to bottom, #000 calc(100% - 48px), transparent)'
 
 type Drag = { id: number; x0: number; y0: number; lastX: number; lastT: number; vel: number; axis: 'x' | 'y' | null }
 
-export default function Pager({ tabs, page, onPage, height, onContentHeight, children }: {
+export default function Pager({ tabs, page, onPage, height, onContentHeight, noFade = [], children }: {
   tabs: string[]; page: number; onPage: (i: number) => void
+  /** 아래 흐림을 쓰지 않는 장(물어보기: 입력칸이 아래에 붙어 있다) */ noFade?: number[]
   /** 지금 장 내용의 높이(시트 기본 높이를 맞추는 데 쓴다) */ onContentHeight?: (h: number) => void
   /** 장이 보이는 높이(px). 시트에서 손잡이·탭을 뺀 만큼 */ height: number
   children: ReactNode[]
@@ -131,8 +132,8 @@ export default function Pager({ tabs, page, onPage, height, onContentHeight, chi
           {children.map((c, i) => (
             <div key={i} id={`v4-panel-${i}`} role="tabpanel" aria-labelledby={`v4-tab-${i}`} aria-hidden={page !== i}
               ref={(el) => { panels.current[i] = el }} inert={page !== i} onScroll={i === page ? checkMore : undefined}
-              style={i === page && more ? { maskImage: FADE, WebkitMaskImage: FADE } : undefined}
-              className="h-full w-full shrink-0 overflow-y-auto overscroll-contain">
+              style={i === page && more && !noFade.includes(i) ? { maskImage: FADE, WebkitMaskImage: FADE } : undefined}
+              className="v4-noscrollbar h-full w-full shrink-0 overflow-y-auto overscroll-contain">
               {c}
             </div>
           ))}
