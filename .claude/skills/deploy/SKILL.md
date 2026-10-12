@@ -19,7 +19,8 @@ description: 배포 절차·환경 변수 목록·프로덕션 마이그레이�
 ## 현재 VM (2026-10-12 설치)
 - 외부 IP `34.68.103.105`, 접속 `ssh -i ~/.ssh/9ryongpo_gcp bang-mac@34.68.103.105` (사용자 이름 = 전달한 공개 키 끝 주석). Debian 13.
 - **여러 팀이 같이 쓰는 VM**: 7개 계정이 모두 sudo(`google-sudoers`)라 `.env`는 다른 팀 root가 읽을 수 있다(오너가 알고 전부 올리기로 결정). 대회 후 키 재발급.
-- 80·443을 다른 팀과 다투지 않게 서버는 `127.0.0.1:8731`, 외부 공개는 Cloudflare 임시 터널(`wipan-tunnel` 서비스). 터널이 다시 뜨면 주소가 바뀐다 → 주소 확인: `sudo journalctl -u wipan-tunnel | grep trycloudflare | tail -1`
+- 80·443을 다른 팀과 다투지 않게 서버는 `127.0.0.1:8731`, 외부 공개는 Cloudflare 터널(`wipan-tunnel` 서비스). 주소 **https://bmj.kr** (가비아 구매 → 네임서버 Cloudflare, 계정 bang794613@gmail.com). 터널·Public Hostname(`bmj.kr`·`www` → `HTTP 127.0.0.1:8731`)은 대시보드에서 관리. `.env`에 `TUNNEL_TOKEN`이 없으면 trycloudflare 임시 주소로 뜬다.
+- Cloudflare 계정 이메일 인증이 안 돼 `cloudflared tunnel login`(cert 방식)은 못 쓴다 → 대시보드 토큰 방식.
 - VM에는 GitHub 인증을 두지 않는다. 코드는 로컬에서 `git push vm main`(VM 저장소가 `receive.denyCurrentBranch updateInstead`)으로 보낸다.
 
 ## 첫 설치 (VM 접속 후 1회)
@@ -69,3 +70,4 @@ description: 배포 절차·환경 변수 목록·프로덕션 마이그레이�
 | `GEMINI_API_KEY` | 전화 음성 합성 키(하루 100회). 음성은 `data/tts_cache/`에 저장돼 재사용 | 전화 쓸 때 예 |
 | `KAKAO_REST_KEY` | 카카오 REST API 키(지도 키와 같은 앱). 질문창·전화의 '어디서 출발하면 몇 시?' 답(장소 검색·자동차 길찾기). 서버 전용 — `VITE_` 를 붙이면 화면에 노출된다. 비우면 그 질문만 '계산할 수 없음' | 권장 |
 | `VITE_KAKAO_MAP_KEY` | 카카오맵 JavaScript 키(화면 빌드 때 들어가는 공개 키). 운영 도메인을 Kakao Developers의 JavaScript SDK 도메인에 등록해야 지도가 뜸. 비우면 Leaflet 지도 | 아니오 |
+| `TUNNEL_TOKEN` | Cloudflare 터널 토큰(대시보드 Zero Trust > Networks > Tunnels의 `bmj`). VM `wipan-tunnel`이 읽는다. 있으면 `https://bmj.kr`·`www.bmj.kr` 고정, 없으면 trycloudflare 임시 주소 | VM 예 |
