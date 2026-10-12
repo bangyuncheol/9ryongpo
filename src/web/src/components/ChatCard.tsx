@@ -47,26 +47,25 @@ export default function ChatCard({ onSubscribe, quick = QUICK, placeholder = '�
   }
 
   const last = useRef<HTMLDivElement>(null)
-  const inputBox = useRef<HTMLDivElement>(null)
-  const [room, setRoom] = useState(0) // 마지막 질문 칸의 최소 높이: 장 높이 - 입력 칸(그래야 맨 위까지 올라간다)
-  // 새 질문은 장 맨 위로 올려 바로 읽히게(10/13 오너: 이전 질문 밑에 생겨 스크롤해야 했음). 메신저처럼 마지막 질문 칸이
-  // 보이는 높이만큼 자리를 차지해, 이전 대화는 위로 밀려 올라가고 답은 질문 바로 아래에 붙는다.
+  const lastDone = turns[turns.length - 1]?.answer ?? turns[turns.length - 1]?.error
+  // 새 질문으로 옮겨 갈 때 이전 대화가 위로 밀려 올라가는 게 보이게(10/13 오너: '딱' 뜨면 이전 대화가 사라진 것 같다).
+  // 메신저처럼 대화 끝에 맞추되, 답이 길면 질문이 화면 위로 넘어가지 않게 질문 머리에서 멈춘다. 아래에 빈 자리를
+  // 만들지 않는다(10/13 오너: 새 질문 아래 여백이 너무 큼). 답이 붙으면 한 번 더 맞춘다.
+  // 브라우저 smooth 는 짧고 기기마다 달라 직접 600ms 로 민다. 움직임 줄이기면 바로.
   useEffect(() => {
     if (!bubbles || !turns.length) return
     const el = last.current
     let sc = el?.parentElement ?? null
     while (sc && !/(auto|scroll)/.test(getComputedStyle(sc).overflowY)) sc = sc.parentElement
-    // 시트가 내용에 맞춰 커지기 전에 재므로(폰 기본 단은 화면의 최대 60%) 그 높이까지는 넉넉히
     if (!sc || !el) return
-    setRoom(Math.max(0, Math.max(sc.clientHeight, window.innerHeight * 0.6) - (inputBox.current?.offsetHeight ?? 0) - 32))
-    // 이전 대화가 위로 밀려 올라가는 게 눈에 보이게(10/13 오너: 새 질문이 '딱' 뜨면 이전 대화가 사라진 것 같다).
-    // 브라우저 smooth 는 짧고 기기마다 달라 직접 600ms 로 민다. 움직임 줄이기면 바로.
     const box = sc
     let id = 0
     id = requestAnimationFrame(() => {
       const from = box.scrollTop
-      const to = from + el.getBoundingClientRect().top - box.getBoundingClientRect().top - 12
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || Math.abs(to - from) < 2) { box.scrollTop = to; return }
+      const head = from + el.getBoundingClientRect().top - box.getBoundingClientRect().top - 12
+      const to = Math.max(0, Math.min(head, box.scrollHeight - box.clientHeight))
+      if (to <= from + 1) return // 이미 보이거나 위로 되돌릴 필요 없음
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { box.scrollTop = to; return }
       const t0 = performance.now(), D = 600
       const step = (now: number) => {
         const k = Math.min(1, (now - t0) / D)
@@ -76,7 +75,7 @@ export default function ChatCard({ onSubscribe, quick = QUICK, placeholder = '�
       id = requestAnimationFrame(step)
     })
     return () => cancelAnimationFrame(id)
-  }, [bubbles, turns.length])
+  }, [bubbles, turns.length, lastDone])
 
   if (bubbles) {
     return (
@@ -88,7 +87,7 @@ export default function ChatCard({ onSubscribe, quick = QUICK, placeholder = '�
             const logOpen = running || openLog === i
             const lookups = t.log.filter((l) => l.startsWith('→')).length
             return (
-              <div key={i} ref={latest ? last : undefined} className="scroll-mt-3 space-y-2 text-body" style={latest && turns.length > 1 ? { minHeight: room } : undefined}>
+              <div key={i} ref={latest ? last : undefined} className="scroll-mt-3 space-y-2 text-body">
                 <p className="ml-auto w-fit max-w-[85%] rounded-[18px] rounded-br-md bg-primary-soft px-4 py-2.5 text-ink">{t.q}</p>
                 <div className="max-w-[95%] space-y-1.5">
                   {t.answer && <p>{t.answer}{t.mode === 'simple' && <span className="ml-1 text-small text-muted">(간단 모드)</span>}</p>}
@@ -112,7 +111,7 @@ export default function ChatCard({ onSubscribe, quick = QUICK, placeholder = '�
           </div>
         )}
         {/* 입력 칸: 장 아래에 붙어 대화와 갈린다(선 + 바탕). 물은 뒤엔 자주 묻는 질문이 이 위 한 줄로 */}
-        <div ref={inputBox} className="sticky bottom-0 -mx-5 mt-4 border-t border-line bg-card px-5 pb-3 pt-3">
+        <div className="sticky bottom-0 -mx-5 mt-4 border-t border-line bg-card px-5 pb-3 pt-3">
           {turns.length > 0 && (
             <div className="v4-noscrollbar -mx-5 mb-2 flex gap-2 overflow-x-auto px-5">
               {quick.map((q) => <Button key={q} compact onClick={() => ask(q)} disabled={busy} className="shrink-0 whitespace-nowrap">{q}</Button>)}
