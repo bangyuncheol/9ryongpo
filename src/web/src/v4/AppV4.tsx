@@ -24,7 +24,7 @@ import './v4.css'
  * 웹(1024px 이상): 지도가 왼쪽 전체, 시트는 오른쪽 고정 칸.
  * 데이터·동작은 버전 2와 같다(같은 API, 같은 알림 신청 부품). 숫자는 서버 값 그대로.
  */
-const PAGE = { light: '#ffffff', dark: '#ffffff' } // 헤더 색 = 시트 흰색(10/13 오너: 청록 띠를 뺌). 다크 모드 기기에서도 라이트(10/12 오너)
+const PAGE = { light: '#ffffff', dark: '#ffffff' } // 브라우저 상단 색(헤더는 투명, 10/13 오너). 다크 모드 기기에서도 라이트(10/12 오너)
 
 export default function AppV4() {
   useThemeColor(PAGE)
@@ -64,7 +64,7 @@ export default function AppV4() {
   const map = (
     <MapView place={place} ships={ships.data?.ships ?? []} arriving={t?.arriving ?? []}
       arrivedCount={t?.arrived.length ?? 0} truck={truck} trucks={trucks.data?.sensors ?? []} sensor={sensor}
-      notice={t?.notice ?? null} selected={selected} onSelect={onSelect} legendToggle fill padBottom={wide ? 0 : hs[snap]} />
+      notice={t?.notice ?? null} selected={selected} onSelect={onSelect} legendToggle fill padBottom={wide ? 0 : hs[snap]} padTop={wide ? 0 : HEADER_H} />
   )
   // '생선 알림 받기'·질문창의 알림 준비: 알림 신청 칸으로. 폰은 알림 장으로 넘긴다
   const toWait = () => {
@@ -92,9 +92,10 @@ export default function AppV4() {
         </div>
       ) : (
         <>
-          <div className="absolute inset-x-0 top-0 z-40 flex flex-col justify-center border-b border-line bg-card px-4" style={{ height: HEADER_H }}><Badge today={t} /></div>
-          {/* 지도는 헤더 아래 전체. 시트가 그 위를 덮고 두 단(내림·기본)으로 오르내린다 */}
-          <div className="absolute inset-x-0 bottom-0" style={{ top: HEADER_H }}>{map}</div>
+          {/* 헤더는 투명: 지도가 화면 맨 위까지 오고 아이콘·워드마크·시각만 그 위에 뜬다(10/13 오너). 끌기는 지도로 통과 */}
+          <div className="v4-float pointer-events-none absolute inset-x-0 top-0 z-40 flex flex-col justify-center px-4" style={{ height: HEADER_H }}><Badge today={t} /></div>
+          {/* 지도는 화면 전체(투명 헤더 아래까지). 시트가 그 위를 덮고 두 단(내림·기본)으로 오르내린다 */}
+          <div className="absolute inset-0">{map}</div>
           <BottomSheet snap={snap} onSnap={setSnap} fit={fit} peek={<Peek today={t} first={arriving[0]} onOpen={() => setSnap('mid')} />}>
             {(h) => <>
               {admin && <div className="pb-2"><AdminBar clock={t?.clock ?? null} feed={t?.source.feed ?? null} call={call.data} /></div>}

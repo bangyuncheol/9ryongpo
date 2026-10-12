@@ -46,6 +46,8 @@ type Props = {
   fill?: boolean
   /** 지도 아래쪽을 덮는 면의 높이(px). 처음 위치·가장자리 화살표·버튼을 그 위로 올린다(버전 4 시트, 10/11) */
   padBottom?: number
+  /** 지도 위쪽을 덮는 투명 헤더 높이(px). 범례·조업 버튼·화살표를 그 아래로 내린다(버전 4, 10/13) */
+  padTop?: number
 }
 
 // path: 이번 2초 동안 그릴 꺾은선(지금 그린 위치 → 지나친 모서리들 → 새 위치). route: 마지막으로 받은 남은 꺾이는 지점
@@ -144,6 +146,9 @@ export default function KakaoArrivalMap(p: Props) {
   const padAtInit = useRef(pad) // 처음 위치는 지도를 만들 때의 여백(시트 기본 높이)으로 한 번 잡는다
   const padNow = useRef(pad)
   padNow.current = pad
+  const top = p.padTop ?? 0
+  const topNow = useRef(top)
+  topNow.current = top
   const selRef = useRef<number | null>(p.selected)
   selRef.current = p.selected
   arrRef.current = new Map(p.arriving.map((a) => [a.ship_id, a]))
@@ -197,7 +202,7 @@ export default function KakaoArrivalMap(p: Props) {
       const m = map.current
       const b = new kakao.maps.LatLngBounds()
       b.extend(new kakao.maps.LatLng(VIEW.s, VIEW.w)); b.extend(new kakao.maps.LatLng(VIEW.n, VIEW.e))
-      m.setBounds(b, 0, 0, padAtInit.current, 0)
+      m.setBounds(b, topNow.current, 0, padAtInit.current, 0)
       const lv = m.getLevel()
       home.current = { center: m.getCenter(), level: lv }
       if (m.setMinLevel) m.setMinLevel(Math.max(1, lv - ZOOM_IN))
@@ -239,7 +244,7 @@ export default function KakaoArrivalMap(p: Props) {
         // 범위 판정은 '눈에 보이는 영역'의 가운데로: 아래를 시트가 덮으면 실제 지도 가운데는 훨씬 남쪽이라,
         // '조업·대기' 버튼으로 넓힌 화면이 범위 밖으로 판정돼 곧바로 처음 위치로 되돌아갔다(10/11 오너 제보)
         const W = box.current?.clientWidth ?? 0, H = box.current?.clientHeight ?? 0
-        const seen = W && H ? m.getProjection().coordsFromContainerPoint(new kakao.maps.Point(W / 2, Math.max(0, H - padNow.current) / 2)) : m.getCenter()
+        const seen = W && H ? m.getProjection().coordsFromContainerPoint(new kakao.maps.Point(W / 2, (topNow.current + Math.max(0, H - padNow.current)) / 2)) : m.getCenter()
         if (bouncing) return
         if (homePending.current) {
           homePending.current = false
@@ -408,7 +413,7 @@ export default function KakaoArrivalMap(p: Props) {
     const b = new kakao.maps.LatLngBounds()
     b.extend(new kakao.maps.LatLng(place.lat, place.lon))
     for (const s of p.ships) if (s.status === '조업·대기') b.extend(new kakao.maps.LatLng(s.lat, s.lon))
-    m.setBounds(b, 30, 30, 30 + pad, 30)
+    m.setBounds(b, 30 + top, 30, 30 + pad, 30)
   }
 
   /** '그 밖 N척 ▸': 들어오는 배가 모두 한 화면에 들어오게(화면에 들어온 배는 화살표 대신 배 모양으로 보인다) */
@@ -419,7 +424,7 @@ export default function KakaoArrivalMap(p: Props) {
     const b = new kakao.maps.LatLngBounds()
     b.extend(new kakao.maps.LatLng(place.lat, place.lon))
     for (const s of p.ships) if (s.status === '입항 중') b.extend(new kakao.maps.LatLng(s.lat, s.lon))
-    m.setBounds(b, 40, 40, 40 + pad, 40)
+    m.setBounds(b, 40 + top, 40, 40 + pad, 40)
   }
   const showArrRef = useRef(showArriving)
   showArrRef.current = showArriving
@@ -470,7 +475,7 @@ export default function KakaoArrivalMap(p: Props) {
         const a = arrRef.current.get(id)
         if (!inView && a && t.status === '입항 중') {
           const pt = proj.containerPointFromCoords(pos)
-          edges.push({ id, y: Math.min(H - 40, Math.max(56, pt.y)), ship: a })
+          edges.push({ id, y: Math.min(H - 40, Math.max(56 + topNow.current, pt.y)), ship: a })
         }
       }
       drawEdges(edgeBox.current, edges, W)
@@ -556,7 +561,7 @@ export default function KakaoArrivalMap(p: Props) {
       <div ref={edgeBox} className={`absolute inset-x-0 top-0 z-[400] overflow-hidden ${p.fill ? '' : 'rounded-card'} [&>*]:pointer-events-auto`} style={{ pointerEvents: 'none', bottom: pad }} />
       {idle.length > 0 && (
         <button type="button" onClick={showIdle} title="조업 중인 배가 보이게 지도를 넓힙니다"
-          className="absolute right-2 top-2 z-[500] rounded-button bg-card/90 px-3 py-1.5 text-[12px] font-bold text-muted shadow-sm hover:text-ink">
+          className="absolute right-2 top-2 z-[500] rounded-button bg-card/90 px-3 py-1.5 text-[12px] font-bold text-muted shadow-sm hover:text-ink" style={top ? { top: top + 8 } : undefined}>
           {stale ? '선박 위치 미갱신' : '조업·대기'} {idle.length}척 · 동쪽 약 {Math.round(idleKm)}km ▸
         </button>
       )}
@@ -571,11 +576,11 @@ export default function KakaoArrivalMap(p: Props) {
       )}
       {p.legendToggle && !legendOpen ? (
         <button type="button" onClick={() => setLegendOpen(true)} aria-expanded={false}
-          className="absolute left-2 top-2 z-[500] rounded-button bg-card/90 px-3 py-1.5 text-[12px] font-bold text-ink shadow-sm">
+          className="absolute left-2 top-2 z-[500] rounded-button bg-card/90 px-3 py-1.5 text-[12px] font-bold text-ink shadow-sm" style={top ? { top: top + 8 } : undefined}>
           ⓘ 범례
         </button>
       ) : (
-      <div className={`${p.legendToggle ? '' : 'pointer-events-none '}absolute left-2 top-2 z-[500] rounded-button bg-card/90 px-3 py-2 text-[12px] leading-5 text-ink shadow-sm`}>
+      <div className={`${p.legendToggle ? '' : 'pointer-events-none '}absolute left-2 top-2 z-[500] rounded-button bg-card/90 px-3 py-2 text-[12px] leading-5 text-ink shadow-sm`} style={top ? { top: top + 8 } : undefined}>
         <p className="sr-only">지도 범례</p>
         <div className="flex flex-wrap gap-x-3">
           <span><span aria-hidden style={{ color: 'var(--color-primary-dark)' }}>★</span> 위판장</span>

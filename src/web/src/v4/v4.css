@@ -77,3 +77,7 @@
 @keyframes v2-drop { from { transform: translateY(-120%); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
 .v2-toast { animation: v2-drop 400ms cubic-bezier(0.22, 0.25, 0, 1); }
 @media (prefers-reduced-motion: reduce) { .v2-toast { animation: none; } }
+
+/* 투명 헤더(폰, 10/13 오너): 지도 위에 뜬 시각 글자가 어떤 지도 바탕에서도 읽히게 흰 테두리 빛. 그림(아이콘·워드마크)엔 옅은 그림자 */
+.v4-float p { text-shadow: 0 0 4px #fff, 0 0 8px #fff, 0 0 12px #fff; }
+.v4-float img { filter: drop-shadow(0 1px 2px rgb(255 255 255 / 0.9)); }
