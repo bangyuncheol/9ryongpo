@@ -44,3 +44,12 @@ brag-output/**/assets/live/
 brag-output/final/*.mp4
 brag-output/demo/*.mp4
 brag-output/**/.*.hf-transaction-*/
+
+# 안드로이드 APK(TWA): 서명 키·빌드 결과는 커밋 안 함 (키는 따로 보관)
+src/android/*.keystore
+src/android/*.apk
+src/android/*.aab
+src/android/.gradle/
+src/android/app/build/
+src/android/local.properties
+src/android/*.idsig

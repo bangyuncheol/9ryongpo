@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "kr.bmj.twa",
+    "sha256_cert_fingerprints": ["A5:EB:E1:19:97:C4:08:E4:8A:09:56:A4:9E:20:29:23:60:70:F5:56:64:21:97:40:12:00:C0:91:DB:C8:E3:37"]
+  }
+}]

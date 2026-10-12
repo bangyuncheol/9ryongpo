@@ -39,6 +39,12 @@ description: 배포 절차·환경 변수 목록·프로덕션 마이그레이�
 - 되돌리기: VM에서 `git checkout <이전 커밋>` 후 `update.sh` 대신 `sudo systemctl restart wipan`. 원인 고친 뒤 `git checkout main`.
 - 스키마는 `src/server/app/schema.sql`(CREATE IF NOT EXISTS)라 별도 마이그레이션 적용 단계가 없다.
 
+## 안드로이드 APK (TWA, 2026-10-13)
+- `src/android/`는 `https://bmj.kr`을 크롬 엔진으로 띄우는 껍데기 앱(Bubblewrap 1.27.0, 패키지 `kr.bmj.twa`). 화면·기능은 웹 배포로 바뀌니 APK를 다시 만들 일은 거의 없다.
+- 준비(1회): JDK 17 + 안드로이드 SDK(cmdline-tools, `build-tools;34.0.0`). `~/.bubblewrap/config.json`에 `jdkPath`·`androidSdkPath`. SDK 폴더에 `tools`가 없으면 Bubblewrap이 SDK를 거부하니 `cmdline-tools/latest`를 `tools`로 링크한다.
+- 빌드: `.env`의 `BUBBLEWRAP_KEYSTORE_PASSWORD`·`BUBBLEWRAP_KEY_PASSWORD`를 환경에 올리고 `cd src/android` → `npx @bubblewrap/cli@1.27.0 build --skipPwaValidation` → `app-release-signed.apk`. `twa-manifest.json`을 고쳤으면 먼저 `update --skipVersionUpgrade`, 다시 배포할 땐 `appVersionCode`를 올린다.
+- 서명 키 `src/android/android.keystore`는 커밋하지 않는다. 키를 잃으면 이미 설치된 앱을 업데이트할 수 없으니 오너가 따로 보관한다. 키를 바꾸면 `src/web/public/.well-known/assetlinks.json`의 SHA-256 지문도 바꿔야 한다. 지문이 안 맞으면 앱 위에 주소창이 보인다(동작은 함).
+
 ## 위판 실적 월 갱신
 - 해수부 일자별 위탁판매현황은 매월 15일 전후 새 달이 등록된다(다음: 2026-09분 10/15).
 - 로컬에서 `cd src/server && uv run python scripts/fetch_auction.py` → 새 CSV 커밋·푸시 → VM에서 `update.sh`(재시작 시 자동 적재).

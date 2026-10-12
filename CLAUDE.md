@@ -16,6 +16,7 @@
 - 데이터베이스: SQLite (파일) — 테이블은 설계 §7
 - 외부 연동: E-UM 디지털트윈 포항 API(어선 명부·위판장·교통 센서·교통량·혼잡율·선박 위치) · 카카오 로컬(장소·주소 검색)·카카오모빌리티 자동차 길찾기(REST, 출발지→위판장 소요 시간, 2026-10-11 오너 승인) · 해양수산부 일자별 위탁판매현황(odcloud API + 월별 CSV) · OpenAI(tool calling, 대회 지원 20만원) · 웹 푸시(VAPID) · 전화 알림: ClawOps 070(`clawops[agent]==0.62.0`, 번호·발신·통화 음성) + CLOVA Speech 받아쓰기(gRPC, 키워드 부스팅, interview_bridge와 같은 키, 10/11 오너 승인) + OpenAI 받아쓰기(`gpt-4o-mini-transcribe`, 말 시작 감지·CLOVA 실패 시 대비) + Gemini TTS(`gemini-3.8-flash-tts`, 하루 100회 한도라 문장 캐시, 실패 시 OpenAI TTS) (2026-10-11 오너 승인)
 - 배포: 대회 제공 GCP VM 1대에 SSH로 접속해 FastAPI 프로세스 1개로 상시 실행 (FastAPI가 Vite `dist/` 정적 서빙, HTTPS는 리버스 프록시 또는 터널). 환경 변수 이름은 `.env.example`·설계 §8 (2026-10-09 Cloud Run에서 변경: 대회는 프로젝트 권한이 아니라 VM 접속 권한만 제공)
+- 안드로이드 앱: 배포된 웹(`https://bmj.kr`)을 감싼 TWA APK(`src/android/`, Bubblewrap). 스토어 등록 없이 APK 파일로 배포. 웹 푸시는 크롬 엔진이라 그대로 된다 (2026-10-13 오너 승인)
 
 스택 변경은 반드시 이 문서를 먼저 고치고 오너 승인을 받은 뒤 진행한다.
 
