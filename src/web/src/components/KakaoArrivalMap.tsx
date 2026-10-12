@@ -150,10 +150,16 @@ export default function KakaoArrivalMap(p: Props) {
   const [moved, setMoved] = useState(false)
   // 처음 위치로: 확대 단계를 먼저(애니메이션 없이) 맞추고 가운데를 옮긴다. 확대 애니메이션과 panTo 를 동시에
   // 보내면 이동이 무시돼 바다 한가운데 멈추는 일이 있었다(10/11 재현).
+  // 여러 단계를 한 번에 확대하면 카카오가 확대를 애니메이션으로 하고, 그동안 옮긴 가운데는 확대가 끝날 때 원래 가운데
+  // 기준으로 덮인다('조업·대기'로 넓힌 뒤 '처음 위치'를 두 번 눌러야 했다, 10/12 오너). 그래서 가운데를 먼저 옮기고
+  // 그 점을 기준(anchor)으로 확대하고, 확대가 끝난 뒤(idle) 한 번 더 맞춘다(homePending).
+  const homePending = useRef(false)
   const resetView = (m: K) => {
     const h = home.current
     if (!h) return
-    m.setLevel(h.level)
+    homePending.current = true
+    m.setCenter(h.center)
+    m.setLevel(h.level, { anchor: h.center, animate: false })
     m.setCenter(h.center)
   }
   // 튕김 애니메이션 번호: '처음 위치'를 누르면 올려서 진행 중인 튕김을 멈춘다(그대로 두면 남은 프레임이 가운데를
@@ -223,6 +229,12 @@ export default function KakaoArrivalMap(p: Props) {
         const W = box.current?.clientWidth ?? 0, H = box.current?.clientHeight ?? 0
         const seen = W && H ? m.getProjection().coordsFromContainerPoint(new kakao.maps.Point(W / 2, Math.max(0, H - padNow.current) / 2)) : m.getCenter()
         if (bouncing) return
+        if (homePending.current) {
+          homePending.current = false
+          const c = m.getCenter() as LL, hc = h.center as LL
+          if (m.getLevel() !== h.level) m.setLevel(h.level, { anchor: h.center, animate: false })
+          if (Math.abs(c.getLat() - hc.getLat()) > 1e-5 || Math.abs(c.getLng() - hc.getLng()) > 1e-5) { m.setCenter(h.center); return }
+        }
         if (!limit.contain(seen)) { bounceBack(m, seen); return }
         checkMoved()
       })
