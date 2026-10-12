@@ -16,12 +16,13 @@ type Gesture = { id: number; y0: number; v0: number; lastY: number; lastT: numbe
 const USER_SNAPS: Snap[] = ['peek', 'mid']
 export const HANDLE_H = 44
 
-export default function BottomSheet({ snap, onSnap, peek, children }: {
+export default function BottomSheet({ snap, onSnap, peek, fit, children }: {
   snap: Snap; onSnap: (s: Snap) => void
+  /** 지금 장 내용이 다 들어가는 높이(기본 단을 여기에 맞춘다) */ fit?: number
   /** 내림 상태에서 손잡이 아래 보이는 한 줄 */ peek: ReactNode
   /** 지금 보이는 높이(손잡이 제외)를 받아 그린다 */ children: (bodyHeight: number) => ReactNode
 }) {
-  const hs = snapHeights(useViewportHeight())
+  const hs = snapHeights(useViewportHeight(), fit)
   const [drag, setDrag] = useState<number | null>(null) // 끄는 중의 보이는 높이
   const dragged = useRef(false) // 끈 직후의 click 은 버튼을 누른 것이 아니다
   const wheelUntil = useRef(0)

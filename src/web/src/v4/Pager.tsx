@@ -8,10 +8,13 @@ import type { ReactNode } from 'react'
  * - 장마다 안쪽이 위아래로 스크롤된다(시트 높이는 그대로, 지도가 늘 보이게).
  * 라이브러리 없이 포인터 이벤트만(npm 의존성 금지).
  */
+const FADE = 'linear-gradient(to bottom, #000 calc(100% - 48px), transparent)'
+
 type Drag = { id: number; x0: number; y0: number; lastX: number; lastT: number; vel: number; axis: 'x' | 'y' | null }
 
-export default function Pager({ tabs, page, onPage, height, children }: {
+export default function Pager({ tabs, page, onPage, height, onContentHeight, children }: {
   tabs: string[]; page: number; onPage: (i: number) => void
+  /** 지금 장 내용의 높이(시트 기본 높이를 맞추는 데 쓴다) */ onContentHeight?: (h: number) => void
   /** 장이 보이는 높이(px). 시트에서 손잡이·탭을 뺀 만큼 */ height: number
   children: ReactNode[]
 }) {
@@ -24,6 +27,20 @@ export default function Pager({ tabs, page, onPage, height, children }: {
 
   // 다른 장으로 가면 그 장은 맨 위부터
   useEffect(() => { panels.current[page]?.scrollTo({ top: 0 }) }, [page])
+
+  // 지금 장 내용 높이를 재서 알린다(내용이 바뀌면 다시: 칩 펼치기·번호 칸·질문 답)
+  const [contentH, setContentH] = useState<number[]>([])
+  useEffect(() => {
+    const ro = new ResizeObserver(() => setContentH(panels.current.map((el) => (el?.firstElementChild as HTMLElement | null)?.offsetHeight ?? 0)))
+    panels.current.forEach((el) => { const c = el?.firstElementChild; if (c) ro.observe(c) })
+    return () => ro.disconnect()
+  }, [n])
+  useEffect(() => { if (contentH[page]) onContentHeight?.(contentH[page]) }, [contentH, page, onContentHeight])
+
+  // 장이 넘쳐 아래가 남았으면 아래를 흐리게(칼로 자른 듯 잘려 보이지 않게, 더 있다는 표시)
+  const [more, setMore] = useState(false)
+  const checkMore = () => { const el = panels.current[page]; setMore(!!el && el.scrollHeight - el.scrollTop - el.clientHeight > 4) }
+  useEffect(checkMore)
 
   const onPointerDown = (e: React.PointerEvent) => {
     if (e.pointerType === 'mouse' && e.button !== 0) return
@@ -113,7 +130,8 @@ export default function Pager({ tabs, page, onPage, height, children }: {
           style={{ transform: `translateX(calc(${-page * 100}% + ${dx ?? 0}px))`, touchAction: 'pan-y', userSelect: dx === null ? undefined : 'none' }}>
           {children.map((c, i) => (
             <div key={i} id={`v4-panel-${i}`} role="tabpanel" aria-labelledby={`v4-tab-${i}`} aria-hidden={page !== i}
-              ref={(el) => { panels.current[i] = el }} inert={page !== i}
+              ref={(el) => { panels.current[i] = el }} inert={page !== i} onScroll={i === page ? checkMore : undefined}
+              style={i === page && more ? { maskImage: FADE, WebkitMaskImage: FADE } : undefined}
               className="h-full w-full shrink-0 overflow-y-auto overscroll-contain">
               {c}
             </div>

@@ -10,7 +10,7 @@ import { Toast } from '../v2/AppV2'
 import type { VisitData } from '../v2/AppV2'
 import WaitFish from '../v2/WaitFish'
 import Icon from '../v2/Icon'
-import BottomSheet from './BottomSheet'
+import BottomSheet, { HANDLE_H } from './BottomSheet'
 import Pager from './Pager'
 import { snapHeights, useViewportHeight } from './sheet'
 import type { Snap } from './sheet'
@@ -37,7 +37,9 @@ export default function AppV4() {
   const onSelect = useCallback((id: number | null) => setSelected(id), [])
   const [snap, setSnap] = useState<Snap>('mid') // 폰 시트: 내림·기본(다 펼침은 입력할 때만 저절로)
   const [page, setPage] = useState(0) // 폰 시트의 장: 들어오는 배 · 알림 · 물어보기(10/12)
-  const hs = snapHeights(useViewportHeight())
+  const [fit, setFit] = useState<number | undefined>(undefined) // 지금 장 내용 높이 + 손잡이·탭
+  const onContentHeight = useCallback((h: number) => setFit(h + HANDLE_H + TABS_H), [])
+  const hs = snapHeights(useViewportHeight(), fit)
   const today = usePoll(api.today, 2000)
   const ships = usePoll(api.ships, 2000)
   const visit = usePoll(() => api.visit(false), 60000)
@@ -74,7 +76,7 @@ export default function AppV4() {
   const sheet = (pages?: { height: number }) => (
     <Sheet today={t} list={arriving} idle={idle} visit={visit.data as VisitData | null} call={call.data}
       selected={selected} onSelect={onSelect} admin={admin} onWait={toWait}
-      pages={pages && { page, onPage: setPage, height: pages.height }} />
+      pages={pages && { page, onPage: setPage, height: pages.height, onContentHeight }} />
   )
 
   return (
@@ -94,7 +96,7 @@ export default function AppV4() {
           <div className="absolute inset-x-0 top-0 z-40 h-[52px] bg-page px-4 py-3"><Badge today={t} /></div>
           {/* 지도는 헤더 아래 전체. 시트가 그 위를 덮고 두 단(내림·기본)으로 오르내린다 */}
           <div className="absolute inset-x-0 bottom-0 top-[52px]">{map}</div>
-          <BottomSheet snap={snap} onSnap={setSnap} peek={<Peek today={t} first={arriving[0]} onOpen={() => setSnap('mid')} />}>
+          <BottomSheet snap={snap} onSnap={setSnap} fit={fit} peek={<Peek today={t} first={arriving[0]} onOpen={() => setSnap('mid')} />}>
             {(h) => <>
               {admin && <div className="pb-2"><AdminBar clock={t?.clock ?? null} feed={t?.source.feed ?? null} call={call.data} /></div>}
               {sheet({ height: Math.max(0, h - TABS_H) })}
@@ -139,7 +141,7 @@ const TABS_H = 45 // 장 탭 줄 높이(44 + 밑줄 1)
 function Sheet({ today, list, idle, visit, call, selected, onSelect, admin, onWait: toWait, pages }: {
   today: Today | null; list: Arrival[]; idle: number; visit: VisitData | null; call: CallState | null
   selected: number | null; onSelect: (id: number | null) => void; admin: boolean; onWait: () => void
-  pages?: { page: number; onPage: (i: number) => void; height: number }
+  pages?: { page: number; onPage: (i: number) => void; height: number; onContentHeight: (h: number) => void }
 }) {
   const number = call?.enabled ? call.number : null
   const [wait, setWait] = useState<{ on: boolean; species: string }>({ on: false, species: '' })
@@ -178,7 +180,7 @@ function Sheet({ today, list, idle, visit, call, selected, onSelect, admin, onWa
 
   if (pages) {
     return (
-      <Pager tabs={['들어오는 배', '알림', '물어보기']} page={pages.page} onPage={pages.onPage} height={pages.height}>
+      <Pager tabs={['들어오는 배', '알림', '물어보기']} page={pages.page} onPage={pages.onPage} height={pages.height} onContentHeight={pages.onContentHeight}>
         {[
           <div key="ships" className="flex flex-col px-6 pb-8">{ships}</div>,
           <div key="alerts" className="px-1 pb-8">{alerts}</div>,
