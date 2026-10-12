@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 
 /*
  * 버전 4 폰 하단 시트. 지도는 늘 전체 화면이고 시트가 그 위를 덮는다(지도 크기가 바뀌지 않아 다시 그릴 필요 없음).
- * 10/12 오너: 끝까지 끌어올려 지도를 가리는 단을 뺐다(지도와 같이 보고 싶다는 피드백). 사람이 고르는 단은 둘 —
- * 내림(한 줄) · 기본. 다 펼침(full)은 글자를 입력할 때만 저절로(휴대폰 키보드가 입력칸을 가리지 않게), 입력이 끝나면 돌아온다.
+ * 10/12 오너: 끝까지 끌어올려 지도를 가리는 단을 뺐다(지도와 같이 보고 싶다는 피드백). 단은 둘 — 내림(한 줄) · 기본.
+ * 10/13 오너: 입력칸을 눌러도 끝까지 올라가지 않는다(전엔 입력 중에만 다 펼쳤음). 키보드가 뜨면 화면 높이가 줄어
+ * 시트 높이도 그에 맞춰 다시 잰다.
  * - 끌기는 손잡이·한 줄 요약에서만. 안쪽(옆으로 넘기는 장)은 자기 스크롤·옆 밀기를 쓴다.
  * - 손을 뗀 위치 + 속도로 가까운 단에 붙는다. 끌기 대안: 손잡이 탭(기본↔내림), 손잡이 위 휠.
  * 라이브러리 없이 포인터 이벤트만(움직임은 창 전체에서 받는다).
@@ -26,23 +27,7 @@ export default function BottomSheet({ snap, onSnap, peek, fit, children }: {
   const [drag, setDrag] = useState<number | null>(null) // 끄는 중의 보이는 높이
   const dragged = useRef(false) // 끈 직후의 click 은 버튼을 누른 것이 아니다
   const wheelUntil = useRef(0)
-  const beforeType = useRef<Snap | null>(null)
   const visible = drag ?? hs[snap]
-
-  // 입력칸에 들어가면 다 펼치고, 시트 밖으로 나가면 원래 단으로(10/12 오너)
-  const onFocusCapture = (e: React.FocusEvent) => {
-    if (!(e.target as HTMLElement).matches('input, textarea')) return
-    if (snap !== 'full') beforeType.current = snap
-    onSnap('full')
-  }
-  const onBlurCapture = () => {
-    setTimeout(() => {
-      const a = document.activeElement as HTMLElement | null
-      if (a?.matches('input, textarea') && a.closest('.v4-sheet')) return // 다른 입력칸으로 옮겼을 뿐
-      if (beforeType.current) { onSnap(beforeType.current); beforeType.current = null }
-    }, 120)
-  }
-  useEffect(() => { if (snap !== 'full') beforeType.current = null }, [snap])
 
   const settle = (vis: number, vel: number) => {
     const target = vis + vel * 200
@@ -103,7 +88,7 @@ export default function BottomSheet({ snap, onSnap, peek, fit, children }: {
     <section aria-label="입항 정보"
       className={`v4-sheet fixed inset-x-0 bottom-0 z-30 flex flex-col rounded-t-[24px] bg-card ${drag === null ? 'v4-sheet-anim' : ''}`}
       style={{ height: hs.full, transform: `translateY(${hs.full - visible}px)`, userSelect: drag === null ? undefined : 'none' }}
-      onClickCapture={onClickCapture} onFocusCapture={onFocusCapture} onBlurCapture={onBlurCapture}>
+      onClickCapture={onClickCapture}>
       <button type="button" onClick={tapHandle} {...drag_}
         aria-label={snap === 'peek' ? '입항 정보 펼치기' : '시트 내리고 지도 보기'} aria-expanded={snap !== 'peek'}
         className="flex h-11 w-full shrink-0 cursor-grab items-center justify-center rounded-t-[24px] active:cursor-grabbing">
