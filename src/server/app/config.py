@@ -33,6 +33,8 @@ class Settings:
     auction_dir: Path
     # 전화(설계 §4.3, 10/11). PHONE_ENABLED=1 인 서버 하나만 ClawOps 번호에 붙는다(번호당 연결 하나).
     phone_enabled: bool = False
+    # 입항 알림 전화 발신 스위치(calls_on)의 기동 시 값. 1 이면 재시작·배포 뒤에도 켜진 채로 뜬다(10/13 오너)
+    phone_calls_on: bool = False
     clawops_api_key: str = ""
     clawops_account_id: str = ""
     clawops_from_number: str = ""
@@ -81,6 +83,7 @@ def load_settings() -> Settings:
         db_path=_resolve(os.getenv("DB_PATH", "./data/app.db").strip()),
         auction_dir=REPO_ROOT / "data" / "auction",
         phone_enabled=os.getenv("PHONE_ENABLED", "0").strip() == "1",
+        phone_calls_on=os.getenv("PHONE_CALLS_ON", "0").strip() == "1",
         clawops_api_key=os.getenv("CLAWOPS_API_KEY", "").strip(),
         clawops_account_id=os.getenv("CLAWOPS_ACCOUNT_ID", "").strip(),
         clawops_from_number=os.getenv("CLAWOPS_FROM_NUMBER", "").strip(),

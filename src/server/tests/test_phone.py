@@ -117,6 +117,17 @@ def test_alert_calls_only_when_switched_on_and_allowed(tmp_path):
     assert call_sub_of(conn, "01011112222") == {"species": ["붉은대게"]}  # 10/12부터 목록으로 저장(옛 문자열도 읽음)
 
 
+def test_calls_switch_starts_from_setting(tmp_path):
+    """PHONE_CALLS_ON=1 이면 재시작(배포) 뒤에도 발신 스위치가 켜진 채로 뜬다. 전화 기능이 꺼져 있으면 켜지지 않는다(10/13)."""
+    conn = db.connect(tmp_path / "t.db")
+    db.init_schema(conn)
+    on = replace(settings, phone_enabled=True, phone_calls_on=True, clawops_api_key="k", clawops_account_id="a",
+                 clawops_from_number="07000000000")
+    assert PhoneService(on, conn, lambda: None, tmp_path / "tts").calls_on is True
+    assert PhoneService(replace(on, phone_calls_on=False), conn, lambda: None, tmp_path / "tts").calls_on is False
+    assert PhoneService(replace(on, phone_enabled=False), conn, lambda: None, tmp_path / "tts").calls_on is False
+
+
 def test_dial_refuses_unlisted_number_and_queues_second(tmp_path):
     ph, _ = _service(tmp_path, allowed=("01011112222", "01055556666"))
     res = asyncio.run(ph.dial("01099998888", ["x"]))

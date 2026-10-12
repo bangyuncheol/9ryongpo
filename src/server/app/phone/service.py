@@ -97,7 +97,7 @@ class PhoneService:
         self.cache_dir = cache_dir
         self.enabled = bool(settings.phone_enabled and settings.clawops_api_key and settings.clawops_account_id
                             and settings.clawops_from_number)
-        self.calls_on = False
+        self.calls_on = self.enabled and settings.phone_calls_on  # 진행 막대 스위치로 바꿀 수 있고, 재시작하면 이 값으로
         self.connected = False
         self.agent: Any = None
         self._pending_greeting: list[str] | None = None
