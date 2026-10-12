@@ -65,3 +65,6 @@ export function useWide() {
   }, [])
   return wide
 }
+
+/** /api/visit 응답(언제 가면 되나) */
+export type VisitData = { auction_time: string; arrive_by: string; now?: string | null; advice: string }

@@ -3,7 +3,6 @@ import { TRAFFIC_ROADS } from './trafficRoads'
 import type { Arrival, Place, SensorTraffic, Ship } from '../api'
 import { hhmm } from '../api'
 import { loadKakao } from './kakaoLoader'
-import { shortBiz } from './ArrivalsCard'
 
 /*
  * 입항 지도(10/10 2차 개편). 지도는 구룡포항 확대(위판장 주변 육지가 자세히 보임)로 고정.
@@ -121,6 +120,8 @@ function TrafficTag({ lv }: { lv: (typeof TRUCK_LEVELS)[number] }) {
   return <span className="inline-flex items-center gap-1"><span aria-hidden className="inline-block h-1.5 w-4 rounded-full"
     style={{ background: `var(${lv.color})`, opacity: 0.75 }} />{lv.word}</span>
 }
+
+const shortBiz = (biz: string | null) => (biz ?? '업종 미상').replace(/어업$/, '').replace(/^(연안|근해|동해구)/, '')
 
 export default function KakaoArrivalMap(p: Props) {
   const wrap = useRef<HTMLDivElement>(null)
