@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { TRAFFIC_ROADS } from './trafficRoads'
 import type { Arrival, Place, SensorTraffic, Ship } from '../api'
 import { hhmm } from '../api'
 import { loadKakao } from './kakaoLoader'
@@ -117,8 +118,8 @@ const TRUCK_LEVELS = [
 const truckLevel = (n: number) => TRUCK_LEVELS.find((l) => n < l.max) ?? TRUCK_LEVELS[2]
 
 function TrafficTag({ lv }: { lv: (typeof TRUCK_LEVELS)[number] }) {
-  return <span className="inline-flex items-center gap-1"><span aria-hidden className="inline-block h-3 w-3 rounded-full"
-    style={{ background: `color-mix(in srgb, var(${lv.color}) 40%, transparent)` }} />{lv.word}</span>
+  return <span className="inline-flex items-center gap-1"><span aria-hidden className="inline-block h-1.5 w-4 rounded-full"
+    style={{ background: `var(${lv.color})`, opacity: 0.75 }} />{lv.word}</span>
 }
 
 export default function KakaoArrivalMap(p: Props) {
@@ -282,27 +283,27 @@ export default function KakaoArrivalMap(p: Props) {
     prevArrived.current = dockedCount
   }, [ready, dockedCount])
 
-  // 교통 센서 자리: 반투명한 색 원 하나(10/12 오너: 트럭 아이콘·글자 딱지를 빼고 색으로만, 테두리 없이). 장소 혼잡도를 원으로
-  // 칠하는 관례(서울시 실시간 도시데이터 등). 지점 값이라 도로를 칠하지 않는다. 크기는 화면 기준 고정(겹쳐도 각각 보이게),
-  // 배·별보다 아래 층. 색만으로는 뜻이 안 전해지므로 화면 읽기 이름·범례·누르면 뜨는 표지에 말과 숫자를 둔다.
+  // 교통: 센서가 놓인 길을 혼잡도 색으로 칠한다(10/12 오너: 카카오맵·네이버 교통처럼 도로를 초록→빨강).
+  // 지점 값이라 센서가 있는 길(929번 호미로·구룡포길)만, 이웃 센서 사이는 가운데에서 갈라 가까운 센서 색으로
+  // (색을 섞어 재지 않은 값을 만들지 않는다). 선 모양은 trafficRoads.ts(OSM에서 생성). 누르거나 올리면 말·숫자 표지.
   useEffect(() => {
     const kakao = k.current, m = map.current
     if (!ready || !kakao || !m) return
     truckOs.current.forEach((o) => o.setMap(null))
-    truckOs.current = p.trucks.map((t) => {
+    const css = getComputedStyle(box.current ?? document.documentElement)
+    truckOs.current = p.trucks.flatMap((t) => {
+      const road = TRAFFIC_ROADS.find((r) => r.sensor === t.name)
+      if (!road) return []
       const lv = truckLevel(t.truck)
-      const el = document.createElement('button')
-      el.type = 'button'
-      el.setAttribute('aria-label', `${t.nickname ?? t.name} 앞길 트럭 ${lv.word}, 지난 1시간 ${t.truck}대`)
-      // 보이는 원은 지름 26px(10/12 오너: 폰에서 40px은 큼), 누르는 자리는 40px 그대로(손가락으로 누르기 쉽게)
-      el.style.cssText = 'display:grid;place-items:center;width:40px;height:40px;padding:0;border:0;background:transparent;cursor:pointer'
-      el.innerHTML = `<span aria-hidden style="display:block;width:26px;height:26px;border-radius:9999px;background:color-mix(in srgb, var(${lv.color}) 40%, transparent)"></span>`
-      el.addEventListener('click', (e) => { e.stopPropagation(); onSelect(null); setSensorFocus((f) => (f === t.name ? null : t.name)) })
-      el.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') setSensorFocus(t.name) })
-      el.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') setSensorFocus((f) => (f === t.name ? null : f)) })
-      const o = new kakao.maps.CustomOverlay({ position: new kakao.maps.LatLng(t.lat, t.lon), content: el, xAnchor: 0.5, yAnchor: 0.5, zIndex: 4 })
-      o.setMap(m)
-      return o
+      const line = new kakao.maps.Polyline({
+        path: road.path.map(([la, lo]) => new kakao.maps.LatLng(la, lo)),
+        strokeWeight: 7, strokeColor: css.getPropertyValue(lv.color).trim() || '#888', strokeOpacity: 0.75, strokeStyle: 'solid', zIndex: 3,
+      })
+      line.setMap(m)
+      kakao.maps.event.addListener(line, 'click', () => { onSelect(null); setSensorFocus((f) => (f === t.name ? null : t.name)) })
+      kakao.maps.event.addListener(line, 'mouseover', () => setSensorFocus(t.name))
+      kakao.maps.event.addListener(line, 'mouseout', () => setSensorFocus((f) => (f === t.name ? null : f)))
+      return [line]
     })
   }, [ready, p.trucks, onSelect])
 
@@ -576,7 +577,7 @@ export default function KakaoArrivalMap(p: Props) {
         <p className="sr-only">지도 범례</p>
         <div className="flex flex-wrap gap-x-3">
           <span><span aria-hidden style={{ color: 'var(--color-primary-dark)' }}>★</span> 위판장</span>
-          <span>앞길 트럭(지난 1시간) <TrafficTag lv={TRUCK_LEVELS[0]} /> <TrafficTag lv={TRUCK_LEVELS[1]} /> <TrafficTag lv={TRUCK_LEVELS[2]} /></span>
+          <span>길 트럭(지난 1시간) <TrafficTag lv={TRUCK_LEVELS[0]} /> <TrafficTag lv={TRUCK_LEVELS[1]} /> <TrafficTag lv={TRUCK_LEVELS[2]} /></span>
         </div>
         <div className="flex flex-wrap gap-x-3">
           <span><span aria-hidden style={{ color: 'var(--color-arriving)' }}>⛴</span> 들어오는 배</span>
