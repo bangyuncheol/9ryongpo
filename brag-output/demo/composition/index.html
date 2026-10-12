@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="ko" data-resolution="landscape">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>배마중 데모 · 할아버지와 청년</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      @font-face { font-family: "Noto Sans KR"; src: url("assets/fonts/NotoSansKR-subset.ttf") format("truetype"); font-weight: 100 900; font-display: block; }
+      :root { --page:#f7f8f5; --card:#fff; --ink:#263238; --muted:#55636b; --line:#e3e7e4; --chip:#edf1ee; --navy:#193b50; --on-navy:#fff;
+              --soft:#d9eae5; --arriving:#b4501d; --on-soft:#9a4116; --sun:#f18a54; --sun-soft:#fdf0e8; }
+      * { margin:0; padding:0; box-sizing:border-box; }
+      html, body { width:1920px; height:1080px; overflow:hidden; background:#0e1a21; font-family:"Noto Sans KR", system-ui, sans-serif; color:var(--ink); }
+      #root { position:relative; width:100%; height:100%; overflow:hidden; background:#0e1a21; }
+      .clip { position:absolute; inset:0; }
+      .center { text-align:center; }
+      .live { position:absolute; top:0; left:0; object-fit:cover; background:#0e1a21; }
+      .live.full { width:1920px; height:1080px; }
+      .live.left { width:1920px; height:1080px; }
+
+      /* 자막 */
+      .sub .band { position:absolute; left:0; right:0; bottom:72px; display:flex; justify-content:center; }
+      .sub.left .band { right:auto; width:864px; }
+      .sub .band > span { display:inline-block; }
+      .sub .who { background:var(--sun); color:#1a1a1a; font-weight:800; font-size:26px; padding:8px 16px; border-radius:12px 0 0 12px; }
+      .sub .say { background:rgba(14,26,33,0.82); color:#fff; font-weight:700; font-size:34px; line-height:1.3; padding:8px 22px; border-radius:0 12px 12px 0; max-width:1400px; }
+      .sub.left .say { max-width:704px; font-size:30px; }
+
+      /* 오른쪽 패널 공통 */
+      #brand { position:absolute; left:864px; width:1056px; top:44px; font-size:38px; font-weight:900; color:var(--navy); letter-spacing:-0.02em; text-shadow:0 0 14px rgba(255,255,255,0.95), 0 0 4px rgba(255,255,255,0.95), 0 2px 10px rgba(255,255,255,0.9); }
+      #brand small { font-size:24px; font-weight:500; color:var(--muted); margin-left:8px; letter-spacing:0; }
+      .cap { position:absolute; left:904px; width:976px; top:104px; font-size:40px; font-weight:800; color:var(--navy); letter-spacing:-0.02em; line-height:1.3; text-shadow:0 0 14px rgba(255,255,255,0.95), 0 0 4px rgba(255,255,255,0.95), 0 2px 10px rgba(255,255,255,0.9); }
+
+      /* 폰 목업 (390×844 를 1.0 배: 세로 844 + 테두리) */
+      #phone { position:absolute; left:1486px; top:186px; width:410px; height:864px; }
+      .frame { position:absolute; inset:0; border:10px solid var(--navy); border-radius:48px; overflow:hidden; background:var(--card); box-shadow:0 24px 50px rgba(25,59,80,0.18); }
+      .screen { position:relative; width:390px; height:844px; overflow:hidden; background:var(--page); }
+      .appbar { position:absolute; left:0; right:0; top:0; height:56px; padding:0 16px; display:flex; align-items:center; justify-content:space-between; }
+      .appbar .name { font-size:18px; font-weight:800; color:var(--navy); }
+      .appbar .name small { font-size:14px; font-weight:500; color:var(--muted); margin-left:6px; }
+      .tag { display:inline-flex; align-items:center; border-radius:999px; padding:2px 8px; font-size:13px; font-weight:700; background:var(--chip); color:var(--muted); }
+      .tag.sun { background:var(--sun-soft); color:var(--on-soft); }
+      .scr { position:absolute; left:0; right:0; top:56px; bottom:56px; overflow:hidden; }
+      .scroll { position:absolute; left:0; right:0; top:0; padding:20px 16px 0; }
+      .card { background:var(--card); border-radius:20px; padding:20px; }
+      .today { background:linear-gradient(180deg, var(--sun-soft) 0%, var(--card) 100%); border-radius:20px; padding:20px; }
+      .today .date { font-size:14px; color:var(--muted); } .today .date b { color:var(--ink); font-variant-numeric:tabular-nums; }
+      .today .greet { margin-top:4px; font-size:20px; line-height:1.4; font-weight:700; color:var(--navy); }
+      .chips { margin-top:12px; display:flex; flex-wrap:wrap; gap:8px; }
+      .pill { display:inline-flex; align-items:center; border-radius:999px; padding:4px 12px; font-size:14px; font-weight:700; background:var(--card); color:var(--ink); }
+      .next { margin-top:16px; position:relative; } .next .head { display:flex; align-items:center; justify-content:space-between; }
+      .h2 { font-size:19px; font-weight:700; color:var(--navy); }
+      .box { margin-top:12px; border-radius:20px; padding:16px; background:var(--sun-soft); }
+      .eta-row { display:flex; align-items:flex-end; gap:12px; }
+      #eta { font-size:40px; line-height:1; font-weight:800; color:var(--arriving); font-variant-numeric:tabular-nums; min-width:112px; }
+      .eta-row small { font-size:13px; color:var(--muted); padding-bottom:4px; }
+      .name-line { margin-top:8px; font-size:20px; font-weight:700; } .biz-line { font-size:14px; color:var(--muted); }
+      .sp-line { margin-top:8px; font-size:16px; font-weight:700; } .sp-line small { font-size:13px; font-weight:500; color:var(--muted); margin-left:4px; }
+      .more { margin-top:12px; display:flex; align-items:center; justify-content:space-between; min-height:44px; padding:0 16px; border-radius:18px; background:var(--chip); font-size:15px; font-weight:700; }
+      #loading { position:absolute; inset:0; } #loading .card { height:100%; color:var(--muted); font-size:16px; }
+      .depart { margin-top:16px; background:var(--navy); border-radius:20px; padding:20px; color:var(--on-navy); }
+      .depart .q { font-size:14px; color:#d5dde2; } .depart .a { margin-top:4px; font-size:20px; line-height:1.4; font-weight:700; } .depart .t { margin-top:4px; font-size:14px; color:#e4eaee; }
+      .mapsec { margin-top:16px; } .maphead { display:flex; align-items:baseline; justify-content:space-between; padding:0 4px 8px; } .maphead .link { font-size:14px; font-weight:700; color:var(--navy); }
+      .map { position:relative; height:200px; border-radius:20px; background:var(--soft); overflow:hidden; }
+      .map .land { position:absolute; left:-40px; top:-20px; width:120px; height:240px; border-radius:0 60px 60px 0; background:#e9ede7; }
+      .map .star { position:absolute; left:64px; top:92px; font-size:18px; color:#0072de; line-height:1; }
+      .map .dot { position:absolute; width:8px; height:8px; border-radius:50%; background:#8a9099; } .map .dot.red { width:10px; height:10px; background:#d32f2f; }
+      .map .legend { position:absolute; left:10px; bottom:10px; display:flex; gap:6px; }
+      .map .legend span { font-size:11px; font-weight:700; color:var(--muted); background:rgba(255,255,255,0.85); border-radius:999px; padding:2px 8px; }
+      .title { font-size:20px; font-weight:700; color:var(--navy); } .subt { margin-top:4px; font-size:14px; line-height:1.45; color:var(--muted); }
+      .wait { margin-top:16px; } .fish { margin-top:16px; display:flex; flex-wrap:wrap; gap:8px; }
+      .fchip { display:inline-flex; align-items:center; min-height:44px; padding:0 16px; border-radius:18px; font-size:15px; font-weight:700; background:var(--chip); color:var(--ink); }
+      .fchip.on { background:var(--navy); color:var(--on-navy); }
+      .check { margin-top:16px; display:flex; align-items:center; gap:8px; min-height:44px; font-size:16px; }
+      .check .bx { width:20px; height:20px; border-radius:4px; background:var(--navy); color:#fff; font-size:14px; display:grid; place-items:center; }
+      .btn { margin-top:16px; width:100%; min-height:44px; display:flex; align-items:center; justify-content:center; border-radius:18px; background:var(--navy); color:var(--on-navy); font-size:15px; font-weight:700; }
+      .tabbar { position:absolute; left:0; right:0; bottom:0; height:56px; border-top:1px solid var(--line); background:var(--card); display:flex; }
+      .tab { flex:1; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; color:var(--muted); } .tab.on { color:var(--navy); }
+      #tab-ind { position:absolute; left:24px; top:0; width:49px; height:3px; border-radius:2px; background:var(--sun); }
+      #toast { position:absolute; left:16px; right:16px; top:12px; background:var(--card); border-radius:20px; border-left:8px solid var(--sun); padding:16px; box-shadow:0 10px 24px rgba(25,59,80,0.18); }
+      #toast .t1 { font-size:14px; font-weight:700; color:var(--arriving); } #toast .t2 { margin-top:4px; font-size:16px; line-height:1.45; }
+      #finger { position:absolute; left:222px; top:794px; width:44px; height:44px; border-radius:50%; background:rgba(25,59,80,0.32); border:2px solid #fff; box-shadow:0 2px 8px rgba(0,0,0,0.25); }
+
+      /* 통화 패널 */
+      #call { position:absolute; left:1262px; top:176px; width:638px; height:874px; border-radius:36px; background:var(--card); box-shadow:0 24px 50px rgba(25,59,80,0.16); overflow:hidden; }
+      #call .hd { height:120px; background:var(--navy); color:var(--on-navy); padding:24px 26px; display:flex; align-items:center; justify-content:space-between; }
+      #call .hd .nm { font-size:30px; font-weight:800; } #call .hd .no { font-size:20px; color:#cfd9e0; margin-top:4px; font-variant-numeric:tabular-nums; }
+      #call .hd .st { position:relative; width:220px; height:60px; }
+      #call .hd .st > span { position:absolute; right:0; top:0; font-size:22px; font-weight:700; color:#ffd7bf; white-space:nowrap; font-variant-numeric:tabular-nums; }
+      #st-end { color:#cfd9e0 !important; }
+      #call .log { padding:22px 28px; display:flex; flex-direction:column; gap:12px; }
+      .bub { max-width:520px; display:flex; gap:12px; align-items:flex-start; }
+      .bub p { font-size:20px; line-height:1.4; padding:10px 16px; border-radius:20px; }
+      .bub.ai p { background:var(--chip); color:var(--ink); border-top-left-radius:6px; }
+      .bub.ai .av { flex:0 0 40px; width:40px; height:40px; border-radius:50%; background:var(--navy); color:#fff; display:grid; place-items:center; font-size:22px; }
+      .bub.user { align-self:flex-end; flex-direction:column; align-items:flex-end; gap:4px; }
+      .bub.user p { background:var(--navy); color:var(--on-navy); border-top-right-radius:6px; }
+      .bub.user .stt { font-size:14px; font-weight:700; color:var(--muted); }
+      .tools { list-style:none; margin:0 0 0 52px; display:flex; flex-direction:column; gap:6px; }
+      .tools li { display:flex; align-items:center; gap:10px; font-size:16px; font-weight:700; color:var(--navy); background:var(--sun-soft); border-radius:10px; padding:6px 12px; width:fit-content; }
+      .tools .chk { width:24px; height:24px; border-radius:50%; background:var(--sun); color:#1a1a1a; display:grid; place-items:center; font-size:15px; }
+      #call-cap { position:absolute; left:864px; width:1056px; top:100px; font-size:36px; font-weight:800; color:var(--navy); letter-spacing:-0.02em; text-shadow:0 0 14px rgba(255,255,255,0.95), 0 0 4px rgba(255,255,255,0.95), 0 2px 10px rgba(255,255,255,0.9); }
+
+      /* 데이터 흐름 그래픽 */
+      .node { position:absolute; display:flex; align-items:center; gap:12px; padding:10px 14px; border-radius:16px; background:rgba(255,255,255,0.92);
+               border:2px solid rgba(255,255,255,0); box-shadow:0 8px 20px rgba(25,59,80,0.14); }
+      .node .ic { font-size:30px; line-height:1; width:40px; text-align:center; }
+      .node .tx { display:flex; flex-direction:column; gap:2px; }
+      .node b { font-size:18px; color:var(--navy); line-height:1.2; }
+      .node small { font-size:13px; color:var(--muted); line-height:1.2; }
+      #hub { position:absolute; left:1246px; top:476px; width:190px; height:104px; border-radius:18px; background:rgba(25,59,80,0.96);
+              border:2px solid rgba(255,255,255,0); color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; box-shadow:0 10px 24px rgba(25,59,80,0.25); }
+      #hub b { font-size:19px; } #hub small { font-size:12px; color:#cfd9e0; text-align:center; line-height:1.25; }
+      .wires { position:absolute; left:0; top:0; width:1920px; height:1080px; pointer-events:none; }
+      .wires line { stroke:rgba(255,255,255,0.75); stroke-width:2; stroke-dasharray:6 8; }
+      .dot { position:absolute; left:0; top:0; width:14px; height:14px; border-radius:50%; background:var(--sun); box-shadow:0 0 10px rgba(241,138,84,0.9), 0 0 2px #fff; opacity:0; }
+
+      /* 아웃트로 */
+      #outro-bg { position:absolute; inset:0; background:var(--page); }
+      #o-logo { position:absolute; left:0; right:0; top:360px; font-size:120px; font-weight:900; color:var(--navy); letter-spacing:-0.02em; }
+      #o-sub { position:absolute; left:0; right:0; top:540px; font-size:44px; font-weight:500; color:var(--muted); }
+      #o-cta { position:absolute; left:0; right:0; top:625px; font-size:48px; font-weight:800; color:var(--arriving); }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="84" data-width="1920" data-height="1080">
+
+      <!-- 촬영분 (자리표시 또는 실제 영상, 파일 이름 고정) -->
+      <video id="live-A" class="live full" src="assets/live/A.mp4" playsinline data-has-audio="true"
+        data-start="0" data-duration="14" data-track-index="0"></video>
+      <video id="live-B" class="live left" src="assets/live/B.mp4" playsinline data-has-audio="true"
+        data-start="14" data-duration="24" data-track-index="0"></video>
+      <video id="live-C" class="live full" src="assets/live/C.mp4" playsinline data-has-audio="true"
+        data-start="38" data-duration="4" data-track-index="0"></video>
+      <video id="live-D" class="live full" src="assets/live/D.mp4" playsinline data-has-audio="true"
+        data-start="42" data-duration="5" data-track-index="0"></video>
+      <video id="live-E" class="live full" src="assets/live/E.mp4" playsinline data-has-audio="true"
+        data-start="47" data-duration="5" data-track-index="0"></video>
+      <video id="live-F" class="live left" src="assets/live/F.mp4" playsinline data-has-audio="true"
+        data-start="52" data-duration="24" data-track-index="0"></video>
+      <video id="live-G" class="live full" src="assets/live/G.mp4" playsinline data-has-audio="true"
+        data-start="76" data-duration="8" data-track-index="0"></video>
+
+      <!-- B: 앱 설명 패널 (오른쪽) -->
+      <section id="app" class="clip" data-start="14" data-duration="24" data-track-index="2">
+        <div id="brand" class="center">⚓ 배마중<small>구룡포항</small></div>
+        <div id="cap2" class="cap center">폰으로 열면, 오늘 새벽이 먼저 보여요</div>
+        <div id="cap3" class="cap center">몇 시에, 어떤 배가, 뭘 싣고</div>
+        <div id="cap4" class="cap center">기다리는 생선이 들어오면 휴대폰으로</div>
+        <div id="cap5" class="cap center">언제 출발할지까지 한 줄로</div>
+        <svg class="wires" id="wires-b" viewBox="0 0 1920 1080" data-layout-ignore><line x1="1196" y1="288" x2="1246" y2="528" /><line x1="1196" y1="408" x2="1246" y2="528" /><line x1="1196" y1="528" x2="1246" y2="528" /><line x1="1196" y1="648" x2="1246" y2="528" /><line x1="1196" y1="768" x2="1246" y2="528" /><line x1="1436" y1="528" x2="1486" y2="600" /></svg>
+        <div id="nb0" class="node" style="left:896px; top:236px; width:300px; height:104px;"><span class="ic">🛰</span><span class="tx"><b>E-UM 선박 위치</b><small>디지털트윈 포항 · 10분마다</small></span></div>
+        <div id="nb1" class="node" style="left:896px; top:356px; width:300px; height:104px;"><span class="ic">📋</span><span class="tx"><b>E-UM 어선 명부</b><small>202척 · 어업종류·톤수</small></span></div>
+        <div id="nb2" class="node" style="left:896px; top:476px; width:300px; height:104px;"><span class="ic">📊</span><span class="tx"><b>해수부 위판 실적</b><small>구룡포수협 · 최근 4년 10월</small></span></div>
+        <div id="nb3" class="node" style="left:896px; top:596px; width:300px; height:104px;"><span class="ic">🚚</span><span class="tx"><b>E-UM 교통 센서</b><small>위판장 80m 앞 · 실측</small></span></div>
+        <div id="nb4" class="node" style="left:896px; top:716px; width:300px; height:104px;"><span class="ic">🔔</span><span class="tx"><b>웹 푸시 (VAPID)</b><small>조건이 맞으면 폰으로</small></span></div>
+        <div id="hub" data-layout-allow-overlap><b>⚓ 배마중 서버</b><small>숫자는 룰이 계산<br>LLM은 문장만</small></div>
+        <span id="dot-B-0-0" class="dot"></span><span id="dot-B-0-1" class="dot"></span><span id="dot-B-1-0" class="dot"></span><span id="dot-B-1-1" class="dot"></span><span id="dot-B-2-0" class="dot"></span><span id="dot-B-2-1" class="dot"></span><span id="dot-B-3-0" class="dot"></span><span id="dot-B-3-1" class="dot"></span><span id="dot-B-4-0" class="dot"></span><span id="dot-B-4-1" class="dot"></span>
+        <div id="phone">
+          <div class="frame" data-layout-allow-overflow>
+            <div class="screen" data-layout-allow-overflow>
+              <div class="appbar"><span class="name" data-layout-allow-overlap>⚓ 배마중<small data-layout-allow-overlap>구룡포항</small></span><span class="tag" data-layout-allow-overlap>선박 위치 시연</span></div>
+              <div id="scr-home" class="scr">
+                <div id="home-scroll" class="scroll">
+                  <div class="today" data-layout-allow-occlusion>
+                    <p class="date" data-layout-allow-occlusion>10월 11일 토요일 · <b data-layout-allow-occlusion>03:10</b></p>
+                    <p class="greet" data-layout-allow-occlusion>좋은 새벽이에요. 오늘도 배가 들어오고 있어요.</p>
+                    <div class="chips"><span id="chip1" class="pill" data-layout-allow-occlusion>🚢 입항 예정 3척</span><span id="chip2" class="pill" data-layout-allow-occlusion>붉은대게 가능성 높음</span><span id="chip3" class="pill" data-layout-allow-occlusion>🚗 위판장 앞 비슷</span></div>
+                  </div>
+                  <div class="next">
+                    <div id="next-card" class="card">
+                      <div class="head"><span class="h2" data-layout-allow-occlusion data-layout-allow-overlap>곧 들어오는 배</span><span class="tag sun" data-layout-allow-occlusion>다음 입항까지 약 75분</span></div>
+                      <div class="box">
+                        <div class="eta-row"><span id="eta">04:25</span><small>예측 · 신뢰도 높음</small></div>
+                        <p id="l1" class="name-line">남진호</p>
+                        <p id="l2" class="biz-line">자망선 5t · 위판장까지 11.7km</p>
+                        <p id="l3" class="sp-line">붉은대게 가능성 높음<small>추정 79%</small></p>
+                      </div>
+                      <div class="more"><span>들어오는 배 3척 모두 보기</span><span>→</span></div>
+                    </div>
+                    <div id="loading"><div class="card">불러오는 중입니다</div></div>
+                  </div>
+                  <div id="depart" class="depart"><p class="q">언제 가면 될까요?</p><p class="a">경매 09:00 · 08:30까지 도착하면 돼요</p><p class="t">지금 위판장 앞은 비슷 · 실측</p></div>
+                  <div class="mapsec">
+                    <div class="maphead"><span class="h2">구룡포항 지금</span><span class="link">크게 보기 →</span></div>
+                    <div class="map" data-layout-ignore><div class="land"></div><span class="star">★</span>
+                      <span class="dot" style="left:210px;top:60px"></span><span class="dot" style="left:236px;top:92px"></span><span class="dot" style="left:262px;top:70px"></span>
+                      <span class="dot" style="left:290px;top:110px"></span><span class="dot" style="left:318px;top:84px"></span><span class="dot" style="left:344px;top:124px"></span>
+                      <span class="dot red" style="left:150px;top:104px"></span><span class="dot red" style="left:176px;top:118px"></span><span class="dot red" style="left:198px;top:132px"></span>
+                      <div class="legend"><span>★ 위판장</span><span>● 들어오는 배</span><span>○ 조업·대기</span></div></div>
+                  </div>
+                </div>
+              </div>
+              <div id="scr-alerts" class="scr">
+                <div class="scroll">
+                  <p class="title">알림</p><p class="subt">원하는 생선이 들어오면 휴대폰이나 전화로 먼저 알려 드려요</p>
+                  <div class="card wait">
+                    <p class="h2">기다리는 생선이 있나요?</p><p class="subt">원하는 생선이 들어오면 먼저 알려 드릴게요.</p>
+                    <div class="fish"><span class="fchip on">🦀 붉은대게</span><span class="fchip">🦑 살오징어</span><span class="fchip">🐚 골뱅이</span><span class="fchip">🚢 어떤 배든</span></div>
+                    <div class="check"><span class="bx">✓</span><span>🔔 휴대폰 알림</span></div>
+                    <div id="apply" class="btn">알림 신청하기</div>
+                  </div>
+                </div>
+              </div>
+              <nav class="tabbar"><div id="tab-ind"></div><span id="tab0" class="tab on">홈</span><span id="tab1" class="tab">들어오는 배</span><span id="tab2" class="tab">알림</span><span id="tab3" class="tab">물어보기</span></nav>
+              <div id="toast" data-layout-allow-occlusion><p class="t1" data-layout-allow-overlap>📣 03:10 입항 알림을 보냈어요</p><p class="t2" data-layout-allow-overlap>04:25~04:35 자망선 3척 입항 예정 · 붉은대게·골뱅이 가능성. 경매 09:00</p></div>
+              <div id="finger" data-layout-ignore></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- F: 통화 패널 (오른쪽) -->
+      <section id="callscene" class="clip" data-start="52" data-duration="24" data-track-index="3">
+        <div id="brand2" class="center" style="position:absolute; left:864px; width:1056px; top:44px; font-size:38px; font-weight:900; color:var(--navy); text-shadow:0 0 14px rgba(255,255,255,0.95), 0 0 4px rgba(255,255,255,0.95), 0 2px 10px rgba(255,255,255,0.9);">⚓ 배마중<small style="font-size:24px; font-weight:500; color:var(--muted); margin-left:8px;">전화로 물어보기</small></div>
+        <div id="call-cap" class="center">말로 물으면, 말로 알려 드려요</div>
+        <svg class="wires" id="wires-f" viewBox="0 0 1920 1080" data-layout-ignore><line x1="1216" y1="254" x2="1262" y2="560" /><line x1="1216" y1="362" x2="1262" y2="560" /><line x1="1216" y1="470" x2="1262" y2="560" /><line x1="1216" y1="578" x2="1262" y2="560" /><line x1="1216" y1="686" x2="1262" y2="560" /><line x1="1216" y1="794" x2="1262" y2="560" /><line x1="1216" y1="902" x2="1262" y2="560" /></svg>
+        <div id="nf0" class="node" style="left:896px; top:206px; width:320px; height:96px;"><span class="ic">☎</span><span class="tx"><b>ClawOps 070</b><small>전화 연결 · 통화 음성</small></span></div>
+        <div id="nf1" class="node" style="left:896px; top:314px; width:320px; height:96px;"><span class="ic">🎙</span><span class="tx"><b>CLOVA Speech</b><small>실시간 받아쓰기</small></span></div>
+        <div id="nf2" class="node" style="left:896px; top:422px; width:320px; height:96px;"><span class="ic">🧠</span><span class="tx"><b>OpenAI</b><small>범위 판정 · 도구 호출</small></span></div>
+        <div id="nf3" class="node" style="left:896px; top:530px; width:320px; height:96px;"><span class="ic">🛰</span><span class="tx"><b>E-UM 선박 위치</b><small>입항 예보</small></span></div>
+        <div id="nf4" class="node" style="left:896px; top:638px; width:320px; height:96px;"><span class="ic">📊</span><span class="tx"><b>해수부 위판 실적</b><small>어종 추정</small></span></div>
+        <div id="nf5" class="node" style="left:896px; top:746px; width:320px; height:96px;"><span class="ic">🚚</span><span class="tx"><b>E-UM 교통 센서</b><small>방문 시각</small></span></div>
+        <div id="nf6" class="node" style="left:896px; top:854px; width:320px; height:96px;"><span class="ic">🔊</span><span class="tx"><b>Gemini TTS</b><small>문장 음성 합성</small></span></div>
+        <span id="dot-F-0-0" class="dot"></span><span id="dot-F-1-0" class="dot"></span><span id="dot-F-2-0" class="dot"></span><span id="dot-F-2-1" class="dot"></span><span id="dot-F-3-0" class="dot"></span><span id="dot-F-4-0" class="dot"></span><span id="dot-F-4-1" class="dot"></span><span id="dot-F-5-0" class="dot"></span><span id="dot-F-6-0" class="dot"></span><span id="dot-F-7-0" class="dot"></span><span id="dot-F-8-0" class="dot"></span><span id="dot-F-9-0" class="dot"></span><span id="dot-F-9-1" class="dot"></span><span id="dot-F-10-0" class="dot"></span>
+        <div id="call">
+          <div class="hd">
+            <div><div class="nm">📞 배마중</div><div class="no">070-0000-0000</div></div>
+            <div class="st"><span id="st-live" data-layout-allow-overlap>통화 중 <span id="timer" data-layout-allow-overlap>0:00</span></span><span id="st-end" data-layout-allow-overlap>통화 종료</span></div>
+          </div>
+          <div class="log">
+            <div id="bub-0" class="bub ai"><span class="av">⚓</span><p><span class="s">안녕하세요, 배마중입니다.</span> <span class="s">구룡포 위판장 입항과 어종, 위판장 앞 교통을 알려 드려요.</span> <span class="s">궁금하신 거 있으세요?</span></p></div>
+            <div id="bub-1" class="bub user"><p>오늘 대게 들어오나? 몇 시에 가면 돼?</p><span class="stt">받아쓰기</span></div>
+            <div id="bub-2" class="bub ai"><span class="av">⚓</span><p><span class="s">네, 확인해 볼게요.</span></p></div>
+            <ul id="tools" class="tools"><li id="tool-0"><span class="chk">✓</span>받아쓰기 확정 · CLOVA Speech</li><li id="tool-1"><span class="chk">✓</span>범위 판정 · 입항 / 어종 / 방문 시각</li><li id="tool-2"><span class="chk">✓</span>get_arrival_forecast · E-UM 선박 위치</li><li id="tool-3"><span class="chk">✓</span>get_species_estimate · 10월 위판 실적 4년</li><li id="tool-4"><span class="chk">✓</span>recommend_visit_time · 교통센서 실측</li></ul>
+            <div id="bub-3" class="bub ai"><span class="av">⚓</span><p><span class="s">지금 자망선 3척이 들어오고 있어요.</span> <span class="s">첫 배 남진호가 4시 25분쯤 도착하고, 붉은대게 가능성이 높아요.</span> <span class="s">경매는 9시니까 8시 30분까지 오시면 돼요.</span></p></div>
+            <div id="bub-4" class="bub user"><p>고마워요.</p><span class="stt">받아쓰기</span></div>
+            <div id="bub-5" class="bub ai"><span class="av">⚓</span><p><span class="s">네, 전화 주셔서 감사합니다.</span> <span class="s">좋은 하루 보내세요.</span></p></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 자막 -->
+      <div id="sub-A0" class="clip sub" data-start="0.8" data-duration="3.6" data-track-index="1" data-layout-allow-caption-zone>
+        <div class="band"><span class="who">할아버지</span><span class="say">오늘도 대게 안 나오는 거 아니야? 갔는데 또 허탕 아니야?</span></div>
+      </div>
+      <div id="sub-A1" class="clip sub" data-start="5.2" data-duration="2.6" data-track-index="1" data-layout-allow-caption-zone>
+        <div class="band"><span class="who">청년</span><span class="say">우리에겐 배마중이 있잖아요!</span></div>
+      </div>
+      <div id="sub-A2" class="clip sub" data-start="8.6" data-duration="2.8" data-track-index="1" data-layout-allow-caption-zone>
+        <div class="band"><span class="who">할아버지</span><span class="say">어디서 나온 거야 이놈 새끼!!</span></div>
+      </div>
+      <div id="sub-B0" class="clip sub left" data-start="15" data-duration="3.2" data-track-index="1" data-layout-allow-caption-zone>
+        <div class="band"><span class="who">청년</span><span class="say">폰으로 열면 오늘 새벽 상황이 바로 보여요.</span></div>
+      </div>
+      <div id="sub-B1" class="clip sub left" data-start="19" data-duration="3.8" data-track-index="1" data-layout-allow-caption-zone>
+        <div class="band"><span class="who">청년</span><span class="say">어떤 배가 몇 시에, 뭘 싣고 오는지까지요.</span></div>
+      </div>
+      <div id="sub-B2" class="clip sub left" data-start="24.5" data-duration="3.8" data-track-index="1" data-layout-allow-caption-zone>
+        <div class="band"><span class="who">청년</span><span class="say">기다리는 생선을 고르고 알림을 켜 두면</span></div>
+      </div>
+      <div id="sub-B3" class="clip sub left" data-start="28.6" data-duration="3" data-track-index="1" data-layout-allow-caption-zone>
+        <div class="band"><span class="who">청년</span><span class="say">들어올 때 폰으로 먼저 알려 줘요.</span></div>
+      </div>
+      <div id="sub-B4" class="clip sub left" data-start="32" data-duration="3.4" data-track-index="1" data-layout-allow-caption-zone>
+        <div class="band"><span class="who">청년</span><span class="say">언제 출발하면 되는지도 한 줄로 알려 주고요.</span></div>
+      </div>
+      <div id="sub-C0" class="clip sub" data-start="38.5" data-duration="3" data-track-index="1" data-layout-allow-caption-zone>
+        <div class="band"><span class="who">청년</span><span class="say">이제 허탕치실 일 없겠죠?</span></div>
+      </div>
+      <div id="sub-D0" class="clip sub" data-start="42.5" data-duration="4" data-track-index="1" data-layout-allow-caption-zone>
+        <div class="band"><span class="who">할아버지</span><span class="say">호호 좋네… 그런데 눈도 침침하고 안 보여~</span></div>
+      </div>
+      <div id="sub-E0" class="clip sub" data-start="47.5" data-duration="3.5" data-track-index="1" data-layout-allow-caption-zone>
+        <div class="band"><span class="who">청년</span><span class="say">그래서 전화로도 가능합니다!</span></div>
+      </div>
+      <div id="sub-F0" class="clip sub left" data-start="57" data-duration="3" data-track-index="1" data-layout-allow-caption-zone>
+        <div class="band"><span class="who">할아버지</span><span class="say">오늘 대게 들어오나? 몇 시에 가면 돼?</span></div>
+      </div>
+      <div id="sub-F1" class="clip sub left" data-start="71" data-duration="2" data-track-index="1" data-layout-allow-caption-zone>
+        <div class="band"><span class="who">할아버지</span><span class="say">고마워요.</span></div>
+      </div>
+
+      <!-- G: 아웃트로 (촬영분 위에 밝아지며) -->
+      <section id="outro" class="clip" data-start="80.5" data-duration="3.5" data-track-index="4">
+        <div id="outro-bg"></div>
+        <div id="o-logo" class="center">⚓ 배마중</div>
+        <div id="o-sub" class="center">구룡포항 새벽 입항·어종 알림</div>
+        <div id="o-cta" class="center">폰 브라우저에서 바로. 전화로도.</div>
+      </section>
+
+      <audio id="music" src="assets/music/happy-beats-business-moves-vol-11-by-ende-dot-app.mp3" data-start="0" data-duration="84" data-track-index="10" data-automation='{"version": 1, "lanes": [{"target": "volume", "points": [{"t": 0, "v": 0}, {"t": 1.5, "v": 0.14}, {"t": 14.0, "v": 0.14}, {"t": 15.0, "v": 0.22}, {"t": 37.0, "v": 0.22}, {"t": 38.0, "v": 0.14}, {"t": 52.0, "v": 0.14}, {"t": 53.0, "v": 0.22}, {"t": 76.0, "v": 0.22}, {"t": 82.5, "v": 0.14}, {"t": 84.0, "v": 0}]}]}'></audio>
+      <audio id="sfx-land" src="assets/sfx/impact/impactSoft_medium_001.ogg" data-start="14.85" data-track-index="30" data-volume="0.6"></audio>
+      <audio id="sfx-chip1" src="assets/sfx/interface/drop_001.ogg" data-start="15.6" data-track-index="31" data-volume="0.45"></audio>
+      <audio id="sfx-chip2" src="assets/sfx/interface/drop_001.ogg" data-start="16.1" data-track-index="32" data-volume="0.45"></audio>
+      <audio id="sfx-chip3" src="assets/sfx/interface/drop_001.ogg" data-start="16.6" data-track-index="33" data-volume="0.45"></audio>
+      <audio id="sfx-slide1" src="assets/sfx/casino/card-slide-1.ogg" data-start="18" data-track-index="34" data-volume="0.4"></audio>
+      <audio id="sfx-num" src="assets/sfx/impact/impactSoft_medium_001.ogg" data-start="19.35" data-track-index="35" data-volume="0.5"></audio>
+      <audio id="sfx-l3" src="assets/sfx/interface/drop_002.ogg" data-start="20.9" data-track-index="36" data-volume="0.45"></audio>
+      <audio id="sfx-tap1" src="assets/sfx/interface/click_003.ogg" data-start="23.9" data-track-index="37" data-volume="0.7"></audio>
+      <audio id="sfx-slide2" src="assets/sfx/casino/card-slide-1.ogg" data-start="23.95" data-track-index="38" data-volume="0.4"></audio>
+      <audio id="sfx-tap2" src="assets/sfx/interface/click_003.ogg" data-start="25.5" data-track-index="39" data-volume="0.7"></audio>
+      <audio id="sfx-toast" src="assets/sfx/impact/impactBell_heavy_000.ogg" data-start="26.3" data-track-index="40" data-volume="0.45"></audio>
+      <audio id="sfx-slide3" src="assets/sfx/casino/card-slide-1.ogg" data-start="29.3" data-track-index="41" data-volume="0.35"></audio>
+      <audio id="sfx-depart" src="assets/sfx/interface/drop_001.ogg" data-start="30.7" data-track-index="42" data-volume="0.5"></audio>
+      <audio id="sfx-connect" src="assets/sfx/interface/switch_007.ogg" data-start="52.6" data-track-index="43" data-volume="0.5"></audio>
+      <audio id="sfx-logo" src="assets/sfx/impact/impactSoft_medium_001.ogg" data-start="80.9" data-track-index="44" data-volume="0.6"></audio>
+      <audio id="sfx-tool0" src="assets/sfx/interface/drop_001.ogg" data-start="60.8" data-track-index="45" data-volume="0.35"></audio>
+      <audio id="sfx-tool1" src="assets/sfx/interface/drop_001.ogg" data-start="61.35" data-track-index="46" data-volume="0.35"></audio>
+      <audio id="sfx-tool2" src="assets/sfx/interface/drop_001.ogg" data-start="61.9" data-track-index="47" data-volume="0.35"></audio>
+      <audio id="sfx-tool3" src="assets/sfx/interface/drop_001.ogg" data-start="62.45" data-track-index="48" data-volume="0.35"></audio>
+      <audio id="sfx-tool4" src="assets/sfx/interface/drop_001.ogg" data-start="63" data-track-index="49" data-volume="0.35"></audio>
+      <audio id="sfx-answer" src="assets/sfx/impact/impactBell_heavy_000.ogg" data-start="64.2" data-track-index="50" data-volume="0.4"></audio>
+    </div>
+
+    <script>
+      // 장면 시작 시각(초). scenes.json 에서 생성됨 — 직접 고치지 말고 build.py 를 다시 돌린다.
+      const T = { A: 0, B: 14, C: 38, D: 42, E: 47, F: 52, G: 76 };
+      const OUI = "power3.out";
+      const pad = (n) => String(n).padStart(2, "0");
+
+      document.fonts.ready.then(() => {
+        const tl = gsap.timeline({ paused: true });
+        // 데이터 흐름: 카드 켜기 / 점(패킷) 이동. 좌표는 build.py 가 계산한 상수(렌더 중 DOM 측정 없음)
+        const lit = (sel, t, hold) => {
+          tl.to(sel, { borderColor: "#f18a54", scale: 1.04, duration: 0.2 }, t);
+          tl.to(sel, { borderColor: "rgba(255,255,255,0)", scale: 1, duration: 0.35 }, t + hold);
+        };
+        const flow = (sel, from, to, t) => {
+          tl.fromTo(sel, { x: from[0] - 7, y: from[1] - 7, opacity: 0 }, { opacity: 1, duration: 0.08, immediateRender: false }, t);
+          tl.to(sel, { x: to[0] - 7, y: to[1] - 7, duration: 0.45, ease: "power1.inOut" }, t);
+          tl.to(sel, { opacity: 0, duration: 0.1 }, t + 0.45);
+        };
+
+        /* 초기 상태 */
+        gsap.set(["#brand", "#cap2", "#cap3", "#cap4", "#cap5", "#call-cap", "#brand2"], { opacity: 0 });
+        gsap.set("#phone", { y: 900, opacity: 0 });
+        gsap.set(["#chip1", "#chip2", "#chip3"], { opacity: 0, scale: 0.6 });
+        gsap.set("#next-card", { opacity: 0 });
+        gsap.set(["#eta", "#l1", "#l2", "#l3"], { opacity: 0 });
+        gsap.set("#scr-alerts", { x: 390, opacity: 0 });
+        gsap.set("#toast", { yPercent: -140, opacity: 0 });
+        gsap.set("#finger", { opacity: 0 });
+        gsap.set("#call", { y: 60, opacity: 0 });
+        gsap.set("#st-end", { opacity: 0 });
+        gsap.set(".bub", { opacity: 0 });
+        gsap.set(["#outro-bg", "#o-logo", "#o-sub", "#o-cta"], { opacity: 0 });
+        document.querySelectorAll(".sub .band").forEach((b) => gsap.set(b, { opacity: 0, y: 16 }));
+
+        /* 자막: 각 자막 클립 시작에서 올라오고 끝에서 사라진다 */
+        document.querySelectorAll(".sub").forEach((el) => {
+          const s = parseFloat(el.dataset.start), d = parseFloat(el.dataset.duration), band = el.querySelector(".band");
+          tl.to(band, { opacity: 1, y: 0, duration: 0.25, ease: OUI }, s);
+          tl.to(band, { opacity: 0, duration: 0.2 }, s + d - 0.25);
+        });
+
+        /* B: 앱 설명 (T.B 기준) */
+        gsap.set(["#wires-b", "#wires-f"], { opacity: 0 });
+        gsap.set([".node", "#hub"], { opacity: 0, x: -20 });
+        tl.to("#wires-b", { opacity: 1, duration: 0.6 }, T.B + 0.5);
+        tl.to(["#nb0", "#nb1", "#nb2", "#nb3", "#nb4"], { opacity: 1, x: 0, duration: 0.4, ease: OUI, stagger: 0.08 }, T.B + 0.4);
+        tl.to("#hub", { opacity: 1, x: 0, duration: 0.4, ease: OUI }, T.B + 0.7);
+        lit("#nb1", T.B + 1.1, 1.8);
+        flow("#dot-B-0-0", [1196, 408], [1246, 528], T.B + 1.1);
+        lit("#hub", T.B + 1.55, 0.6);
+        flow("#dot-B-0-1", [1436, 528], [1486, 600], T.B + 1.6);
+        lit("#hub", T.B + 2.05, 0.6);
+        lit("#nb0", T.B + 3.9, 1.8);
+        flow("#dot-B-1-0", [1196, 288], [1246, 528], T.B + 3.9);
+        lit("#hub", T.B + 4.35, 0.6);
+        flow("#dot-B-1-1", [1436, 528], [1486, 600], T.B + 4.4);
+        lit("#hub", T.B + 4.85, 0.6);
+        lit("#nb2", T.B + 6.2, 1.8);
+        flow("#dot-B-2-0", [1196, 528], [1246, 528], T.B + 6.2);
+        lit("#hub", T.B + 6.65, 0.6);
+        flow("#dot-B-2-1", [1436, 528], [1486, 600], T.B + 6.7);
+        lit("#hub", T.B + 7.15, 0.6);
+        lit("#nb4", T.B + 11.6, 1.8);
+        flow("#dot-B-3-0", [1246, 528], [1196, 768], T.B + 11.6);
+        flow("#dot-B-3-1", [1196, 768], [1486, 600], T.B + 12.1);
+        lit("#nb3", T.B + 16.1, 1.8);
+        flow("#dot-B-4-0", [1196, 648], [1246, 528], T.B + 16.1);
+        lit("#hub", T.B + 16.55, 0.6);
+        flow("#dot-B-4-1", [1436, 528], [1486, 600], T.B + 16.6);
+        lit("#hub", T.B + 17.05, 0.6);
+        tl.to(["#wires-b", "#nb0", "#nb1", "#nb2", "#nb3", "#nb4", "#hub"], { opacity: 0, duration: 0.7 }, T.B + 23);
+        tl.to("#brand", { opacity: 1, duration: 0.4 }, T.B + 0.2);
+        tl.to("#phone", { y: 0, opacity: 1, duration: 0.75, ease: OUI }, T.B + 0.3);
+        tl.fromTo("#cap2", { y: 16 }, { y: 0, opacity: 1, duration: 0.4, ease: OUI }, T.B + 0.6);
+        tl.to("#chip1", { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.6)" }, T.B + 1.6);
+        tl.to("#chip2", { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.6)" }, T.B + 2.1);
+        tl.to("#chip3", { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.6)" }, T.B + 2.6);
+        tl.to("#cap2", { opacity: 0, y: -12, duration: 0.3 }, T.B + 3.8);
+        tl.to("#home-scroll", { y: -200, duration: 0.5, ease: "power2.inOut" }, T.B + 4.0);
+        tl.fromTo("#cap3", { y: 16 }, { y: 0, opacity: 1, duration: 0.4, ease: OUI }, T.B + 4.2);
+        tl.to("#loading", { opacity: 0, duration: 0.3 }, T.B + 4.4);
+        tl.to("#next-card", { opacity: 1, duration: 0.35 }, T.B + 4.45);
+        tl.to("#eta", { opacity: 1, duration: 0.2 }, T.B + 4.8);
+        const etaProxy = { m: 0 };
+        tl.to(etaProxy, { m: 265, duration: 0.6, ease: "power2.out", onUpdate() { const m = Math.round(etaProxy.m); document.getElementById("eta").textContent = pad(Math.floor(m / 60)) + ":" + pad(m % 60); } }, T.B + 4.8);
+        tl.fromTo("#l1", { y: 12 }, { y: 0, opacity: 1, duration: 0.35, ease: OUI }, T.B + 5.9);
+        tl.fromTo("#l2", { y: 12 }, { y: 0, opacity: 1, duration: 0.35, ease: OUI }, T.B + 6.4);
+        tl.fromTo("#l3", { y: 12 }, { y: 0, opacity: 1, duration: 0.35, ease: OUI }, T.B + 6.9);
+        tl.to("#cap3", { opacity: 0, y: -12, duration: 0.3 }, T.B + 9.4);
+        tl.to("#finger", { opacity: 1, duration: 0.2 }, T.B + 9.6);
+        tl.to("#finger", { scale: 0.82, duration: 0.1 }, T.B + 9.9);
+        tl.to("#finger", { scale: 1, duration: 0.18, ease: "back.out(2)" }, T.B + 10.0);
+        tl.to("#tab-ind", { x: 195, duration: 0.3, ease: OUI }, T.B + 9.9);
+        tl.to("#tab0", { color: "#55636b", duration: 0.2 }, T.B + 9.9);
+        tl.to("#tab2", { color: "#193b50", duration: 0.2 }, T.B + 9.9);
+        tl.to("#scr-home", { x: -390, opacity: 0, duration: 0.4, ease: "power2.inOut" }, T.B + 9.9);
+        tl.to("#scr-alerts", { x: 0, opacity: 1, duration: 0.4, ease: "power2.inOut" }, T.B + 9.9);
+        tl.fromTo("#cap4", { y: 16 }, { y: 0, opacity: 1, duration: 0.4, ease: OUI }, T.B + 10.1);
+        tl.to("#finger", { x: -49, y: -392, duration: 0.55, ease: "power2.inOut" }, T.B + 10.9);
+        tl.to("#finger", { scale: 0.82, duration: 0.1 }, T.B + 11.5);
+        tl.to("#finger", { scale: 1, duration: 0.18, ease: "back.out(2)" }, T.B + 11.6);
+        tl.to("#apply", { scale: 0.97, duration: 0.1 }, T.B + 11.5);
+        tl.to("#apply", { scale: 1, duration: 0.2, ease: "back.out(2)" }, T.B + 11.6);
+        tl.to("#finger", { opacity: 0, duration: 0.25 }, T.B + 11.9);
+        tl.to("#toast", { yPercent: 0, opacity: 1, duration: 0.4, ease: OUI }, T.B + 12.3);
+        tl.to("#cap4", { opacity: 0, y: -12, duration: 0.3 }, T.B + 15.0);
+        tl.to("#tab-ind", { x: 0, duration: 0.3, ease: OUI }, T.B + 15.3);
+        tl.to("#tab2", { color: "#55636b", duration: 0.2 }, T.B + 15.3);
+        tl.to("#tab0", { color: "#193b50", duration: 0.2 }, T.B + 15.3);
+        tl.to("#scr-home", { x: 0, opacity: 1, duration: 0.4, ease: "power2.inOut" }, T.B + 15.3);
+        tl.to("#scr-alerts", { x: 390, opacity: 0, duration: 0.4, ease: "power2.inOut" }, T.B + 15.3);
+        tl.to("#toast", { yPercent: -140, opacity: 0, duration: 0.35, ease: "power2.in" }, T.B + 15.5);
+        tl.fromTo("#cap5", { y: 16 }, { y: 0, opacity: 1, duration: 0.4, ease: OUI }, T.B + 15.9);
+        tl.to("#home-scroll", { y: -300, duration: 0.55, ease: "power2.inOut" }, T.B + 16.0);
+        tl.to("#depart", { scale: 1.04, duration: 0.25 }, T.B + 16.7);
+        tl.to("#depart", { scale: 1, duration: 0.4, ease: OUI }, T.B + 16.95);
+        tl.to(["#phone", "#brand", "#cap5"], { opacity: 0, duration: 0.7 }, T.B + 23);
+
+        /* F: 통화 (T.F 기준) */
+        tl.to("#wires-f", { opacity: 1, duration: 0.6 }, T.F + 0.5);
+        tl.to(["#nf0", "#nf1", "#nf2", "#nf3", "#nf4", "#nf5", "#nf6"], { opacity: 1, x: 0, duration: 0.4, ease: OUI, stagger: 0.07 }, T.F + 0.3);
+        lit("#nf0", T.F + 0.5, 1.3);
+        flow("#dot-F-0-0", [1216, 254], [1262, 560], T.F + 0.5);
+        lit("#nf6", T.F + 0.9, 1.3);
+        flow("#dot-F-1-0", [1216, 902], [1262, 560], T.F + 0.9);
+        lit("#nf1", T.F + 4.9, 1.8);
+        flow("#dot-F-2-0", [1262, 560], [1216, 362], T.F + 4.9);
+        flow("#dot-F-2-1", [1216, 362], [1262, 560], T.F + 5.4);
+        lit("#nf6", T.F + 8.1, 1.3);
+        flow("#dot-F-3-0", [1216, 902], [1262, 560], T.F + 8.1);
+        lit("#nf2", T.F + 8.7, 1.8);
+        flow("#dot-F-4-0", [1262, 560], [1216, 470], T.F + 8.7);
+        flow("#dot-F-4-1", [1216, 470], [1262, 560], T.F + 9.2);
+        lit("#nf3", T.F + 9.8, 1.3);
+        flow("#dot-F-5-0", [1216, 578], [1262, 560], T.F + 9.8);
+        lit("#nf4", T.F + 10.35, 1.3);
+        flow("#dot-F-6-0", [1216, 686], [1262, 560], T.F + 10.35);
+        lit("#nf5", T.F + 10.9, 1.3);
+        flow("#dot-F-7-0", [1216, 794], [1262, 560], T.F + 10.9);
+        lit("#nf6", T.F + 12.1, 1.3);
+        flow("#dot-F-8-0", [1216, 902], [1262, 560], T.F + 12.1);
+        lit("#nf1", T.F + 18.9, 1.8);
+        flow("#dot-F-9-0", [1262, 560], [1216, 362], T.F + 18.9);
+        flow("#dot-F-9-1", [1216, 362], [1262, 560], T.F + 19.4);
+        lit("#nf6", T.F + 20.5, 1.3);
+        flow("#dot-F-10-0", [1216, 902], [1262, 560], T.F + 20.5);
+        tl.to(["#wires-f", "#nf0", "#nf1", "#nf2", "#nf3", "#nf4", "#nf5", "#nf6"], { opacity: 0, duration: 0.6 }, T.F + 23.2);
+        tl.to(["#brand2", "#call-cap"], { opacity: 1, duration: 0.4 }, T.F + 0.2);
+        tl.to("#call", { y: 0, opacity: 1, duration: 0.6, ease: OUI }, T.F + 0.4);
+        const timer = { s: 0 };
+        tl.to(timer, { s: 23, duration: 23, ease: "none", onUpdate() { const s = Math.floor(timer.s); document.getElementById("timer").textContent = Math.floor(s / 60) + ":" + pad(s % 60); } }, T.F);
+        tl.fromTo("#bub-0", { y: 18, opacity: 0 }, { y: 0, opacity: 1, duration: 0.35, ease: OUI }, T.F + 1);
+        gsap.set("#bub-0 .s", { opacity: 0 });
+        tl.to("#bub-0 .s:nth-child(1)", { opacity: 1, duration: 0.25 }, T.F + 1.15);
+        tl.to("#bub-0 .s:nth-child(2)", { opacity: 1, duration: 0.25 }, T.F + 2.65);
+        tl.to("#bub-0 .s:nth-child(3)", { opacity: 1, duration: 0.25 }, T.F + 4.15);
+        tl.fromTo("#bub-1", { y: 18, opacity: 0 }, { y: 0, opacity: 1, duration: 0.35, ease: OUI }, T.F + 5);
+        tl.fromTo("#bub-2", { y: 18, opacity: 0 }, { y: 0, opacity: 1, duration: 0.35, ease: OUI }, T.F + 8.2);
+        gsap.set("#tools li", { opacity: 0, x: -14 }); gsap.set("#tools .chk", { scale: 0 });
+        tl.to("#tool-0", { opacity: 1, x: 0, duration: 0.3, ease: OUI }, T.F + 8.8);
+        tl.to("#tool-0 .chk", { scale: 1, duration: 0.25, ease: "back.out(2)" }, T.F + 9.15);
+        tl.to("#tool-1", { opacity: 1, x: 0, duration: 0.3, ease: OUI }, T.F + 9.35);
+        tl.to("#tool-1 .chk", { scale: 1, duration: 0.25, ease: "back.out(2)" }, T.F + 9.7);
+        tl.to("#tool-2", { opacity: 1, x: 0, duration: 0.3, ease: OUI }, T.F + 9.9);
+        tl.to("#tool-2 .chk", { scale: 1, duration: 0.25, ease: "back.out(2)" }, T.F + 10.25);
+        tl.to("#tool-3", { opacity: 1, x: 0, duration: 0.3, ease: OUI }, T.F + 10.45);
+        tl.to("#tool-3 .chk", { scale: 1, duration: 0.25, ease: "back.out(2)" }, T.F + 10.8);
+        tl.to("#tool-4", { opacity: 1, x: 0, duration: 0.3, ease: OUI }, T.F + 11);
+        tl.to("#tool-4 .chk", { scale: 1, duration: 0.25, ease: "back.out(2)" }, T.F + 11.35);
+        tl.fromTo("#bub-3", { y: 18, opacity: 0 }, { y: 0, opacity: 1, duration: 0.35, ease: OUI }, T.F + 12.2);
+        gsap.set("#bub-3 .s", { opacity: 0 });
+        tl.to("#bub-3 .s:nth-child(1)", { opacity: 1, duration: 0.25 }, T.F + 12.35);
+        tl.to("#bub-3 .s:nth-child(2)", { opacity: 1, duration: 0.25 }, T.F + 13.85);
+        tl.to("#bub-3 .s:nth-child(3)", { opacity: 1, duration: 0.25 }, T.F + 15.35);
+        tl.fromTo("#bub-4", { y: 18, opacity: 0 }, { y: 0, opacity: 1, duration: 0.35, ease: OUI }, T.F + 19);
+        tl.fromTo("#bub-5", { y: 18, opacity: 0 }, { y: 0, opacity: 1, duration: 0.35, ease: OUI }, T.F + 20.6);
+        gsap.set("#bub-5 .s", { opacity: 0 });
+        tl.to("#bub-5 .s:nth-child(1)", { opacity: 1, duration: 0.25 }, T.F + 20.75);
+        tl.to("#bub-5 .s:nth-child(2)", { opacity: 1, duration: 0.25 }, T.F + 22.25);
+        tl.to("#st-live", { opacity: 0, duration: 0.25 }, T.F + 23);
+        tl.to("#st-end", { opacity: 1, duration: 0.25 }, T.F + 23);
+        tl.to(["#call", "#brand2", "#call-cap"], { opacity: 0, duration: 0.6 }, T.F + 23.2);
+
+        /* G: 아웃트로 — 촬영분 위로 밝아지며 로고 */
+        tl.to("#outro-bg", { opacity: 0.94, duration: 0.8, ease: "power2.inOut" }, T.G + 4.5);
+        tl.fromTo("#o-logo", { scale: 0.82 }, { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(1.4)" }, T.G + 4.9);
+        tl.fromTo("#o-sub", { y: 16 }, { y: 0, opacity: 1, duration: 0.4, ease: OUI }, T.G + 5.3);
+        tl.fromTo("#o-cta", { y: 16 }, { y: 0, opacity: 1, duration: 0.4, ease: OUI }, T.G + 5.6);
+
+        window.__timelines["main"] = tl;
+        if (window.__hfForceTimelineRebind) window.__hfForceTimelineRebind();
+      });
+    </script>
+  </body>
+</html>

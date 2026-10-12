@@ -37,3 +37,10 @@ data/app.db-*
 data/tts_cache/
 # STT 비교 시험 녹음(본인 목소리, 시험 뒤 삭제)
 data/stt_clips/
+
+# 소개영상 원본·렌더 결과(용량 큼, OneDrive에만 둠)
+brag-output/*.mp4
+brag-output/**/assets/live/
+brag-output/final/*.mp4
+brag-output/demo/*.mp4
+brag-output/**/.*.hf-transaction-*/
