@@ -57,8 +57,25 @@ export default function ChatCard({ onSubscribe, quick = QUICK, placeholder = '�
     let sc = el?.parentElement ?? null
     while (sc && !/(auto|scroll)/.test(getComputedStyle(sc).overflowY)) sc = sc.parentElement
     // 시트가 내용에 맞춰 커지기 전에 재므로(폰 기본 단은 화면의 최대 60%) 그 높이까지는 넉넉히
-    if (sc) setRoom(Math.max(0, Math.max(sc.clientHeight, window.innerHeight * 0.6) - (inputBox.current?.offsetHeight ?? 0) - 32))
-    requestAnimationFrame(() => el?.scrollIntoView({ block: 'start', behavior: 'smooth' }))
+    if (!sc || !el) return
+    setRoom(Math.max(0, Math.max(sc.clientHeight, window.innerHeight * 0.6) - (inputBox.current?.offsetHeight ?? 0) - 32))
+    // 이전 대화가 위로 밀려 올라가는 게 눈에 보이게(10/13 오너: 새 질문이 '딱' 뜨면 이전 대화가 사라진 것 같다).
+    // 브라우저 smooth 는 짧고 기기마다 달라 직접 600ms 로 민다. 움직임 줄이기면 바로.
+    const box = sc
+    let id = 0
+    id = requestAnimationFrame(() => {
+      const from = box.scrollTop
+      const to = from + el.getBoundingClientRect().top - box.getBoundingClientRect().top - 12
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || Math.abs(to - from) < 2) { box.scrollTop = to; return }
+      const t0 = performance.now(), D = 600
+      const step = (now: number) => {
+        const k = Math.min(1, (now - t0) / D)
+        box.scrollTop = from + (to - from) * (1 - Math.pow(1 - k, 3)) // 빠르게 출발해 천천히 멈춤
+        if (k < 1) id = requestAnimationFrame(step)
+      }
+      id = requestAnimationFrame(step)
+    })
+    return () => cancelAnimationFrame(id)
   }, [bubbles, turns.length])
 
   if (bubbles) {
