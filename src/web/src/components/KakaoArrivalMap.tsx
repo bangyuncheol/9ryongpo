@@ -156,7 +156,17 @@ export default function KakaoArrivalMap(p: Props) {
     m.setLevel(h.level)
     m.setCenter(h.center)
   }
-  const goHome = () => { if (map.current) resetView(map.current) }
+  // 튕김 애니메이션 번호: '처음 위치'를 누르면 올려서 진행 중인 튕김을 멈춘다(그대로 두면 남은 프레임이 가운데를
+  // 다시 옮겨 처음 위치로 안 돌아갔다, 10/12 오너 제보). 끈 뒤 관성 이동이 덮어쓰는 것도 막으려고 한 번 더 맞춘다.
+  const bounceId = useRef(0)
+  const goHome = () => {
+    const m = map.current
+    if (!m) return
+    bounceId.current++
+    resetView(m)
+    requestAnimationFrame(() => resetView(m))
+    setTimeout(() => { resetView(m); setMoved(false) }, 250)
+  }
   useEffect(() => {
     let alive = true
     loadKakao().then((kakao) => {
@@ -186,8 +196,10 @@ export default function KakaoArrivalMap(p: Props) {
         const from = [c.getLat(), c.getLng()], to = [from[0] + lat - seen.getLat(), from[1] + lng - seen.getLng()]
         if (reduceMotion()) { mm.setCenter(new kakao.maps.LatLng(to[0], to[1])); checkMoved(); return }
         bouncing = true
+        const id = ++bounceId.current
         const t0 = performance.now(), D = 380, k1 = 1.6
         const step = (now: number) => {
+          if (id !== bounceId.current) { bouncing = false; return } // '처음 위치'가 눌렸다
           const x = Math.min(1, (now - t0) / D)
           const e = 1 + (k1 + 1) * (x - 1) ** 3 + k1 * (x - 1) ** 2
           mm.setCenter(new kakao.maps.LatLng(from[0] + (to[0] - from[0]) * e, from[1] + (to[1] - from[1]) * e))
