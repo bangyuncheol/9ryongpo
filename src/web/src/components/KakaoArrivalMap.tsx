@@ -165,14 +165,23 @@ export default function KakaoArrivalMap(p: Props) {
   // 튕김 애니메이션 번호: '처음 위치'를 누르면 올려서 진행 중인 튕김을 멈춘다(그대로 두면 남은 프레임이 가운데를
   // 다시 옮겨 처음 위치로 안 돌아갔다, 10/12 오너 제보). 끈 뒤 관성 이동이 덮어쓰는 것도 막으려고 한 번 더 맞춘다.
   const bounceId = useRef(0)
+  const homeTimer = useRef(0)
   const goHome = () => {
     const m = map.current
     if (!m) return
     bounceId.current++
     resetView(m)
-    requestAnimationFrame(() => resetView(m))
-    setTimeout(() => { resetView(m); setMoved(false) }, 250)
+    const id = bounceId.current
+    requestAnimationFrame(() => { if (id === bounceId.current) resetView(m) })
+    window.clearTimeout(homeTimer.current)
+    homeTimer.current = window.setTimeout(() => {
+      if (id !== bounceId.current) return
+      resetView(m); setMoved(false)
+      homePending.current = false // 이미 제자리면 idle 이 안 와서 표시가 남아, 다음 '조업·대기'를 되돌렸다(10/12 오너)
+    }, 250)
   }
+  /** 다른 곳으로 옮기기 전에: 남은 '처음 위치' 맞추기·튕김을 모두 취소 */
+  const cancelHome = () => { bounceId.current++; homePending.current = false; window.clearTimeout(homeTimer.current) }
   useEffect(() => {
     let alive = true
     loadKakao().then((kakao) => {
@@ -238,6 +247,7 @@ export default function KakaoArrivalMap(p: Props) {
         if (!limit.contain(seen)) { bounceBack(m, seen); return }
         checkMoved()
       })
+      kakao.maps.event.addListener(m, 'dragstart', () => cancelHome()) // 사람이 끌기 시작하면 남은 '처음 위치' 맞추기는 버린다
       kakao.maps.event.addListener(m, 'click', () => { onSelect(null); setSensorFocus(null) })
       setReady(true)
     }).catch((e: unknown) => { console.error(e); onFail() })
@@ -393,6 +403,7 @@ export default function KakaoArrivalMap(p: Props) {
   const showIdle = () => {
     const kakao = k.current, m = map.current
     if (!kakao || !m || !place) return
+    cancelHome()
     const b = new kakao.maps.LatLngBounds()
     b.extend(new kakao.maps.LatLng(place.lat, place.lon))
     for (const s of p.ships) if (s.status === '조업·대기') b.extend(new kakao.maps.LatLng(s.lat, s.lon))
