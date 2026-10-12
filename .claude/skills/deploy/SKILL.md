@@ -16,18 +16,23 @@ description: 배포 절차·환경 변수 목록·프로덕션 마이그레이�
 - VM에서 FastAPI 프로세스 1개를 systemd로 상시 실행. 화면은 FastAPI가 `src/web/dist`를 서빙. DB는 VM 디스크 `data/app.db`.
 - 파일: `src/deploy/setup_vm.sh`(첫 설치) · `update.sh`(갱신) · `wipan.service`(systemd) · `Caddyfile`(HTTPS). 모두 리눅스 VM 전용.
 
+## 현재 VM (2026-10-12 설치)
+- 외부 IP `34.68.103.105`, 접속 `ssh -i ~/.ssh/9ryongpo_gcp bang-mac@34.68.103.105` (사용자 이름 = 전달한 공개 키 끝 주석). Debian 13.
+- **여러 팀이 같이 쓰는 VM**: 7개 계정이 모두 sudo(`google-sudoers`)라 `.env`는 다른 팀 root가 읽을 수 있다(오너가 알고 전부 올리기로 결정). 대회 후 키 재발급.
+- 80·443을 다른 팀과 다투지 않게 서버는 `127.0.0.1:8731`, 외부 공개는 Cloudflare 임시 터널(`wipan-tunnel` 서비스). 터널이 다시 뜨면 주소가 바뀐다 → 주소 확인: `sudo journalctl -u wipan-tunnel | grep trycloudflare | tail -1`
+- VM에는 GitHub 인증을 두지 않는다. 코드는 로컬에서 `git push vm main`(VM 저장소가 `receive.denyCurrentBranch updateInstead`)으로 보낸다.
+
 ## 첫 설치 (VM 접속 후 1회)
-1. `git clone https://github.com/bangyuncheol/9ryongpo.git ~/9ryongpo`
-2. 로컬의 `.env`를 VM `~/9ryongpo/.env`로 복사(scp). 메신저·저장소로 보내지 않는다.
-3. 외부 IP 확인 후 HTTPS 호스트 정하기: IP `34.64.1.2` → `34-64-1-2.sslip.io`.
-4. `bash ~/9ryongpo/src/deploy/setup_vm.sh 34-64-1-2.sslip.io`
-5. Kakao Developers > 플랫폼 키 > JavaScript SDK 도메인에 `https://<호스트>` 추가(카카오맵용)
-6. 폰 크롬에서 `https://<호스트>/` 열기 → 알림 받기 → `/?admin=1`에서 "시험 알림".
+1. 로컬: `git remote add vm bang-mac@<IP>:9ryongpo` / VM: `git init -b main ~/9ryongpo && git -C ~/9ryongpo config receive.denyCurrentBranch updateInstead` (git 없으면 `sudo apt-get install -y git`)
+2. 로컬: `git push vm main` (키 지정: `GIT_SSH_COMMAND="ssh -i ~/.ssh/9ryongpo_gcp"`), `.env`는 scp로 `~/9ryongpo/.env`에 올리고 `chmod 600`. 메신저·저장소로 보내지 않는다.
+3. VM: `bash ~/9ryongpo/src/deploy/setup_vm.sh` — 호스트를 안 주면 터널, `<호스트>`를 주면 Caddy(80·443 필요)
+4. Kakao Developers > 플랫폼 키 > JavaScript SDK 도메인에 터널 주소 추가(카카오맵용)
+5. 폰 크롬에서 주소 열기 → 알림 받기 → `/?admin=1`에서 "시험 알림".
 
 ## 배포 절차 (코드 갱신)
 1. 로컬에서 테스트 통과 확인(`cd src/server && uv run pytest`) 후 `main`에 푸시
 2. `.claude/skills/qa-regression/checklist.md` 관련 항목 확인
-3. VM에서 `bash ~/9ryongpo/src/deploy/update.sh` (받기 → 의존성 → 테스트 → 화면 빌드 → 재시작 → health 확인)
+3. 로컬에서 `git push vm main` → VM에서 `bash ~/9ryongpo/src/deploy/update.sh` (받기 → 의존성 → 테스트 → 화면 빌드 → 재시작 → health 확인)
 4. 화면에서 핵심 흐름 1회 확인(03:10 재생 → 입항 카드 → 알림함)
 - 되돌리기: VM에서 `git checkout <이전 커밋>` 후 `update.sh` 대신 `sudo systemctl restart wipan`. 원인 고친 뒤 `git checkout main`.
 - 스키마는 `src/server/app/schema.sql`(CREATE IF NOT EXISTS)라 별도 마이그레이션 적용 단계가 없다.
@@ -40,7 +45,7 @@ description: 배포 절차·환경 변수 목록·프로덕션 마이그레이�
 - **80·443 포트가 열린 경우**: Caddy가 sslip.io 호스트로 인증서를 자동 발급(`setup_vm.sh` 5단계).
 - **포트가 막힌 경우 또는 로컬에서 폰 시험**: Cloudflare 임시 터널. 계정 불필요, 주소는 실행할 때마다 바뀐다.
   - 설치: 맥 `brew install cloudflared`, 윈도우 `winget install --id Cloudflare.cloudflared`, 리눅스 공식 .deb
-  - 실행: `cloudflared tunnel --url http://localhost:8000` → 출력되는 `https://….trycloudflare.com` 을 폰에서 연다
+  - 실행: `cloudflared tunnel --url http://localhost:8000` (로컬 개발 서버 기준. VM은 8731) → 출력되는 `https://….trycloudflare.com` 을 폰에서 연다
   - 주소가 바뀌면 브라우저 입장에선 다른 사이트라 알림 받기를 다시 눌러야 한다.
 
 ## 환경 변수
