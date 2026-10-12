@@ -113,11 +113,27 @@ export type ChatEvent =
   | { type: 'error'; message: string }
   | { type: 'done' }
 
+/** 질문이 '질문한 사람이 있는 곳'을 출발지로 말하는지(10/13). 서버 도구 설명(estimate_travel)과 같은 말들. */
+const HERE_RE = /여기\s*(서|에서|부터)|(내|제)\s*위치|(내가|제가|지금)\s*있는\s*(곳|데)|현재\s*위치/
+
+/** 위 말이 있을 때만 휴대폰 위치를 한 번 받는다(처음엔 브라우저가 허용을 묻는다). 거절·실패면 없이 보낸다 → 서버가 출발지를 되묻는다. */
+function hereFor(message: string): Promise<{ lat: number; lon: number } | null> {
+  if (!HERE_RE.test(message) || !('geolocation' in navigator)) return Promise.resolve(null)
+  return new Promise((resolve) => {
+    navigator.geolocation.getCurrentPosition(
+      (p) => resolve({ lat: p.coords.latitude, lon: p.coords.longitude }),
+      (e) => { console.warn('내 위치를 받지 못함', e.code, e.message); resolve(null) },
+      { timeout: 8000, maximumAge: 5 * 60 * 1000 },
+    )
+  })
+}
+
 /** 질문창 SSE(POST라 EventSource 대신 fetch 스트림을 읽는다). */
 export async function askStream(message: string, history: { q: string; a: string }[], onEvent: (e: ChatEvent) => void): Promise<void> {
   let r: Response
+  const here = await hereFor(message)
   try {
-    r = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message, history }) })
+    r = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message, history, here }) })
   } catch {
     onEvent({ type: 'error', message: '서버에 연결할 수 없습니다. 네트워크를 확인해 주세요.' }); return
   }

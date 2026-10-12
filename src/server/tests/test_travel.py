@@ -28,7 +28,11 @@ class FakeKakao:
         self.address_used = True
         return json.loads((FIX / "kakao_address.json").read_text(encoding="utf-8"))["documents"]
 
+    async def region(self, at):
+        return "포항시 남구 오천읍"
+
     async def route(self, origin, dest, depart=None):
+        self.origins = getattr(self, "origins", []) + [origin]
         self.departs.append(depart)
         if self.route_fail:
             raise KakaoError("timeout", "길찾기")
@@ -70,9 +74,28 @@ def test_route_failure_falls_back_to_rough_estimate():
 
 
 def test_far_or_missing_place_is_an_error():
+    # 60km 밖만 찾히면 '멀어서 안내하기 어렵다'(10/13 오너 결정 — 예전엔 '찾지 못했습니다'), 아예 없으면 찾지 못함
     far = [{"place_name": "다른 지역 같은 이름", "x": "127.0", "y": "37.5", "distance": "300000"}]
-    assert "찾지 못했습니다" in run(kakao=FakeKakao(docs=far))["error"]
+    assert "60km" in run(kakao=FakeKakao(docs=far))["error"]
     assert "찾지 못했습니다" in run(kakao=FakeKakao(docs=[]))["error"]
+
+
+def test_my_location_uses_gps_and_names_the_area():
+    k = FakeKakao()
+    here = (129.4170, 35.9770)  # 오천읍 근처, 위판장에서 약 13km
+    r = run(kakao=k, origin="내 위치", here=here)
+    assert k.origins == [here] and r["origin"] == "지금 계신 곳(포항시 남구 오천읍 근처)" and "depart_by" in r
+
+
+def test_my_location_without_gps_asks_for_origin():
+    # 전화에는 좌표가 오지 않는다 → 출발지를 되묻는다
+    assert "말씀해 주세요" in run(kakao=FakeKakao(), origin="여기")["error"]
+
+
+def test_my_location_beyond_60km_is_refused():
+    k = FakeKakao()
+    r = run(kakao=k, origin="내 위치", here=(126.9780, 37.5665))  # 서울
+    assert "60km" in r["error"] and not k.departs
 
 
 def test_no_key_is_an_error():

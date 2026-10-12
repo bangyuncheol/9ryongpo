@@ -39,9 +39,11 @@ TOOLS: list[dict] = [
      "description": "다른 곳에서 구룡포 위판장까지 차로 걸리는 시간과 출발 권장 시각. 카카오 길찾기(지금 도로 상황 또는 그 시각 예측 교통) + 위판장 앞 여유. "
                     "'OO에서 몇 시에 출발하면 돼?'는 depart_time 없이(경매 도착 권장 시각에 맞춘 depart_by) — 문장에 '지금 OO에서 출발하는데'처럼 '지금'이 있어도 출발 시각을 묻는 질문이면 생략한다. "
                     "'지금 출발하면 얼마나 걸려?'처럼 걸리는 시간만 물을 때만 depart_time='지금', '8시에 출발하면 언제 도착해?'는 depart_time='08:00'. "
-                    "한 질문에 한 번만 부른다. 출발지를 모르면 부르지 말고 어디서 출발하는지 먼저 묻는다.",
+                    "한 질문에 한 번만 부른다. 출발지를 모르면 부르지 말고 어디서 출발하는지 먼저 묻는다. "
+                    "'여기서', '내 위치에서', '내가 있는 곳에서', '지금 있는 곳에서', '현재 위치에서'처럼 질문한 사람이 있는 곳을 말하면 origin='내 위치'로 부른다"
+                    "(위치를 알 수 없으면 도구가 출발지를 되물으라고 알려 준다). 결과가 error면 그 문장 그대로 안내한다.",
      "parameters": {"type": "object", "properties": {
-         "origin": {"type": "string", "description": "출발지 이름 그대로. 예: 포항과학기술고등학교, 포항시청, 구룡포읍사무소"},
+         "origin": {"type": "string", "description": "출발지 이름 그대로. 예: 포항과학기술고등학교, 포항시청, 구룡포읍사무소. 질문한 사람이 있는 곳이면 '내 위치'"},
          "depart_time": {"type": "string", "description": "'지금' 또는 HH:MM. 생략하면 경매에 맞춰 출발 시각을 계산"},
          "auction_time": {"type": "string", "description": "HH:MM. 기본 06:00"}},
          "required": ["origin"], "additionalProperties": False}},
@@ -64,6 +66,7 @@ class ToolContext:
     engine: Engine
     traffic: TrafficService
     kakao: KakaoClient | None = None  # 출발지 → 위판장 길찾기(10/11). 없으면 그 도구만 '설정 없음'으로 답한다
+    here: tuple[float, float] | None = None  # 웹이 보낸 질문자 GPS(lon, lat)(10/13). 전화는 없음. 저장하지 않는다
 
 
 async def run_tool(ctx: ToolContext, name: str, args: dict[str, Any]) -> dict:
@@ -107,7 +110,7 @@ async def run_tool(ctx: ToolContext, name: str, args: dict[str, Any]) -> dict:
                 t = None
             lat, lon = ctx.engine.place
             return await travel.estimate(ctx.kakao, (lon, lat), args.get("origin", ""), t,
-                                         args.get("auction_time") or visit.AUCTION_DEFAULT, args.get("depart_time"))
+                                         args.get("auction_time") or visit.AUCTION_DEFAULT, args.get("depart_time"), here=ctx.here)
         if name == "get_past_auction":
             return past_auction(ctx.engine.conn, args["species"], args.get("year"), args.get("month"))
         if name == "subscribe":

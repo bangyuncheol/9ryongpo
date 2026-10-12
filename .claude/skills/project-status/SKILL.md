@@ -44,7 +44,7 @@ description: 미구현·보류·기술부채·진행 중 과제의 현재 상태
 - 테스트 72개 (`cd src/server && uv run pytest`). 외부 호출 없이 `tests/fixtures/`의 실제 응답 일부로 돈다.
 
 - **화면은 버전 4 하나(10/12 정리)**: `src/web/src/v4/`(AppV4·BottomSheet·Pager·WaitFish·Toast), 정본 `.claude/rules/design-v4.md`. `/` 사용자 화면, `/?admin=1` 시연 진행 막대·통화 내역, `/?preview=1` 폰·웹 틀 + 시연 패널. 폰은 지도 + 두 단 시트 안 세 장(들어오는 배·알림·물어보기), 웹은 지도 + 오른쪽 칸. 라이트 고정. 버전 1·2·3은 지웠다(git 기록: 10/12 이전 커밋).
-- 가는 시간(10/11): 질문창·전화가 '어디서 몇 시에 출발?'·'지금 출발하면 얼마나?'에 답한다. 도구 `estimate_travel`(`rules/travel.py`, `kakao.py`), 설계 §4.2. 키 `KAKAO_REST_KEY`(지도 키와 같은 앱의 REST 키, 맥 `.env`에 있음 — **윈도우·VM `.env`에도 필요**). 카카오 결과는 10분 기억. 실기: '포항과학기술고등학교' 1.5km 7분 → 08:20 출발, '양덕동' 29.2km 51분 → 07:35 출발(전화 말투로도 확인).
+- 가는 시간(10/11): 질문창·전화가 '어디서 몇 시에 출발?'·'지금 출발하면 얼마나?'에 답한다. 도구 `estimate_travel`(`rules/travel.py`, `kakao.py`), 설계 §4.2. 키 `KAKAO_REST_KEY`(지도 키와 같은 앱의 REST 키, 맥 `.env`에 있음 — **윈도우·VM `.env`에도 필요**). 카카오 결과는 10분 기억. 실기: '포항과학기술고등학교' 1.5km 7분 → 08:20 출발, '양덕동' 29.2km 51분 → 07:35 출발(전화 말투로도 확인). 10/13: '여기서·내 위치에서' → 웹 GPS 좌표로 계산(질문에 그 말이 있을 때만 `api.ts`가 위치를 받는다, 처음엔 브라우저 허용 창, 좌표는 저장 안 함 — HTTPS 필요). 전화는 좌표가 없어 출발지를 되묻는다. 60km 밖 출발지는 '멀어서 안내하기 어렵다'. 실기: 오천읍 좌표 → 23분·05:05 출발, 서울 좌표·'서울역' → 60km 안내, 좌표 없이 '여기서' → 되물음.
 - 디자인 스킬(10/11, 맥 작성자 PC 사용자 전역 설치·저장소 밖): ponytail·impeccable(플러그인), design-taste-frontend·redesign-existing-projects·ui-ux-pro-max·web-design-guidelines(`~/.claude/skills`). 윈도우 작업자는 필요하면 같은 이름으로 설치. 없어도 `design-v2.md`만 따르면 된다.
 
 **다음 할 일**

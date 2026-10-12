@@ -16,6 +16,7 @@ log = logging.getLogger(__name__)
 
 LOCAL_URL = "https://dapi.kakao.com/v2/local/search/keyword.json"
 ADDRESS_URL = "https://dapi.kakao.com/v2/local/search/address.json"
+REGION_URL = "https://dapi.kakao.com/v2/local/geo/coord2regioncode.json"
 NAVI_URL = "https://apis-navi.kakaomobility.com/v1/directions"
 FUTURE_URL = "https://apis-navi.kakaomobility.com/v1/future/directions"
 CACHE_S = 600
@@ -81,6 +82,17 @@ class KakaoClient:
         if not isinstance(docs, list):
             raise KakaoError("invalid", "주소 검색", "documents 없음")
         return docs
+
+    async def region(self, at: tuple[float, float]) -> str | None:
+        """좌표(lon, lat) → '포항시 남구 구룡포읍' 같은 행정동 이름(10/13, '내 위치에서' 답에 동네를 붙인다)."""
+        body = await self._get("행정구역 조회", REGION_URL, {"x": f"{at[0]:.6f}", "y": f"{at[1]:.6f}"})
+        docs = body.get("documents") if isinstance(body, dict) else None
+        if not isinstance(docs, list):
+            raise KakaoError("invalid", "행정구역 조회", "documents 없음")
+        d = next((d for d in docs if d.get("region_type") == "H"), docs[0] if docs else None)
+        if not d:
+            return None
+        return " ".join(x for x in (d.get("region_2depth_name"), d.get("region_3depth_name")) if x) or d.get("address_name")
 
     async def route(self, origin: tuple[float, float], dest: tuple[float, float], depart: datetime | None = None) -> dict:
         """자동차 길찾기. depart 를 주면 그 출발 시각의 예측 교통(미래 운행), 없으면 실제 지금 도로 상황.

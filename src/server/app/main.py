@@ -286,13 +286,27 @@ def _rate_limit(ip: str) -> str | None:
     return None
 
 
+def _here(raw: object) -> tuple[float, float] | None:
+    """웹이 보낸 GPS {lat, lon} 검증(10/13). 좌표가 아니면 없는 것으로 본다(먼 곳은 규칙이 60km로 거른다). 로그·DB에 남기지 않는다."""
+    if not isinstance(raw, dict):
+        return None
+    try:
+        lat, lon = float(raw["lat"]), float(raw["lon"])
+    except (KeyError, TypeError, ValueError):
+        return None
+    if not (-90.0 <= lat <= 90.0 and -180.0 <= lon <= 180.0):  # NaN 도 여기서 걸러진다
+        return None
+    return lon, lat
+
+
 @app.post("/api/chat")
 async def chat(request: Request) -> StreamingResponse:
     body = await request.json()
     question = str(body.get("message", ""))
     ip = request.client.host if request.client else "?"
     limited = _rate_limit(ip)
-    ctx = ToolContext(engine=request.app.state.engine, traffic=request.app.state.traffic, kakao=request.app.state.kakao)
+    ctx = ToolContext(engine=request.app.state.engine, traffic=request.app.state.traffic, kakao=request.app.state.kakao,
+                      here=_here(body.get("here")))
 
     async def stream():
         if limited:
