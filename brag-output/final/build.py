@@ -236,7 +236,7 @@ HTML = f"""<!doctype html>
       /* 자막: 기본은 가운데, 분할 구간은 사람이 있는 쪽(left/right 864px 띠) */
       .sub .band {{ position:absolute; left:0; right:0; bottom:72px; display:flex; justify-content:center; }}
       .sub.left .band {{ right:auto; width:{BAND}px; }}
-      .sub.right .band {{ left:1000px; right:24px; }}
+      .sub.right .band {{ left:1100px; right:24px; }}
       .sub .band > span {{ display:inline-block; }}
       .sub .who {{ background:var(--sun); color:#1a1a1a; font-weight:800; font-size:26px; padding:8px 16px; border-radius:12px 0 0 12px; white-space:nowrap; }}
       .sub .say {{ background:rgba(14,26,33,0.82); color:#fff; font-weight:700; font-size:34px; line-height:1.3; padding:8px 22px; border-radius:0 12px 12px 0; max-width:1400px; }}

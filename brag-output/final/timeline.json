@@ -16,7 +16,7 @@
   "call": {
     "_설명": "전화 구간(할아버지 오른쪽 · 그래픽 왼쪽). call 의 t 는 절대 초. ai 문장은 sents 의 시각에 한 문장씩 드러난다(TTS 실제 발화 시각).",
     "start": 49.0, "end": 90.0,
-    "zoom": { "scale": 1.06, "origin": "58% 55%", "dur": 1.0 },
+    "zoom": { "scale": 1.20, "origin": "0% 35%", "dur": 1.2 },
     "end_badge_t": 89.8,
     "events": [
       { "t": 51.9, "who": "ai", "sents": [
