@@ -408,6 +408,19 @@ export default function KakaoArrivalMap(p: Props) {
     m.setBounds(b, 30, 30, 30 + pad, 30)
   }
 
+  /** '그 밖 N척 ▸': 들어오는 배가 모두 한 화면에 들어오게(화면에 들어온 배는 화살표 대신 배 모양으로 보인다) */
+  const showArriving = () => {
+    const kakao = k.current, m = map.current
+    if (!kakao || !m || !place) return
+    cancelHome()
+    const b = new kakao.maps.LatLngBounds()
+    b.extend(new kakao.maps.LatLng(place.lat, place.lon))
+    for (const s of p.ships) if (s.status === '입항 중') b.extend(new kakao.maps.LatLng(s.lat, s.lon))
+    m.setBounds(b, 40, 40, 40 + pad, 40)
+  }
+  const showArrRef = useRef(showArriving)
+  showArrRef.current = showArriving
+
   // 정보 표지: 올린 배 → 고른 배. 화면 안에 있을 때만(화면 밖이면 가장자리 화살표가 펼쳐진다).
   useEffect(() => {
     const kakao = k.current, m = map.current
@@ -470,15 +483,25 @@ export default function KakaoArrivalMap(p: Props) {
   // 가장자리 화살표(React 밖에서 매 프레임 갱신). 누르면 그 배를 고른다.
   function drawEdges(root: HTMLDivElement | null, edges: { id: number; y: number; ship: Arrival }[], W: number) {
     if (!root) return
+    // 화살표는 먼저 도착하는 배 몇 척만(10/12 오너: 너무 많이 쌓임). 폰처럼 낮은 지도는 3척, 높으면 5척.
+    // 고른 배는 순위 밖이어도 보이고, 나머지는 '그 밖 N척 ▸' 하나로 묶는다. 가장 먼저 오는 배는 시각·이름까지.
+    const H0 = root.clientHeight
+    const max = H0 < 600 ? 3 : 5
+    const byEta = [...edges].sort((a, b) => (a.ship.eta ?? '9').localeCompare(b.ship.eta ?? '9'))
+    const firstId = byEta[0]?.id
+    const shown = byEta.filter((e, i) => i < max || e.id === selRef.current)
+    const rest = edges.length - shown.length
+    edges = shown
     edges.sort((a, b) => a.y - b.y)
     for (let i = 1; i < edges.length; i++) edges[i].y = Math.max(edges[i].y, edges[i - 1].y + 30)
     // 아래로 넘치면 아래에서부터 위로 쌓는다(잘리지 않게)
-    const H = root.clientHeight
+    const H = H0 - (rest > 0 ? 30 : 0) // 묶음 칩 자리
     for (let i = edges.length - 1; i >= 0; i--) {
       const limit = i === edges.length - 1 ? H - 40 : edges[i + 1].y - 30
       if (edges[i].y > limit) edges[i].y = limit
     }
     const keep = new Set(edges.map((e) => String(e.id)))
+    if (rest > 0) keep.add('more')
     for (const c of [...root.children]) if (!keep.has((c as HTMLElement).dataset.id!)) c.remove()
     for (const e of edges) {
       let el = root.querySelector<HTMLButtonElement>(`[data-id="${e.id}"]`)
@@ -494,13 +517,28 @@ export default function KakaoArrivalMap(p: Props) {
         el.addEventListener('pointerleave', (ev) => { if (ev.pointerType === 'mouse') setHovered((h) => (h === id ? null : h)) })
         root.appendChild(el)
       }
-      const open = selRef.current === e.id || hoveredRef.current === e.id
+      const open = selRef.current === e.id || hoveredRef.current === e.id || e.id === firstId
       el.style.top = `${e.y - 13}px`
       el.style.maxWidth = `${Math.max(120, W - 24)}px`
       el.style.borderColor = selRef.current === e.id ? 'var(--color-primary)' : 'transparent'
       el.setAttribute('aria-label', `${e.ship.name} ${hhmm(e.ship.eta)} 도착 예정, ${e.ship.d_km.toFixed(1)}km`)
       const text = open ? `${hhmm(e.ship.eta)} ${e.ship.name} · ${e.ship.d_km.toFixed(1)}km` : `${e.ship.d_km.toFixed(1)}km`
       el.innerHTML = `<span aria-hidden style="color:var(--color-arriving)">◀</span>${text}`
+    }
+    if (rest > 0) {
+      let more = root.querySelector<HTMLButtonElement>('[data-id="more"]')
+      if (!more) {
+        more = document.createElement('button')
+        more.type = 'button'; more.dataset.id = 'more'
+        more.style.cssText = 'position:absolute;right:6px;padding:3px 10px;border-radius:9999px;font-size:12px;font-weight:700;white-space:nowrap;' +
+          'background:var(--color-card);color:var(--color-muted);box-shadow:0 1px 4px rgba(0,0,0,.18);border:0;cursor:pointer'
+        more.addEventListener('click', (ev) => { ev.stopPropagation(); showArrRef.current() })
+        root.appendChild(more)
+      }
+      const y = edges.length ? edges[edges.length - 1].y + 30 : 56
+      more.style.top = `${y - 13}px`
+      more.textContent = `그 밖 ${rest}척 ▸`
+      more.setAttribute('aria-label', `화면 밖 들어오는 배 ${rest}척 더 보기(지도를 넓힙니다)`)
     }
   }
 
