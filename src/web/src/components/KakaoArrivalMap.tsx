@@ -282,7 +282,7 @@ export default function KakaoArrivalMap(p: Props) {
     prevArrived.current = dockedCount
   }, [ready, dockedCount])
 
-  // 교통 센서 자리: 반투명한 색 원 하나(10/12 오너: 트럭 아이콘·글자 딱지를 빼고 색으로만). 장소 혼잡도를 원으로
+  // 교통 센서 자리: 반투명한 색 원 하나(10/12 오너: 트럭 아이콘·글자 딱지를 빼고 색으로만, 테두리 없이). 장소 혼잡도를 원으로
   // 칠하는 관례(서울시 실시간 도시데이터 등). 지점 값이라 도로를 칠하지 않는다. 크기는 화면 기준 고정(겹쳐도 각각 보이게),
   // 배·별보다 아래 층. 색만으로는 뜻이 안 전해지므로 화면 읽기 이름·범례·누르면 뜨는 표지에 말과 숫자를 둔다.
   useEffect(() => {
@@ -294,8 +294,9 @@ export default function KakaoArrivalMap(p: Props) {
       const el = document.createElement('button')
       el.type = 'button'
       el.setAttribute('aria-label', `${t.nickname ?? t.name} 앞길 트럭 ${lv.word}, 지난 1시간 ${t.truck}대`)
-      el.style.cssText = 'display:block;width:40px;height:40px;border-radius:9999px;padding:0;cursor:pointer;' +
-        `background:color-mix(in srgb, var(${lv.color}) 40%, transparent);border:0` // 테두리 없이(10/12 오너), 대신 조금 진하게
+      // 보이는 원은 지름 26px(10/12 오너: 폰에서 40px은 큼), 누르는 자리는 40px 그대로(손가락으로 누르기 쉽게)
+      el.style.cssText = 'display:grid;place-items:center;width:40px;height:40px;padding:0;border:0;background:transparent;cursor:pointer'
+      el.innerHTML = `<span aria-hidden style="display:block;width:26px;height:26px;border-radius:9999px;background:color-mix(in srgb, var(${lv.color}) 40%, transparent)"></span>`
       el.addEventListener('click', (e) => { e.stopPropagation(); onSelect(null); setSensorFocus((f) => (f === t.name ? null : t.name)) })
       el.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') setSensorFocus(t.name) })
       el.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') setSensorFocus((f) => (f === t.name ? null : f)) })
