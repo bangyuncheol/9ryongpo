@@ -85,14 +85,14 @@ export default function AppV4() {
         <div className="grid h-dvh grid-cols-[1fr_440px]">
           <div className="relative h-dvh">{map}</div>
           <aside className="v4-sheet relative z-10 h-dvh overflow-y-auto bg-card" aria-label="입항 정보">
-            <div className="sticky top-0 z-10 bg-band px-6 py-4"><Badge today={t} /></div>
+            <div className="sticky top-0 z-10 bg-band px-6 py-3"><Badge today={t} /></div>
             {admin && <div className="py-2"><AdminBar clock={t?.clock ?? null} feed={t?.source.feed ?? null} call={call.data} /></div>}
             {sheet()}
           </aside>
         </div>
       ) : (
         <>
-          <div className="absolute inset-x-0 top-0 z-40 bg-band px-4 py-3" style={{ height: HEADER_H }}><Badge today={t} /></div>
+          <div className="absolute inset-x-0 top-0 z-40 flex flex-col justify-center bg-band px-4" style={{ height: HEADER_H }}><Badge today={t} /></div>
           {/* 지도는 헤더 아래 전체. 시트가 그 위를 덮고 두 단(내림·기본)으로 오르내린다 */}
           <div className="absolute inset-x-0 bottom-0" style={{ top: HEADER_H }}>{map}</div>
           <BottomSheet snap={snap} onSnap={setSnap} fit={fit} peek={<Peek today={t} first={arriving[0]} onOpen={() => setSnap('mid')} />}>
@@ -107,17 +107,14 @@ export default function AppV4() {
   )
 }
 
-const HEADER_H = 72 // 폰 헤더 띠: 아이콘 + 워드마크 + 한 줄 소개(10/13 브랜드 시안)
+const HEADER_H = 52 // 폰 헤더 띠: 아이콘 + 워드마크 + 시각만(10/13 오너: 한 줄 소개를 빼고 지도 자리를 넓힘)
 
 /** 앱 아이콘(탭·홈 화면·푸시와 같은 그림)과 '배마중' 워드마크. 원본: 03_발표/design-preview/(10/13 오너) */
 function Logo() {
   return (
-    <span className="flex min-w-0 items-center gap-2.5">
-      <img src="/icon-192.png" alt="" aria-hidden className="h-12 w-12 shrink-0" />
-      <span className="flex min-w-0 flex-col">
-        <img src="/wordmark.png" alt="배마중" className="h-7 w-auto self-start" />
-        <span className="mt-0.5 truncate text-small font-medium text-muted">구룡포 새벽 입항·어종 알림</span>
-      </span>
+    <span className="flex items-center gap-2">
+      <img src="/icon-192.png" alt="" aria-hidden className="h-7 w-7 shrink-0" />
+      <img src="/wordmark.png" alt="배마중" className="h-6 w-auto" />
     </span>
   )
 }
@@ -131,7 +128,7 @@ function Badge({ today }: { today: Today | null }) {
       <div className="flex items-center justify-between gap-3">
         <h1 className="min-w-0"><Logo /></h1>
         {/* 시연이어도 실제처럼 보이게 시각만 둔다(10/11 오너 결정, CLAUDE.md '데이터 소스 표시'의 버전 4 헤더 예외). 시연·실시간은 화면 읽기 이름·title로만 */}
-        <p className="shrink-0 text-main font-medium text-ink" title={sim ? '선박 위치 시연' : '실시간'}>
+        <p className="shrink-0 text-body font-medium text-ink" title={sim ? '선박 위치 시연' : '실시간'}>
           <span className="sr-only">{sim ? '선박 위치 시연' : '실시간'}</span>
           {now && <span className="tabular-nums">{hhmm(now)}</span>}
         </p>
