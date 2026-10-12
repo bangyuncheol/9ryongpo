@@ -118,7 +118,7 @@ const truckLevel = (n: number) => TRUCK_LEVELS.find((l) => n < l.max) ?? TRUCK_L
 
 function TrafficTag({ lv }: { lv: (typeof TRUCK_LEVELS)[number] }) {
   return <span className="inline-flex items-center gap-1"><span aria-hidden className="inline-block h-3 w-3 rounded-full"
-    style={{ background: `color-mix(in srgb, var(${lv.color}) 30%, transparent)`, border: `1.5px solid var(${lv.color})` }} />{lv.word}</span>
+    style={{ background: `color-mix(in srgb, var(${lv.color}) 40%, transparent)` }} />{lv.word}</span>
 }
 
 export default function KakaoArrivalMap(p: Props) {
@@ -295,7 +295,7 @@ export default function KakaoArrivalMap(p: Props) {
       el.type = 'button'
       el.setAttribute('aria-label', `${t.nickname ?? t.name} 앞길 트럭 ${lv.word}, 지난 1시간 ${t.truck}대`)
       el.style.cssText = 'display:block;width:40px;height:40px;border-radius:9999px;padding:0;cursor:pointer;' +
-        `background:color-mix(in srgb, var(${lv.color}) 30%, transparent);border:2px solid color-mix(in srgb, var(${lv.color}) 85%, transparent)`
+        `background:color-mix(in srgb, var(${lv.color}) 40%, transparent);border:0` // 테두리 없이(10/12 오너), 대신 조금 진하게
       el.addEventListener('click', (e) => { e.stopPropagation(); onSelect(null); setSensorFocus((f) => (f === t.name ? null : t.name)) })
       el.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') setSensorFocus(t.name) })
       el.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') setSensorFocus((f) => (f === t.name ? null : f)) })
