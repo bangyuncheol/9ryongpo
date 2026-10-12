@@ -21,6 +21,7 @@ description: 배포 절차·환경 변수 목록·프로덕션 마이그레이�
 - **여러 팀이 같이 쓰는 VM**: 7개 계정이 모두 sudo(`google-sudoers`)라 `.env`는 다른 팀 root가 읽을 수 있다(오너가 알고 전부 올리기로 결정). 대회 후 키 재발급.
 - 80·443을 다른 팀과 다투지 않게 서버는 `127.0.0.1:8731`, 외부 공개는 Cloudflare 터널(`wipan-tunnel` 서비스). 주소 **https://bmj.kr** (가비아 구매 → 네임서버 Cloudflare, 계정 bang794613@gmail.com). 터널·Public Hostname(`bmj.kr`·`www` → `HTTP 127.0.0.1:8731`)은 대시보드에서 관리. `.env`에 `TUNNEL_TOKEN`이 없으면 trycloudflare 임시 주소로 뜬다.
 - Cloudflare 계정 이메일 인증이 안 돼 `cloudflared tunnel login`(cert 방식)은 못 쓴다 → 대시보드 토큰 방식.
+- 전화는 VM만 ClawOps 번호에 붙는다: `/etc/systemd/system/wipan.service.d/phone.conf`의 `Environment=PHONE_ENABLED=1`(시스템 환경 변수가 `.env`보다 우선이라 `.env`를 다시 올려도 유지). 로컬에서 전화 시험하려면 먼저 VM의 이 파일을 지우고 `sudo systemctl daemon-reload && sudo systemctl restart wipan`. 실제 발신은 `/?admin=1` 전화 스위치(`calls_on`, 재시작하면 꺼짐)를 켜야 한다.
 - VM에는 GitHub 인증을 두지 않는다. 코드는 로컬에서 `git push vm main`(VM 저장소가 `receive.denyCurrentBranch updateInstead`)으로 보낸다.
 
 ## 첫 설치 (VM 접속 후 1회)
