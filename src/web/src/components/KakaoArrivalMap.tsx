@@ -291,19 +291,20 @@ export default function KakaoArrivalMap(p: Props) {
     if (!ready || !kakao || !m) return
     truckOs.current.forEach((o) => o.setMap(null))
     const css = getComputedStyle(box.current ?? document.documentElement)
+    // 큰길(센서가 놓인 길)은 굵고 진하게, 주변 길(가까운 센서 값을 빌림)은 가늘고 옅게(10/12 오너 '가지처럼 퍼지게')
     truckOs.current = p.trucks.flatMap((t) => {
-      const road = TRAFFIC_ROADS.find((r) => r.sensor === t.name)
-      if (!road) return []
-      const lv = truckLevel(t.truck)
-      const line = new kakao.maps.Polyline({
-        path: road.path.map(([la, lo]) => new kakao.maps.LatLng(la, lo)),
-        strokeWeight: 7, strokeColor: css.getPropertyValue(lv.color).trim() || '#888', strokeOpacity: 0.75, strokeStyle: 'solid', zIndex: 3,
+      const color = css.getPropertyValue(truckLevel(t.truck).color).trim() || '#888'
+      return TRAFFIC_ROADS.filter((r) => r.sensor === t.name).map((road) => {
+        const line = new kakao.maps.Polyline({
+          path: road.path.map(([la, lo]) => new kakao.maps.LatLng(la, lo)),
+          strokeWeight: road.side ? 4 : 7, strokeColor: color, strokeOpacity: road.side ? 0.45 : 0.75, strokeStyle: 'solid', zIndex: road.side ? 2 : 3,
+        })
+        line.setMap(m)
+        kakao.maps.event.addListener(line, 'click', () => { onSelect(null); setSensorFocus((f) => (f === t.name ? null : t.name)) })
+        kakao.maps.event.addListener(line, 'mouseover', () => setSensorFocus(t.name))
+        kakao.maps.event.addListener(line, 'mouseout', () => setSensorFocus((f) => (f === t.name ? null : f)))
+        return line
       })
-      line.setMap(m)
-      kakao.maps.event.addListener(line, 'click', () => { onSelect(null); setSensorFocus((f) => (f === t.name ? null : t.name)) })
-      kakao.maps.event.addListener(line, 'mouseover', () => setSensorFocus(t.name))
-      kakao.maps.event.addListener(line, 'mouseout', () => setSensorFocus((f) => (f === t.name ? null : f)))
-      return [line]
     })
   }, [ready, p.trucks, onSelect])
 

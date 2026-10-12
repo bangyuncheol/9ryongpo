@@ -21,6 +21,8 @@ OSM_URL = "https://api.openstreetmap.org/api/0.6/map.json?bbox={},{},{},{}".form
 DRIVE = {"secondary", "tertiary", "secondary_link", "tertiary_link", "unclassified", "residential"}
 MAIN = {"secondary", "tertiary"}  # 센서를 붙이는 길
 EXT_M = 150
+SIDE_M = 350  # 주변 길: 센서에서 도로를 따라 이만큼 안의 차도를 가까운 센서 색으로(가늘고 옅게, 10/12 오너 '가지처럼')
+SIDE = {"secondary", "tertiary", "secondary_link", "tertiary_link", "unclassified", "residential"}
 # 길을 따라 늘어선 차례(서 → 동). /api/traffic/sensors 를 못 읽을 때의 좌표(10/12 확인값)
 ORDER = ["교통센서2", "교통센서1", "교통센서3", "교통센서4"]
 FALLBACK = {"교통센서2": (35.985863, 129.548065), "교통센서1": (35.986351, 129.549484),
@@ -54,11 +56,14 @@ def main() -> None:
     pos = {e["id"]: (e["lat"], e["lon"]) for e in d["elements"] if e["type"] == "node"}
     graph: dict[int, list[tuple[int, float]]] = {}
     main_nodes: set[int] = set()
+    ways: list[list[int]] = []
     for w in d["elements"]:
         hw = w.get("tags", {}).get("highway") if w["type"] == "way" else None
         if hw not in DRIVE:
             continue
         ns = w["nodes"]
+        if hw in SIDE:
+            ways.append(ns)
         if hw in MAIN:
             main_nodes.update(ns)
         for a, b in zip(ns, ns[1:]):
@@ -130,12 +135,40 @@ def main() -> None:
         roads.append({"sensor": n, "path": [[round(a, 6), round(b, 6)] for a, b in seg]})
         print(f"{n}: {hi - lo:.0f}m")
 
-    body = ",\n".join(f"  {{ sensor: '{r['sensor']}', path: {json.dumps(r['path'])} }}" for r in roads)
+    # 주변 길: 센서 넷에서 동시에 도로를 따라 퍼지며(다중 출발 최단 거리) 가까운 센서에 붙인다. 큰길로 쓴 구간은 뺀다
+    near: dict[int, tuple[float, str]] = {}
+    q = [(0.0, snap[n], n) for n in ORDER]
+    while q:
+        c, u, n = heapq.heappop(q)
+        if c > SIDE_M or (u in near and near[u][0] <= c):
+            continue
+        near[u] = (c, n)
+        for v, w in graph.get(u, []):
+            heapq.heappush(q, (c + w, v, n))
+    on_main = set(zip(route, route[1:])) | set(zip(route[1:], route))
+    for ns in ways:
+        run: list[int] = []
+        owner = None
+        def flush() -> None:
+            if len(run) > 1 and owner:
+                roads.append({"sensor": owner, "path": [[round(pos[k][0], 6), round(pos[k][1], 6)] for k in run], "side": True})
+        for a, b in zip(ns, ns[1:]):
+            o = near[a][1] if a in near and b in near and near[a][1] == near[b][1] and (a, b) not in on_main else None
+            if o and o == owner and run and run[-1] == a:
+                run.append(b)
+            else:
+                flush()
+                run, owner = ([a, b], o) if o else ([], None)
+        flush()
+    print(f"주변 길 {sum(1 for r in roads if r.get('side'))}가닥")
+
+    body = ",\n".join(f"  {{ sensor: '{r['sensor']}', side: {'true' if r.get('side') else 'false'}, path: {json.dumps(r['path'])} }}" for r in roads)
     OUT.write_text(
         "// 자동 생성: src/server/scripts/build_traffic_roads.py — 손으로 고치지 말 것\n"
         "// 교통 센서가 놓인 길을 센서마다 나눈 선(이웃 센서 사이는 가운데에서 가름, 양 끝은 길 따라 150m).\n"
+        "// side: 센서에서 길 따라 350m 안의 주변 길(잰 길이 아니라 가까운 센서 값을 빌림 → 화면에서 가늘고 옅게).\n"
         "// 도로: ⓒ OpenStreetMap contributors (ODbL)\n"
-        f"export const TRAFFIC_ROADS: {{ sensor: string; path: [number, number][] }}[] = [\n{body},\n]\n",
+        f"export const TRAFFIC_ROADS: {{ sensor: string; side: boolean; path: [number, number][] }}[] = [\n{body},\n]\n",
         encoding="utf-8")
     print(f"썼다: {OUT}")
 
