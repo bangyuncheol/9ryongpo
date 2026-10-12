@@ -1,0 +1,228 @@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sun-typeface/SUITE@2/fonts/static/woff2/SUITE.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/static/woff2/SUIT.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&display=swap">
+<style>
+  #baemajung-brand { color-scheme: light; width: 100%; }
+  #baemajung-brand * { box-sizing: border-box; }
+  #baemajung-brand .bm-stage {
+    --bm-teal: #0c5560; --bm-coral: #c0392b; --bm-sun: #e8604c;
+    --bm-ink: #10232b; --bm-muted: #4f6169; --bm-paper: #fff;
+    --bm-mist: #eef3f2; --bm-line: #e1e9e8; --bm-chip: #e7eeed;
+    --bm-body: "Pretendard Variable", Pretendard, system-ui, sans-serif;
+    --bm-display: SUITE, "Pretendard Variable", sans-serif;
+    --bm-body-size: 16px; --bm-heading-weight: 700;
+    font-family: var(--bm-body); color: var(--bm-ink);
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(290px, 340px);
+    gap: 28px; min-height: 666px; padding: 24px 20px;
+    align-items: start; background: var(--bm-mist); border-radius: 24px;
+  }
+  #baemajung-brand .bm-stage[hidden] { display: none; }
+  #baemajung-brand .bm-label { color: var(--bm-muted); font-size: 12px; line-height: 1.5; letter-spacing: .06em; }
+  #baemajung-brand .bm-name { margin: 8px 0 0; font-size: 24px; font-weight: 700; line-height: 1.4; letter-spacing: -.04em; }
+  #baemajung-brand .bm-label-line { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  #baemajung-brand .bm-recommended { padding: 3px 8px; background: #d6ebe8; color: var(--bm-teal); border-radius: 6px; font-size: 12px; font-weight: 650; }
+  #baemajung-brand .bm-brand-area { min-width: 0; }
+  #baemajung-brand .bm-brand-lockup { display: flex; align-items: center; gap: 17px; margin: 43px 0 32px; flex-wrap: wrap; }
+  #baemajung-brand .bm-wordmark { display: block; color: var(--bm-teal); font-family: var(--bm-display); font-size: 44px; font-weight: 800; line-height: 1.2; letter-spacing: -.045em; }
+  #baemajung-brand .bm-tagline { display: block; font-size: 13px; line-height: 1.65; color: var(--bm-muted); margin-top: 8px; }
+  #baemajung-brand .bm-logo { position: relative; display: inline-block; flex-shrink: 0; width: var(--bm-logo-size, 88px); height: var(--bm-logo-size, 88px); border-radius: 24%; overflow: hidden; background: var(--bm-teal); color: white; }
+  #baemajung-brand .bm-logo > span { display: block; position: absolute; }
+  #baemajung-brand .bm-sun { width: 22%; height: 22%; right: 20%; top: 23%; border-radius: 50%; background: var(--bm-sun); }
+  #baemajung-brand .bm-mast { width: 4.5%; height: 18%; left: 36%; top: 26%; background: currentColor; border-radius: 3px; }
+  #baemajung-brand .bm-cabin { left: 31%; top: 38%; width: 28%; height: 17%; background: currentColor; border-radius: 20% 20% 0 0; }
+  #baemajung-brand .bm-hull { left: 19%; top: 55%; width: 64%; height: 19%; background: currentColor; clip-path: polygon(0 0, 100% 0, 78% 100%, 15% 100%); }
+  #baemajung-brand .bm-wake { left: 20%; top: 76%; width: 59%; height: 4.5%; border-radius: 999px; background: currentColor; }
+  #baemajung-brand .bm-port, #baemajung-brand .bm-window { display: none; }
+  #baemajung-brand .bm-icon-row { display: flex; align-items: end; gap: 22px; margin: 14px 0 27px; }
+  #baemajung-brand .bm-icon-sample { display: flex; flex-direction: column; gap: 8px; align-items: center; font-size: 12px; color: var(--bm-muted); }
+  #baemajung-brand .bm-mono { background: var(--bm-ink); }
+  #baemajung-brand .bm-mono .bm-sun { background: currentColor; }
+  #baemajung-brand .bm-specimen { padding: 19px 0; border-top: 1px solid #cddbd8; }
+  #baemajung-brand .bm-specimen h3 { font-family: var(--bm-display); margin: 9px 0 4px; font-size: 22px; line-height: 1.45; font-weight: var(--bm-heading-weight); letter-spacing: -.03em; }
+  #baemajung-brand .bm-specimen p { margin: 0; font-size: var(--bm-body-size); line-height: 1.7; word-break: keep-all; }
+  #baemajung-brand .bm-font-info { display: block; margin-top: 9px; font-size: 12px; color: var(--bm-muted); line-height: 1.7; }
+  #baemajung-brand .bm-palette { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 14px; font-size: 12px; color: var(--bm-muted); }
+  #baemajung-brand .bm-palette span { display: flex; align-items: center; gap: 6px; }
+  #baemajung-brand .bm-swatch { display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: var(--bm-teal); }
+  #baemajung-brand .bm-swatch.coral { background: var(--bm-coral); }
+  #baemajung-brand .bm-screen-wrap { min-width: 0; }
+  #baemajung-brand .bm-screen-caption { display: flex; justify-content: space-between; gap: 8px; margin: 0 3px 10px; color: var(--bm-muted); font-size: 11px; line-height: 1.5; }
+  #baemajung-brand .bm-screen { background: var(--bm-paper); border-radius: 22px; border: 1px solid #d5e1df; overflow: hidden; box-shadow: 0 8px 24px #0c55600b; }
+  #baemajung-brand .bm-app-header { padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; gap: 10px; background: var(--bm-mist); }
+  #baemajung-brand .bm-header-brand { display: flex; align-items: center; gap: 8px; }
+  #baemajung-brand .bm-app-wordmark { font-family: var(--bm-display); font-weight: 800; color: var(--bm-teal); font-size: 21px; line-height: 1.3; letter-spacing: -.04em; }
+  #baemajung-brand .bm-clock { font-size: 13px; font-variant-numeric: tabular-nums; color: var(--bm-muted); }
+  #baemajung-brand .bm-handle { width: 32px; height: 4px; margin: 12px auto 4px; border-radius: 999px; background: #cbd5d3; }
+  #baemajung-brand .bm-tabs { display: flex; padding: 0 14px; border-bottom: 1px solid var(--bm-line); }
+  #baemajung-brand .bm-tab { flex: 1; font-family: inherit; color: var(--bm-muted); background: transparent; border: 0; border-bottom: 2px solid transparent; font-size: 14px; font-weight: 600; line-height: 1.5; padding: 12px 3px; min-height: 44px; }
+  #baemajung-brand .bm-tab[aria-selected="true"] { color: var(--bm-teal); border-bottom-color: var(--bm-teal); font-weight: 750; }
+  #baemajung-brand .bm-page { padding: 25px 23px 26px; min-height: 465px; }
+  #baemajung-brand .bm-page[hidden] { display: none; }
+  #baemajung-brand .bm-eta { display: flex; flex-wrap: wrap; gap: 6px; align-items: baseline; color: var(--bm-coral); }
+  #baemajung-brand .bm-number { font-size: 56px; font-weight: 760; line-height: 1.05; letter-spacing: -.05em; font-variant-numeric: tabular-nums; }
+  #baemajung-brand .bm-eta-unit { font-size: 19px; font-weight: 650; }
+  #baemajung-brand .bm-eta-time { font-size: 16px; font-weight: 650; margin-left: auto; font-variant-numeric: tabular-nums; }
+  #baemajung-brand .bm-ship-name { margin: 19px 0 3px; font-size: 21px; font-weight: 700; letter-spacing: -.025em; line-height: 1.5; }
+  #baemajung-brand .bm-copy { font-size: var(--bm-body-size); line-height: 1.65; margin: 0; word-break: keep-all; }
+  #baemajung-brand .bm-secondary { color: var(--bm-muted); font-size: 13px; line-height: 1.7; margin: 7px 0 0; }
+  #baemajung-brand .bm-action { font-family: inherit; font-size: 15px; font-weight: 650; min-height: 48px; padding: 12px 13px; border: 0; border-radius: 16px; background: var(--bm-chip); color: var(--bm-ink); width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 20px; }
+  #baemajung-brand .bm-action i { width: 17px; height: 17px; }
+  #baemajung-brand .bm-visit { background: var(--bm-mist); padding: 14px 15px; border-radius: 15px; margin-top: 20px; }
+  #baemajung-brand .bm-visit p { margin: 0; font-size: 15px; font-weight: 550; line-height: 1.65; font-variant-numeric: tabular-nums; }
+  #baemajung-brand .bm-visit small { display: block; margin-top: 4px; color: var(--bm-muted); font-size: 13px; line-height: 1.5; }
+  #baemajung-brand .bm-section-title { font-family: var(--bm-display); font-size: 20px; line-height: 1.5; font-weight: var(--bm-heading-weight); color: var(--bm-teal); letter-spacing: -.025em; margin: 23px 0 10px; }
+  #baemajung-brand .bm-queue { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 10px 0; border-top: 1px solid var(--bm-line); font-size: 15px; line-height: 1.5; }
+  #baemajung-brand .bm-queue time { color: var(--bm-coral); font-variant-numeric: tabular-nums; font-weight: 650; }
+  #baemajung-brand .bm-queue small { color: var(--bm-muted); font-size: 13px; }
+  #baemajung-brand .bm-page h3:first-child { margin-top: 0; }
+  #baemajung-brand .bm-fish-options { display: flex; gap: 8px; flex-wrap: wrap; margin: 20px 0; }
+  #baemajung-brand .bm-fish { background: var(--bm-chip); border: 0; color: var(--bm-ink); font-family: inherit; font-size: 15px; font-weight: 600; border-radius: 14px; min-height: 44px; padding: 10px 15px; }
+  #baemajung-brand .bm-fish[aria-pressed="true"] { background: var(--bm-teal); color: white; }
+  #baemajung-brand .bm-alert-status { color: var(--bm-teal); margin-top: 16px; font-size: 14px; line-height: 1.7; }
+  #baemajung-brand .bm-question { display: block; text-align: left; width: 100%; border: 0; border-radius: 14px; font-family: inherit; font-size: 15px; padding: 14px 15px; margin-top: 12px; min-height: 44px; background: var(--bm-mist); color: var(--bm-ink); line-height: 1.65; }
+  #baemajung-brand .bm-answer { background: #d6ebe8; font-size: var(--bm-body-size); line-height: 1.7; border-radius: 16px; padding: 15px; margin-top: 20px; word-break: keep-all; }
+  #baemajung-brand .bm-dock { --bm-display: SUIT, "Pretendard Variable", sans-serif; --bm-body: SUIT, "Pretendard Variable", sans-serif; }
+  #baemajung-brand .bm-dock .bm-brand-lockup { flex-direction: column; align-items: start; gap: 20px; margin-top: 29px; margin-bottom: 27px; }
+  #baemajung-brand .bm-dock .bm-wordmark { letter-spacing: -.075em; font-size: 48px; }
+  #baemajung-brand .bm-dock .bm-logo { border-radius: 20%; }
+  #baemajung-brand .bm-dock .bm-sun { display: none; }
+  #baemajung-brand .bm-dock .bm-port { display: block; border: solid currentColor; border-width: 0 0 0 calc(var(--bm-logo-size, 88px) * .045); left: 16%; top: 27%; width: 70%; height: 45%; border-radius: 2px; }
+  #baemajung-brand .bm-dock .bm-port:after { content: ""; position: absolute; right: 0; top: 0; width: calc(var(--bm-logo-size, 88px) * .045); height: 100%; border-radius: 2px; background: currentColor; }
+  #baemajung-brand .bm-dock .bm-cabin { left: 36%; top: 36%; width: 28%; height: 18%; border-radius: 2px 2px 0 0; }
+  #baemajung-brand .bm-dock .bm-mast { left: 48%; top: 24%; width: 4%; height: 14%; }
+  #baemajung-brand .bm-dock .bm-hull { left: 29%; top: 53%; width: 43%; height: 23%; clip-path: polygon(0 0, 50% 8%, 100% 0, 83% 75%, 50% 100%, 17% 75%); }
+  #baemajung-brand .bm-dock .bm-wake { left: 34%; top: 82%; width: 32%; height: 4%; }
+  #baemajung-brand .bm-dock .bm-window { display: block; left: 41%; top: 41%; width: 18%; height: 4.5%; border-radius: 1px; background: var(--bm-teal); }
+  #baemajung-brand .bm-dock .bm-mono .bm-window { background: var(--bm-ink); }
+  #baemajung-brand .bm-neighbor { --bm-display: "Pretendard Variable", Pretendard, sans-serif; }
+  #baemajung-brand .bm-neighbor .bm-wordmark, #baemajung-brand .bm-neighbor .bm-app-wordmark { font-family: Jua, "Pretendard Variable", sans-serif; font-weight: 400; letter-spacing: -.035em; }
+  #baemajung-brand .bm-neighbor .bm-brand-lockup { display: flex; flex-direction: column; align-items: start; gap: 17px; margin-top: 28px; margin-bottom: 25px; }
+  #baemajung-brand .bm-neighbor .bm-logo { border-radius: 32%; }
+  #baemajung-brand .bm-neighbor .bm-sun { width: 32%; height: 32%; left: 36%; top: 23%; }
+  #baemajung-brand .bm-neighbor .bm-mast { display: none; }
+  #baemajung-brand .bm-neighbor .bm-cabin { left: 35%; top: 42%; width: 30%; height: 16%; border-radius: 6px 6px 0 0; }
+  #baemajung-brand .bm-neighbor .bm-hull { left: 21%; top: 55%; width: 58%; height: 20%; border-radius: 0 0 45% 45%; clip-path: none; }
+  #baemajung-brand .bm-neighbor .bm-wake { left: 29%; top: 82%; width: 42%; height: 4%; }
+  #baemajung-brand .bm-neighbor .bm-wordmark { font-size: 51px; }
+  #baemajung-brand .bm-neighbor .bm-app-wordmark { font-size: 24px; }
+  #baemajung-brand .bm-neighbor .bm-specimen h3 { font-family: Jua, sans-serif; font-weight: 400; }
+  @media (max-width: 630px) {
+    #baemajung-brand .bm-stage { grid-template-columns: minmax(0, 1fr); gap: 20px; padding: 23px 15px; min-height: 1100px; }
+    #baemajung-brand .bm-screen-wrap { width: 100%; max-width: 360px; justify-self: center; }
+    #baemajung-brand .bm-brand-lockup { margin: 24px 0; }
+    #baemajung-brand .bm-dock .bm-brand-lockup, #baemajung-brand .bm-neighbor .bm-brand-lockup { flex-direction: row; align-items: center; }
+    #baemajung-brand .bm-specimen { padding: 14px 0; }
+    #baemajung-brand .bm-icon-row { margin-bottom: 18px; }
+    #baemajung-brand .bm-wordmark, #baemajung-brand .bm-dock .bm-wordmark, #baemajung-brand .bm-neighbor .bm-wordmark { font-size: 40px; }
+    #baemajung-brand .bm-logo { --bm-logo-size: 72px; }
+  }
+</style>
+<div id="baemajung-brand">
+  <div class="viz-carousel viz-dotted-background" aria-label="배마중 아이콘과 글씨 디자인 비교" data-previous-label="이전 시안" data-next-label="다음 시안">
+    <section class="bm-stage bm-dawn" data-variant="새벽 마중" aria-label="새벽 마중 디자인"></section>
+    <section class="bm-stage bm-dock" data-variant="항구 안내" aria-label="항구 안내 디자인" hidden></section>
+    <section class="bm-stage bm-neighbor" data-variant="정다운 마중" aria-label="정다운 마중 디자인" hidden></section>
+  </div>
+</div>
+<script>
+(() => {
+  const root = document.getElementById('baemajung-brand');
+  const designs = [
+    { name: '새벽 마중', mark: '어선 + 떠오르는 해 + 수평선', logoFont: 'SUITE ExtraBold · 800', bodyFont: 'Pretendard · 400 / 600 / 700', recommended: true },
+    { name: '항구 안내', mark: '입항하는 배 + 두 방파제', logoFont: 'SUIT ExtraBold · 800', bodyFont: 'SUIT · 400 / 600 / 700', recommended: false },
+    { name: '정다운 마중', mark: '둥근 뱃머리 + 아침 해', logoFont: 'Jua · 400', bodyFont: 'Pretendard · 400 / 600 / 700', recommended: false }
+  ];
+  function logo(size, mono = false) {
+    return `<span class="bm-logo${mono ? ' bm-mono' : ''}" style="--bm-logo-size:${size}px" role="img" aria-label="배마중 어선 심볼"><span class="bm-port"></span><span class="bm-sun"></span><span class="bm-mast"></span><span class="bm-cabin"></span><span class="bm-hull"></span><span class="bm-window"></span><span class="bm-wake"></span></span>`;
+  }
+  const saved = window.openai?.widgetState?.modelContent;
+  const validFish = ['붉은대게', '살오징어', '모두'];
+  const picked = validFish.includes(saved?.fish) ? saved.fish : '붉은대게';
+  const sections = [...root.querySelectorAll('.bm-stage')];
+  sections.forEach((stage, index) => {
+    const d = designs[index];
+    stage.innerHTML = `
+      <div class="bm-brand-area" aria-label="${d.name} 로고와 글꼴">
+        <div class="bm-label-line"><span class="bm-label">아이콘 · 로고 글씨 · 화면 글씨</span>${d.recommended ? '<span class="bm-recommended">추천</span>' : ''}</div>
+        <h2 class="bm-name">${d.name}</h2>
+        <div class="bm-brand-lockup">${logo(88)}<div><span class="bm-wordmark">배마중</span><span class="bm-tagline">구룡포 새벽 입항·어종 알림</span></div></div>
+        <span class="bm-label">${d.mark}</span>
+        <div class="bm-icon-row">
+          <div class="bm-icon-sample">${logo(48)}<span>앱 아이콘</span></div>
+          <div class="bm-icon-sample">${logo(24)}<span>헤더 24px</span></div>
+          <div class="bm-icon-sample">${logo(32, true)}<span>단색</span></div>
+        </div>
+        <div class="bm-specimen"><span class="bm-label">로고 글씨</span><h3>배를 기다리는 새벽</h3><span class="bm-font-info">${d.logoFont}</span></div>
+        <div class="bm-specimen"><span class="bm-label">본문 · 알림 · 안내</span><p>원하는 생선이 들어오면<br>먼저 알려 드릴게요.</p><span class="bm-font-info">${d.bodyFont}<br>구역 제목 20px · 본문 16px · 보조 13px</span></div>
+        <div class="bm-palette"><span><i class="bm-swatch"></i>깊은 청록</span><span><i class="bm-swatch coral"></i>입항 시각</span></div>
+      </div>
+      <div class="bm-screen-wrap" aria-label="${d.name} 화면 글씨 미리보기">
+        <div class="bm-screen-caption"><span>헤더 / 입항 시트 발췌</span><span>예시 데이터</span></div>
+        <div class="bm-screen">
+          <header class="bm-app-header"><div class="bm-header-brand">${logo(24)}<span class="bm-app-wordmark">배마중</span></div><time class="bm-clock">05:00</time></header>
+          <div class="bm-handle" aria-hidden="true"></div>
+          <div class="bm-tabs" role="tablist" aria-label="미리보기 화면">
+            ${['들어오는 배', '알림', '물어보기'].map((t, page) => `<button type="button" class="bm-tab cursor-interaction" id="bm-tab-${index}-${page}" role="tab" aria-controls="bm-page-${index}-${page}" aria-selected="${page === 0}" data-page="${page}">${t}</button>`).join('')}
+          </div>
+          <section class="bm-page" id="bm-page-${index}-0" role="tabpanel" aria-labelledby="bm-tab-${index}-0">
+            <div class="bm-eta"><span class="bm-number">20</span><span class="bm-eta-unit">분 뒤 도착</span><time class="bm-eta-time">05:20</time></div>
+            <h3 class="bm-ship-name">남진호</h3>
+            <p class="bm-copy"><strong>붉은대게</strong> 가능성이 높아요</p>
+            <p class="bm-secondary">어종 추정 · 같은 달 위판 실적 기준<br>통발선 · 위판장까지 3.2km · 입항 예보</p>
+            <button type="button" class="bm-action cursor-interaction" data-open-alert><i data-lucide="bell" aria-hidden="true"></i>생선 알림 받기</button>
+            <div class="bm-visit"><p>경매가 06:00에 시작해요.<br>05:40까지 오시면 돼요</p><small>지금 위판장 앞은 원활해요</small></div>
+            <h3 class="bm-section-title">그다음 들어오는 배</h3>
+            <div class="bm-queue"><time>05:35</time><span>동해호</span><small>살오징어</small></div>
+          </section>
+          <section class="bm-page" id="bm-page-${index}-1" role="tabpanel" aria-labelledby="bm-tab-${index}-1" hidden>
+            <h3 class="bm-section-title">기다리는 생선이 있나요?</h3>
+            <p class="bm-copy">원하는 생선이 들어오면<br>먼저 알려 드릴게요.</p>
+            <div class="bm-fish-options" role="group" aria-label="생선 선택 미리보기">${validFish.map(f => `<button type="button" class="bm-fish cursor-interaction" aria-pressed="${f === picked}" data-fish="${f}">${f}</button>`).join('')}</div>
+            <button type="button" class="bm-action cursor-interaction" data-preview-subscribe><i data-lucide="bell" aria-hidden="true"></i>휴대폰 알림 받기</button>
+            <p class="bm-alert-status" aria-live="polite">${picked} 선택됨</p>
+            <p class="bm-secondary">알림 화면 미리보기</p>
+          </section>
+          <section class="bm-page" id="bm-page-${index}-2" role="tabpanel" aria-labelledby="bm-tab-${index}-2" hidden>
+            <h3 class="bm-section-title">물어보기</h3>
+            <p class="bm-copy">궁금한 걸 편하게 물어보세요.</p>
+            <button type="button" class="bm-question cursor-interaction" data-question="fish">오늘 붉은대게 들어와?</button>
+            <button type="button" class="bm-question cursor-interaction" data-question="visit">몇 시까지 가면 돼?</button>
+            <div class="bm-answer" aria-live="polite">붉은대게를 실었을 가능성이 높은 남진호가 05:20에 들어올 예정이에요.</div>
+            <p class="bm-secondary">대화 글씨 미리보기 · 예시 응답</p>
+          </section>
+        </div>
+      </div>`;
+    function openPage(page) {
+      stage.querySelectorAll('.bm-tab').forEach((tab, i) => tab.setAttribute('aria-selected', String(i === page)));
+      stage.querySelectorAll('.bm-page').forEach((panel, i) => { panel.hidden = i !== page; });
+    }
+    stage.querySelectorAll('.bm-tab').forEach(tab => tab.addEventListener('click', () => openPage(Number(tab.dataset.page))));
+    stage.querySelector('[data-open-alert]').addEventListener('click', () => openPage(1));
+    stage.querySelectorAll('[data-fish]').forEach(button => button.addEventListener('click', () => {
+      stage.querySelectorAll('[data-fish]').forEach(b => b.setAttribute('aria-pressed', String(b === button)));
+      stage.querySelector('.bm-alert-status').textContent = `${button.dataset.fish} 선택됨`;
+      window.openai?.setWidgetState?.({modelContent: {design: d.name, fish: button.dataset.fish}, privateContent: null})?.catch(() => {});
+    }));
+    stage.querySelector('[data-preview-subscribe]').addEventListener('click', () => {
+      const fish = stage.querySelector('[data-fish][aria-pressed="true"]').dataset.fish;
+      stage.querySelector('.bm-alert-status').textContent = `${fish} 알림 켜짐 · 디자인 미리보기`;
+    });
+    stage.querySelectorAll('[data-question]').forEach(button => button.addEventListener('click', () => {
+      stage.querySelector('.bm-answer').textContent = button.dataset.question === 'fish'
+        ? '붉은대게를 실었을 가능성이 높은 남진호가 05:20에 들어올 예정이에요.'
+        : '경매는 06:00에 시작해요. 20분 전인 05:40까지 오시면 돼요. 지금 위판장 앞은 원활해요.';
+    }));
+    if (globalThis.Tweak) {
+      const state = { bodySize: 16, headingWeight: 700 };
+      const tweak = new Tweak({ container: stage, onChange: () => {
+        stage.style.setProperty('--bm-body-size', `${state.bodySize}px`);
+        stage.style.setProperty('--bm-heading-weight', String(state.headingWeight));
+      }});
+      tweak.addSlider(state, 'bodySize', { label: '본문 크기', min: 16, max: 19, step: 1, unit: 'px' });
+      tweak.addSlider(state, 'headingWeight', { label: '제목 굵기', min: 600, max: 800, step: 100 });
+    }
+  });
+  if (globalThis.lucide) lucide.createIcons({ attrs: { width: 17, height: 17 } });
+})();
+</script>
