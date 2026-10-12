@@ -10,7 +10,7 @@ type Props = {
   notice: string | null; selected: number | null; onSelect: (id: number | null) => void
   legendToggle?: boolean // 2차 시안: 범례를 접어 두고 버튼으로 연다(카카오 지도만)
   compact?: boolean // 버전 3 폰 홈: 지도 높이를 줄인다(카카오 지도만)
-  fill?: boolean // 버전 4: 부모 높이를 꽉 채운다(카카오 지도만)
+  fill?: boolean // 부모 높이를 꽉 채운다(카카오 지도·대체 지도 모두, 10/12)
   padBottom?: number // 버전 4: 아래를 덮는 시트 높이(px)
 }
 
@@ -18,6 +18,6 @@ export default function MapView(props: Props) {
   const [fallback, setFallback] = useState(!import.meta.env.VITE_KAKAO_MAP_KEY)
   const onFail = useCallback(() => setFallback(true), [])
   return fallback
-    ? <ShipMap place={props.place} ships={props.ships} arriving={props.arriving} />
+    ? <ShipMap place={props.place} ships={props.ships} arriving={props.arriving} fill={props.fill} />
     : <KakaoArrivalMap {...props} onFail={onFail} />
 }

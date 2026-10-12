@@ -29,17 +29,17 @@ function FitOnce({ points }: { points: [number, number][] }) {
   return null
 }
 
-type Props = { place: Place | null; ships: Ship[]; arriving: Arrival[] }
+type Props = { place: Place | null; ships: Ship[]; arriving: Arrival[]; fill?: boolean }
 
-export default function ShipMap({ place, ships, arriving }: Props) {
+export default function ShipMap({ place, ships, arriving, fill = false }: Props) {
   const center: [number, number] = place ? [place.lat, place.lon + 0.045] : [35.99, 129.6]
   const eta = new Map(arriving.map((a) => [a.ship_id, a.eta]))
   // 라벨은 바로 다음에 들어올 1척만 항상 표시(항구 근처에 몰리면 겹침, 10/10). 나머지는 점을 누르면(폰은 탭) 보인다.
   const labeled = new Set(arriving.slice(0, 1).map((a) => a.ship_id))
   return (
-    <div className="relative">
+    <div className={fill ? 'relative h-full' : 'relative'}>
     {/* 지도는 고정(10/10): 끌기·확대 없음. 폰에서 페이지를 내릴 때 지도만 움직이는 문제도 없앤다. 배 점 탭은 그대로. */}
-    <MapContainer center={center} zoom={12} className="h-72 w-full rounded-card md:h-[440px]"
+    <MapContainer center={center} zoom={12} className={fill ? 'h-full w-full' : 'h-72 w-full rounded-card md:h-[440px]'}
       dragging={false} touchZoom={false} doubleClickZoom={false} scrollWheelZoom={false}
       boxZoom={false} keyboard={false} zoomControl={false}>
       <TileLayer
