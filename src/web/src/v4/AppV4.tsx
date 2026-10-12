@@ -24,7 +24,7 @@ import './v4.css'
  * 웹(1024px 이상): 지도가 왼쪽 전체, 시트는 오른쪽 고정 칸.
  * 데이터·동작은 버전 2와 같다(같은 API, 같은 알림 신청 부품). 숫자는 서버 값 그대로.
  */
-const PAGE = { light: '#c8dcde', dark: '#c8dcde' } // v4.css --color-band(헤더 띠 색). 다크 모드 기기에서도 라이트(10/12 오너)
+const PAGE = { light: '#ffffff', dark: '#ffffff' } // 헤더 색 = 시트 흰색(10/13 오너: 청록 띠를 뺌). 다크 모드 기기에서도 라이트(10/12 오너)
 
 export default function AppV4() {
   useThemeColor(PAGE)
@@ -85,14 +85,14 @@ export default function AppV4() {
         <div className="grid h-dvh grid-cols-[1fr_440px]">
           <div className="relative h-dvh">{map}</div>
           <aside className="v4-sheet relative z-10 h-dvh overflow-y-auto bg-card" aria-label="입항 정보">
-            <div className="sticky top-0 z-10 bg-band px-6 py-3"><Badge today={t} /></div>
+            <div className="sticky top-0 z-10 bg-card px-6 py-3"><Badge today={t} /></div>
             {admin && <div className="py-2"><AdminBar clock={t?.clock ?? null} feed={t?.source.feed ?? null} call={call.data} /></div>}
             {sheet()}
           </aside>
         </div>
       ) : (
         <>
-          <div className="absolute inset-x-0 top-0 z-40 flex flex-col justify-center bg-band px-4" style={{ height: HEADER_H }}><Badge today={t} /></div>
+          <div className="absolute inset-x-0 top-0 z-40 flex flex-col justify-center border-b border-line bg-card px-4" style={{ height: HEADER_H }}><Badge today={t} /></div>
           {/* 지도는 헤더 아래 전체. 시트가 그 위를 덮고 두 단(내림·기본)으로 오르내린다 */}
           <div className="absolute inset-x-0 bottom-0" style={{ top: HEADER_H }}>{map}</div>
           <BottomSheet snap={snap} onSnap={setSnap} fit={fit} peek={<Peek today={t} first={arriving[0]} onOpen={() => setSnap('mid')} />}>
