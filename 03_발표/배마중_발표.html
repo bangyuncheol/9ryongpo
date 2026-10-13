@@ -78,6 +78,20 @@ ul.dots li + li { margin-top: 12px; }
 ul.dots li::before { content: ""; position: absolute; left: 4px; top: .65em; width: 10px; height: 10px; border-radius: 50%; background: var(--primary); }
 .dark ul.dots li::before { background: var(--night-blue); }
 .notes { display: none; }
+/* 팀 소개(마지막 장): 두 사람 카드. 이력은 인터뷰브릿지 IR·UGRP 자료에서 */
+.team { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 40px; }
+.member { background: var(--night-2); border-radius: 30px; padding: 40px 44px; display: flex; flex-direction: column; }
+.member .top { display: flex; align-items: center; gap: 22px; }
+.member .av { width: 92px; height: 92px; border-radius: 50%; background: var(--night-blue); color: var(--night); display: grid; place-items: center; font-size: 40px; font-weight: 800; flex: none; }
+.member .nm { font-size: 44px; font-weight: 800; line-height: 1.1; }
+.member .rl { font-size: 24px; color: var(--night-blue); font-weight: 800; margin-top: 8px; }
+.member .rl small { color: var(--night-muted); font-weight: 600; margin-left: 10px; }
+.member ul.dots { margin-top: 28px; }
+.member li { font-size: 24px; line-height: 1.5; color: var(--night-ink); }
+.member li + li { margin-top: 12px; }
+.member li b { color: #fff; }
+.member .bm { margin-top: auto; padding-top: 22px; border-top: 1px solid #263a55; font-size: 23px; line-height: 1.5; color: var(--night-muted); }
+.member .bm b { color: var(--night-blue); }
 /* 문제 요약(6장) 2×2 카드 · 문제별 장(7~10장): 왼쪽 근거, 오른쪽 해결·기대효과. '인터뷰브릿지 기술' 칩 */
 .pgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 40px; }
 .pcard { background: var(--night-2); border-radius: 26px; padding: 30px 36px; display: flex; gap: 22px; align-items: flex-start; }
@@ -810,13 +824,33 @@ body:hover #hud { opacity: .8; }
   <aside class="notes">구조는 단순합니다. 받고, 계산하고, 문장으로 바꿔서, 폰이랑 전화로 보냅니다. 서버 한 대에서 전부 돕니다.</aside>
 </section>
 
-<!-- 20 마무리 -->
+<!-- 20 팀 -->
 <section class="slide dark center">
-  <h2 style="font-size:96px; line-height:1.2;">10월 13일 새벽 3시 10분,<br>이번엔 김 사장님이 먼저 압니다</h2>
-  <p class="lead" style="font-size:36px; margin-top:44px;">붉은대게를 실었을 자망선 세 척, 4시 25분부터 들어옵니다. 6시 경매, 5시 반까지 가면 됩니다.</p>
-  <p class="b30" style="margin-top:96px; color:var(--night-muted);">팀 인터뷰브릿지　·　권인석 기획·발표　·　방윤철 디자인·화면　·　bmj.kr</p>
-  <div class="foot"><span class="src">2026 디지털 트윈 구룡포 AI 해커톤</span><span class="pg"></span></div>
-  <aside class="notes">12월엔 빈손으로 돌아왔던 김 사장님이, 이번엔 3시 10분에 압니다. 붉은대게 실었을 배 세 척, 5시 반까지 가면 된다는 걸요. 감사합니다.</aside>
+  <p class="kicker">팀 인터뷰브릿지</p>
+  <h2 style="margin-top:14px;">사람처럼 말을 주고받는 음성 AI를 만드는 두 사람</h2>
+  <p class="lead" style="margin-top:14px;">포항공과대학교 컴퓨터공학과. 실시간 음성 AI 모의면접 「인터뷰브릿지」를 2026년 7월부터 정식 운영하며, 같은 대화 엔진을 어르신 구술생애사 기록과 배마중으로 넓히고 있습니다.</p>
+  <div class="team">
+    <div class="member">
+      <div class="top"><div class="av">권</div><div><p class="nm">권인석</p><p class="rl">기획 · 발표<small>인터뷰브릿지 대표 · 사업 총괄</small></p></div></div>
+      <ul class="dots">
+        <li><b>이공계 입시 멘토 6년</b> — 매년 면접자 100명 이상 지도, 면접 문항 제작과 면접관 수행</li>
+        <li>입시컨설팅 <b>'포스컨설팅' 창업·운영</b>, VC 대상 IR 피칭</li>
+        <li>AFPK · 투자자산운용사</li>
+      </ul>
+      <p class="bm"><b>배마중에서</b> 문제 정의와 현장 조사(구사모 · 과메기조합 · 참전전우회 · 새벽 위판장), 데이터 검증, 발표</p>
+    </div>
+    <div class="member">
+      <div class="top"><div class="av">방</div><div><p class="nm">방윤철</p><p class="rl">개발 · 디자인<small>인터뷰브릿지 CTO · AI 개발·기술 총괄</small></p></div></div>
+      <ul class="dots">
+        <li><b>프론트엔드 · 모바일 앱 개발</b> 경험으로 실시간 음성 AI 서비스를 구현</li>
+        <li>사업화 기획과 <b>입시 데이터 분석</b>, 학교·교육청 B2B 확장 설계</li>
+        <li>화면 설계부터 배포·운영까지 혼자 끝내는 풀스택</li>
+      </ul>
+      <p class="bm"><b>배마중에서</b> 서버 · 지도 화면 · 웹 푸시 · 070 전화 · 안드로이드 APK 구현, 브랜드(아이콘 · 워드마크)와 영상 디자인</p>
+    </div>
+  </div>
+  <div class="foot"><span class="src">이력은 인터뷰브릿지 IR 자료 · POSTECH UGRP 기술창업트랙 연구계획서(2026.4) 기준 · 인터뷰브릿지 app.interview-bridge.com · 배마중 bmj.kr</span><span class="pg"></span></div>
+  <aside class="notes">저희는 포항공대 컴퓨터공학과 둘입니다. 저 권인석은 이공계 입시 멘토를 6년 하면서 매년 100명 넘게 면접을 지도했고, 그 경험으로 인터뷰브릿지를 만들어 운영하고 있습니다. 배마중에서는 문제를 찾고 현장을 다니고 데이터를 검증하고 오늘 발표를 맡았습니다. 방윤철은 인터뷰브릿지 기술 총괄이고, 배마중의 서버와 화면, 푸시, 전화, APK, 브랜드와 영상까지 혼자 만들었습니다. 12월엔 빈손으로 돌아왔던 김 사장님이, 이번엔 3시 10분에 압니다. 감사합니다.</aside>
 </section>
 
 </div>
