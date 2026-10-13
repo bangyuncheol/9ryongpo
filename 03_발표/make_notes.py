@@ -24,7 +24,7 @@ def clean(t: str) -> str:
 def main() -> None:
     s = SRC.read_text(encoding="utf-8")
     out = [
-        "# 배마중 발표 — 슬라이드 노트(발표 메모 + 출처)",
+        "# 배마중 발표 슬라이드 노트(발표 메모 + 출처)",
         "",
         "PDF를 이미지로 떠서 PPT에 붙일 때 각 장의 노트에 넣는 글. `배마중_발표.html`의 발표 메모(N 키)와 같은 내용이며, "
         "화면에서 뺀 출처 줄은 여기와 발표 메모에만 있다. HTML을 고치면 `python make_notes.py`로 다시 만든다.",
@@ -41,7 +41,7 @@ def main() -> None:
         memo, src = notes, ""
         if "\n\n출처: " in notes:
             memo, src = notes.split("\n\n출처: ", 1)
-        out += [f"## {num}. {title}" + (f" — {head}" if head else ""), ""]
+        out += [f"## {num}. {title}" + (f": {head}" if head else ""), ""]
         out += ["**발표 메모**", "", memo or "(없음)", ""]
         out += ["**출처**", "", src or "(없음)", ""]
     OUT.write_text("\n".join(out), encoding="utf-8", newline="\n")
