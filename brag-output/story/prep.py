@@ -127,11 +127,21 @@ for i, s in enumerate(cfg["shots"]):
     print(f"[{i:02d}] {s['id']}")
     parts.append(build_shot(i, s))
 
-# concat 필터로 다시 인코딩한다 — concat 분리기(-c copy)는 컷마다 AAC 앞 여백이 쌓여 뒤로 갈수록 입과 소리가 어긋났다
+# 영상은 프레임 그대로 잇고(concat 분리기, 복사), 소리는 컷마다 정확히 '프레임 수 × 1600' 샘플(48kHz)로 잘라 PCM 으로 잇는다.
+# concat 필터는 프레임을 끼워 넣고 AAC 앞 여백이 쌓여, 끝으로 갈수록 소리가 입보다 1초 가까이 앞섰다(10/13 오너 지적)
 footage = LIVE / "footage.mp4"
-ins = [a for p in parts for a in ("-i", p)]
-graph = "".join(f"[{k}:v][{k}:a]" for k in range(len(parts))) + f"concat=n={len(parts)}:v=1:a=1[v][a]"
-ff(*ins, "-filter_complex", graph, "-map", "[v]", "-map", "[a]", *ENC, "-movflags", "+faststart", footage)
+lst = TMP / "list.txt"
+lst.write_text("".join(f"file '{p.name}'\n" for p in parts), encoding="utf-8")
+vid, pcm = TMP / "video.mp4", TMP / "audio.pcm"
+ff("-f", "concat", "-safe", "0", "-i", lst, "-map", "0:v", "-c:v", "copy", vid)
+with pcm.open("wb") as out:
+    for part, s in zip(parts, cfg["shots"]):
+        n = round((s.get("duration") or s["out"] - s["in"]) * FPS) * (48000 // FPS)
+        out.write(subprocess.run(["ffmpeg", "-v", "error", "-i", str(part), "-map", "0:a", "-af", f"apad,atrim=end_sample={n}",
+                                  "-ar", "48000", "-ac", "2", "-f", "s16le", "-"], check=True, capture_output=True).stdout)
+ff("-i", vid, "-f", "s16le", "-ar", 48000, "-ac", 2, "-i", pcm, "-map", "0:v", "-map", "1:a", "-c:v", "copy",
+   "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", "-shortest", footage)
+ff("-i", footage, "-vn", "-c:a", "copy", LIVE / "footage.m4a")   # 소리는 따로 깐다(build.py 의 영상 2프레임 보정)
 info = [{"id": s["id"], "dur": round(duration(p), 3)} for s, p in zip(cfg["shots"], parts)]
 (LIVE / "shots.json").write_text(json.dumps(info, ensure_ascii=False, indent=1), encoding="utf-8")
 print(f"footage.mp4 {duration(footage):.2f}초 ({len(parts)}컷)")
