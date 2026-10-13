@@ -32,9 +32,9 @@ for s in cfg["shots"]:
     for j, sub in enumerate(s.get("subs", [])):
         a = t0 + sub["t"] - s["in"]; b = min(t0 + d, t0 + sub["end"] - s["in"])
         who = sub.get("who")
-        tag = f'<span class="who{" q" if who == "Q" else ""}">{escape(who)}</span>' if who else ""
+        tag = f'<span class="who">{escape("제작진" if who == "Q" else who)}</span>' if who else ""
         clips.append(f'<div id="sub-{sid}-{j}" class="clip sub" data-start="{fmt(a)}" data-duration="{fmt(b - a)}" data-track-index="1">'
-                     f'<span class="band">{tag}{escape(sub["text"])}</span></div>')
+                     f'{tag}<p class="txt">{escape(sub["text"])}</p></div>')
     if s.get("card"):
         lines = s["card"]; step = (d - 1.2) / len(lines)
         spans = "".join(f'<p class="ln">{"".join(f"<i>{escape(c)}</i>" for c in ln)}</p>' for ln in lines)
@@ -44,7 +44,7 @@ for s in cfg["shots"]:
         js.append(f'tl.to("#card-{sid}", {{ opacity: 0, duration: 0.3 }}, {fmt(t0 + d - 0.35)});')
     if s.get("hud"):
         clips.append(f'<div id="hud-{sid}" class="clip hud" data-start="{fmt(t0)}" data-duration="{fmt(d)}" data-track-index="3">'
-                     f'<span class="rec"><b></b>REC</span><span class="tag">{escape(s["hud"])}</span><span class="vc">음성변조</span></div>')
+                     f'<span class="rec"><b></b>REC</span><span class="vc">음성변조</span></div>')
         js.append(f'tl.to("#hud-{sid} .rec b", {{ opacity: 0.15, duration: 0.5, repeat: {max(1, int(d / 0.5) - 1)}, yoyo: true, ease: "steps(1)" }}, {fmt(t0)});')
     if s.get("caption"):
         clips.append(f'<div id="cap-{sid}" class="clip cap" data-start="{fmt(t0 - 0.6)}" data-duration="{fmt(d + 1.2)}" data-track-index="4">{escape(s["caption"])}</div>')
@@ -77,10 +77,11 @@ HTML = f"""<!doctype html>
                    font-family:"Noto Sans KR",sans-serif; }}
       #root {{ position:relative; width:{W}px; height:{H}px; }}
       #footage {{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }}
-      .sub {{ position:absolute; left:0; right:0; bottom:86px; display:flex; justify-content:center; }}
-      .sub .band {{ max-width:1500px; padding:12px 28px; background:rgba(0,0,0,.72); font-size:44px; font-weight:600; line-height:1.4; text-align:center; word-break:keep-all; }}
-      .who {{ display:inline-block; margin-right:16px; padding:2px 12px; background:#fff; color:#111; font-size:30px; font-weight:800; vertical-align:middle; }}
-      .who.q {{ background:{CORAL}; color:#fff; }}
+      /* 자막: 시사 프로그램식 — 검은 기울어진 이름표(빨간 그림자) + 굵은 흰 글자에 검은 테두리, 왼쪽 아래 (10/13 오너 참고 이미지) */
+      .sub {{ position:absolute; left:90px; right:90px; bottom:64px; display:flex; flex-direction:column; align-items:flex-start; gap:14px; }}
+      .who {{ display:inline-block; padding:6px 30px 8px; background:#151515; color:#fff; font-size:44px; font-weight:900; transform:skewX(-10deg); box-shadow:10px 8px 0 #d6312b; }}
+      .txt {{ max-width:1600px; font-size:62px; font-weight:800; line-height:1.28; color:#fff; word-break:keep-all;
+             -webkit-text-stroke:9px #111; paint-order:stroke fill; text-shadow:0 3px 12px rgba(0,0,0,.6); }}
       .card {{ position:absolute; inset:0; background:#000; display:flex; flex-direction:column; justify-content:center; padding-left:260px; gap:26px; }}
       .card .ln {{ font-size:72px; font-weight:700; letter-spacing:-0.01em; }}
       .card .ln:first-child {{ color:{CORAL}; }}
@@ -88,11 +89,10 @@ HTML = f"""<!doctype html>
       .hud {{ position:absolute; inset:0; }}
       .hud .rec {{ position:absolute; left:56px; top:48px; font-size:34px; font-weight:700; line-height:1; letter-spacing:.08em; display:flex; align-items:center; gap:14px; }}
       .hud .rec b {{ width:22px; height:22px; border-radius:50%; background:#e53935; }}
-      .hud .tag {{ position:absolute; right:56px; top:44px; padding:8px 18px; border-left:6px solid {CORAL}; background:rgba(0,0,0,.6); font-size:32px; font-weight:700; }}
-      .hud .vc {{ position:absolute; left:56px; bottom:40px; font-size:24px; opacity:.75; }}
+      .hud .vc {{ position:absolute; right:56px; top:44px; padding:6px 16px; background:rgba(0,0,0,.6); font-size:28px; font-weight:700; }}
       .cap {{ position:absolute; left:0; right:0; bottom:120px; text-align:center; font-size:58px; font-weight:800; text-shadow:0 2px 18px rgba(0,0,0,.85); }}
       .chip {{ position:absolute; left:56px; top:56px; padding:12px 24px; background:{CORAL}; font-size:36px; font-weight:800; }}
-      .data {{ position:absolute; left:0; right:0; bottom:28px; text-align:center; font-size:30px; font-weight:700; color:#ffd8cf; }}
+      .data {{ position:absolute; left:50%; top:40px; transform:translateX(-50%); padding:10px 24px; background:{CORAL}; font-size:34px; font-weight:800; white-space:nowrap; }}
       #outro {{ position:absolute; inset:0; background:#f6f8f8; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:30px; }}
       #o-logo {{ display:flex; align-items:center; gap:28px; }}
       #o-logo img.ic {{ height:150px; border-radius:34px; }}
@@ -135,7 +135,7 @@ print(f"index.html 생성 — 총 {TOTAL:.1f}초 (촬영분 {FOOT:.1f}초 + 아�
 src = Path(os.environ.get("NOTO_KR_TTF", r"C:/Windows/Fonts/NotoSansKR-VF.ttf"))
 sub = COMP / "assets" / "fonts" / "NotoSansKR-subset.ttf"
 if src.exists():
-    chars = set(re.sub(r"<[^>]+>", " ", HTML.split("<body>", 1)[1].split("<script>", 1)[0])) | set("0123456789RECbmj.kr·~")
+    chars = set(re.sub(r"<[^>]+>", " ", HTML.split("<body>", 1)[1].split("<script>", 1)[0])) | set("0123456789RECbmj.kr·~제작진")
     glyphs = HERE / ".glyphs.txt"; glyphs.write_text("".join(sorted(c for c in chars if not c.isspace())), encoding="utf-8")
     sub.parent.mkdir(parents=True, exist_ok=True)
     try:
