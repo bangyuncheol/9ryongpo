@@ -5,6 +5,7 @@
   · rotate ccw   폰을 눕혀 찍은 세로 파일을 가로로 세운다
   · mosaic       얼굴 모자이크(mediapipe blaze_face_short_range, 화면을 짧은 변의 절반 크기 조각으로 나눠 작은 얼굴도 잡는다).
                  잡은 자리를 앞뒤 1초 동안 가려 놓친 프레임(옆얼굴·처음 보이는 순간)도 가린다
+  · hide         [[x, y, w, h, 시작초, 끝초], …] 완성 화면(1920×1080) 좌표로 상호명 간판 등을 모자이크(컷 안 시각)
   · blur         화면 전체를 흐리게(인터뷰이·간판까지 알아볼 수 없게, 10/13 오너)
   · voice        음성변조(음높이 0.85배, 빠르기는 그대로)
   · grade doc    인터뷰 톤(채도·밝기 낮추고 푸른 기)
@@ -112,6 +113,9 @@ def build_shot(i: int, s: dict) -> Path:
     else:
         vf = (f"[0:v]{v}split[a][b];[a]scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},gblur=sigma=40,eq=brightness=-0.18[bg];"
               f"[b]scale=-2:{H}[fg];[bg][fg]overlay=(W-w)/2:0,setsar=1{blur}{grade}[v]")
+    for k, (x, y, bw, bh, a0, a1) in enumerate(s.get("hide", [])):   # 상호명 간판 모자이크
+        vf = vf[:-3] + f"[pre{k}];[pre{k}]split[m{k}][c{k}];[c{k}]crop={bw}:{bh}:{x}:{y},scale={bw // 24}:{bh // 24},scale={bw}:{bh}:flags=neighbor[p{k}];" \
+             f"[m{k}][p{k}]overlay={x}:{y}:enable='between(t,{a0},{a1})'[v]"
     af = "asetrate=48000*0.85,aresample=48000,atempo=1.17647," if s.get("voice") else ""
     af += f"loudnorm=I=-16:TP=-1.5:LRA=11,aresample=48000,apad,atrim=0:{dur},afade=t=in:d=0.08"
     ff("-i", raw, "-filter_complex", vf, "-map", "[v]", "-map", "0:a", "-af", af, *fix, *ENC, out)
