@@ -6,7 +6,8 @@
 <title>배마중 발표</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
 <style>
-/* 7판(10/13 오전): 표지가 첫 장(QR 셋), 소개 영상 둘째(화면 전체, PDF 엔 주요 장면 6컷), 현장 3명(핀), '지금 돌아가나'·'대회 끝나고' 뺌(21장), 현장(문제 찾기) → 위판장 취재 영상 → 훅 순. 전화 장에 인터뷰브릿지 기술 두 줄.
+/* 8판(10/13 낮): 6장 문제 요약 → 7~10장 문제별(근거 · 배마중은 이렇게 · 기대효과, 인터뷰브릿지 기술 칩), 훅·'그래서' 장은 접음.
+   7판(10/13 오전): 표지가 첫 장(QR 셋), 소개 영상 둘째(화면 전체, PDF 엔 주요 장면 6컷), 현장 3명(핀), '지금 돌아가나'·'대회 끝나고' 뺌(21장), 현장(문제 찾기) → 위판장 취재 영상 → 훅 순. 전화 장에 인터뷰브릿지 기술 두 줄.
    6판(10/13 새벽, APK 한 줄 추가). 글은 제목 + 그림 + 한 줄만. 설명은 발표 메모(N 키)에.
    폰 화면은 bmj.kr 실제 화면 캡처(shots/, 10/13 새벽, 시뮬레이션 03:10·04:00 장면). 캡처가 없으면 아래 재현 화면으로 대체.
    색: 파랑 = 그 장의 강조 하나 · 빨강 = 입항 시각과 0톤 · 초록 = 실데이터·실측 · 주황 = 시뮬레이션. */
@@ -77,6 +78,25 @@ ul.dots li + li { margin-top: 12px; }
 ul.dots li::before { content: ""; position: absolute; left: 4px; top: .65em; width: 10px; height: 10px; border-radius: 50%; background: var(--primary); }
 .dark ul.dots li::before { background: var(--night-blue); }
 .notes { display: none; }
+/* 문제 요약(6장) 2×2 카드 · 문제별 장(7~10장): 왼쪽 근거, 오른쪽 해결·기대효과. '인터뷰브릿지 기술' 칩 */
+.pgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 40px; }
+.pcard { background: var(--night-2); border-radius: 26px; padding: 30px 36px; display: flex; gap: 22px; align-items: flex-start; }
+.pcard .kn { width: 46px; height: 46px; font-size: 24px; margin-top: 4px; }
+.pcard b { display: block; font-size: 34px; font-weight: 800; line-height: 1.25; }
+.pcard p { font-size: 23px; line-height: 1.5; color: var(--night-muted); margin-top: 10px; }
+.pcard p em { font-style: normal; color: var(--night-ink); font-weight: 700; }
+.pse { display: grid; grid-template-columns: 1.1fr 1fr; gap: 28px; margin-top: 32px; flex: 1; min-height: 0; }
+.pse .ev { display: flex; flex-direction: column; justify-content: center; }
+.pse .ev .line { font-size: 28px; font-weight: 750; line-height: 1.4; margin-top: 22px; }
+.pse .rs { display: flex; flex-direction: column; gap: 22px; }
+.pse .rs .card { flex: 1; padding: 26px 32px; display: flex; flex-direction: column; justify-content: center; }
+.pse .rs .card:first-child { flex: 1.35; }
+.pse .rs .card ul.dots { margin-top: 12px; }
+.pse .rs .card li { font-size: 24px; line-height: 1.5; }
+.pse .rs .card li + li { margin-top: 9px; }
+.pse .rs .card li b { font-weight: 800; }
+.pse .eff { background: var(--primary-soft); }
+.ib { display: inline-block; padding: 2px 10px; border-radius: 999px; background: #dcebff; color: var(--primary-dark); font-size: 16px; font-weight: 800; vertical-align: 2px; margin-left: 4px; white-space: nowrap; }
 table.t { border-collapse: collapse; width: 100%; font-size: var(--fs-body); }
 table.t th, table.t td { text-align: left; padding: 18px 16px; border-bottom: 1px solid var(--line); vertical-align: middle; }
 table.t tr:last-child td { border-bottom: 0; }
@@ -348,22 +368,26 @@ body:hover #hud { opacity: .8; }
   <aside class="notes">(새벽 구룡포 위판장 취재 영상 재생. 스페이스로 재생·정지, → 로 다음 장.)</aside>
 </section>
 
-<!-- 6 훅 -->
+<!-- 6 문제 요약 -->
 <section class="slide dark center">
   <p class="kicker">새벽 4시, 구룡포 위판장 가는 길</p>
-  <h2 style="font-size:84px; margin-top:36px; line-height:1.2;">“오늘 붉은대게 들어오나?<br>몇 척이나? 몇 시에 가면 되나?”</h2>
-  <p style="font-size:40px; font-weight:750; margin-top:72px;">구룡포 어선 <span class="blue">202척</span>. 아는 선장 몇 명한테 물어선 모릅니다.<br><span class="red">배가 닿고 나면 늦습니다.</span></p>
-  <div class="foot"><span class="src">202척은 E-UM 어선 기본정보</span><span class="pg"></span></div>
-  <aside class="notes">새벽 4시, 횟집 사장님 머릿속엔 이 질문이 있습니다. 오늘 붉은대게 들어오나, 몇 척이나, 몇 시에 가면 되나. 지금은 직접 나가 보거나 아는 선장한테 전화하는 수밖에 없어요. 근데 구룡포 배가 202척입니다. 몇 명한테 물어봐선 다 모르죠. 결국 배가 닿아야 압니다. 그땐 늦고요.</aside>
+  <h2 style="font-size:64px; margin-top:20px;">“오늘 붉은대게 들어오나? 몇 척이나? 몇 시에 가면 되나?”<br><span class="blue">네 가지</span>가 막혀 있었습니다</h2>
+  <div class="pgrid">
+    <div class="pcard"><span class="kn">1</span><div><b>뭐가 잡힐지 모른다</b><p>8월 1위 어종이 2년 연속 바뀜. 10월 살오징어 <em>1,473톤 → 44톤</em>, 3년 만에.</p></div></div>
+    <div class="pcard"><span class="kn">2</span><div><b>모르고 오면 사는 쪽이 손해</b><p>방어 84.6톤 들어오고 닷새 뒤, 위판장은 열렸는데 <em>방어만 0톤</em>. 도착해서야 압니다.</p></div></div>
+    <div class="pcard"><span class="kn">3</span><div><b>언제 가야 할지 모른다</b><p>배가 닿는 시각 · 경매 시각 · 위판장 앞길, <em>셋 다 가 봐야</em> 압니다. 지금은 감으로.</p></div></div>
+    <div class="pcard"><span class="kn">4</span><div><b>앱과 웹이 낯설다</b><p>어가 인구 <em>48.2%</em>가 고령. AI 서비스를 써 본 농어민은 31.1%(일반 국민 59.4%).</p></div></div>
+  </div>
+  <div class="foot"><span class="src">구룡포 어선 202척은 E-UM 어선 기본정보 · 위판 수치는 해양수산부 「일자별 위탁판매현황」 구룡포수협 본소 2022.1~2026.8 팀 집계 · 고령 48.2%는 국가데이터처 「2025 농림어업총조사(잠정)」 · AI 경험률은 과기정통부·NIA 「2025 디지털정보격차 실태조사」</span><span class="pg"></span></div>
+  <aside class="notes">새벽 4시, 횟집 사장님 머릿속엔 이 질문이 있습니다. 오늘 붉은대게 들어오나, 몇 척이나, 몇 시에 가면 되나. 구룡포 배가 202척인데 아는 선장 몇 명한테 물어선 모릅니다. 위판장에서 들은 얘기를 데이터로 확인해 보니 네 가지로 정리됐습니다. 뭐가 잡힐지 모르고, 모르고 오면 사는 쪽이 손해를 보고, 언제 가야 할지 모르고, 그리고 쓰는 분들께 앱과 웹이 낯섭니다. 하나씩 보겠습니다.</aside>
 </section>
 
-<!-- 7 8월 1위 -->
+<!-- 7 문제 1 -->
 <section class="slide">
   <p class="kicker"><span class="kn">1</span>뭐가 잡힐지 모른다</p>
   <h2>8월 1위 어종이 2년 연속 바뀌었습니다</h2>
-  <div class="mid-area">
-  <div class="body">
-    <div class="card col" style="flex:1.45;">
+  <div class="pse">
+    <div class="card ev">
       <p class="lab">구룡포 위판장 8월 위판금액 1위 어종과 비중</p>
       <svg viewBox="0 0 960 520" width="100%" style="margin-top:12px;" role="img" aria-label="8월 1위 어종: 2022 살오징어 82%, 2023 살오징어 73%, 2024 살오징어 85%, 2025 붉은대게 33%, 2026 청어 86%">
         <line x1="30" y1="440" x2="940" y2="440" stroke="#c4cad1" stroke-width="2"/>
@@ -383,70 +407,70 @@ body:hover #hud { opacity: .8; }
           <text x="130" y="478">2022</text><text x="310" y="478">2023</text><text x="490" y="478">2024</text><text x="670" y="478">2025</text><text x="850" y="478">2026</text>
         </g>
       </svg>
+      <p class="line">10월 살오징어 <span class="red">1,473톤 → 44톤</span>, 3년 만에</p>
     </div>
-    <div class="col card" style="flex:.75; justify-content:center;">
-      <p class="lab">10월 살오징어 위판량</p>
-      <p style="margin-top:14px;"><span class="big">1,473</span><span class="h3">톤</span></p>
-      <p style="margin-top:10px;"><span class="h3 red">→ 44톤</span><span class="b26 mut">　3년 만에</span></p>
+    <div class="rs">
+      <div class="card">
+        <p class="lab">배마중은 이렇게 — 입항 예보 + 어종 추정</p>
+        <ul class="dots">
+          <li><b>오는 배와 도착 시각</b>을 E-UM 선박 위치·어선 명부로 예보합니다(남은 거리 ÷ 속도).</li>
+          <li><b>무엇을 실었을지</b>는 그 배의 업종 × 같은 달 4년 위판 실적으로 가능성을 냅니다(자망선 → 붉은대게 79%).</li>
+          <li>숫자는 규칙이 내고, AI는 문장만 씁니다. 1위가 바뀌는 업종은 말하지 않습니다.</li>
+        </ul>
+      </div>
+      <div class="card eff">
+        <p class="lab">기대효과</p>
+        <ul class="dots">
+          <li>나가기 전에 <b>오늘 무엇이 얼마나 오는지</b> 압니다. 어종이 바뀌는 해에도 그날 배로 판단합니다.</li>
+          <li>잴 지표: 예보 도착 시각 오차 · 어종 적중률(위판 실적과 대조).</li>
+        </ul>
+      </div>
     </div>
   </div>
-  </div>
-  <div class="foot"><span class="src">해양수산부 「일자별 위탁판매현황」 구룡포수협 본소 2022.1~2026.8, 팀 집계</span><span class="pg"></span></div>
-  <aside class="notes">해수부 위판 실적 56개월치를 직접 받아서 봤습니다. 8월 1위가 3년 내내 살오징어였다가, 작년엔 붉은대게, 올해는 청어로 바뀌었습니다. 10월 살오징어는 3년 만에 1,473톤에서 44톤이 됐습니다. 수온 상승과 남획이 원인으로 꼽힙니다.</aside>
+  <div class="foot"><span class="src">해양수산부 「일자별 위탁판매현황」 구룡포수협 본소 2022.1~2026.8, 팀 집계 · 어종 추정 백테스트: 연안자망·연안통발·근해채낚기 12/12, 근해자망 0/4</span><span class="pg"></span></div>
+  <aside class="notes">해수부 위판 실적 56개월치를 직접 받아서 봤습니다. 8월 1위가 3년 내내 살오징어였다가, 작년엔 붉은대게, 올해는 청어로 바뀌었습니다. 10월 살오징어는 3년 만에 1,473톤에서 44톤이 됐습니다. 그래서 배마중은 '올해는 뭐가 잡힌다'가 아니라 '오늘 이 배가 뭘 싣고 몇 시에 온다'를 냅니다. 배 위치와 명부로 도착 시각을, 업종과 같은 달 실적으로 어종 가능성을 냅니다. 숫자는 전부 규칙이 내고 AI는 문장만 씁니다. 나가기 전에 오늘 물건을 아는 게 효과고, 예보 오차와 어종 적중률을 재서 보여 드리겠습니다.</aside>
 </section>
 
-<!-- 8 방어 일별 -->
+<!-- 8 문제 2 -->
 <section class="slide">
-  <p class="kicker"><span class="kn">1</span>하루 단위로 보면</p>
-  <h2>84.6톤 들어오고 닷새 뒤, 위판장은 열렸는데 방어만 0톤</h2>
-  <div class="mid-area">
-  <div class="card">
-    <p class="lab">2025년 12월 구룡포 위판장 방어 위판량 (경매일별, 톤)</p>
-    <svg id="dailyChart" viewBox="0 0 1600 500" width="100%" style="margin-top:8px;" role="img" aria-label="2025년 12월 방어 일별 위판량. 12월 7일 84.6톤, 12일부터 14일까지 0톤"></svg>
-  </div>
-  </div>
-  <div class="foot"><span class="src">같은 자료, 팀 집계. 12일·14일엔 다른 생선이 15톤 안팎 팔렸습니다. 막대는 기록이 있는 날만.</span><span class="pg"></span></div>
-  <aside class="notes">하루 단위로 보면 더 심합니다. 겨울 횟집에서 제일 많이 찾는 방어인데요. 작년 12월 7일엔 84톤이 들어왔습니다. 그런데 닷새 뒤인 12일부터 0톤이었습니다. 위판장이 쉰 것도 아닙니다. 12일이랑 14일엔 다른 생선이 15톤 안팎 팔렸는데 방어만 없었습니다.</aside>
-</section>
-
-<!-- 9 김 사장 -->
-<section class="slide">
-  <p class="kicker"><span class="kn">2</span>헛걸음</p>
+  <p class="kicker"><span class="kn">2</span>모르고 오면 사는 쪽이 손해</p>
   <h2>위판장에 도착해서야 오늘 물건을 압니다</h2>
-  <div class="mid-area">
-  <div class="body" style="gap:64px;">
-    <div class="card col">
-      <p class="lab">횟집 김 사장의 12월 · 가상 인물, 날짜와 물량은 실제 기록</p>
-      <div class="stack" style="margin-top:44px; gap:52px; border-left:3px solid var(--line); margin-left:8px; padding-left:40px;">
-        <div style="position:relative;"><span style="position:absolute; left:-51px; top:6px; width:18px; height:18px; border-radius:50%; background:var(--primary-dark);"></span>
-          <p class="lab num">12월 7일 일요일</p><p class="b30" style="margin-top:4px;">방어 <b>84.6톤</b>. 넉넉하게 받아 옵니다.</p></div>
-        <div style="position:relative;"><span style="position:absolute; left:-51px; top:6px; width:18px; height:18px; border-radius:50%; background:var(--arriving);"></span>
-          <p class="lab num">12월 12일 금요일</p><p class="b30" style="margin-top:4px;">새벽에 나갔는데 방어 <b class="red">0톤</b>.</p></div>
-        <div style="position:relative;"><span style="position:absolute; left:-51px; top:6px; width:18px; height:18px; border-radius:50%; background:var(--arriving);"></span>
-          <p class="lab num">12월 13~14일</p><p class="b30" style="margin-top:4px;">또 <b class="red">0톤</b>. 주말 상에 방어가 없습니다.</p></div>
-      </div>
+  <div class="pse">
+    <div class="card ev">
+      <p class="lab">2025년 12월 구룡포 위판장 방어 위판량 (경매일별, 톤)</p>
+      <svg id="dailyChart" viewBox="0 0 1600 500" width="100%" style="margin-top:8px;" role="img" aria-label="2025년 12월 방어 일별 위판량. 12월 7일 84.6톤, 12일부터 14일까지 0톤"></svg>
+      <p class="line">횟집 김 사장이 잃는 것 — 새벽 운전과 빈손 · 나갈지 말지 정할 근거 · 트럭을 몇 대 부를지</p>
     </div>
-    <div class="col" style="justify-content:center;">
-      <p class="h3">김 사장이 잃는 것</p>
-      <div style="margin-top:28px; font-size:34px; font-weight:700; line-height:1.3;">
-        <p style="padding:30px 0; border-top:1px solid var(--line);">새벽 운전, 기다린 시간, 빈손</p>
-        <p style="padding:30px 0; border-top:1px solid var(--line);">나갈지 말지 정할 근거</p>
-        <p style="padding:30px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line);">트럭을 몇 대 부를지</p>
+    <div class="rs">
+      <div class="card">
+        <p class="lab">배마중은 이렇게 — 먼저 알림</p>
+        <ul class="dots">
+          <li><b>원하는 생선을 골라 두면</b>, 그걸 실었을 배가 보이는 순간 휴대폰 알림이 옵니다(웹 푸시, 안드로이드 APK).</li>
+          <li>화면이 낯선 분께는 <b>배마중이 전화를 걸어</b> 읽어 드립니다(070). 알림 문장은 규칙이 숫자를 채우고 AI가 다듬습니다.</li>
+          <li>전화 문장은 미리 합성해 두고 바로 틉니다 <span class="ib">인터뷰브릿지 기술</span> — 고정 발화를 미리 만들어 재생하는 쿠션 설계.</li>
+        </ul>
+      </div>
+      <div class="card eff">
+        <p class="lab">기대효과</p>
+        <ul class="dots">
+          <li><b>나갈지 말지, 트럭 몇 대</b>를 배가 닿기 전에 정합니다. 헛걸음과 빈손이 줄어듭니다.</li>
+          <li>잴 지표: 알림 뒤 방문율 · 알림이 간 시각과 실제 입항 시각의 차이.</li>
+        </ul>
       </div>
     </div>
   </div>
-  </div>
-  <div class="foot"><span class="src">위판장 전체 물량도 7일 98.8톤, 12일 14.7톤</span><span class="pg"></span></div>
-  <aside class="notes">이렇게 들쭉날쭉하면 손해는 사러 온 사람이 봅니다. 김 사장님은 가상 인물이지만 날짜랑 물량은 실제 기록이에요. 7일엔 넉넉했고, 12일 금요일 새벽엔 없었습니다. 빈손으로 돌아오고, 다른 데로 갈지 정할 수도 없고, 트럭을 몇 대 부를지도 모릅니다. 위판장 전체 물량도 98톤에서 14톤까지 오갑니다.</aside>
+  <div class="foot"><span class="src">같은 자료, 팀 집계. 12일·14일엔 다른 생선이 15톤 안팎 팔렸습니다. 김 사장은 가상 인물, 날짜와 물량은 실제 기록(위판장 전체 7일 98.8톤, 12일 14.7톤).</span><span class="pg"></span></div>
+  <aside class="notes">하루 단위로 보면 더 심합니다. 겨울 횟집에서 제일 많이 찾는 방어인데, 작년 12월 7일엔 84톤이 들어왔다가 닷새 뒤부터 0톤이었습니다. 위판장이 쉰 것도 아니에요. 이렇게 들쭉날쭉하면 손해는 사러 온 사람이 봅니다. 그래서 먼저 알립니다. 원하는 생선을 골라 두면 실었을 배가 보이는 순간 휴대폰으로, 화면이 낯분 분께는 배마중이 전화를 걸어 읽어 드립니다. 전화 문장을 미리 만들어 두고 바로 트는 건 저희 인터뷰브릿지가 AI 면접에서 쓰던 쿠션 설계입니다. 나갈지 말지, 트럭 몇 대를 배가 닿기 전에 정하는 게 효과입니다.</aside>
 </section>
 
-<!-- 10 언제 가야 하나 -->
+<!-- 9 문제 3 -->
 <section class="slide">
   <p class="kicker"><span class="kn">3</span>언제 가야 할지 모른다</p>
   <h2>몇 시에 나갈지, 지금은 감으로 정합니다</h2>
-  <div class="mid-area">
-  <div class="card" style="padding:48px 56px 40px;">
-    <svg viewBox="0 0 1600 270" width="100%" role="img" aria-label="03시부터 09시까지 시간 축. 배가 닿는 시각, 경매 시각, 위판장 앞 길이 모두 물음표">
+  <div class="pse">
+    <div class="card ev">
+      <p class="lab">새벽 3시부터 9시까지, 지금 아는 것</p>
+      <svg viewBox="0 0 1600 270" width="100%" role="img" aria-label="03시부터 09시까지 시간 축. 배가 닿는 시각, 경매 시각, 위판장 앞 길이 모두 물음표">
       <line x1="60" y1="110" x2="1540" y2="110" stroke="#c4cad1" stroke-width="4" stroke-linecap="round"/>
       <g stroke="#c4cad1" stroke-width="2"><line x1="60" y1="98" x2="60" y2="122"/><line x1="307" y1="98" x2="307" y2="122"/><line x1="553" y1="98" x2="553" y2="122"/><line x1="800" y1="98" x2="800" y2="122"/><line x1="1047" y1="98" x2="1047" y2="122"/><line x1="1293" y1="98" x2="1293" y2="122"/><line x1="1540" y1="98" x2="1540" y2="122"/></g>
       <g fill="#5b6168" font-size="22" text-anchor="middle"><text x="60" y="262">03시</text><text x="307" y="262">04시</text><text x="553" y="262">05시</text><text x="800" y="262">06시</text><text x="1047" y="262">07시</text><text x="1293" y="262">08시</text><text x="1540" y="262">09시</text></g>
@@ -456,51 +480,71 @@ body:hover #hud { opacity: .8; }
       <text x="1270" y="62" text-anchor="middle" font-size="30" font-weight="800" fill="#111418">경매는 몇 시?</text>
       <rect x="60" y="186" width="1480" height="22" rx="11" fill="none" stroke="#9aa1a9" stroke-width="2" stroke-dasharray="6 8"/><text x="60" y="174" font-size="24" font-weight="700" fill="#5b6168">위판장 앞 길은?</text>
     </svg>
-  </div>
-  <p style="font-size:38px; font-weight:750; margin-top:56px; text-align:center;">배 · 경매 · 길, 셋 다 <span class="red">가 봐야 압니다</span></p>
-  </div>
-  <div class="foot"><span class="src"></span><span class="pg"></span></div>
-  <aside class="notes">세 번째는 언제 가느냐입니다. 배가 몇 시에 닿는지, 경매가 몇 시인지, 위판장 앞이 막혔는지. 이 셋을 같이 알려 주는 데가 지금은 없어요. 그래서 다들 감으로 나갑니다.</aside>
-</section>
-
-<!-- 11 고령 -->
-<section class="slide">
-  <p class="kicker"><span class="kn">4</span>앱과 웹이 낯선 분들</p>
-  <h2>어가 인구 둘 중 한 명이 고령입니다</h2>
-  <div class="mid-area">
-  <div class="body" style="gap:40px;">
-    <div class="card col" style="flex:.9; justify-content:center; padding:56px;">
-      <p class="lab">어가 인구 중 고령 인구</p>
-      <p style="margin-top:18px;"><span class="big" style="font-size:180px;">48.2</span><span class="h3">%</span></p>
+      <p class="line">배 · 경매 · 길, 셋 다 <span class="red">가 봐야 압니다</span></p>
     </div>
-    <div class="card col" style="flex:1.1; justify-content:center; padding:56px;">
-      <p class="lab">AI 서비스를 써 본 비율</p>
-      <div style="margin-top:28px; display:grid; grid-template-columns:150px 1fr 110px; gap:22px 18px; align-items:center; font-size:28px;">
-        <span>농어민</span><span style="height:26px; background:var(--chip); border-radius:13px;"><span style="display:block; width:31.1%; height:100%; background:var(--primary-dark); border-radius:13px;"></span></span><b class="num">31.1%</b>
-        <span class="mut">일반 국민</span><span style="height:26px; background:var(--chip); border-radius:13px;"><span style="display:block; width:59.4%; height:100%; background:#9aa6b3; border-radius:13px;"></span></span><span class="num mut">59.4%</span>
+    <div class="rs">
+      <div class="card">
+        <p class="lab">배마중은 이렇게 — 언제 가면 되나</p>
+        <ul class="dots">
+          <li><b>배</b>: 도착 시각을 예보합니다. <b>경매</b>: 06:00, 30분 전 도착을 권합니다.</li>
+          <li><b>길</b>: 위판장 앞 도로를 E-UM 교통센서 실측으로 칠합니다(여유 · 보통 · 붐빔).</li>
+          <li><b>내 위치에서 출발 시각</b>: 카카오 길찾기 소요 시간에서 거꾸로 셉니다. 전화로 물으면 출발지를 되묻습니다.</li>
+        </ul>
+      </div>
+      <div class="card eff">
+        <p class="lab">기대효과</p>
+        <ul class="dots">
+          <li>“<b>4시 반에 나오세요</b>” 한 줄로 끝납니다. 기다리는 시간과 새벽 운전이 줄어듭니다.</li>
+          <li>잴 지표: 권장 출발 시각 대비 실제 도착 · 위판장 앞길 혼잡 예측 적중.</li>
+        </ul>
       </div>
     </div>
   </div>
-  <p style="font-size:38px; font-weight:750; margin-top:48px; text-align:center;">글자 안 쳐도 됩니다. <span class="blue">전화로 물으면 됩니다.</span></p>
-  </div>
-  <div class="foot"><span class="src">국가데이터처 「2025년 농림어업총조사 결과(잠정)」 · 과기정통부·NIA 「2025 디지털정보격차 실태조사」</span><span class="pg"></span></div>
-  <aside class="notes">네 번째는 쓰는 사람 얘기입니다. 어가 인구 둘 중 한 명이 고령이고, 농어민 중에 AI 서비스 써 본 사람은 31%, 일반 국민의 절반쯤입니다. 그래서 화면만 만들지 않고 전화를 붙였어요. 화면을 못 봐도 말로 물으면 됩니다.</aside>
+  <div class="foot"><span class="src">도로 색은 E-UM 교통량·혼잡율(여유 ≤30대 · 보통 ≤100대 · 붐빔) · 출발 시각은 카카오모빌리티 길찾기, 60km 밖은 계산하지 않음 · 경매 06:00과 30분 전 도착은 수협 확인 전</span><span class="pg"></span></div>
+  <aside class="notes">세 번째는 언제 가느냐입니다. 배가 몇 시에 닿는지, 경매가 몇 시인지, 위판장 앞이 막혔는지. 이 셋을 같이 알려 주는 데가 지금은 없어서 다들 감으로 나갑니다. 배마중은 도착 시각을 예보하고, 경매 30분 전 도착을 권하고, 위판장 앞길을 교통센서 실측으로 칠하고, 내 위치에서 카카오 길찾기로 출발 시각을 거꾸로 셉니다. '4시 반에 나오세요' 한 줄이 효과입니다.</aside>
 </section>
 
-<!-- 12 그래서 -->
-<section class="slide dark center">
-  <h2>네 가지를 만들었습니다</h2>
-  <div style="margin-top:48px;">
-    <div class="map-row"><div class="l"><small>1 뭐가 잡힐지 모른다</small>오늘 무엇이 얼마나 오나</div><div class="ar">→</div><div class="r"><b>입항 예보 + 어종 추정</b><span>오는 배와 도착 시각, 업종으로 본 어종 <span class="chip-s">1</span><span class="chip-s">3</span></span></div></div>
-    <div class="map-row"><div class="l"><small>2 모르고 오면 손해</small>나갈지 말지, 트럭은 몇 대</div><div class="ar">→</div><div class="r"><b>먼저 알림</b><span>원하는 생선을 실은 배가 보이면 휴대폰 알림 또는 전화로 <span class="chip-s">2</span></span></div></div>
-    <div class="map-row"><div class="l"><small>3 언제 가야 할지 모른다</small>배 · 경매 · 길</div><div class="ar">→</div><div class="r"><b>언제 가면 되나</b><span>입항 · 경매 06:00 · 위판장 앞길 실측 · 내 위치에서 출발 시각 <span class="chip-s">4</span></span></div></div>
-    <div class="map-row"><div class="l"><small>4 화면이 낯설다</small>말로 묻고 싶다</div><div class="ar">→</div><div class="r"><b>물어보기 + 070 전화</b><span>글로 묻든 말로 묻든 같은 엔진, 같은 숫자 <span class="chip-s">5</span><span class="chip-s">6</span></span></div></div>
+<!-- 10 문제 4 -->
+<section class="slide">
+  <p class="kicker"><span class="kn">4</span>앱과 웹이 낯선 분들</p>
+  <h2>어가 인구 둘 중 한 명이 고령입니다</h2>
+  <div class="pse">
+    <div class="card ev">
+      <div class="body" style="margin-top:0; gap:32px; align-items:center;">
+        <div class="col" style="flex:.9;"><p class="lab">어가 인구 중 고령 인구</p><p style="margin-top:12px; white-space:nowrap;"><span class="big" style="font-size:132px;">48.2</span><span class="h3">%</span></p></div>
+        <div class="col" style="flex:1.2;">
+          <p class="lab">AI 서비스를 써 본 비율</p>
+          <div style="margin-top:22px; display:grid; grid-template-columns:120px 1fr 96px; gap:20px 14px; align-items:center; font-size:26px;">
+            <span>농어민</span><span style="height:24px; background:var(--chip); border-radius:12px;"><span style="display:block; width:31.1%; height:100%; background:var(--primary-dark); border-radius:12px;"></span></span><b class="num">31.1%</b>
+            <span class="mut">일반 국민</span><span style="height:24px; background:var(--chip); border-radius:12px;"><span style="display:block; width:59.4%; height:100%; background:#9aa6b3; border-radius:12px;"></span></span><span class="num mut">59.4%</span>
+          </div>
+        </div>
+      </div>
+      <p class="line">글자 안 쳐도 됩니다. <span class="blue">전화로 물으면 됩니다.</span></p>
+    </div>
+    <div class="rs">
+      <div class="card">
+        <p class="lab">배마중은 이렇게 — 물어보기 + 070 전화</p>
+        <ul class="dots">
+          <li>글로 묻든 <b>말로 묻든 같은 엔진, 같은 숫자</b>. 070-5276-7121로 먼저 걸어도 되고, 배마중이 걸어 주기도 합니다.</li>
+          <li><b>말 주고받는 때</b>는 AI 면접용으로 직접 만든 턴테이킹 설계로 잡습니다 <span class="ib">인터뷰브릿지 기술</span> — 쿠션 선재생 · 침묵 길이로 말 끝 · 끼어들기.</li>
+          <li><b>구룡포 지명 · 어촌 말 · 그날 배 이름</b>을 CLOVA 키워드 핫부스팅으로 알아듣습니다 <span class="ib">인터뷰브릿지 기술</span> — 어르신 구술생애사 과제의 방식. 실통화 배 이름 5/5.</li>
+        </ul>
+      </div>
+      <div class="card eff">
+        <p class="lab">기대효과</p>
+        <ul class="dots">
+          <li><b>앱 설치도, 글자 입력도 없이</b> 전화 한 통. 고령 사용자도 같은 정보를 같은 시각에 받습니다.</li>
+          <li>잴 지표: 통화 완료율 · 되묻기 횟수 · 받아쓰기 정확도(배 이름·어종).</li>
+        </ul>
+      </div>
+    </div>
   </div>
-  <div class="foot"><span class="src"></span><span class="pg"></span></div>
-  <aside class="notes">네 개를 만들었습니다. 말로 하는 것보다 보는 게 빠르니까, 시연 들어가기 전에 하나만 먼저 말씀드릴게요.</aside>
+  <div class="foot"><span class="src">국가데이터처 「2025년 농림어업총조사 결과(잠정)」 · 과기정통부·NIA 「2025 디지털정보격차 실태조사」 · 전화: ClawOps 070 · CLOVA·OpenAI 받아쓰기 · Gemini 음성 합성 · 배 이름 5/5는 10/11 실통화 6건(OpenAI 1/5)</span><span class="pg"></span></div>
+  <aside class="notes">네 번째는 쓰는 사람 얘기입니다. 어가 인구 둘 중 한 명이 고령이고, 농어민 중에 AI 서비스를 써 본 사람은 31%, 일반 국민의 절반쯤입니다. 그래서 화면만 만들지 않고 전화를 붙였습니다. 글로 묻든 말로 묻든 같은 엔진이 같은 숫자를 냅니다. 여기 저희 인터뷰브릿지 기술이 들어갑니다. 말을 언제 받고 언제 끊을지는 AI 면접용으로 직접 만든 턴테이킹 설계를 전화에 맞게 옮겨서 잡고, 어르신 구술생애사 과제에서 쓰는 키워드 핫부스팅으로 구룡포 지명과 어촌 말, 그날 배 이름을 알아듣습니다. 실제 통화에서 배 이름을 다섯 번 다 맞혔습니다. 앱 설치도 글자 입력도 없이 전화 한 통이면 되는 게 효과입니다.</aside>
 </section>
 
-<!-- 13 시연 전에 -->
+<!-- 11 시연 전에 -->
 <section class="slide">
   <p class="kicker">시연 전에</p>
   <h2>시뮬레이션은 배 위치 하나, 나머지는 실데이터입니다</h2>
@@ -525,10 +569,10 @@ body:hover #hud { opacity: .8; }
   </div>
   </div>
   <div class="foot"><span class="src">E-UM 호출 검증 10.8~9 · 업종으로 본 어종은 가능성 · 경매 06:00과 30분 전 도착은 수협 확인 전 · 화면·전화는 bmj.kr(VM 1대)에서 운영 중</span><span class="pg"></span></div>
-  <aside class="notes">선박 위치 API가 작년 4월에 멈춰 있습니다. 그래서 같은 형식으로 시뮬레이션을 돌렸습니다. 나머지는 전부 진짜 데이터예요. 시연 끝에 이 스위치를 실데이터로 바꿔 볼게요. 그러면 엉터리 예보 대신 '못 냅니다'가 뜹니다.</aside>
+  <aside class="notes">이제 시연입니다. 들어가기 전에 하나만 먼저 말씀드릴게요. 선박 위치 API가 작년 4월에 멈춰 있습니다. 그래서 같은 형식으로 시뮬레이션을 돌렸습니다. 나머지는 전부 진짜 데이터예요. 시연 끝에 이 스위치를 실데이터로 바꿔 볼게요. 그러면 엉터리 예보 대신 '못 냅니다'가 뜹니다.</aside>
 </section>
 
-<!-- 14 시연① -->
+<!-- 12 시연① -->
 <section class="slide">
   <p class="kicker">시연 1 · 가상 시각 03:10</p>
   <h2>항으로 오는 배 3척, 4시 25분부터 들어옵니다</h2>
@@ -552,7 +596,7 @@ body:hover #hud { opacity: .8; }
   <aside class="notes">시계를 새벽 3시 10분에 놓았습니다. 오른쪽 바다에서 자망선 세 척이 항으로 들어오고 있어요. 화면 밖에 있어서 가장자리 화살표로 시각이랑 거리를 보여 줍니다. 배마중은 배 위치를 10분마다 보고 이 네 가지를 다 만족하는 배만 골라서, 남은 거리를 속도로 나눕니다. 여기까진 AI가 안 들어가고, 그냥 나눗셈입니다. 지도 위 초록 길은 위판장 앞길 트럭 실측이고, 방파제 사이로 들어와 부두에 붙는 길은 위성 사진 보고 저희가 직접 찍었습니다.</aside>
 </section>
 
-<!-- 15 시연② -->
+<!-- 13 시연② -->
 <section class="slide">
   <p class="kicker">시연 2 · 가상 시각 03:10</p>
   <h2>3시 10분, 사장님 폰이 먼저 울립니다</h2>
@@ -583,7 +627,7 @@ body:hover #hud { opacity: .8; }
   <aside class="notes">같은 3시 10분, 붉은대게 알림을 켜 둔 사장님 폰이 먼저 울립니다. 4시 25분부터 35분 사이 자망선 세 척, 붉은대게랑 골뱅이 가능성, 경매 6시. AI가 문장을 다듬긴 하는데, 숫자가 하나라도 바뀌면 버리고 이 문장 그대로 나갑니다. 전화번호를 등록해 두신 분께는 같은 순간 전화가 갑니다. [무대: 푸시 실기 시험을 마쳤을 때만] 지금 이 폰으로 받아 볼게요.</aside>
 </section>
 
-<!-- 16 시연③ -->
+<!-- 14 시연③ -->
 <section class="slide">
   <p class="kicker">시연 3 · 무엇을 싣고 오나</p>
   <h2>10월에 자망선이 들어오면, 대부분 붉은대게입니다</h2>
@@ -612,7 +656,7 @@ body:hover #hud { opacity: .8; }
   <aside class="notes">어선 기본정보엔 연안자망이라고만 나옵니다. 사장님이 궁금한 건 그래서 뭐가 오냐죠. 해수부 실적엔 업종이랑 어종이 같은 줄에 있어서, 10월 연안자망 배는 붉은대게가 78%라는 걸 4년치로 계산할 수 있습니다. 같은 연안자망도 8월엔 골뱅이가 1위라 늘 같은 달 실적만 봅니다. 한 해씩 빼고 시험해 봤더니 세 업종은 12번 다 맞았고, 근해자망은 4번 다 틀렸습니다. 1위가 잘 안 바뀌는 업종이니 맞히기 쉬운 것 아니냐고 물으실 수 있는데, 맞습니다. 그래서 1위가 안 바뀌는 업종만 말하고, 바뀌는 근해자망은 말 안 하는 게 이 규칙의 핵심입니다.</aside>
 </section>
 
-<!-- 17 시연④ -->
+<!-- 15 시연④ -->
 <section class="slide">
   <p class="kicker">시연 4 · 언제 가면 되나</p>
   <h2>4시 25분에 첫 배가 닿고, 5시 반까지 오시면 됩니다</h2>
@@ -664,7 +708,7 @@ body:hover #hud { opacity: .8; }
   <aside class="notes">언제 가면 되냐에는 이렇게 답합니다. 4시 25분에 첫 배가 닿으니까 그즈음 나갈지 정하시면 되고, 6시 경매니까 5시 반까지 오시면 됩니다. 그리고 지도 위 초록 길은 진짜예요. 위판장 1km 안 센서 네 곳이 지난 1시간 동안 센 트럭 수를 지금 바로 불러와 길에 칠합니다. 앞으로 막힐지는 맞히지 않습니다. 교통 API가 최근 9시간치만 줘서 근거가 없습니다. '여기서 몇 시에 출발하면 되냐'고 물으면 폰 위치에서 카카오 길찾기로 걸리는 시간을 받아 5시 반에서 거꾸로 셉니다.</aside>
 </section>
 
-<!-- 18 시연⑤ -->
+<!-- 16 시연⑤ -->
 <section class="slide">
   <p class="kicker">시연 5 · 물어보기 · 가상 시각 04:00</p>
   <h2>글로 물으면, AI가 표에서 숫자를 찾아 그대로 옮깁니다</h2>
@@ -700,7 +744,7 @@ body:hover #hud { opacity: .8; }
   <aside class="notes">물어보기입니다. 시계를 4시로 옮겼어요. 사장님 질문 그대로 칩으로 두었습니다. "오늘 붉은대게 들어와?" 누르면 AI가 어종 추정이랑 입항 예보를 찾아보고, 거기 있는 숫자만 옮겨서 답합니다. 뭘 찾아봤는지는 답 아래 기록으로 남습니다. "여기서 몇 시에 출발하면 돼?"는 폰 위치에서 카카오 길찾기로 소요 시간을 받아 5시 반에서 거꾸로 셉니다. 상관없는 질문엔 정해진 한마디만 합니다.</aside>
 </section>
 
-<!-- 19 시연⑥ -->
+<!-- 17 시연⑥ -->
 <section class="slide">
   <p class="kicker">시연 6 · 전화</p>
   <h2>알림을 전화로 받고, 궁금한 건 말로 묻습니다</h2>
@@ -727,7 +771,7 @@ body:hover #hud { opacity: .8; }
   <aside class="notes">채팅이 낯선 분들을 위해 전화를 붙였습니다. 알림이 오면 배마중이 전화를 걸어서 읽어 드리고, 궁금한 걸 말로 물으면 말로 답해요. 답은 화면의 물어보기랑 같은 엔진이 냅니다. 0.6초 안에 답이 안 나오면 미리 만들어 둔 "네, 확인해 볼게요"부터 말합니다. 전화는 폰 위치를 모르니까 어디서 출발하는지 되묻고 계산합니다. 말을 언제 받고 언제 끊을지는 저희 인터뷰브릿지가 AI 면접용으로 직접 만든 턴테이킹 엔진의 설계를 전화에 맞게 옮겨서 잡습니다. 쿠션 음성을 미리 만들어 바로 틀고, 침묵 길이로 말 끝을 보고, 끼어들면 멈춥니다. 그리고 어르신 구술생애사를 기록하는 과제에서 쓰는 키워드 핫부스팅으로 구룡포 지명, 어촌 말, 그날 배 이름을 알아듣게 해 뒀습니다. 실제 통화에서 배 이름을 다섯 번 다 맞혔습니다. [무대: 실통화 시험을 마쳤을 때만] 지금 걸어 볼게요. 마지막으로 아까 말씀드린 스위치를 실데이터로 바꿔 보겠습니다.</aside>
 </section>
 
-<!-- 20 원칙 -->
+<!-- 18 원칙 -->
 <section class="slide dark center">
   <p class="kicker">숫자는 누가 내나</p>
   <h2 style="font-size:84px;">숫자는 규칙이 내고, AI는 문장만 씁니다</h2>
@@ -742,7 +786,7 @@ body:hover #hud { opacity: .8; }
   <aside class="notes">새벽에 돈이 걸린 결정을 돕는 거라 숫자가 틀리면 안 됩니다. 그래서 숫자는 전부 규칙이 내고 AI는 문장만 씁니다. 가격도 해 봤는데, 3분의 1 남짓밖에 안 맞았습니다. 예측은 접고 과거 실적만 답합니다.</aside>
 </section>
 
-<!-- 21 구조 -->
+<!-- 19 구조 -->
 <section class="slide">
   <p class="kicker">구조</p>
   <h2>데이터 받고, 규칙으로 계산하고, 말로 바꿔 보냅니다</h2>
@@ -764,7 +808,7 @@ body:hover #hud { opacity: .8; }
   <aside class="notes">구조는 단순합니다. 받고, 계산하고, 문장으로 바꿔서, 폰이랑 전화로 보냅니다. 서버 한 대에서 전부 돕니다.</aside>
 </section>
 
-<!-- 22 마무리 -->
+<!-- 20 마무리 -->
 <section class="slide dark center">
   <h2 style="font-size:96px; line-height:1.2;">10월 13일 새벽 3시 10분,<br>이번엔 김 사장님이 먼저 압니다</h2>
   <p class="lead" style="font-size:36px; margin-top:44px;">붉은대게를 실었을 자망선 세 척, 4시 25분부터. 5시 반까지 가면 됩니다.</p>
