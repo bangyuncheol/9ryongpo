@@ -15,6 +15,7 @@ import { snapHeights, useViewportHeight } from './sheet'
 import type { Snap } from './sheet'
 import { byEta, likelihood, minutesUntil, shipSpecies, shortBiz, telHref, telText, trafficWord, useThemeColor, useWide } from './bits'
 import type { VisitData } from './bits'
+import { FED, useParentFeed } from './feed'
 import './v4.css'
 
 /*
@@ -41,12 +42,17 @@ export default function AppV4() {
   const hs = snapHeights(useViewportHeight(), fit)
   // 1초마다(10/13 오너: /demo 를 띄우고 다른 창 /?admin=1 에서 재생하면 같이 움직여야 함. 2초면 300배속에서 10분씩 늦어 보였다).
   // 배 위치 보간 시간은 KakaoArrivalMap POLL_MS 와 같다
-  const today = usePoll(api.today, 1000)
-  const ships = usePoll(api.ships, 1000)
+  // /demo 안(FED)이면 부모 창이 같은 값을 두 화면에 함께 보내므로 직접 조회하지 않는다(10/13 오너: 폰·웹 시계를 같게)
+  const feed = useParentFeed()
+  const todayPoll = usePoll(api.today, FED ? 0 : 1000)
+  const shipsPoll = usePoll(api.ships, FED ? 0 : 1000)
+  const today = FED ? { data: feed?.today ?? null } : todayPoll
+  const ships = FED ? { data: feed?.ships ?? null } : shipsPoll
   const visit = usePoll(() => api.visit(false), 60000)
   const traffic = usePoll(api.traffic, 60000)
   const trucks = usePoll(api.trafficSensors, 60000)
-  const inbox = usePoll(api.notifications, 3000)
+  const inboxPoll = usePoll(api.notifications, FED ? 0 : 3000)
+  const inbox = FED ? { data: feed?.inbox ?? null } : inboxPoll
   const call = usePoll(() => api.callState(admin), admin ? 1500 : 60000)
 
   useEffect(() => {
@@ -87,7 +93,7 @@ export default function AppV4() {
         <div className="grid h-dvh grid-cols-[1fr_440px]">
           <div className="relative h-dvh">{map}</div>
           <aside className="v4-sheet relative z-10 h-dvh overflow-y-auto bg-card" aria-label="입항 정보">
-            <div className="sticky top-0 z-10 bg-card px-6 py-3"><Badge today={t} /></div>
+            <div className="sticky top-0 z-10 bg-card px-6 py-3"><Badge today={t} at={feed?.at} /></div>
             {admin && <div className="py-2"><AdminBar clock={t?.clock ?? null} feed={t?.source.feed ?? null} call={call.data} /></div>}
             {sheet()}
           </aside>
@@ -95,9 +101,9 @@ export default function AppV4() {
       ) : (
         <>
           {/* 헤더는 투명: 지도가 화면 맨 위까지 오고 아이콘·워드마크·시각만 그 위에 뜬다(10/13 오너). 끌기는 지도로 통과 */}
-          <div className="v4-float pointer-events-none absolute inset-x-0 top-0 z-40 flex flex-col justify-center px-4" style={{ height: HEADER_H }}><Badge today={t} /></div>
+          <div className="v4-float pointer-events-none absolute inset-x-0 top-0 z-40 flex flex-col justify-center px-4" style={{ height: HEADER_H }}><Badge today={t} at={feed?.at} /></div>
           {/* 지도는 화면 전체(투명 헤더 아래까지). 시트가 그 위를 덮고 두 단(내림·기본)으로 오르내린다 */}
-          <div className="absolute inset-0">{map}</div>
+          <div className="absolute inset-0 isolate">{map}</div>{/* isolate: 대체 지도(Leaflet)의 z-index 400대가 시트 위로 올라오지 않게 */}
           <BottomSheet snap={snap} onSnap={setSnap} fit={fit} peek={<Peek today={t} first={arriving[0]} onOpen={() => setSnap('mid')} />}>
             {(h) => <>
               {admin && <div className="pb-2"><AdminBar clock={t?.clock ?? null} feed={t?.source.feed ?? null} call={call.data} /></div>}
@@ -123,9 +129,9 @@ function Logo() {
 }
 
 /** 이름 + 어떤 데이터가 언제 기준인지. 위치가 멈췄을 때는 그 사실이 이 줄을 대신한다. */
-function Badge({ today }: { today: Today | null }) {
+function Badge({ today, at }: { today: Today | null; at?: number }) {
   const sim = today?.source.feed === 'sim'
-  const now = useTicking(today?.clock ?? null)
+  const now = useTicking(today?.clock ?? null, at)
   return (
     <div>
       <div className="flex items-center justify-between gap-3">
@@ -141,21 +147,29 @@ function Badge({ today }: { today: Today | null }) {
   )
 }
 
-/** 재생 중이면 마지막으로 받은 서버 시각에서 배속만큼 앞으로 굴려 1초 사이에도 시계가 흐르게(서버를 다시 읽으면 그 값으로 맞춘다). */
-function useTicking(clock: { now: string; playing: boolean; speed: number } | null) {
-  const [, tick] = useState(0)
+/**
+ * 재생 중이면 마지막으로 받은 서버 시각에서 배속만큼 앞으로 굴려 조회 사이에도 시계가 흐르게(새 값이 오면 그 값으로 맞춘다).
+ * at: 그 값을 받은 때(Date.now). /demo 에선 부모가 준 같은 at 을 써서 폰·웹이 같은 시각을 낸다. 화면 프레임마다 확인해
+ * 분이 바뀔 때만 다시 그린다(두 화면이 같은 프레임에 바뀜).
+ */
+function useTicking(clock: { now: string; playing: boolean; speed: number } | null, at?: number) {
   const [base, setBase] = useState<{ iso: string; at: number } | null>(null)
-  useEffect(() => { if (clock) setBase({ iso: clock.now, at: performance.now() }) }, [clock?.now]) // eslint-disable-line react-hooks/exhaustive-deps
+  const [shown, setShown] = useState<string | undefined>(undefined)
+  useEffect(() => { if (clock) setBase({ iso: clock.now, at: at ?? Date.now() }) }, [clock?.now, at]) // eslint-disable-line react-hooks/exhaustive-deps
+  const playing = !!clock?.playing, speed = clock?.speed ?? 1
   useEffect(() => {
-    if (!clock?.playing) return
-    const id = setInterval(() => tick((n) => n + 1), 250)
-    return () => clearInterval(id)
-  }, [clock?.playing])
-  if (!clock || !base) return clock?.now
-  if (!clock.playing) return clock.now
-  const ms = Date.parse(base.iso) + (performance.now() - base.at) * clock.speed
-  const kst = new Date(ms + 9 * 3600_000).toISOString() // 화면 시각은 한국 시간(서버 값과 같은 꼴: 앞 16자만 씀)
-  return kst
+    if (!base) return
+    const calc = () => playing
+      ? new Date(Date.parse(base.iso) + (Date.now() - base.at) * speed + 9 * 3600_000).toISOString() // 한국 시간, 앞 16자만 씀
+      : base.iso
+    setShown(calc())
+    if (!playing) return
+    let id = 0
+    const loop = () => { const v = calc(); setShown((o) => (o?.slice(0, 16) === v.slice(0, 16) ? o : v)); id = requestAnimationFrame(loop) }
+    id = requestAnimationFrame(loop)
+    return () => cancelAnimationFrame(id)
+  }, [base, playing, speed])
+  return shown ?? clock?.now
 }
 
 const TABS_H = 45 // 장 탭 줄 높이(44 + 밑줄 1)

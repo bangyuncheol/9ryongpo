@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 
-/** 주기 조회. 실패하면 마지막 성공 값을 유지하고 오류 문구만 바꾼다. */
+/** 주기 조회. 실패하면 마지막 성공 값을 유지하고 오류 문구만 바꾼다. ms 가 0 이면 조회하지 않는다(/demo 안 화면은 부모가 값을 준다). */
 export function usePoll<T>(fn: () => Promise<T>, ms: number, key: unknown = null) {
   const [data, setData] = useState<T | null>(null)
   const [error, setError] = useState<string | null>(null)
   const fnRef = useRef(fn)
   fnRef.current = fn
   useEffect(() => {
+    if (!ms) return
     let alive = true
     const run = async () => {
       try {
