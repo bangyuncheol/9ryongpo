@@ -19,7 +19,10 @@ export function usePoll<T>(fn: () => Promise<T>, ms: number, key: unknown = null
     }
     run()
     const id = setInterval(run, ms)
-    return () => { alive = false; clearInterval(id) }
+    // 창이 다시 보이면 바로 한 번(가려진 창은 브라우저가 타이머를 늦춘다 — /demo 시연 창, 10/13)
+    const onShow = () => { if (document.visibilityState === 'visible') run() }
+    document.addEventListener('visibilitychange', onShow)
+    return () => { alive = false; clearInterval(id); document.removeEventListener('visibilitychange', onShow) }
   }, [ms, key])
   return { data, error }
 }

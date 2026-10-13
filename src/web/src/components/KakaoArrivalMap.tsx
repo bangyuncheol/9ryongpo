@@ -15,7 +15,7 @@ import { loadKakao } from './kakaoLoader'
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type K = any
 
-const POLL_MS = 2000
+const POLL_MS = 1000 // 배 위치 조회 주기(AppV4 의 ships 폴링과 같게). 이 시간 동안 이전 위치→새 위치로 미끄러지듯 옮긴다
 const reduceMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
 // 항구 확대 범위: 위판장 주변 육지 + 항구 + 입구 바깥 접근로(harbor.py APPROACH[0])까지
 // 서쪽은 위판장 1km 안 교통 센서(병포리 교차로·행정복지센터)까지 들어오게(10/10)

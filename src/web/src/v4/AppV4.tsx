@@ -39,8 +39,10 @@ export default function AppV4() {
   const [fit, setFit] = useState<number | undefined>(undefined) // 지금 장 내용 높이 + 손잡이·탭
   const onContentHeight = useCallback((h: number) => setFit(h + HANDLE_H + TABS_H), [])
   const hs = snapHeights(useViewportHeight(), fit)
-  const today = usePoll(api.today, 2000)
-  const ships = usePoll(api.ships, 2000)
+  // 1초마다(10/13 오너: /demo 를 띄우고 다른 창 /?admin=1 에서 재생하면 같이 움직여야 함. 2초면 300배속에서 10분씩 늦어 보였다).
+  // 배 위치 보간 시간은 KakaoArrivalMap POLL_MS 와 같다
+  const today = usePoll(api.today, 1000)
+  const ships = usePoll(api.ships, 1000)
   const visit = usePoll(() => api.visit(false), 60000)
   const traffic = usePoll(api.traffic, 60000)
   const trucks = usePoll(api.trafficSensors, 60000)
@@ -123,7 +125,7 @@ function Logo() {
 /** 이름 + 어떤 데이터가 언제 기준인지. 위치가 멈췄을 때는 그 사실이 이 줄을 대신한다. */
 function Badge({ today }: { today: Today | null }) {
   const sim = today?.source.feed === 'sim'
-  const now = today?.clock.now
+  const now = useTicking(today?.clock ?? null)
   return (
     <div>
       <div className="flex items-center justify-between gap-3">
@@ -137,6 +139,23 @@ function Badge({ today }: { today: Today | null }) {
       {today?.notice && <p role="status" className="mt-2 text-sub font-bold text-arriving">{today.notice}</p>}
     </div>
   )
+}
+
+/** 재생 중이면 마지막으로 받은 서버 시각에서 배속만큼 앞으로 굴려 1초 사이에도 시계가 흐르게(서버를 다시 읽으면 그 값으로 맞춘다). */
+function useTicking(clock: { now: string; playing: boolean; speed: number } | null) {
+  const [, tick] = useState(0)
+  const [base, setBase] = useState<{ iso: string; at: number } | null>(null)
+  useEffect(() => { if (clock) setBase({ iso: clock.now, at: performance.now() }) }, [clock?.now]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!clock?.playing) return
+    const id = setInterval(() => tick((n) => n + 1), 250)
+    return () => clearInterval(id)
+  }, [clock?.playing])
+  if (!clock || !base) return clock?.now
+  if (!clock.playing) return clock.now
+  const ms = Date.parse(base.iso) + (performance.now() - base.at) * clock.speed
+  const kst = new Date(ms + 9 * 3600_000).toISOString() // 화면 시각은 한국 시간(서버 값과 같은 꼴: 앞 16자만 씀)
+  return kst
 }
 
 const TABS_H = 45 // 장 탭 줄 높이(44 + 밑줄 1)
