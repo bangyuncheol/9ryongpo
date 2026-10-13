@@ -181,7 +181,7 @@ table.t th { font-size: var(--fs-label); color: var(--muted); font-weight: 600; 
 .qrs .q b { font-size: 22px; font-weight: 800; color: var(--night-blue); letter-spacing: .03em; }
 .qrs .q small { font-size: 19px; color: var(--night-muted); margin-top: -4px; }
 
-/* 소개 영상 자리 — 03_발표/영상/소개.mp4 (없으면 brag-output/final/ 렌더 결과)가 있으면 자동으로 재생 화면이 된다 */
+/* 소개 영상 자리: 03_발표/영상/소개.mp4 (없으면 brag-output/final/ 렌더 결과)가 있으면 자동으로 재생 화면이 된다 */
 .vwrap { width: 1600px; aspect-ratio: 16 / 9; margin: 0 auto; background: #000; border-radius: 28px; overflow: hidden; position: relative; outline: 2px dashed #2b4466; }
 .vwrap video { width: 100%; height: 100%; display: none; background: #000; }
 .vwrap .vph { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; color: var(--night-muted); font-size: 34px; line-height: 1.6; }
@@ -210,7 +210,7 @@ table.t th { font-size: var(--fs-label); color: var(--muted); font-weight: 600; 
 .photos .pin { position: absolute; right: 18px; top: 18px; display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px 8px 12px; border-radius: 999px; background: rgba(255,255,255,.94); color: #d32f2f; font-size: 19px; font-weight: 800; line-height: 1; box-shadow: 0 4px 14px rgba(0,0,0,.18); }
 .photos .pin svg { width: 20px; height: 20px; flex: none; }
 
-/* 폰 틀 — 실제 폰 비율(390×844). shots/ 캡처가 있으면 자동으로 바뀌고, 없으면 재현 화면 */
+/* 폰 틀: 실제 폰 비율(390×844). shots/ 캡처가 있으면 자동으로 바뀌고, 없으면 재현 화면 */
 .phone { width: 340px; height: 720px; border-radius: 54px; background: #0d0f12; padding: 12px; flex: none; box-shadow: 0 30px 70px rgba(11,22,38,.22); position: relative; }
 .phone.tall { width: 400px; height: 850px; border-radius: 60px; padding: 14px; }
 .screen { width: 100%; height: 100%; border-radius: 44px; background: #eef3f2; color: #10232b; overflow: hidden; position: relative; font-size: 16px; }
@@ -422,7 +422,7 @@ body:hover #hud { opacity: .8; }
     <div class="grid">
       <figure><img src="shots/story-1.jpg" alt="구룡포 수협 위판장 도착. 활어 위판장과 수협 위판장 네 컷"><figcaption>구룡포 수협 위판장 도착<small>0:03</small></figcaption></figure>
       <figure><img src="shots/story-2.jpg" alt="경매 중매상 인터뷰. 어획량이 매일 다른 이유"><figcaption>경매 중매상: “차이가 나지. 기상도 있고, 물때도 있고”<small>0:14</small></figcaption></figure>
-      <figure><img src="shots/story-3.jpg" alt="경매 중매상 인터뷰. 물량이 안 채워지면 바다에 계속 머문다"><figcaption>“물량이 안 채워지면 바다에 계속 사시는 거예요?” — “좀 더 어획량을 올리기 위해서”<small>0:25</small></figcaption></figure>
+      <figure><img src="shots/story-3.jpg" alt="경매 중매상 인터뷰. 물량이 안 채워지면 바다에 계속 머문다"><figcaption>“물량이 안 채워지면 바다에 계속 사시는 거예요?” “좀 더 어획량을 올리기 위해서”<small>0:25</small></figcaption></figure>
       <figure><img src="shots/story-4.jpg" alt="수협 판매과 직원 인터뷰. 입항하는 배에 따라 다르다"><figcaption>수협 판매과 직원: “입항하는 배에 따라서 다르죠”<small>0:36</small></figcaption></figure>
       <figure><img src="shots/story-5.jpg" alt="정리 카드. 양은 매일 다르고, 배는 다 채워야 들어온다. 새벽까지 아무도 모른다"><figcaption>양은 매일 다르고, 배는 다 채워야 들어온다. 새벽까지 아무도 모른다.<small>0:47</small></figcaption></figure>
       <figure><img src="shots/story-6.jpg" alt="돌아오는 차 안. 현장에서 들은 이야기가 문제 정의에 도움이 됐다"><figcaption>“인터넷에 나와 있지 않은 사실을 많이 알 수 있어서”<small>0:58</small></figcaption></figure>
@@ -482,15 +482,15 @@ body:hover #hud { opacity: .8; }
       </div>
       <p class="lab" style="margin-top:14px;">2026년 6월 청어 위판량 (같은 위판장, 경매일별, 톤)</p>
       <svg id="dailyChart2" viewBox="0 0 1600 400" width="100%" style="margin-top:2px;" role="img" aria-label="2026년 6월 청어 일별 위판량. 6월 5일 256.5톤, 13일부터 27일까지 0톤"></svg>
-      <p class="line" style="margin-top:10px; font-size:25px;">방어도 같습니다(2025년 12월 84.6톤 → 닷새 뒤 0톤). 사는 쪽은 그날 배를 봐야 압니다.</p>
+      <p class="line" style="margin-top:10px; font-size:25px;">방어도 같습니다(2025년 12월 84.6톤 → 닷새 뒤 0톤).</p>
     </div>
     <div class="rs">
       <div class="card">
-        <p class="lab">배마중은 이렇게 — 입항 예보 + 어종 추정 + 먼저 알림</p>
+        <p class="lab">배마중은 이렇게: 입항 예보 + 어종 추정 + 먼저 알림</p>
         <ul class="dots">
           <li><b>조업을 마치고 돌아오는 배</b>를 E-UM 선박 위치·어선 명부로 가장 먼저 잡고 도착 시각을 예보합니다(남은 거리 ÷ 속도).</li>
           <li><b>무엇을 실었을지</b>는 그 배의 업종 × 같은 달 4년 위판 실적으로 가능성을 냅니다(자망선 → 붉은대게 79%). 숫자는 규칙이, 문장은 AI가 씁니다.</li>
-          <li><b>원하는 생선을 골라 두면</b> 실었을 배가 돌아오는 순간 휴대폰 알림이 오고, 화면이 낯선 분께는 배마중이 전화를 겁니다 <span class="ib">인터뷰브릿지 기술</span> — 고정 발화를 미리 합성해 바로 트는 쿠션 설계.</li>
+          <li><b>원하는 생선을 골라 두면</b> 실었을 배가 돌아오는 순간 휴대폰 알림이 오고, 화면이 낯선 분께는 배마중이 전화를 겁니다 <span class="ib">인터뷰브릿지 기술</span>: 고정 발화를 미리 합성해 바로 트는 쿠션 설계.</li>
         </ul>
       </div>
       <div class="card eff">
@@ -528,7 +528,7 @@ body:hover #hud { opacity: .8; }
     </div>
     <div class="rs">
       <div class="card">
-        <p class="lab">배마중은 이렇게 — 돌아온다는 걸 가장 먼저</p>
+        <p class="lab">배마중은 이렇게: 돌아온다는 걸 가장 먼저</p>
         <ul class="dots">
           <li><b>조업을 마치고 위판장으로 향하는 배</b>를 선박 위치로 가장 먼저 잡습니다. 무엇을 실었을지, 몇 시에 닿을지를 경매 전에 알립니다.</li>
           <li><b>06:00 경매에 맞춰</b> 내 위치에서 출발 시각을 거꾸로 셉니다(카카오 길찾기). 위판장 앞 도로는 E-UM 교통센서 실측으로 칠합니다.</li>
@@ -568,11 +568,11 @@ body:hover #hud { opacity: .8; }
     </div>
     <div class="rs">
       <div class="card">
-        <p class="lab">배마중은 이렇게 — 물어보기 + 070 전화</p>
+        <p class="lab">배마중은 이렇게: 물어보기 + 070 전화</p>
         <ul class="dots">
           <li>글로 묻든 <b>말로 묻든 같은 엔진, 같은 숫자</b>. 070-5276-7121로 먼저 걸어도 되고, 배마중이 걸어 주기도 합니다.</li>
-          <li><b>말 주고받는 때</b>는 AI 면접용으로 직접 만든 턴테이킹 설계로 잡습니다 <span class="ib">인터뷰브릿지 기술</span> — 쿠션 선재생 · 침묵 길이로 말 끝 · 끼어들기.</li>
-          <li><b>구룡포 지명 · 어촌 말 · 그날 배 이름</b>을 CLOVA 키워드 핫부스팅으로 알아듣습니다 <span class="ib">인터뷰브릿지 기술</span> — 어르신 구술생애사 과제의 방식. 실통화 배 이름 5/5.</li>
+          <li><b>말 주고받는 때</b>는 AI 면접용으로 직접 만든 턴테이킹 설계로 잡습니다 <span class="ib">인터뷰브릿지 기술</span>: 쿠션 선재생 · 침묵 길이로 말 끝 · 끼어들기.</li>
+          <li><b>구룡포 지명 · 어촌 말 · 그날 배 이름</b>을 CLOVA 키워드 핫부스팅으로 알아듣습니다 <span class="ib">인터뷰브릿지 기술</span>: 어르신 구술생애사 과제의 방식. 실통화 배 이름 5/5.</li>
         </ul>
       </div>
       <div class="card eff">
@@ -606,13 +606,11 @@ body:hover #hud { opacity: .8; }
 
 <!-- 11 원칙 -->
 <section class="slide dark center">
-  <p class="kicker">숫자는 누가 내나</p>
-  <h2 style="font-size:84px;">숫자는 규칙이 내고, AI는 문장만 씁니다</h2>
+  <h2 style="font-size:84px;">구현 방식</h2>
   <div class="rules">
-    <span class="k">도착 시각</span><p>남은 거리 ÷ 속도. AI는 계산에 손대지 않습니다.</p>
-    <span class="k">어종</span><p>업종 × 같은 달 4년 실적. 1위가 바뀌는 업종은 말하지 않습니다.</p>
+    <span class="k">도착 시각</span><p>남은 거리 ÷ 평균속도.</p>
     <span class="k">출발 시각</span><p>카카오 길찾기 소요 시간에서 거꾸로. 60km 밖은 계산하지 않습니다.</p>
-    <span class="k">가격</span><p>예측은 접었습니다. 4년 중 3년이 3분의 1만 맞았습니다. 과거 실적만 답합니다.</p>
+    <span class="k">가격</span><p>과거 실적만 답합니다.</p>
     <span class="k">질문 범위</span><p>엉뚱한 질문은 바로 거절. 앞 대화를 꾸며 넣어도 안 넘어갑니다.</p>
   </div>
   <div class="foot"><span class="src"></span><span class="pg"></span></div>
@@ -627,7 +625,7 @@ body:hover #hud { opacity: .8; }
   <div class="pipe">
     <div class="st"><p class="lab">1 받기</p><h4>공개 데이터</h4><p>E-UM 어선·위판장·교통<br>해수부 위판 실적 · 카카오 길찾기</p></div>
     <div class="st"><p class="lab">2 모으기</p><h4>수집</h4><p>10분마다 배 위치<br>교통은 부를 때마다</p></div>
-    <div class="st hl"><p class="lab blue">3 계산</p><h4>규칙</h4><p>도착 시각 · 어종 가능성<br>도착 권장 · 출발 시각</p></div>
+    <div class="st"><p class="lab">3 계산</p><h4>규칙</h4><p>도착 시각 · 어종 가능성<br>도착 권장 · 출발 시각</p></div>
     <div class="st"><p class="lab">4 문장</p><h4>AI</h4><p>알림 문장 다듬기<br>질문 답하기(도구 7개)</p></div>
     <div class="st"><p class="lab">5 보내기</p><h4>폰 · 전화</h4><p>지도 화면 · 웹 푸시<br>070 전화</p></div>
   </div>
@@ -657,7 +655,7 @@ body:hover #hud { opacity: .8; }
     <div class="svc"><span class="st talk">협업시기 논의 중</span><b class="h">크로스보더 셀러<br>온보딩 대화</b><p>셀러가 대화로 제품과 판매 계획을 설명하면 <em>HS 코드 후보 · 외국어 품명 · 인보이스 초안</em>을 담당자가 확인만 하면 되게 미리 준비하는 12주 공동 실증.</p><p class="who">한진 · SURF 2026 인천 스타트업위크 OI 밋업</p></div>
   </div>
   <div class="foot"><span class="src"></span><span class="pg"></span></div>
-  <aside class="notes">저희 인터뷰브릿지는 포항공대 컴퓨터공학과 학생 창업팀입니다. 사람과 AI가 자연스럽게 대화하는 실시간 음성 대화 엔진과, 그 대화를 기준에 따라 판정하고 근거를 보여 주는 평가 엔진을 직접 만들어 운영하고 있습니다. 끼어들면 20~40밀리초 안에 AI 말을 끊고, 말이 끝났다고 판단하면 65밀리초 안에 답을 시작합니다. 이 기술 위에서 서비스를 돌리고 있습니다. 대입 AI 모의면접 인터뷰브릿지는 7월부터 정식 운영 중이고 사립고와 제휴했습니다. 어르신 구술생애사 기록은 리빙랩 과제로 어르신 스무 분과 실증하고, 대학 수업의 조별 토론 퍼실리테이터는 PoC 중입니다. 현대홈쇼핑과는 방송 발화 확인 구간 자동 선별, 한진과는 크로스보더 셀러 온보딩 대화 공동 실증을 제안해 협업 시기를 논의하고 있습니다. 배마중의 070 전화는 바로 이 대화 엔진 위에 있습니다. 12월엔 빈손으로 돌아왔던 김 사장님이, 이번엔 3시 10분에 압니다. 감사합니다.<br><br>출처: 인터뷰브릿지 기업소개자료(SURF 2026 인천 스타트업위크 OI 밋업, 2026.10) — 핵심 기술 수치(20~40ms·65ms)와 서비스 현황<br>협업 사례는 협업제안서(현대홈쇼핑, 2026 용인 오픈이노베이션 교류회)와 협업제안서(한진, SURF 2026 인천 스타트업위크)</aside>
+  <aside class="notes">저희 인터뷰브릿지는 포항공대 컴퓨터공학과 학생 창업팀입니다. 사람과 AI가 자연스럽게 대화하는 실시간 음성 대화 엔진과, 그 대화를 기준에 따라 판정하고 근거를 보여 주는 평가 엔진을 직접 만들어 운영하고 있습니다. 끼어들면 20~40밀리초 안에 AI 말을 끊고, 말이 끝났다고 판단하면 65밀리초 안에 답을 시작합니다. 이 기술 위에서 서비스를 돌리고 있습니다. 대입 AI 모의면접 인터뷰브릿지는 7월부터 정식 운영 중이고 사립고와 제휴했습니다. 어르신 구술생애사 기록은 리빙랩 과제로 어르신 스무 분과 실증하고, 대학 수업의 조별 토론 퍼실리테이터는 PoC 중입니다. 현대홈쇼핑과는 방송 발화 확인 구간 자동 선별, 한진과는 크로스보더 셀러 온보딩 대화 공동 실증을 제안해 협업 시기를 논의하고 있습니다. 배마중의 070 전화는 바로 이 대화 엔진 위에 있습니다. 12월엔 빈손으로 돌아왔던 김 사장님이, 이번엔 3시 10분에 압니다. 감사합니다.<br><br>출처: 인터뷰브릿지 기업소개자료(SURF 2026 인천 스타트업위크 OI 밋업, 2026.10): 핵심 기술 수치(20~40ms·65ms)와 서비스 현황<br>협업 사례는 협업제안서(현대홈쇼핑, 2026 용인 오픈이노베이션 교류회)와 협업제안서(한진, SURF 2026 인천 스타트업위크)</aside>
 </section>
 
 </div>
