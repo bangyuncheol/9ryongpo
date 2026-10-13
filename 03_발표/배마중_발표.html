@@ -6,7 +6,8 @@
 <title>배마중 발표</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
 <style>
-/* 8판(10/13 낮): 경매는 06:00 고정이라 '언제 가야 할지 모른다'를 '들어와야 안다'(돌아오는 배를 가장 먼저 · 원하는 어종이 오는 날만 일어남)로 고침. 6장 문제 요약 → 7~10장 문제별(근거 · 배마중은 이렇게 · 기대효과, 인터뷰브릿지 기술 칩), 훅·'그래서' 장은 접음.
+/* 9판(10/13 오후): 시연 7장(시연 전에·시연①~⑥)을 빼고 '기대효과' 한 장으로(시연은 bmj.kr에서 직접) → 14장.
+   8판(10/13 낮): 경매는 06:00 고정이라 '언제 가야 할지 모른다'를 '들어와야 안다'(돌아오는 배를 가장 먼저 · 원하는 어종이 오는 날만 일어남)로 고침. 6장 문제 요약 → 7~10장 문제별(근거 · 배마중은 이렇게 · 기대효과, 인터뷰브릿지 기술 칩), 훅·'그래서' 장은 접음.
    7판(10/13 오전): 표지가 첫 장(QR 셋), 소개 영상 둘째(화면 전체, PDF 엔 주요 장면 6컷), 현장 3명(핀), '지금 돌아가나'·'대회 끝나고' 뺌(21장), 현장(문제 찾기) → 위판장 취재 영상 → 훅 순. 전화 장에 인터뷰브릿지 기술 두 줄.
    6판(10/13 새벽, APK 한 줄 추가). 글은 제목 + 그림 + 한 줄만. 설명은 발표 메모(N 키)에.
    폰 화면은 bmj.kr 실제 화면 캡처(shots/, 10/13 새벽, 시뮬레이션 03:10·04:00 장면). 캡처가 없으면 아래 재현 화면으로 대체.
@@ -78,6 +79,14 @@ ul.dots li + li { margin-top: 12px; }
 ul.dots li::before { content: ""; position: absolute; left: 4px; top: .65em; width: 10px; height: 10px; border-radius: 50%; background: var(--primary); }
 .dark ul.dots li::before { background: var(--night-blue); }
 .notes { display: none; }
+/* 기대효과 한 장(시연 장 대신): 기능 여섯 개 → 사장님에게 달라지는 것 */
+.egrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 36px; flex: 1; min-height: 0; }
+.ecard { background: var(--card); border-radius: 26px; padding: 30px 32px; display: flex; flex-direction: column; justify-content: center; }
+.ecard .lab { display: flex; align-items: center; gap: 10px; }
+.ecard .kn { width: 34px; height: 34px; font-size: 18px; }
+.ecard b.h { display: block; font-size: 30px; font-weight: 800; line-height: 1.3; margin-top: 14px; letter-spacing: -.02em; }
+.ecard p.d { font-size: 22px; line-height: 1.5; color: var(--muted); margin-top: 12px; }
+.ecard p.d em { font-style: normal; color: var(--ink); font-weight: 700; }
 /* 팀 소개(마지막 장): 두 사람 카드. 이력은 인터뷰브릿지 IR·UGRP 자료에서 */
 .team { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 40px; }
 .member { background: var(--night-2); border-radius: 30px; padding: 40px 44px; display: flex; flex-direction: column; }
@@ -560,234 +569,23 @@ body:hover #hud { opacity: .8; }
   <aside class="notes">네 번째는 쓰는 사람 얘기입니다. 어가 인구 둘 중 한 명이 고령이고, 농어민 중에 AI 서비스를 써 본 사람은 31%, 일반 국민의 절반쯤입니다. 그래서 화면만 만들지 않고 전화를 붙였습니다. 글로 묻든 말로 묻든 같은 엔진이 같은 숫자를 냅니다. 여기 저희 인터뷰브릿지 기술이 들어갑니다. 말을 언제 받고 언제 끊을지는 AI 면접용으로 직접 만든 턴테이킹 설계를 전화에 맞게 옮겨서 잡고, 어르신 구술생애사 과제에서 쓰는 키워드 핫부스팅으로 구룡포 지명과 어촌 말, 그날 배 이름을 알아듣습니다. 실제 통화에서 배 이름을 다섯 번 다 맞혔습니다. 앱 설치도 글자 입력도 없이 전화 한 통이면 되는 게 효과입니다.</aside>
 </section>
 
-<!-- 11 시연 전에 -->
+<!-- 11 기대효과 -->
 <section class="slide">
-  <p class="kicker">시연 전에</p>
-  <h2>시뮬레이션은 배 위치 하나, 나머지는 실데이터입니다</h2>
-  <div class="mid-area">
-  <div class="body">
-    <div class="card col" style="flex:1.4; padding:28px 36px;">
-      <table class="t">
-        <tr><th>데이터</th><th>상태</th><th>쓰는 곳</th></tr>
-        <tr><td class="nw">E-UM 어선 기본정보 202척</td><td><span class="tag live"><i></i>실데이터</span></td><td>업종·톤수·배 이름</td></tr>
-        <tr><td class="nw">E-UM 위판장 위치</td><td><span class="tag live"><i></i>실데이터</span></td><td>거리 기준점</td></tr>
-        <tr><td class="nw">E-UM 교통센서·교통량·혼잡율</td><td><span class="tag live"><i></i>실측</span></td><td>위판장 앞길 지금</td></tr>
-        <tr><td class="nw">해수부 위판 실적 56개월</td><td><span class="tag live"><i></i>실데이터</span></td><td>어종 추정 · 과거 실적</td></tr>
-        <tr><td class="nw">카카오모빌리티 길찾기</td><td><span class="tag live"><i></i>실시간</span></td><td>출발지→위판장 소요 시간</td></tr>
-        <tr><td class="nw">E-UM 선박 위치 50척</td><td><span class="tag sim"><i></i>시뮬레이션</span></td><td>2025-04-27 멈춤 → 같은 형식 재생</td></tr>
-      </table>
-    </div>
-    <div class="col card" style="justify-content:center;">
-      <p class="lab">진짜 위치가 들어오면</p>
-      <p class="b30" style="margin-top:12px;"><b>스위치 하나.</b> 위치가 하루 넘게 멈추면 예보 대신 이렇게 띄웁니다.</p>
-      <p class="b26" style="margin-top:20px; background:var(--primary-soft); border-radius:16px; padding:16px 20px;">“선박 위치가 2025-04-27 이후 갱신되지 않아 입항 예보를 낼 수 없습니다”</p>
-    </div>
+  <p class="kicker">기대효과 · 시연은 bmj.kr에서 직접 보여 드립니다</p>
+  <h2>김 사장님의 새벽이 이렇게 바뀝니다</h2>
+  <div class="egrid">
+    <div class="ecard"><p class="lab"><span class="kn">1</span>입항 예보</p><b class="h">돌아오는 배를 누구보다 먼저 압니다</b><p class="d">배 위치를 10분마다 읽어 위판장으로 향하는 배를 잡고, <em>도착 시각 = 남은 거리 ÷ 속도</em>로 냅니다. 3시 10분에 "4시 25분부터 3척"을 압니다.</p></div>
+    <div class="ecard"><p class="lab"><span class="kn">2</span>먼저 알림</p><b class="h">원하는 생선이 오는 날만 일어납니다</b><p class="d">골라 둔 생선을 실었을 배가 입항 중이 되는 순간 폰이 먼저 울립니다. <em>앱 설치 없이</em>, 번호를 등록하면 같은 순간 070 전화로도.</p></div>
+    <div class="ecard"><p class="lab"><span class="kn">3</span>어종 추정</p><b class="h">무엇을 실었을지 가능성으로 압니다</b><p class="d">10월에 자망선이 들어오면 <em>붉은대게 78%</em>. 업종 × 같은 달 4년 실적으로 내고, 맞히지 못하는 업종(근해자망)은 어종을 말하지 않습니다.</p></div>
+    <div class="ecard"><p class="lab"><span class="kn">4</span>나갈지, 몇 시에</p><b class="h">경매 전에 나갈지를 정합니다</b><p class="d">6시 경매에 맞춰 <em>5시 반 도착, 출발은 내 위치에서 거꾸로</em>. 위판장 앞길은 센서 4곳의 지난 1시간 트럭 수로 지금 상태를 칠합니다.</p></div>
+    <div class="ecard"><p class="lab"><span class="kn">5</span>물어보기</p><b class="h">글로 물으면 표의 숫자를 그대로 옮깁니다</b><p class="d">AI가 도구 7개(입항 예보 · 어종 · 교통 · 출발 시각 …)에서 찾은 숫자만 씁니다. <em>조회 기록이 답 아래 남고</em>, 엉뚱한 질문은 정해진 한마디로 거절합니다.</p></div>
+    <div class="ecard"><p class="lab"><span class="kn">6</span>전화</p><b class="h">앱도 글자도 없이 전화 한 통이면 됩니다</b><p class="d">알림을 전화로 받고 궁금한 건 말로 묻습니다. <em>화면과 같은 엔진, 같은 숫자</em>. 구룡포 지명·어촌 말·그날 배 이름을 알아듣습니다(실통화 배 이름 5/5).</p></div>
   </div>
-  </div>
-  <div class="foot"><span class="src">E-UM 호출 검증 10.8~9<br>업종으로 본 어종은 가능성<br>경매 06:00과 30분 전 도착은 수협 확인 전<br>화면·전화는 bmj.kr(VM 1대)에서 운영 중</span><span class="pg"></span></div>
-  <aside class="notes">이제 시연입니다. 들어가기 전에 하나만 먼저 말씀드릴게요. 선박 위치 API가 작년 4월에 멈춰 있습니다. 그래서 같은 형식으로 시뮬레이션을 돌렸습니다. 나머지는 전부 진짜 데이터예요. 시연 끝에 이 스위치를 실데이터로 바꿔 볼게요. 그러면 엉터리 예보 대신 '못 냅니다'가 뜹니다.</aside>
+  <div class="foot"><span class="src">배 위치만 시뮬레이션(E-UM 선박 위치가 2025-04-27에 멈춰 같은 형식으로 재생, 하루 넘게 멈추면 예보 대신 '낼 수 없습니다'를 띄움)<br>나머지는 실데이터: E-UM 어선 기본정보 202척 · 위판장 위치 · 교통센서·교통량·혼잡율(실측) · 해수부 위판 실적 56개월 · 카카오모빌리티 길찾기<br>경매 06:00과 30분 전 도착은 수협 확인 전 · 화면·전화는 bmj.kr(VM 1대)에서 운영 중</span><span class="pg"></span></div>
+  <aside class="notes">시연은 이 뒤에 bmj.kr에서 직접 보여 드리겠습니다. 그 전에 사장님의 새벽이 어떻게 바뀌는지 한 장으로 정리했습니다. 돌아오는 배를 누구보다 먼저 알고, 원하는 생선이 오는 날만 일어나고, 무엇을 실었을지 가능성으로 알고, 경매 전에 나갈지를 정하고, 글로든 말로든 같은 숫자를 받습니다. 배 위치 API가 작년 4월에 멈춰 있어서 배 움직임만 같은 형식으로 시뮬레이션하고, 나머지는 전부 실데이터입니다. 위치가 들어오면 스위치 하나로 바뀌고, 멈추면 엉터리 예보 대신 '못 냅니다'가 뜹니다.</aside>
 </section>
 
-<!-- 12 시연① -->
-<section class="slide">
-  <p class="kicker">시연 1 · 가상 시각 03:10</p>
-  <h2>항으로 오는 배 3척, 4시 25분부터 들어옵니다</h2>
-  <div class="mid-area">
-  <div class="body" style="gap:80px; align-items:center;">
-    <div class="phone" data-shot="shots/map.png"><div class="screen" data-p4></div></div>
-    <div class="col">
-      <p class="b30 mut">배 위치를 10분마다 읽어, 넷을 모두 만족하면 ‘입항 중’</p>
-      <div class="steps" style="margin-top:32px;">
-        <span class="kn">1</span><span>위판장에서 15km 안</span>
-        <span class="kn">2</span><span>2노트 이상으로 움직이는 중</span>
-        <span class="kn">3</span><span>뱃머리가 위판장 쪽 (±35°)</span>
-        <span class="kn">4</span><span>10분 전보다 가까워짐</span>
-      </div>
-      <p style="font-size:38px; font-weight:750; margin-top:48px;">도착 시각 = 남은 거리 ÷ 속도</p>
-      <p class="b26 mut" style="margin-top:20px;">화면 밖 배는 가장자리 화살표로 시각·이름·거리. 지도 위 초록 길은 위판장 앞길 트럭 실측.</p>
-    </div>
-  </div>
-  </div>
-  <div class="foot"><span class="src">배 움직임은 시뮬레이션(E-UM 마지막 위치 50척에서 출발)<br>왼쪽은 실제 화면(카카오맵, bmj.kr, 10/13 새벽 캡처)</span><span class="pg"></span></div>
-  <aside class="notes">시계를 새벽 3시 10분에 놓았습니다. 오른쪽 바다에서 자망선 세 척이 항으로 들어오고 있어요. 화면 밖에 있어서 가장자리 화살표로 시각이랑 거리를 보여 줍니다. 배마중은 배 위치를 10분마다 보고 이 네 가지를 다 만족하는 배만 골라서, 남은 거리를 속도로 나눕니다. 여기까진 AI가 안 들어가고, 그냥 나눗셈입니다. 지도 위 초록 길은 위판장 앞길 트럭 실측이고, 방파제 사이로 들어와 부두에 붙는 길은 위성 사진 보고 저희가 직접 찍었습니다.</aside>
-</section>
-
-<!-- 13 시연② -->
-<section class="slide">
-  <p class="kicker">시연 2 · 가상 시각 03:10</p>
-  <h2>3시 10분, 사장님 폰이 먼저 울립니다</h2>
-  <div class="mid-area">
-  <div class="body" style="gap:80px; align-items:center;">
-    <div class="phone" data-shot="shots/push.png">
-      <div class="screen lock">
-        <div class="clock"><p class="d">10월 13일 화요일</p><p class="t num">3:10</p></div>
-        <div class="noti"><div class="nh"><img src="../src/web/public/icon-192.png" alt=""><b style="color:var(--ink)">배마중</b><span>지금</span></div>
-          <p class="nt">구룡포 입항 예보</p>
-          <p class="nb">04:25~04:35 자망선 3척 입항 예정 · 붉은대게·골뱅이 가능성. 경매 06:00</p></div>
-      </div>
-    </div>
-    <div class="col">
-      <div class="card callout" style="padding:40px 48px;">
-        <p class="lab">잠금 화면에 뜨는 말</p>
-        <p style="font-size:46px; font-weight:750; line-height:1.38; letter-spacing:-.02em; margin-top:14px;"><span class="red">04:25~04:35</span> 자망선 3척 입항 예정 · 붉은대게·골뱅이 가능성. 경매 06:00</p>
-      </div>
-      <div class="rows" style="margin-top:36px;">
-        <p class="b30"><b>언제</b>　고른 생선을 실었을 배가 입항 중이 되는 순간</p>
-        <p class="b30"><b>숫자 검사</b>　AI가 다듬어도 숫자가 바뀌면 이 문장 그대로</p>
-        <p class="b30"><b>전화로도</b>　번호를 등록한 분께는 같은 순간 070에서 전화가 갑니다</p>
-      </div>
-    </div>
-  </div>
-  </div>
-  <div class="foot"><span class="src">알림 문장은 시뮬레이션 03:10에 규칙 템플릿이 낸 문장<br>갤럭시 크롬에서 앱 설치 없이 받습니다(같은 웹을 감싼 안드로이드 APK도 있음)<br>생선은 여러 개 골라 둘 수 있습니다(붉은대게·살오징어 …)</span><span class="pg"></span></div>
-  <aside class="notes">같은 3시 10분, 붉은대게 알림을 켜 둔 사장님 폰이 먼저 울립니다. 4시 25분부터 35분 사이 자망선 세 척, 붉은대게랑 골뱅이 가능성, 경매 6시. AI가 문장을 다듬긴 하는데, 숫자가 하나라도 바뀌면 버리고 이 문장 그대로 나갑니다. 전화번호를 등록해 두신 분께는 같은 순간 전화가 갑니다. [무대: 푸시 실기 시험을 마쳤을 때만] 지금 이 폰으로 받아 볼게요.</aside>
-</section>
-
-<!-- 14 시연③ -->
-<section class="slide">
-  <p class="kicker">시연 3 · 무엇을 싣고 오나</p>
-  <h2>10월에 자망선이 들어오면, 대부분 붉은대게입니다</h2>
-  <div class="mid-area">
-  <div class="body">
-    <div class="card col" style="flex:1.3; justify-content:center;">
-      <p class="lab">구룡포 위판장 10월, 연안자망 배가 판 어종 (2022~2025 평균, 금액 기준)</p>
-      <div style="margin-top:40px; display:grid; grid-template-columns:150px 1fr 220px; gap:34px 24px; align-items:center;">
-        <span class="b30"><b>붉은대게</b></span><span style="height:30px; background:var(--primary-soft); border-radius:15px;"><span style="display:block; width:78%; height:100%; background:var(--primary-dark); border-radius:15px;"></span></span><span><b style="font-size:36px; margin-right:10px;" class="num">78%</b> <span class="lab num">63~88</span></span>
-        <span class="b30">골뱅이</span><span style="height:30px; background:var(--primary-soft); border-radius:15px;"><span style="display:block; width:10%; height:100%; background:#8fb6e6; border-radius:15px;"></span></span><span><b style="font-size:36px; margin-right:10px;" class="num">10%</b> <span class="lab num">3~19</span></span>
-        <span class="b30">살오징어</span><span style="height:30px; background:var(--primary-soft); border-radius:15px;"><span style="display:block; width:7%; height:100%; background:#8fb6e6; border-radius:15px;"></span></span><span><b style="font-size:36px; margin-right:10px;" class="num">7%</b> <span class="lab num">0~27</span></span>
-      </div>
-      <p class="b26 mut" style="margin-top:44px;">회색은 해마다의 최저~최고</p>
-    </div>
-    <div class="col stack">
-      <div class="card grow" style="justify-content:center;"><p class="lab">한 해씩 빼고 나머지 3년으로 그해 10월 1위 맞히기</p>
-        <div style="display:grid; grid-template-columns:1fr auto; gap:18px; margin-top:24px; font-size:26px; align-items:baseline;">
-          <span>연안자망 · 연안통발 · 근해채낚기</span><b class="num blue" style="font-size:34px; justify-self:end;">12번 중 12번</b>
-          <span>근해자망</span><b class="num mut" style="font-size:34px; justify-self:end;">4번 중 0번</b>
-        </div></div>
-      <div class="card"><p class="b30"><b>근해자망은 어종을 말하지 않습니다.</b> <span class="mut">척수와 톤수만.</span></p></div>
-    </div>
-  </div>
-  </div>
-  <div class="foot"><span class="src">해양수산부 「일자별 위탁판매현황」 구룡포수협 본소, 팀 계산<br>화면의 79%는 같은 값(78.46%)을 두 번 반올림한 표시</span><span class="pg"></span></div>
-  <aside class="notes">어선 기본정보엔 연안자망이라고만 나옵니다. 사장님이 궁금한 건 그래서 뭐가 오냐죠. 해수부 실적엔 업종이랑 어종이 같은 줄에 있어서, 10월 연안자망 배는 붉은대게가 78%라는 걸 4년치로 계산할 수 있습니다. 같은 연안자망도 8월엔 골뱅이가 1위라 늘 같은 달 실적만 봅니다. 한 해씩 빼고 시험해 봤더니 세 업종은 12번 다 맞았고, 근해자망은 4번 다 틀렸습니다. 1위가 잘 안 바뀌는 업종이니 맞히기 쉬운 것 아니냐고 물으실 수 있는데, 맞습니다. 그래서 1위가 안 바뀌는 업종만 말하고, 바뀌는 근해자망은 말 안 하는 게 이 규칙의 핵심입니다.</aside>
-</section>
-
-<!-- 15 시연④ -->
-<section class="slide">
-  <p class="kicker">시연 4 · 나갈지, 몇 시에 나갈지</p>
-  <h2>4시 25분에 첫 배가 닿습니다. 6시 경매에 맞춰 5시 반 도착, 출발은 거꾸로</h2>
-  <div class="mid-area">
-  <div class="card" style="padding:24px 56px 30px;">
-    <svg viewBox="0 0 1600 230" width="100%" role="img" aria-label="시간 비례 축. 03:10 알림, 04:25~04:35 입항, 05:30까지 도착 권장, 06:00 경매">
-      <!-- 03:00 = x60, 06:00 = x1540, 1분 = 8.222px -->
-      <line x1="60" y1="120" x2="1540" y2="120" stroke="#c4cad1" stroke-width="4" stroke-linecap="round"/>
-      <g stroke="#c4cad1" stroke-width="2"><line x1="60" y1="108" x2="60" y2="132"/><line x1="307" y1="108" x2="307" y2="132"/><line x1="553" y1="108" x2="553" y2="132"/><line x1="800" y1="108" x2="800" y2="132"/><line x1="1047" y1="108" x2="1047" y2="132"/><line x1="1293" y1="108" x2="1293" y2="132"/><line x1="1540" y1="108" x2="1540" y2="132"/></g>
-      <g fill="#5b6168" font-size="20" text-anchor="middle"><text x="60" y="222">03:00</text><text x="307" y="222">03:30</text><text x="553" y="222">04:00</text><text x="800" y="222">04:30</text><text x="1047" y="222">05:00</text><text x="1293" y="222">05:30</text><text x="1540" y="222">06:00</text></g>
-      <rect x="759" y="108" width="82" height="24" rx="12" fill="#d32f2f"/>
-      <circle cx="142" cy="120" r="14" fill="#0072de"/>
-      <circle cx="1293" cy="120" r="14" fill="#0072de"/>
-      <circle cx="1540" cy="120" r="14" fill="#111418"/>
-      <g font-weight="800" font-size="28">
-        <text x="142" y="74" text-anchor="middle" fill="#0072de">03:10</text>
-        <text x="800" y="74" text-anchor="middle" fill="#d32f2f">04:25~04:35</text>
-        <text x="1293" y="74" text-anchor="middle" fill="#0072de">05:30</text>
-        <text x="1540" y="74" text-anchor="middle" fill="#111418">06:00</text>
-      </g>
-      <g font-size="22" fill="#5b6168">
-        <text x="142" y="172" text-anchor="middle">알림</text>
-        <text x="800" y="172" text-anchor="middle">입항</text>
-        <text x="1293" y="172" text-anchor="middle">도착 권장</text>
-        <text x="1540" y="172" text-anchor="middle">경매</text>
-      </g>
-    </svg>
-  </div>
-  <div class="body" style="margin-top:28px; gap:28px; align-items:stretch;">
-    <div class="col card" style="flex:1.25; box-shadow: inset 0 5px 0 var(--arrived); padding:28px 36px;">
-      <p class="lab">위판장 앞길 지금 <span class="tag live" style="margin-left:10px;"><i></i>실측 · 실제 현재 시각</span></p>
-      <div style="display:flex; gap:28px; margin-top:16px; align-items:center;">
-        <img src="shots/roads.png" alt="앱 지도. 위판장 별 표시 주변 929번 호미로와 구룡포길이 지난 1시간 트럭 수에 따라 초록으로 칠해져 있다" style="width:520px; border-radius:18px; flex:none;">
-        <div class="b26" style="line-height:1.7;">
-          <p>센서 4곳이 놓인 길을<br>지난 1시간 트럭 수로 칠합니다</p>
-          <p style="margin-top:14px;"><i class="road" style="background:#1e7d45;"></i>여유 30대 이하</p>
-          <p><i class="road" style="background:#b45309;"></i>보통 100대 이하</p>
-          <p><i class="road" style="background:#b91c1c;"></i>붐빔</p>
-        </div>
-      </div>
-    </div>
-    <div class="col card" style="justify-content:center;"><p class="lab">화면에 뜨는 말</p>
-      <p class="b30" style="margin-top:16px;">“경매가 06:00에 시작해요.<br>30분 전인 05:30까지 오시면 돼요”</p>
-      <p class="b26 mut" style="margin-top:14px;">🚚 지금 위판장 앞은 한산한 편</p>
-      <p class="b26" style="margin-top:22px; padding-top:18px; border-top:1px solid var(--line);"><b>“여기서 몇 시에 출발하면 돼?”</b><br><span class="mut">폰 위치에서 카카오 길찾기로 거꾸로 셉니다</span></p></div>
-  </div>
-  </div>
-  <div class="foot"><span class="src">교통: E-UM 시간대별·차종별 교통량(최근 9시간) · 혼잡율(최근 24시간)<br>길 모양은 OSM, 센서 사이는 가까운 센서 색. 앞으로 막힐지는 맞히지 않습니다<br>경매 30분 전 도착은 제품 가정(수협 확인 전)</span><span class="pg"></span></div>
-  <aside class="notes">나갈지, 몇 시에 나갈지에는 이렇게 답합니다. 4시 25분에 첫 배가 닿으니까 그걸 보고 나갈지 정하시면 되고, 경매는 6시로 정해져 있으니 5시 반까지 오시면 됩니다. 그리고 지도 위 초록 길은 진짜예요. 위판장 1km 안 센서 네 곳이 지난 1시간 동안 센 트럭 수를 지금 바로 불러와 길에 칠합니다. 앞으로 막힐지는 맞히지 않습니다. 교통 API가 최근 9시간치만 줘서 근거가 없습니다. '여기서 몇 시에 출발하면 되냐'고 물으면 폰 위치에서 카카오 길찾기로 걸리는 시간을 받아 5시 반에서 거꾸로 셉니다.</aside>
-</section>
-
-<!-- 16 시연⑤ -->
-<section class="slide">
-  <p class="kicker">시연 5 · 물어보기 · 가상 시각 04:00</p>
-  <h2>글로 물으면, AI가 표에서 숫자를 찾아 그대로 옮깁니다</h2>
-  <div class="mid-area">
-  <div class="body" style="gap:80px; align-items:center;">
-    <div class="phone" data-shot="shots/chat.png">
-      <div class="screen">
-        <div class="p4">
-          <div class="hd"><b><img class="ic" src="../src/web/public/icon-192.png" alt=""><img class="wm" src="../src/web/public/wordmark.png" alt="배마중"></b><span>04:00</span></div>
-          <div class="mp" style="flex:0 0 200px;"><svg viewBox="0 0 392 200" preserveAspectRatio="xMidYMid slice"><path d="M0 0 H178 C196 40 170 80 186 118 C200 150 164 150 178 150 H0 Z" fill="#e9ece7"/><path d="M190 64 L246 98" stroke="#9aa8a7" stroke-width="7" stroke-linecap="round"/><g transform="translate(166 120)"><circle r="16" fill="#fff"/><path d="M0 -11 L3 -3 L11 -3 L4.5 2 L7 10 L0 5 L-7 10 L-4.5 2 L-11 -3 L-3 -3 Z" fill="#0c5560"/></g></svg></div>
-          <div class="sh" style="flex:1; display:flex; flex-direction:column;">
-            <div class="hb"></div>
-            <div class="tabs"><span>들어오는 배</span><span>알림</span><b>물어보기</b></div>
-            <p style="align-self:flex-end; background:#d6ebe8; border-radius:18px 18px 6px 18px; padding:9px 13px; font-size:14px; margin-top:16px; max-width:86%;">오늘 붉은대게 들어와?</p>
-            <p style="font-size:14px; line-height:1.5; margin-top:10px;">지금 붉은대게를 주로 잡는 연안자망어업 배 3척이 들어오고 있어, 붉은대게가 들어올 가능성이 있습니다. 최근 4년 같은 달인 10월 구룡포 위판 실적을 바탕으로 한 추정이며, 실제 실은 어종은 아직 확인되지 않았습니다.</p>
-            <p style="font-size:12px; color:#4f6169; background:#eef3f2; border-radius:12px; padding:8px 10px; margin-top:8px; font-family:monospace;">→ 어종 추정<br>  어종 추정: 붉은대게 78% · 골뱅이 10% · 살오징어 7%</p>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="col">
-      <p class="lab">AI가 쓸 수 있는 도구 7개</p>
-      <p class="b30" style="margin-top:12px; line-height:1.7;">입항 예보 · 어종 추정 · 위판장 앞 교통 · 방문 시각 · 가는 시간(카카오 길찾기) · 과거 경매 실적 · 알림 준비</p>
-      <div class="rows" style="margin-top:36px;">
-        <p class="b30"><b>조회 기록</b>　뭘 찾아봤는지 답 아래에 그대로</p>
-        <p class="b30"><b>“여기서”</b>　폰 위치로 계산. 60km 밖은 “멀어서 안내하기 어렵다”</p>
-        <p class="b30"><b>엉뚱한 질문</b>　정해진 한마디로 거절</p>
-      </div>
-    </div>
-  </div>
-  </div>
-  <div class="foot"><span class="src">OpenAI tool calling<br>왼쪽 답은 10/13 새벽 bmj.kr에서 실제로 물어본 결과(시연 땐 그때 답이 나옵니다)</span><span class="pg"></span></div>
-  <aside class="notes">물어보기입니다. 시계를 4시로 옮겼어요. 사장님 질문 그대로 칩으로 두었습니다. "오늘 붉은대게 들어와?" 누르면 AI가 어종 추정이랑 입항 예보를 찾아보고, 거기 있는 숫자만 옮겨서 답합니다. 뭘 찾아봤는지는 답 아래 기록으로 남습니다. "여기서 몇 시에 출발하면 돼?"는 폰 위치에서 카카오 길찾기로 소요 시간을 받아 5시 반에서 거꾸로 셉니다. 상관없는 질문엔 정해진 한마디만 합니다.</aside>
-</section>
-
-<!-- 17 시연⑥ -->
-<section class="slide">
-  <p class="kicker">시연 6 · 전화</p>
-  <h2>알림을 전화로 받고, 궁금한 건 말로 묻습니다</h2>
-  <div class="mid-area">
-  <div class="body" style="align-items:center;">
-    <div class="col card" style="flex:1.3; padding:44px 48px;">
-      <p class="lab">배마중이 건 전화 · 예시</p>
-      <div class="talk" style="margin-top:28px; row-gap:30px; font-size:28px;">
-        <span class="who">배마중</span><p>배마중입니다. 04:25~04:35 자망선 3척 입항 예정, 붉은대게·골뱅이 가능성. 경매 06:00. 더 궁금하신 거 있으세요?</p>
-        <span class="who u">사장님</span><p class="mut">몇 시에 출발하면 돼요?</p>
-        <span class="who">배마중</span><p>네, 확인해 볼게요. … 어디서 출발하세요? … 5시 반까지 오시면 되니까, 양덕동에서 51분 걸려 4시 반쯤 나오시면 됩니다.</p>
-      </div>
-    </div>
-    <div class="col" style="font-size:32px; font-weight:700; line-height:1.3;">
-      <p style="padding:20px 0; border-top:1px solid var(--line);">앱 설치도, 글자 입력도 없음</p>
-      <p style="padding:20px 0; border-top:1px solid var(--line);">070-5276-7121로 먼저 걸어도 됨<br><span class="b26 mut" style="font-weight:500;">화면의 ‘전화로 묻기’ 한 번이면 바로 연결</span></p>
-      <p style="padding:20px 0; border-top:1px solid var(--line);">말 주고받는 때는 <span class="blue">인터뷰브릿지 턴테이킹 설계</span>가 잡음<br><span class="b26 mut" style="font-weight:500;">AI 면접용으로 직접 만든 엔진의 설계(쿠션 선재생·침묵 길이로 말 끝·끼어들기)를 전화에 맞게 옮김</span></p>
-      <p style="padding:20px 0; border-top:1px solid var(--line);">구룡포 지명·어촌 말·배 이름도 알아들음<br><span class="b26 mut" style="font-weight:500;">어르신 구술생애사(자서전) 과제의 키워드 핫부스팅 방식 · 실통화 배 이름 5/5</span></p>
-      <p style="padding:20px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line);">화면과 같은 엔진, 같은 숫자</p>
-    </div>
-  </div>
-  </div>
-  <div class="foot"><span class="src">ClawOps 070 · CLOVA·OpenAI 받아쓰기 · Gemini 음성 합성<br>턴테이킹 설계와 키워드 핫부스팅(CLOVA)은 팀 인터뷰브릿지의 AI 면접·어르신 구술생애사 과제에서 가져옴(배 이름 5/5는 10/11 실통화 6건, OpenAI는 1/5)<br>답이 늦으면 “네, 확인해 볼게요”부터. 전화는 위치를 모르니 출발지를 되묻습니다(양덕동 51분은 10/11 실기값)<br>통화 내용은 예시</span><span class="pg"></span></div>
-  <aside class="notes">채팅이 낯선 분들을 위해 전화를 붙였습니다. 알림이 오면 배마중이 전화를 걸어서 읽어 드리고, 궁금한 걸 말로 물으면 말로 답해요. 답은 화면의 물어보기랑 같은 엔진이 냅니다. 0.6초 안에 답이 안 나오면 미리 만들어 둔 "네, 확인해 볼게요"부터 말합니다. 전화는 폰 위치를 모르니까 어디서 출발하는지 되묻고 계산합니다. 말을 언제 받고 언제 끊을지는 저희 인터뷰브릿지가 AI 면접용으로 직접 만든 턴테이킹 엔진의 설계를 전화에 맞게 옮겨서 잡습니다. 쿠션 음성을 미리 만들어 바로 틀고, 침묵 길이로 말 끝을 보고, 끼어들면 멈춥니다. 그리고 어르신 구술생애사를 기록하는 과제에서 쓰는 키워드 핫부스팅으로 구룡포 지명, 어촌 말, 그날 배 이름을 알아듣게 해 뒀습니다. 실제 통화에서 배 이름을 다섯 번 다 맞혔습니다. [무대: 실통화 시험을 마쳤을 때만] 지금 걸어 볼게요. 마지막으로 아까 말씀드린 스위치를 실데이터로 바꿔 보겠습니다.</aside>
-</section>
-
-<!-- 18 원칙 -->
+<!-- 12 원칙 -->
 <section class="slide dark center">
   <p class="kicker">숫자는 누가 내나</p>
   <h2 style="font-size:84px;">숫자는 규칙이 내고, AI는 문장만 씁니다</h2>
@@ -802,7 +600,7 @@ body:hover #hud { opacity: .8; }
   <aside class="notes">새벽에 돈이 걸린 결정을 돕는 거라 숫자가 틀리면 안 됩니다. 그래서 숫자는 전부 규칙이 내고 AI는 문장만 씁니다. 가격도 해 봤는데, 3분의 1 남짓밖에 안 맞았습니다. 예측은 접고 과거 실적만 답합니다.</aside>
 </section>
 
-<!-- 19 구조 -->
+<!-- 13 구조 -->
 <section class="slide">
   <p class="kicker">구조</p>
   <h2>데이터 받고, 규칙으로 계산하고, 말로 바꿔 보냅니다</h2>
@@ -824,7 +622,7 @@ body:hover #hud { opacity: .8; }
   <aside class="notes">구조는 단순합니다. 받고, 계산하고, 문장으로 바꿔서, 폰이랑 전화로 보냅니다. 서버 한 대에서 전부 돕니다.</aside>
 </section>
 
-<!-- 20 팀 -->
+<!-- 14 팀 -->
 <section class="slide dark center">
   <p class="kicker">팀 인터뷰브릿지</p>
   <h2 style="margin-top:14px;">사람처럼 말을 주고받는 음성 AI를 만드는 두 사람</h2>
