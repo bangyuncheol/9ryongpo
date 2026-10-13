@@ -29,7 +29,7 @@ p, li { text-wrap: pretty; }
 .num, td, .big { font-variant-numeric: tabular-nums; }
 
 #stage { position: absolute; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: center; }
-.slide { position: absolute; inset: 0; background: var(--page); padding: 92px 120px 96px; display: none; flex-direction: column; overflow: hidden; }
+.slide { position: absolute; inset: 0; background: var(--page); padding: 92px 120px 128px; display: none; flex-direction: column; overflow: hidden; }
 .slide.on { display: flex; }
 .slide.dark { background: var(--night); color: var(--night-ink); }
 .slide.center { justify-content: center; }
@@ -52,7 +52,7 @@ h2 { font-size: var(--fs-h2); font-weight: 750; line-height: 1.22; letter-spacin
 .blue { color: var(--primary-dark); } .dark .blue { color: var(--night-blue); }
 .green { color: var(--arrived); }
 
-.foot { position: absolute; left: 120px; right: 120px; bottom: 34px; display: flex; justify-content: space-between; align-items: flex-end; gap: 40px; font-size: var(--fs-src); color: var(--muted); line-height: 1.45; }
+.foot { position: absolute; left: 120px; right: 120px; bottom: 30px; display: flex; justify-content: space-between; align-items: flex-end; gap: 40px; font-size: var(--fs-src); color: var(--muted); line-height: 1.4; }
 .dark .foot { color: var(--night-muted); }
 .foot .src { max-width: 1520px; }
 .foot .src:empty::before { content: "\200b"; }
@@ -441,7 +441,7 @@ body:hover #hud { opacity: .8; }
       </div>
     </div>
   </div>
-  <div class="foot"><span class="src">해양수산부 「일자별 위탁판매현황」 구룡포수협 본소 2022.1~2026.8, 팀 집계 · 어종 추정 백테스트: 연안자망·연안통발·근해채낚기 12/12, 근해자망 0/4</span><span class="pg"></span></div>
+  <div class="foot"><span class="src">해양수산부 「일자별 위탁판매현황」 구룡포수협 본소 2022.1~2026.8, 팀 집계<br>어종 추정 백테스트: 연안자망·연안통발·근해채낚기 12/12, 근해자망 0/4</span><span class="pg"></span></div>
   <aside class="notes">해수부 위판 실적 56개월치를 직접 받아서 봤습니다. 8월 1위가 3년 내내 살오징어였다가, 작년엔 붉은대게, 올해는 청어로 바뀌었습니다. 10월 살오징어는 3년 만에 1,473톤에서 44톤이 됐습니다. 그래서 배마중은 '올해는 뭐가 잡힌다'가 아니라 '오늘 이 배가 뭘 싣고 몇 시에 온다'를 냅니다. 배 위치와 명부로 도착 시각을, 업종과 같은 달 실적으로 어종 가능성을 냅니다. 숫자는 전부 규칙이 내고 AI는 문장만 씁니다. 나가기 전에 오늘 물건을 아는 게 효과고, 예보 오차와 어종 적중률을 재서 보여 드리겠습니다.</aside>
 </section>
 
@@ -475,7 +475,7 @@ body:hover #hud { opacity: .8; }
       </div>
     </div>
   </div>
-  <div class="foot"><span class="src">해양수산부 「일자별 위탁판매현황」 구룡포수협 본소, 팀 집계. 방어 12·14일엔 다른 생선이 15톤 안팎 팔림(12일은 파고 3m 풍랑). 청어 13~27일은 파고 0.3~0.6m의 잔잔한 날에도 0톤(청어를 잡는 선망 선단이 들어오지 않음, 21·22일만 폭우·풍랑 휴장). 김 사장은 가상 인물, 날짜와 물량은 실제 기록.</span><span class="pg"></span></div>
+  <div class="foot"><span class="src">해양수산부 「일자별 위탁판매현황」 구룡포수협 본소, 팀 집계<br>방어 12·14일엔 다른 생선이 15톤 안팎 팔림(12일은 파고 3m 풍랑)<br>청어 13~27일은 파고 0.3~0.6m의 잔잔한 날에도 0톤(청어를 잡는 선망 선단이 들어오지 않음, 21·22일만 폭우·풍랑 휴장)<br>김 사장은 가상 인물, 날짜와 물량은 실제 기록</span><span class="pg"></span></div>
   <aside class="notes">하루 단위로 보면 더 심합니다. 겨울 횟집에서 제일 많이 찾는 방어인데, 작년 12월 7일엔 84톤이 들어왔다가 닷새 뒤부터 0톤이었습니다. 위판장이 쉰 것도 아니에요. 12일은 파고 3미터 풍랑이었지만 13일, 14일엔 다른 생선이 15톤씩 팔렸습니다. 청어도 같습니다. 올해 6월 5일 256톤이 들어왔는데 13일부터 보름 동안 0톤이었습니다. 바람도 잔잔했어요. 청어를 잡는 선망 선단이 안 들어온 겁니다. 이렇게 들쭉날쭉하면 손해는 사러 온 사람이 봅니다. 그래서 먼저 알립니다. 원하는 생선을 골라 두면 실었을 배가 보이는 순간 휴대폰으로, 화면이 낯분 분께는 배마중이 전화를 걸어 읽어 드립니다. 전화 문장을 미리 만들어 두고 바로 트는 건 저희 인터뷰브릿지가 AI 면접에서 쓰던 쿠션 설계입니다. 나갈지 말지, 트럭 몇 대를 배가 닿기 전에 정하는 게 효과입니다.</aside>
 </section>
 
@@ -516,7 +516,7 @@ body:hover #hud { opacity: .8; }
       </div>
     </div>
   </div>
-  <div class="foot"><span class="src">도로 색은 E-UM 교통량·혼잡율(여유 ≤30대 · 보통 ≤100대 · 붐빔) · 출발 시각은 카카오모빌리티 길찾기, 60km 밖은 계산하지 않음 · 경매 06:00과 30분 전 도착은 수협 확인 전</span><span class="pg"></span></div>
+  <div class="foot"><span class="src">도로 색은 E-UM 교통량·혼잡율(여유 ≤30대 · 보통 ≤100대 · 붐빔)<br>출발 시각은 카카오모빌리티 길찾기, 60km 밖은 계산하지 않음<br>경매 06:00과 30분 전 도착은 수협 확인 전</span><span class="pg"></span></div>
   <aside class="notes">세 번째입니다. 경매는 6시로 정해져 있어요. 그건 다 압니다. 모르는 건 그 전에 어떤 배가 조업을 마치고 무엇을 싣고 돌아오느냐예요. 지금은 위판장에 가서 배를 봐야 압니다. 배마중은 선박 위치로 조업을 마치고 위판장으로 향하는 배를 누구보다 먼저 잡습니다. 무엇을 실었을지, 몇 시에 닿을지를 경매 전에 알리고, 6시 경매에 맞춰 내 위치에서 출발 시각을 거꾸로 셉니다. 원하는 생선을 실은 배가 돌아오는 날만 알리니까, 그날만 일어나면 됩니다. 경매 전에 나갈지를 정하는 게 효과입니다.</aside>
 </section>
 
@@ -556,7 +556,7 @@ body:hover #hud { opacity: .8; }
       </div>
     </div>
   </div>
-  <div class="foot"><span class="src">국가데이터처 「2025년 농림어업총조사 결과(잠정)」 · 과기정통부·NIA 「2025 디지털정보격차 실태조사」 · 전화: ClawOps 070 · CLOVA·OpenAI 받아쓰기 · Gemini 음성 합성 · 배 이름 5/5는 10/11 실통화 6건(OpenAI 1/5)</span><span class="pg"></span></div>
+  <div class="foot"><span class="src">국가데이터처 「2025년 농림어업총조사 결과(잠정)」<br>과기정통부·NIA 「2025 디지털정보격차 실태조사」<br>전화: ClawOps 070 · CLOVA·OpenAI 받아쓰기 · Gemini 음성 합성<br>배 이름 5/5는 10/11 실통화 6건(OpenAI 1/5)</span><span class="pg"></span></div>
   <aside class="notes">네 번째는 쓰는 사람 얘기입니다. 어가 인구 둘 중 한 명이 고령이고, 농어민 중에 AI 서비스를 써 본 사람은 31%, 일반 국민의 절반쯤입니다. 그래서 화면만 만들지 않고 전화를 붙였습니다. 글로 묻든 말로 묻든 같은 엔진이 같은 숫자를 냅니다. 여기 저희 인터뷰브릿지 기술이 들어갑니다. 말을 언제 받고 언제 끊을지는 AI 면접용으로 직접 만든 턴테이킹 설계를 전화에 맞게 옮겨서 잡고, 어르신 구술생애사 과제에서 쓰는 키워드 핫부스팅으로 구룡포 지명과 어촌 말, 그날 배 이름을 알아듣습니다. 실제 통화에서 배 이름을 다섯 번 다 맞혔습니다. 앱 설치도 글자 입력도 없이 전화 한 통이면 되는 게 효과입니다.</aside>
 </section>
 
@@ -584,7 +584,7 @@ body:hover #hud { opacity: .8; }
     </div>
   </div>
   </div>
-  <div class="foot"><span class="src">E-UM 호출 검증 10.8~9 · 업종으로 본 어종은 가능성 · 경매 06:00과 30분 전 도착은 수협 확인 전 · 화면·전화는 bmj.kr(VM 1대)에서 운영 중</span><span class="pg"></span></div>
+  <div class="foot"><span class="src">E-UM 호출 검증 10.8~9<br>업종으로 본 어종은 가능성<br>경매 06:00과 30분 전 도착은 수협 확인 전<br>화면·전화는 bmj.kr(VM 1대)에서 운영 중</span><span class="pg"></span></div>
   <aside class="notes">이제 시연입니다. 들어가기 전에 하나만 먼저 말씀드릴게요. 선박 위치 API가 작년 4월에 멈춰 있습니다. 그래서 같은 형식으로 시뮬레이션을 돌렸습니다. 나머지는 전부 진짜 데이터예요. 시연 끝에 이 스위치를 실데이터로 바꿔 볼게요. 그러면 엉터리 예보 대신 '못 냅니다'가 뜹니다.</aside>
 </section>
 
@@ -608,7 +608,7 @@ body:hover #hud { opacity: .8; }
     </div>
   </div>
   </div>
-  <div class="foot"><span class="src">배 움직임은 시뮬레이션(E-UM 마지막 위치 50척에서 출발). 왼쪽은 실제 화면(카카오맵, bmj.kr, 10/13 새벽 캡처).</span><span class="pg"></span></div>
+  <div class="foot"><span class="src">배 움직임은 시뮬레이션(E-UM 마지막 위치 50척에서 출발)<br>왼쪽은 실제 화면(카카오맵, bmj.kr, 10/13 새벽 캡처)</span><span class="pg"></span></div>
   <aside class="notes">시계를 새벽 3시 10분에 놓았습니다. 오른쪽 바다에서 자망선 세 척이 항으로 들어오고 있어요. 화면 밖에 있어서 가장자리 화살표로 시각이랑 거리를 보여 줍니다. 배마중은 배 위치를 10분마다 보고 이 네 가지를 다 만족하는 배만 골라서, 남은 거리를 속도로 나눕니다. 여기까진 AI가 안 들어가고, 그냥 나눗셈입니다. 지도 위 초록 길은 위판장 앞길 트럭 실측이고, 방파제 사이로 들어와 부두에 붙는 길은 위성 사진 보고 저희가 직접 찍었습니다.</aside>
 </section>
 
@@ -639,7 +639,7 @@ body:hover #hud { opacity: .8; }
     </div>
   </div>
   </div>
-  <div class="foot"><span class="src">알림 문장은 시뮬레이션 03:10에 규칙 템플릿이 낸 문장. 갤럭시 크롬에서 앱 설치 없이 받습니다(같은 웹을 감싼 안드로이드 APK도 있음). 생선은 여러 개 골라 둘 수 있습니다(붉은대게·살오징어 …).</span><span class="pg"></span></div>
+  <div class="foot"><span class="src">알림 문장은 시뮬레이션 03:10에 규칙 템플릿이 낸 문장<br>갤럭시 크롬에서 앱 설치 없이 받습니다(같은 웹을 감싼 안드로이드 APK도 있음)<br>생선은 여러 개 골라 둘 수 있습니다(붉은대게·살오징어 …)</span><span class="pg"></span></div>
   <aside class="notes">같은 3시 10분, 붉은대게 알림을 켜 둔 사장님 폰이 먼저 울립니다. 4시 25분부터 35분 사이 자망선 세 척, 붉은대게랑 골뱅이 가능성, 경매 6시. AI가 문장을 다듬긴 하는데, 숫자가 하나라도 바뀌면 버리고 이 문장 그대로 나갑니다. 전화번호를 등록해 두신 분께는 같은 순간 전화가 갑니다. [무대: 푸시 실기 시험을 마쳤을 때만] 지금 이 폰으로 받아 볼게요.</aside>
 </section>
 
@@ -668,7 +668,7 @@ body:hover #hud { opacity: .8; }
     </div>
   </div>
   </div>
-  <div class="foot"><span class="src">해양수산부 「일자별 위탁판매현황」 구룡포수협 본소, 팀 계산. 화면의 79%는 같은 값(78.46%)을 두 번 반올림한 표시.</span><span class="pg"></span></div>
+  <div class="foot"><span class="src">해양수산부 「일자별 위탁판매현황」 구룡포수협 본소, 팀 계산<br>화면의 79%는 같은 값(78.46%)을 두 번 반올림한 표시</span><span class="pg"></span></div>
   <aside class="notes">어선 기본정보엔 연안자망이라고만 나옵니다. 사장님이 궁금한 건 그래서 뭐가 오냐죠. 해수부 실적엔 업종이랑 어종이 같은 줄에 있어서, 10월 연안자망 배는 붉은대게가 78%라는 걸 4년치로 계산할 수 있습니다. 같은 연안자망도 8월엔 골뱅이가 1위라 늘 같은 달 실적만 봅니다. 한 해씩 빼고 시험해 봤더니 세 업종은 12번 다 맞았고, 근해자망은 4번 다 틀렸습니다. 1위가 잘 안 바뀌는 업종이니 맞히기 쉬운 것 아니냐고 물으실 수 있는데, 맞습니다. 그래서 1위가 안 바뀌는 업종만 말하고, 바뀌는 근해자망은 말 안 하는 게 이 규칙의 핵심입니다.</aside>
 </section>
 
@@ -720,7 +720,7 @@ body:hover #hud { opacity: .8; }
       <p class="b26" style="margin-top:22px; padding-top:18px; border-top:1px solid var(--line);"><b>“여기서 몇 시에 출발하면 돼?”</b><br><span class="mut">폰 위치에서 카카오 길찾기로 거꾸로 셉니다</span></p></div>
   </div>
   </div>
-  <div class="foot"><span class="src">교통: E-UM 시간대별·차종별 교통량(최근 9시간) · 혼잡율(최근 24시간). 길 모양은 OSM, 센서 사이는 가까운 센서 색. 앞으로 막힐지는 맞히지 않습니다. 경매 30분 전 도착은 제품 가정(수협 확인 전).</span><span class="pg"></span></div>
+  <div class="foot"><span class="src">교통: E-UM 시간대별·차종별 교통량(최근 9시간) · 혼잡율(최근 24시간)<br>길 모양은 OSM, 센서 사이는 가까운 센서 색. 앞으로 막힐지는 맞히지 않습니다<br>경매 30분 전 도착은 제품 가정(수협 확인 전)</span><span class="pg"></span></div>
   <aside class="notes">나갈지, 몇 시에 나갈지에는 이렇게 답합니다. 4시 25분에 첫 배가 닿으니까 그걸 보고 나갈지 정하시면 되고, 경매는 6시로 정해져 있으니 5시 반까지 오시면 됩니다. 그리고 지도 위 초록 길은 진짜예요. 위판장 1km 안 센서 네 곳이 지난 1시간 동안 센 트럭 수를 지금 바로 불러와 길에 칠합니다. 앞으로 막힐지는 맞히지 않습니다. 교통 API가 최근 9시간치만 줘서 근거가 없습니다. '여기서 몇 시에 출발하면 되냐'고 물으면 폰 위치에서 카카오 길찾기로 걸리는 시간을 받아 5시 반에서 거꾸로 셉니다.</aside>
 </section>
 
@@ -756,7 +756,7 @@ body:hover #hud { opacity: .8; }
     </div>
   </div>
   </div>
-  <div class="foot"><span class="src">OpenAI tool calling. 왼쪽 답은 10/13 새벽 bmj.kr에서 실제로 물어본 결과(시연 땐 그때 답이 나옵니다).</span><span class="pg"></span></div>
+  <div class="foot"><span class="src">OpenAI tool calling<br>왼쪽 답은 10/13 새벽 bmj.kr에서 실제로 물어본 결과(시연 땐 그때 답이 나옵니다)</span><span class="pg"></span></div>
   <aside class="notes">물어보기입니다. 시계를 4시로 옮겼어요. 사장님 질문 그대로 칩으로 두었습니다. "오늘 붉은대게 들어와?" 누르면 AI가 어종 추정이랑 입항 예보를 찾아보고, 거기 있는 숫자만 옮겨서 답합니다. 뭘 찾아봤는지는 답 아래 기록으로 남습니다. "여기서 몇 시에 출발하면 돼?"는 폰 위치에서 카카오 길찾기로 소요 시간을 받아 5시 반에서 거꾸로 셉니다. 상관없는 질문엔 정해진 한마디만 합니다.</aside>
 </section>
 
@@ -783,7 +783,7 @@ body:hover #hud { opacity: .8; }
     </div>
   </div>
   </div>
-  <div class="foot"><span class="src">ClawOps 070 · CLOVA·OpenAI 받아쓰기 · Gemini 음성 합성. 턴테이킹 설계와 키워드 핫부스팅(CLOVA)은 팀 인터뷰브릿지의 AI 면접·어르신 구술생애사 과제에서 가져옴(배 이름 5/5는 10/11 실통화 6건, OpenAI는 1/5). 답이 늦으면 “네, 확인해 볼게요”부터. 전화는 위치를 모르니 출발지를 되묻습니다(양덕동 51분은 10/11 실기값). 통화 내용은 예시.</span><span class="pg"></span></div>
+  <div class="foot"><span class="src">ClawOps 070 · CLOVA·OpenAI 받아쓰기 · Gemini 음성 합성<br>턴테이킹 설계와 키워드 핫부스팅(CLOVA)은 팀 인터뷰브릿지의 AI 면접·어르신 구술생애사 과제에서 가져옴(배 이름 5/5는 10/11 실통화 6건, OpenAI는 1/5)<br>답이 늦으면 “네, 확인해 볼게요”부터. 전화는 위치를 모르니 출발지를 되묻습니다(양덕동 51분은 10/11 실기값)<br>통화 내용은 예시</span><span class="pg"></span></div>
   <aside class="notes">채팅이 낯선 분들을 위해 전화를 붙였습니다. 알림이 오면 배마중이 전화를 걸어서 읽어 드리고, 궁금한 걸 말로 물으면 말로 답해요. 답은 화면의 물어보기랑 같은 엔진이 냅니다. 0.6초 안에 답이 안 나오면 미리 만들어 둔 "네, 확인해 볼게요"부터 말합니다. 전화는 폰 위치를 모르니까 어디서 출발하는지 되묻고 계산합니다. 말을 언제 받고 언제 끊을지는 저희 인터뷰브릿지가 AI 면접용으로 직접 만든 턴테이킹 엔진의 설계를 전화에 맞게 옮겨서 잡습니다. 쿠션 음성을 미리 만들어 바로 틀고, 침묵 길이로 말 끝을 보고, 끼어들면 멈춥니다. 그리고 어르신 구술생애사를 기록하는 과제에서 쓰는 키워드 핫부스팅으로 구룡포 지명, 어촌 말, 그날 배 이름을 알아듣게 해 뒀습니다. 실제 통화에서 배 이름을 다섯 번 다 맞혔습니다. [무대: 실통화 시험을 마쳤을 때만] 지금 걸어 볼게요. 마지막으로 아까 말씀드린 스위치를 실데이터로 바꿔 보겠습니다.</aside>
 </section>
 
@@ -798,7 +798,7 @@ body:hover #hud { opacity: .8; }
     <span class="k">가격</span><p>예측은 접었습니다. 4년 중 3년이 3분의 1만 맞았습니다. 과거 실적만 답합니다.</p>
     <span class="k">질문 범위</span><p>엉뚱한 질문은 바로 거절. 앞 대화를 꾸며 넣어도 안 넘어갑니다.</p>
   </div>
-  <div class="foot"><span class="src">가격 시험: 그해 8월 붉은대게 kg당 가격 25~75% 범위에 그해 10월 거래 중량이 든 비율. 2022 37% · 2023 65% · 2024 32% · 2025 35%</span><span class="pg"></span></div>
+  <div class="foot"><span class="src">가격 시험: 그해 8월 붉은대게 kg당 가격 25~75% 범위에 그해 10월 거래 중량이 든 비율<br>2022 37% · 2023 65% · 2024 32% · 2025 35%</span><span class="pg"></span></div>
   <aside class="notes">새벽에 돈이 걸린 결정을 돕는 거라 숫자가 틀리면 안 됩니다. 그래서 숫자는 전부 규칙이 내고 AI는 문장만 씁니다. 가격도 해 봤는데, 3분의 1 남짓밖에 안 맞았습니다. 예측은 접고 과거 실적만 답합니다.</aside>
 </section>
 
@@ -849,7 +849,7 @@ body:hover #hud { opacity: .8; }
       <p class="bm"><b>배마중에서</b> 서버 · 지도 화면 · 웹 푸시 · 070 전화 · 안드로이드 APK 구현, 브랜드(아이콘 · 워드마크)와 영상 디자인</p>
     </div>
   </div>
-  <div class="foot"><span class="src">이력은 인터뷰브릿지 IR 자료 · POSTECH UGRP 기술창업트랙 연구계획서(2026.4) 기준 · 인터뷰브릿지 app.interview-bridge.com · 배마중 bmj.kr</span><span class="pg"></span></div>
+  <div class="foot"><span class="src">이력은 인터뷰브릿지 IR 자료 · POSTECH UGRP 기술창업트랙 연구계획서(2026.4) 기준<br>인터뷰브릿지 app.interview-bridge.com<br>배마중 bmj.kr</span><span class="pg"></span></div>
   <aside class="notes">저희는 포항공대 컴퓨터공학과 둘입니다. 저 권인석은 이공계 입시 멘토를 6년 하면서 매년 100명 넘게 면접을 지도했고, 그 경험으로 인터뷰브릿지를 만들어 운영하고 있습니다. 배마중에서는 문제를 찾고 현장을 다니고 데이터를 검증하고 오늘 발표를 맡았습니다. 방윤철은 인터뷰브릿지 기술 총괄이고, 배마중의 서버와 화면, 푸시, 전화, APK, 브랜드와 영상까지 혼자 만들었습니다. 12월엔 빈손으로 돌아왔던 김 사장님이, 이번엔 3시 10분에 압니다. 감사합니다.</aside>
 </section>
 
