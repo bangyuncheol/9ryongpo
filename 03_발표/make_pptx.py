@@ -91,8 +91,15 @@ def main() -> None:
                 slide.shapes.add_picture(str(png), 0, 0, W, H)
             if notes.get(i):
                 slide.notes_slide.notes_text_frame.text = notes[i]
-        prs.save(OUT)
-    print(f"{OUT.name}: {len(prs.slides)}장, {OUT.stat().st_size / 1e6:.1f} MB")
+        out = OUT
+        try:
+            prs.save(out)
+        except PermissionError:
+            # 파워포인트에서 열어 둔 파일은 덮어쓸 수 없다. 새 이름으로 저장하고 알린다
+            out = OUT.with_name(OUT.stem + "_new.pptx")
+            prs.save(out)
+            print(f"{OUT.name} 이 열려 있어 덮어쓰지 못했습니다. 닫은 뒤 {out.name} 을 {OUT.name} 으로 바꿔 쓰세요.")
+    print(f"{out.name}: {len(prs.slides)}장, {out.stat().st_size / 1e6:.1f} MB")
 
 
 if __name__ == "__main__":
