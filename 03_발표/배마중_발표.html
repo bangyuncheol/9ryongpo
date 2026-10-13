@@ -6,7 +6,7 @@
 <title>배마중 발표</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
 <style>
-/* 7판(10/13 오전): 표지가 첫 장(QR 셋), 소개 영상 둘째, 현장(문제 찾기) → 위판장 취재 영상 → 훅 순. 전화 장에 인터뷰브릿지 기술 두 줄.
+/* 7판(10/13 오전): 표지가 첫 장(QR 셋), 소개 영상 둘째(화면 전체, PDF 엔 주요 장면 6컷), 현장 3명(핀), '지금 돌아가나'·'대회 끝나고' 뺌(21장), 현장(문제 찾기) → 위판장 취재 영상 → 훅 순. 전화 장에 인터뷰브릿지 기술 두 줄.
    6판(10/13 새벽, APK 한 줄 추가). 글은 제목 + 그림 + 한 줄만. 설명은 발표 메모(N 키)에.
    폰 화면은 bmj.kr 실제 화면 캡처(shots/, 10/13 새벽, 시뮬레이션 03:10·04:00 장면). 캡처가 없으면 아래 재현 화면으로 대체.
    색: 파랑 = 그 장의 강조 하나 · 빨강 = 입항 시각과 0톤 · 초록 = 실데이터·실측 · 주황 = 시뮬레이션. */
@@ -85,7 +85,6 @@ table.t th { font-size: var(--fs-label); color: var(--muted); font-weight: 600; 
 .callout { position: relative; outline: 3px solid var(--primary-dark); }
 .callout::before { content: ""; position: absolute; left: -64px; top: 50%; width: 64px; height: 3px; background: var(--primary-dark); }
 .chip-s { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--primary-dark); color: #fff; font-size: 16px; font-weight: 800; margin-left: 6px; vertical-align: 1px; }
-#runTable td b { font-size: 32px; }
 .steps { display: grid; grid-template-columns: 56px 1fr; gap: 22px; align-items: center; font-size: 30px; }
 .steps .kn { width: 48px; height: 48px; font-size: 24px; }
 .rows p { padding: 22px 0; border-top: 1px solid var(--line); }
@@ -111,6 +110,17 @@ table.t th { font-size: var(--fs-label); color: var(--muted); font-weight: 600; 
 .vwrap.has { outline: 0; }
 .vwrap.has video { display: block; }
 .vwrap.has .vph { display: none; }
+/* 소개 영상 장: 여백 없이 화면 전체. 인쇄(PDF)에서는 영상 대신 주요 장면 6컷(shots/intro-*.jpg, 최종 렌더에서 캡처) */
+.slide.full { padding: 0; }
+.slide.full .vwrap { width: 1920px; height: 1080px; aspect-ratio: auto; margin: 0; border-radius: 0; outline: 0; }
+.slide.full .vwrap:not(.has) { outline: 2px dashed #2b4466; outline-offset: -2px; }
+.slide.full .foot { display: none; }
+.stills { display: none; position: absolute; inset: 0; padding: 92px 120px 96px; flex-direction: column; justify-content: center; background: var(--night); }
+.stills .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px 24px; margin-top: 36px; }
+.stills figure { margin: 0; }
+.stills img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; display: block; border-radius: 18px; background: #000; }
+.stills figcaption { font-size: 22px; font-weight: 600; color: var(--night-ink); margin-top: 12px; line-height: 1.4; }
+.stills figcaption small { color: var(--night-muted); font-weight: 500; margin-left: 8px; font-variant-numeric: tabular-nums; }
 
 /* 현장 사진 */
 .photos { display: grid; grid-template-columns: 1.25fr 1fr 1fr; gap: 28px; margin-top: 44px; flex: 1; min-height: 0; }
@@ -118,6 +128,8 @@ table.t th { font-size: var(--fs-label); color: var(--muted); font-weight: 600; 
 .photos img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .photos figcaption { position: absolute; left: 0; right: 0; bottom: 0; padding: 60px 28px 24px; background: linear-gradient(180deg, transparent, rgba(5,9,15,.82)); color: #fff; font-size: 24px; font-weight: 700; line-height: 1.4; }
 .photos figcaption small { display: block; font-size: 18px; font-weight: 500; opacity: .8; margin-top: 2px; }
+.photos .pin { position: absolute; right: 18px; top: 18px; display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px 8px 12px; border-radius: 999px; background: rgba(255,255,255,.94); color: #d32f2f; font-size: 19px; font-weight: 800; line-height: 1; box-shadow: 0 4px 14px rgba(0,0,0,.18); }
+.photos .pin svg { width: 20px; height: 20px; flex: none; }
 
 /* 폰 틀 — 실제 폰 비율(390×844). shots/ 캡처가 있으면 자동으로 바뀌고, 없으면 재현 화면 */
 .phone { width: 340px; height: 720px; border-radius: 54px; background: #0d0f12; padding: 12px; flex: none; box-shadow: 0 30px 70px rgba(11,22,38,.22); position: relative; }
@@ -214,6 +226,8 @@ body:hover #hud { opacity: .8; }
   .slide { position: relative; display: flex !important; width: 1920px; height: 1080px; break-after: page; break-inside: avoid; }
   .slide:last-child { break-after: auto; }
   #hud, #notes-panel { display: none !important; }
+  .slide.full .vwrap { display: none; }
+  .slide.full .stills { display: flex; }
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
 </style>
@@ -264,7 +278,7 @@ body:hover #hud { opacity: .8; }
       <p class="kicker">2026 디지털 트윈 구룡포 AI 해커톤 · 팀 인터뷰브릿지</p>
       <h1 class="lockup"><img class="ic" src="design-preview/baemajung-icon.png" alt=""><img class="wm" src="design-preview/baemajung-wordmark.png" alt="배마중"></h1>
       <p style="font-size:44px; font-weight:650; margin-top:44px; line-height:1.4;">오늘 뭐가 몇 시에 들어오는지,<br>위판장 나가기 전에 알려 드립니다</p>
-      <p class="b30" style="margin-top:36px; color:var(--night-muted);">bmj.kr 에서 지금 돌아갑니다 · 찍어 보세요</p>
+      <p class="b30" style="margin-top:36px; color:var(--night-muted);">지금 바로 bmj.kr 에서 확인해보세요.</p>
       <div class="qrs">
         <div class="q"><div class="box"><img src="qr/qr-web.svg" alt="bmj.kr QR"></div><b>WEB</b><small>bmj.kr</small></div>
         <div class="q"><div class="box"><img src="qr/qr-tel.svg" alt="전화 QR"></div><b>전화</b><small>070-5276-7121</small></div>
@@ -278,7 +292,18 @@ body:hover #hud { opacity: .8; }
 </section>
 
 <!-- 2 소개 영상 -->
-<section class="slide dark center">
+<section class="slide dark center full">
+  <div class="stills">
+    <p class="kicker">소개 영상 · 주요 장면 (발표에서는 영상이 화면 전체로 재생됩니다)</p>
+    <div class="grid">
+      <figure><img src="shots/intro-1.jpg" alt="어두운 방에서 할아버지가 폰을 보며 오늘 대게가 들어오는지 걱정하는 장면"><figcaption>“아휴, 오늘 대게 들어오나? 허탕치는 거 아니여?”<small>0:09</small></figcaption></figure>
+      <figure><img src="shots/intro-2.jpg" alt="폰 화면에 입항 예보가 뜨고 E-UM API 여섯 줄에 신호가 가는 장면"><figcaption>폰으로 열면, 오늘 새벽이 먼저 보여요<small>0:22</small></figcaption></figure>
+      <figure><img src="shots/intro-3.jpg" alt="새 입항 소식 알림이 폰 위에 뜨는 장면"><figcaption>기다리는 생선이 들어오면 휴대폰으로<small>0:30</small></figcaption></figure>
+      <figure><img src="shots/intro-4.jpg" alt="할아버지가 070 번호로 전화를 걸어 배마중이 받는 장면"><figcaption>전화로 물어보기 · 070-5276-7121<small>0:55</small></figcaption></figure>
+      <figure><img src="shots/intro-5.jpg" alt="질문을 받아쓰고 도구 다섯 개를 거쳐 답을 만드는 통화 화면"><figcaption>말로 물으면 규칙이 계산하고 말로 답해요<small>1:12</small></figcaption></figure>
+      <figure><img src="shots/intro-6.jpg" alt="아웃트로. WEB·APP QR과 전화번호"><figcaption>WEB / APP / 전화 모두 가능합니다<small>1:35</small></figcaption></figure>
+    </div>
+  </div>
   <div class="vwrap" id="introWrap">
     <video id="introVideo" controls playsinline preload="metadata">
       <source src="영상/소개.mp4" type="video/mp4">
@@ -294,13 +319,14 @@ body:hover #hud { opacity: .8; }
 <section class="slide">
   <p class="kicker">현장에서</p>
   <h2>구룡포에서 풀 문제를 찾아다녔습니다</h2>
-  <div class="photos" style="grid-template-columns:1fr 1fr;">
-    <figure><img src="사진/구사모_미팅.jpg" alt="카페에서 구사모 조이태 사무총장과 마주 앉아 자료를 펼쳐 놓고 이야기하는 팀"><figcaption>구사모(구룡포사랑모임) 조이태 사무총장 미팅<small>디지털 트윈으로 구룡포 요식업(횟집·관광)의 문제를 풀어 보려 했습니다</small></figcaption></figure>
-    <figure><img src="사진/과메기조합_인터뷰.jpg" alt="구룡포 위판장 앞 도로. 통발과 그물 더미 옆에 차와 트럭이 서 있다"><figcaption>구룡포 장천수 과메기조합장 미팅<small>디지털 트윈으로 과메기 품질 관리 문제를 풀어 보려 했습니다</small></figcaption></figure>
+  <div class="photos" style="grid-template-columns:1fr 1fr 1fr;">
+    <figure><img src="사진/구사모_미팅.jpg" alt="카페에서 구사모 조이태 사무총장과 마주 앉아 자료를 펼쳐 놓고 이야기하는 팀"><span class="pin"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>서울 영등포구 카페</span><figcaption>구사모(구룡포사랑모임) 조이태 사무총장님 미팅<small>디지털 트윈으로 구룡포 요식업 및 관광 문제를 풀어 보려 했습니다</small></figcaption></figure>
+    <figure><img src="사진/과메기조합_인터뷰.jpg" alt="구룡포 위판장 앞 도로. 통발과 그물 더미 옆에 차와 트럭이 서 있다"><span class="pin"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>포항구룡포과메기사업협동조합</span><figcaption>구룡포 장천수 과메기조합장님 미팅<small>디지털 트윈으로 과메기 품질 관리 문제를 풀어 보려 했습니다</small></figcaption></figure>
+    <figure><img src="사진/참전전우회_미팅_web.jpg" alt="월남전참전전우회 포항시 지부 신준식 회장과 마주 앉아 이야기하는 팀"><figcaption>월남전참전전우회 포항시 지부 신준식 회장님 미팅<small>구룡포의 역사를 관광자원으로 활용하는 방법을 논의했습니다</small></figcaption></figure>
   </div>
-  <p class="b30" style="margin-top:28px;">둘 다 약하다고 느끼던 차에, <b class="blue">수산물 유통</b> 문제를 풀어 보려고 새벽 구룡포 위판장으로 갔습니다. 그 이야기를 들어 보시죠.</p>
+  <p class="b30" style="margin-top:28px;">셋 다 약하다고 느끼던 차에, <b class="blue">수산물 유통</b> 문제를 풀어 보려고 새벽 구룡포 위판장으로 갔습니다. 그 이야기를 들어 보시죠.</p>
   <div class="foot"><span class="src"></span><span class="pg"></span></div>
-  <aside class="notes">책상에서만 생각한 게 아닙니다. 처음엔 구룡포사랑모임 조이태 사무총장님을 만나 요식업 쪽을, 장천수 과메기조합장님을 만나 과메기 품질 관리를 디지털 트윈으로 풀어 보려 했습니다. 둘 다 약하다고 느끼던 차에, 수산물 유통 문제를 풀어 보려고 새벽 구룡포 위판장에 나갔습니다. 거기서 들은 이야기를 먼저 보시죠.</aside>
+  <aside class="notes">책상에서만 생각한 게 아닙니다. 처음엔 구룡포사랑모임 조이태 사무총장님을 만나 요식업과 관광 쪽을, 장천수 과메기조합장님을 만나 과메기 품질 관리를 디지털 트윈으로 풀어 보려 했습니다. 월남전참전전우회 포항시 지부 신준식 회장님과는 구룡포의 역사를 관광자원으로 쓰는 방법을 이야기했습니다. 셋 다 약하다고 느끼던 차에, 수산물 유통 문제를 풀어 보려고 새벽 구룡포 위판장에 나갔습니다. 거기서 들은 이야기를 먼저 보시죠.</aside>
 </section>
 
 <!-- 4 위판장 취재 영상 -->
@@ -732,44 +758,7 @@ body:hover #hud { opacity: .8; }
   <aside class="notes">구조는 단순합니다. 받고, 계산하고, 문장으로 바꿔서, 폰이랑 전화로 보냅니다. 서버 한 대에서 전부 돕니다.</aside>
 </section>
 
-<!-- 21 지금 돌아가나 -->
-<section class="slide">
-  <p class="kicker">내일 바로 켤 수 있나</p>
-  <h2>수협 내부 자료 없이, 공개 데이터만으로 돌아갑니다</h2>
-  <div class="mid-area">
-  <div class="card" style="padding:20px 48px;">
-    <table class="t" style="font-size:30px;" id="runTable">
-      <tr><td style="width:420px;" class="mut">수협 내부 자료</td><td><b>안 씀.</b> E-UM과 해수부 공개 API만</td></tr>
-      <tr><td class="mut">서버</td><td><b>VM 1대, 프로세스 1개.</b> bmj.kr 에서 운영 중</td></tr>
-      <tr><td class="mut">자동 테스트</td><td><b>109개.</b> 외부 호출 없이</td></tr>
-      <tr><td class="mut">음성 처리 1분</td><td><b>약 2센트</b></td></tr>
-      <tr><td class="mut">OpenAI가 안 될 때</td><td><b>규칙만으로 답하는 간단 모드</b></td></tr>
-    </table>
-  </div>
-  </div>
-  <div class="foot"><span class="src">테스트 수 2026.10.13 기준. 음성은 합성 1.4~1.7센트 + 받아쓰기 0.3센트(업체 표기), 070 회선·AI 답변 비용 별도.</span><span class="pg"></span></div>
-  <aside class="notes">그럼 진짜 켤 수 있냐. 수협 내부 자료는 하나도 안 씁니다. 공개 데이터만으로 돌고, 서버 한 대면 됩니다. 지금 bmj.kr 주소로 돌아가고 있고요. 음성 처리는 1분에 2센트쯤입니다. 새 달 위판 실적은 매월 15일 전후 공개분을 스크립트 한 번으로 받습니다.</aside>
-</section>
-
-<!-- 22 대회 끝나고 -->
-<section class="slide">
-  <p class="kicker">대회 끝나고</p>
-  <h2>효과는 아직 모릅니다. 잴 것부터 정했습니다</h2>
-  <div class="mid-area">
-  <div class="body" style="gap:28px;">
-    <div class="col card"><p class="lab">잴 것</p>
-      <ul class="dots b30" style="margin-top:20px;"><li>도착 예보가 몇 분 틀렸나</li><li>알린 어종이 그날 실제로 위판됐나</li></ul></div>
-    <div class="col card"><p class="lab">다음에 붙일 곳</p>
-      <ul class="dots b30" style="margin-top:20px;"><li>구룡포수협 장기·호미곶 지점</li><li>E-UM 데이터가 있는 포항의 다른 항</li></ul></div>
-    <div class="col card"><p class="lab">누가 켜 둘 수 있나</p>
-      <p class="b30" style="margin-top:20px;">포항시 디지털 트윈 서비스의 메뉴 하나로. 고정비는 서버 한 대.</p></div>
-  </div>
-  </div>
-  <div class="foot"><span class="src">아직 수협·시와 이야기해 보지 않은 제안입니다.</span><span class="pg"></span></div>
-  <aside class="notes">효과는 아직 모릅니다. 뭘 재 볼지부터 정했어요. 예보가 몇 분 틀렸는지, 알린 어종이 그날 실제로 팔렸는지. 수협이나 시와는 아직 얘기 못 해 봤습니다. 된다면 포항시 디지털 트윈 안에 메뉴 하나로 들어가는 게 제일 현실적일 것 같습니다.</aside>
-</section>
-
-<!-- 23 마무리 -->
+<!-- 21 마무리 -->
 <section class="slide dark center">
   <h2 style="font-size:96px; line-height:1.2;">10월 13일 새벽 3시 10분,<br>이번엔 김 사장님이 먼저 압니다</h2>
   <p class="lead" style="font-size:36px; margin-top:44px;">붉은대게를 실었을 자망선 세 척, 4시 25분부터. 5시 반까지 가면 됩니다.</p>
