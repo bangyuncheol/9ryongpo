@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
-import { askStream, TOOL_LABEL } from '../api'
+import { askStream, speechToText, TOOL_LABEL } from '../api'
 import type { ChatEvent } from '../api'
 import Card, { Button } from './Card'
 import More from './More'
+import Icon from '../v4/Icon'
+import { useVoice, voiceSupported } from './voice'
 
 const QUICK = ['43톤 자망선 언제 와?', '오늘 오징어 있어?', '몇 시에 가면 돼?', '작년 10월 붉은대게 얼마였어?']
 
@@ -28,6 +30,21 @@ export default function ChatCard({ onSubscribe, quick = QUICK, placeholder = '�
   const [busy, setBusy] = useState(false)
   const [showOld, setShowOld] = useState(false)
   const [openLog, setOpenLog] = useState<number | null>(null)
+
+  // 음성으로 묻기(10/13 오너): 받아쓴 글자를 바로 질문으로 보낸다. 마이크 버튼은 입력칸과 묻기 사이 아이콘 하나
+  const voice = useVoice(async (pcm) => {
+    const text = await speechToText(pcm)
+    if (text) await ask(text)
+  })
+  const listening = voice.state === 'listening'
+  const mic = voiceSupported() ? (
+    <button type="button" onClick={voice.toggle} disabled={busy || voice.state === 'busy'} aria-pressed={listening}
+      aria-label={listening ? '듣기 멈추고 물어보기' : '음성으로 묻기'} title={listening ? '듣기 멈추기' : '음성으로 묻기'}
+      className={`relative flex h-[var(--spacing-touch)] w-[var(--spacing-touch)] shrink-0 items-center justify-center rounded-full text-[22px] transition-colors disabled:opacity-40 ${listening ? 'bg-[var(--color-sunrise-soft)] text-arriving' : 'text-ink hover:bg-chip'}`}>
+      {listening && <span aria-hidden className="v4-listen absolute inset-0 rounded-full" />}
+      <Icon name="mic" />
+    </button>
+  ) : null
 
   const ask = async (q: string) => {
     const text = q.trim()
@@ -120,10 +137,12 @@ export default function ChatCard({ onSubscribe, quick = QUICK, placeholder = '�
           <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); ask(input) }}>
             <label htmlFor="chat-input" className="sr-only">질문</label>
             <input id="chat-input" value={input} onChange={(e) => setInput(e.target.value)} maxLength={300}
-              placeholder={placeholder}
+              placeholder={voice.state === 'listening' ? '듣고 있어요. 말씀이 끝나면 저절로 물어봐요' : voice.state === 'busy' ? '받아쓰는 중…' : placeholder}
               className="min-h-[var(--spacing-touch)] min-w-0 flex-1 rounded-button border border-line bg-card px-4 text-body text-ink placeholder:text-muted focus:border-primary focus:outline-none" />
+            {mic}
             <Button emphasis="high" disabled={busy || !input.trim()}>묻기</Button>
           </form>
+          {voice.error && <p role="alert" className="mt-1.5 text-sub text-arriving">{voice.error}</p>}
         </div>
       </Card>
     )
@@ -165,10 +184,12 @@ export default function ChatCard({ onSubscribe, quick = QUICK, placeholder = '�
       <form className="mt-3 flex gap-2" onSubmit={(e) => { e.preventDefault(); ask(input) }}>
         <label htmlFor="chat-input" className="sr-only">질문</label>
         <input id="chat-input" value={input} onChange={(e) => setInput(e.target.value)} maxLength={300}
-          placeholder={placeholder}
+          placeholder={voice.state === 'listening' ? '듣고 있어요. 말씀이 끝나면 저절로 물어봐요' : voice.state === 'busy' ? '받아쓰는 중…' : placeholder}
           className="min-h-[var(--spacing-touch)] min-w-0 flex-1 rounded-button border border-line bg-card px-4 text-body text-ink placeholder:text-muted focus:border-primary focus:outline-none" />
+        {mic}
         <Button emphasis="high" disabled={busy || !input.trim()}>묻기</Button>
       </form>
+      {voice.error && <p role="alert" className="mt-1.5 text-sub text-arriving">{voice.error}</p>}
     </Card>
   )
 }

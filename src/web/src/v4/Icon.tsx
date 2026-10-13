@@ -1,7 +1,7 @@
 /*
  * 버전 2·3 아이콘 한 벌(10/11). 이모지는 기기마다 모양이 달라 선 아이콘으로 통일한다(선 2px, 둥근 끝).
  * phone·arrow-right·truck: Rune Icons outline — Copyright (c) 2026 Rune Icons Team, Apache License 2.0
- * (https://runeicons.com). bell: 같은 세트의 bell-off 에서 사선을 빼 이 제품이 만든 것. chevron: 이 제품이 그린 꺾쇠(10/13).
+ * (https://runeicons.com). bell: 같은 세트의 bell-off 에서 사선을 빼 이 제품이 만든 것. chevron·mic: 이 제품이 그린 꺾쇠·마이크(10/13).
  * 채운 모양이 필요하면 className 에 fill-current(브랜드 시안의 알림 카드 종).
  */
 const PATHS = {
@@ -9,6 +9,7 @@ const PATHS = {
   bell: 'M10.268 21a2 2 0 0 0 3.464 0M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326',
   arrow: 'M5 12h14M12 19l7-7-7-7',
   chevron: 'M9 18l6-6-6-6',
+  mic: 'M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21',
   truck: 'M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2m0 0a2 2 0 0 0 4 0m-4 0a2 2 0 0 1 4 0m6 0H9m6 0a2 2 0 0 0 4 0m-4 0a2 2 0 0 1 4 0m0 0h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14',
 } as const
 

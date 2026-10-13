@@ -40,6 +40,7 @@ FIXES = [
     (re.compile(r"멋있(고|게)\s*(들어|와|오)"), r"뭐 싣고 \2"),
     (re.compile(r"댁에\s*(들어|와|오|있)"), r"대게 \1"),
     (re.compile(r"(^|\s)지\s?(\d+)\s?(?=[가-힣]+호)"), r"\1제\2"),
+    (re.compile(r"붉은\s?대{2,}게"), "붉은대게"),  # '붉은대대게'(10/13 물어보기 음성 시험)
 ]
 
 
@@ -48,6 +49,77 @@ def fix_text(text: str) -> str:
     for pat, rep in FIXES:
         out = pat.sub(rep, out)
     return out
+
+
+def clova_config(keywords: list[str], gap_ms: int = 800) -> dict:
+    """CLOVA Nest 설정(전화·웹 물어보기 음성이 같이 쓴다). 형식은 interview_bridge 운영 코드(driver/stt.py)와 같다."""
+    return {"transcription": {"language": "ko"},
+            "keywordBoosting": {"boostings": [{"words": ",".join(keywords), "weight": 0.5}]},
+            # 침묵(gap) 기준으로 문장을 끊어 확정한다. 녹음 2개+1.5초 무음 시험에서 문장별로 따로 확정(10/11)
+            "semanticEpd": {"skipEmptyText": True, "useWordEpd": False, "usePeriodEpd": True,
+                            "gapThreshold": gap_ms, "durationThreshold": 20000, "syllableThreshold": 0}}
+
+
+# --- 웹 물어보기 음성(10/13 오너): 브라우저가 녹음을 PCM16 16kHz 한 덩어리로 보내면 CLOVA 로 받아쓴다 ---
+PCM_RATE = 16000
+WEB_MAX_SEC, WEB_MIN_SEC = 20, 0.3
+
+
+def pcm_problem(n_bytes: int) -> str | None:
+    """받은 녹음 길이가 받아쓸 만한지. 문제가 있으면 사용자에게 보일 한 문장."""
+    sec = n_bytes / (PCM_RATE * 2)
+    if sec > WEB_MAX_SEC:
+        return f"말은 {WEB_MAX_SEC}초 안으로 해 주세요."
+    if sec < WEB_MIN_SEC:
+        return "목소리가 들리지 않았어요. 다시 말씀해 주세요."
+    return None
+
+
+async def recognize_once(key: str, pcm: bytes, keywords: list[str], recognize=None, wait_s: float = 6.0) -> str:
+    """녹음 한 덩어리를 CLOVA 에 100ms 단위로 흘려보내고, 확정 문장을 이어 붙여 돌려준다(전화와 같은 오류 고침 적용).
+    끝 표시(epFlag)를 보낸 뒤 보내는 쪽을 바로 닫으면 CLOVA 가 받아쓰기 결과 없이 끝낸다(10/13 실측: 설정 응답만 옴).
+    그래서 끝 표시 뒤 결과가 오고 0.5초 더 조용할 때까지(최대 wait_s) 연결을 열어 둔다.
+    recognize: 시험에서 gRPC 대신 넣는 함수(요청 반복자 → 응답 반복자)."""
+    import grpc
+    from .nest import nest_pb2, nest_pb2_grpc
+
+    pcm = pcm[: len(pcm) // 2 * 2]
+    sent_end = asyncio.Event()
+    last_text = [0.0]  # 끝 표시 뒤 마지막 결과가 온 때
+
+    async def reqs():
+        yield nest_pb2.NestRequest(type=nest_pb2.CONFIG, config=nest_pb2.NestConfig(config=json.dumps(clova_config(keywords))))
+        chunks = [pcm[i:i + CLOVA_CHUNK] for i in range(0, len(pcm), CLOVA_CHUNK)] + [b""]
+        for seq, chunk in enumerate(chunks, 1):
+            last = seq == len(chunks)
+            yield nest_pb2.NestRequest(type=nest_pb2.DATA, data=nest_pb2.NestData(
+                chunk=chunk, extra_contents=json.dumps({"seqId": seq, "epFlag": last})))
+        sent_end.set()
+        t0 = time.monotonic()
+        while time.monotonic() - t0 < wait_s:
+            if last_text[0] and time.monotonic() - last_text[0] > 0.5:
+                return
+            await asyncio.sleep(0.05)
+
+    texts: list[str] = []
+    ch = None
+    if recognize is None:
+        ch = grpc.aio.secure_channel(CLOVA_ADDR, grpc.ssl_channel_credentials())
+        stub = nest_pb2_grpc.NestServiceStub(ch)
+        recognize = lambda it: stub.recognize(it, metadata=[("authorization", key)])  # noqa: E731
+    try:
+        async for r in recognize(reqs()):
+            if not r.contents:
+                continue
+            text = ((json.loads(r.contents).get("transcription") or {}).get("text") or "").strip()
+            if text:
+                texts.append(text)
+                if sent_end.is_set():
+                    last_text[0] = time.monotonic()
+    finally:
+        if ch is not None:
+            await ch.close()
+    return fix_text(" ".join(texts)).strip()
 
 
 def _clova_conf(tr: dict) -> float | None:
@@ -87,12 +159,7 @@ class PhoneSTT:
             "noise_reduction": {"type": "near_field"}}}}}
 
     def _clova_config(self) -> dict:
-        return {"transcription": {"language": "ko"},
-                # 형식은 interview_bridge 운영 코드(driver/stt.py)와 같다
-                "keywordBoosting": {"boostings": [{"words": ",".join(self._keywords), "weight": 0.5}]},
-                # 침묵(gap) 기준으로 문장을 끊어 확정한다. 녹음 2개+1.5초 무음 시험에서 문장별로 따로 확정(10/11)
-                "semanticEpd": {"skipEmptyText": True, "useWordEpd": False, "usePeriodEpd": True,
-                                "gapThreshold": self._silence_ms, "durationThreshold": 20000, "syllableThreshold": 0}}
+        return clova_config(self._keywords, self._silence_ms)
 
     # --- 녹음(비교 시험용) ---
     def _save_clip(self, item_id: str, text: str, conf: float | None, avg: float | None, low: int) -> None:

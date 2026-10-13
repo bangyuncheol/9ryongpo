@@ -300,3 +300,36 @@ def test_unsubscribe_by_masked_number(tmp_path):
     assert delete_call_sub_masked(conn, "010-****-2222") == 1
     assert call_sub_of(conn, "01011112222") is None and call_sub_of(conn, "01033334444") is not None
     assert delete_call_sub_masked(conn, "아무거나") == 0
+
+
+def test_web_voice_length_check():
+    """물어보기 음성(10/13): 너무 짧거나 20초를 넘는 녹음은 CLOVA 에 보내지 않고 한국어로 알린다."""
+    from app.phone.stt import pcm_problem
+    sec = 16000 * 2
+    assert pcm_problem(int(sec * 0.1)) == "목소리가 들리지 않았어요. 다시 말씀해 주세요."
+    assert pcm_problem(sec * 5) is None
+    assert pcm_problem(sec * 21) == "말은 20초 안으로 해 주세요."
+
+
+def test_web_voice_recognize_once_joins_and_fixes():
+    """녹음 한 덩어리를 100ms 조각 + 끝 표시로 보내고, 확정 문장을 이어 붙여 전화와 같은 오류 고침을 거친다."""
+    import json as _json
+    from types import SimpleNamespace
+    from app.phone.stt import CLOVA_CHUNK, recognize_once
+
+    sent = []
+
+    async def fake(reqs):
+        async for r in reqs:
+            sent.append(r)
+        for t in ["오늘 붉은대대게", "", "뭐 있고 들어와?"]:
+            yield SimpleNamespace(contents=_json.dumps({"transcription": {"text": t}}) if t else "")
+
+    pcm = b"\x01\x00" * (CLOVA_CHUNK * 2 // 2 + 10)  # 조각 3개(마지막은 짧음)
+    text = asyncio.run(recognize_once("k", pcm, ["붉은대게"], recognize=fake, wait_s=0.1))
+    assert text == "오늘 붉은대게 뭐 싣고 들어와?"
+    cfg = _json.loads(sent[0].config.config)
+    assert cfg["keywordBoosting"]["boostings"][0]["words"] == "붉은대게"
+    datas = [r.data for r in sent[1:]]
+    assert [len(d.chunk) for d in datas] == [CLOVA_CHUNK, CLOVA_CHUNK, 20, 0]
+    assert [_json.loads(d.extra_contents)["epFlag"] for d in datas] == [False, False, False, True]

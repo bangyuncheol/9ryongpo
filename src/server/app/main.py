@@ -6,6 +6,7 @@
 """
 from __future__ import annotations
 
+import asyncio
 import logging
 from contextlib import asynccontextmanager
 
@@ -325,6 +326,40 @@ async def chat(request: Request) -> StreamingResponse:
         yield "data: {\"type\": \"done\"}\n\n"
 
     return StreamingResponse(stream(), media_type="text/event-stream", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+
+# --- 물어보기 음성 입력(10/13 오너): 브라우저 녹음(PCM16 16kHz 모노) → CLOVA 받아쓰기 → 글자. 답은 /api/chat 이 낸다 ---
+_stt_hits: dict[str, deque] = defaultdict(deque)
+_STT_PER_IP_PER_MIN = 6  # CLOVA 사용료 보호(한 번에 최대 20초)
+
+
+@app.post("/api/stt")
+async def speech_to_text(request: Request) -> dict:
+    from .phone import stt as sttmod
+    if not settings.clova_secret_key:
+        raise HTTPException(503, detail="지금은 음성으로 물어볼 수 없습니다. 글자로 물어봐 주세요.")
+    ip = request.client.host if request.client else "?"
+    now, q = _time.monotonic(), _stt_hits[ip]
+    while q and now - q[0] > 60:
+        q.popleft()
+    if len(q) >= _STT_PER_IP_PER_MIN:
+        raise HTTPException(429, detail="음성 질문이 너무 잦습니다. 1분 뒤에 다시 말씀해 주세요.")
+    pcm = await request.body()
+    problem = sttmod.pcm_problem(len(pcm))
+    if problem:
+        raise HTTPException(422, detail=problem)
+    q.append(now)
+    phone = getattr(request.app.state, "phone", None)
+    names = phone.ship_names() if phone else []
+    try:
+        text = await asyncio.wait_for(sttmod.recognize_once(settings.clova_secret_key, pcm,
+                                                            list(dict.fromkeys(sttmod.KEYWORDS + names))), timeout=25)
+    except Exception as e:
+        log.warning("물어보기 음성 받아쓰기 실패: %s", getattr(e, "details", lambda: type(e).__name__)())
+        raise HTTPException(502, detail="음성을 글자로 바꾸지 못했어요. 다시 말씀해 주세요.") from None
+    if not text:
+        raise HTTPException(422, detail="잘 못 들었어요. 다시 말씀해 주세요.")
+    return {"text": text}
 
 
 # --- 전화 알림 (설계 §4.3, 10/11) ---

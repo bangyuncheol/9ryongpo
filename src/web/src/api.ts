@@ -82,6 +82,19 @@ export const api = {
   callState: (admin = false) => get<CallState>(`/api/call/state${admin ? '?admin=1' : ''}`),
 }
 
+/** 물어보기 음성(10/13): 16kHz 16비트 PCM → 받아쓴 글자. 실패하면 서버의 한국어 문구로 던진다. */
+export async function speechToText(pcm: ArrayBuffer): Promise<string> {
+  let r: Response
+  try {
+    r = await fetch('/api/stt', { method: 'POST', headers: { 'Content-Type': 'application/octet-stream' }, body: pcm })
+  } catch {
+    throw new ApiError('서버에 연결할 수 없습니다. 네트워크를 확인해 주세요.')
+  }
+  const body = await r.json().catch(() => null)
+  if (!r.ok) throw new ApiError(body?.detail ?? '음성을 글자로 바꾸지 못했어요. 다시 말씀해 주세요.')
+  return String(body?.text ?? '')
+}
+
 export async function adminPost(path: string): Promise<Clock & { feed: string }> {
   const r = await fetch(path, { method: 'POST' })
   const body = await r.json().catch(() => null)

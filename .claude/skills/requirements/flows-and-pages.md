@@ -30,6 +30,7 @@
 | GET | `/api/traffic/sensors` | 위판장 1km 안 교통 센서별 지난 1시간 트럭·전체 수(지도 트럭 아이콘). 트럭 위치가 아니라 그 지점을 지난 수 | 공개 |
 | GET | `/api/visit?visitor=false` | 방문 권장 문구(경매 시각 + 위판장 앞 실측). 교통 실패 시에도 경매 기준 문구 | 공개 |
 | POST | `/api/chat` | 질문창 SSE `{message}` → tool/tool_result/action/answer/error/done 이벤트. IP당 분당 8회, 하루 400회 | 공개 |
+| POST | `/api/stt` | 물어보기 음성(10/13). 본문 PCM16 16kHz 모노(0.3~20초) → `{text}`(CLOVA). IP당 분당 6회. 422 너무 짧음/못 알아들음, 429, 502, 503(키 없음) — 모두 한국어 `detail` | 공개 |
 | GET | `/api/push/key` | VAPID 공개 키와 구독 가능한 어종 목록 | 공개 |
 | POST | `/api/subscribe` | 브라우저 푸시 구독 저장 `{subscription, species}`(species 없으면 전체) | 공개 |
 | POST | `/api/unsubscribe` | 구독 삭제 `{endpoint}` | 공개 |

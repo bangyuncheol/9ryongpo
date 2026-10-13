@@ -81,3 +81,8 @@
 /* 투명 헤더(폰, 10/13 오너): 지도 위에 뜬 시각 글자가 어떤 지도 바탕에서도 읽히게 흰 테두리 빛. 그림(아이콘·워드마크)엔 옅은 그림자 */
 .v4-float p { text-shadow: 0 0 4px #fff, 0 0 8px #fff, 0 0 12px #fff; }
 .v4-float img { filter: drop-shadow(0 1px 2px rgb(255 255 255 / 0.9)); }
+
+/* 물어보기 음성: 듣는 동안 마이크 둘레가 숨 쉬듯 퍼진다(10/13). 움직임 줄이기면 고정 테두리 */
+@keyframes v4-listen { from { box-shadow: 0 0 0 0 rgb(204 61 41 / 0.45) } to { box-shadow: 0 0 0 12px rgb(204 61 41 / 0) } }
+.v4-listen { animation: v4-listen 1.1s ease-out infinite; }
+@media (prefers-reduced-motion: reduce) { .v4-listen { animation: none; box-shadow: 0 0 0 2px rgb(204 61 41 / 0.6); } }
