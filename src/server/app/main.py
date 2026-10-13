@@ -400,6 +400,11 @@ WEB_DIST = REPO_ROOT / "src" / "web" / "dist"
 if WEB_DIST.is_dir():
     from fastapi.responses import FileResponse  # noqa: E402
 
+    @app.get("/sw.js", include_in_schema=False)
+    def service_worker() -> FileResponse:
+        """서비스 워커는 캐시하지 않는다(Cloudflare 기본 4시간 캐시 때문에 배포 뒤에도 옛 알림 아이콘이 남았다, 10/13)."""
+        return FileResponse(WEB_DIST / "sw.js", media_type="text/javascript", headers={"Cache-Control": "no-cache, no-store, must-revalidate"})
+
     @app.get("/demo", include_in_schema=False)
     @app.get("/demo/", include_in_schema=False)
     def demo_frame() -> FileResponse:

@@ -69,7 +69,10 @@ export default function WaitFish({ phoneEnabled, onChange, showMore = false, one
     }).catch(console.error)
     if (!supported()) return
     navigator.serviceWorker.getRegistration()
-      .then(async (reg) => setPushOn(!!(reg && (await reg.pushManager.getSubscription()))))
+      .then(async (reg) => {
+        reg?.update().catch(console.error) // 예전에 신청한 브라우저도 새 서비스 워커(새 알림 아이콘)로 바로 바꾼다(10/13)
+        setPushOn(!!(reg && (await reg.pushManager.getSubscription())))
+      })
       .catch(console.error)
   }, [])
 
