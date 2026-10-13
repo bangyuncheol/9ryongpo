@@ -398,6 +398,14 @@ from .config import REPO_ROOT  # noqa: E402
 
 WEB_DIST = REPO_ROOT / "src" / "web" / "dist"
 if WEB_DIST.is_dir():
+    from fastapi.responses import FileResponse  # noqa: E402
+
+    @app.get("/mobile", include_in_schema=False)
+    @app.get("/mobile/", include_in_schema=False)
+    def mobile_frame() -> FileResponse:
+        """발표용 폰 틀 화면(10/13 오너). 같은 앱 묶음을 주고 화면 쪽(main.tsx)이 주소를 보고 폰 틀을 띄운다."""
+        return FileResponse(WEB_DIST / "index.html")
+
     app.mount("/", StaticFiles(directory=WEB_DIST, html=True), name="web")
 else:
     log.info("화면 빌드(src/web/dist)가 없어 API만 제공합니다. 화면은 'cd src/web && npm run build'.")
