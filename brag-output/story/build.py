@@ -27,7 +27,7 @@ fmt = lambda x: f"{x:.3f}".rstrip("0").rstrip(".")
 clips, js = [], []
 t0 = 0.0
 PIN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z" fill="currentColor"/></svg>'
-QA_PX, QA_MAX = 56, 1600
+QA_PX, QA_MAX = 50, 1600   # 50px: 가장 긴 질문(의문 1 두 번째)이 한 줄에 들어가는 크기. 다른 자막도 이 크기에 맞춤(10/13 오너)
 
 
 def text_w(t: str, px: int) -> float:
@@ -112,14 +112,14 @@ HTML = f"""<!doctype html>
       /* 자막: 시사 프로그램식 — 가운데 아래, 이름표는 자막 왼쪽 위(서비스 청록) + 굵은 흰 글자에 검은 테두리 (10/13 오너) */
       .sub {{ position:absolute; left:90px; right:90px; bottom:64px; display:flex; justify-content:center; }}
       .blk {{ display:flex; flex-direction:column; align-items:flex-start; gap:12px; max-width:1600px; }}
-      .who {{ display:inline-block; padding:6px 24px 8px; background:{BRAND}; color:#fff; font-size:38px; font-weight:800; line-height:1.2; box-shadow:8px 6px 0 {ACCENT}; }}
+      .who {{ display:inline-block; padding:6px 24px 8px; background:{BRAND}; color:#fff; font-size:34px; font-weight:800; line-height:1.2; box-shadow:7px 5px 0 {ACCENT}; }}
       /* 인터뷰: 질문(위, 아래 끝 고정)과 답변(아래, 위 끝 고정)을 같은 왼쪽 끝에 — 글씨 크기 같게 */
       .qbox, .ans {{ position:absolute; display:flex; flex-direction:column; align-items:flex-start; gap:10px; max-width:{QA_MAX}px; }}
       .qbox {{ bottom:288px; }}
       .ans {{ top:808px; }}
-      .qbox .txt, .ans .txt {{ align-self:flex-start; text-align:left; font-size:{QA_PX}px; }}
-      .txt {{ align-self:center; text-align:center; font-size:62px; font-weight:800; line-height:1.28; color:#fff; word-break:keep-all;
-             -webkit-text-stroke:9px #111; paint-order:stroke fill; text-shadow:0 3px 12px rgba(0,0,0,.6); }}
+      .qbox .txt, .ans .txt {{ align-self:flex-start; text-align:left; white-space:nowrap; }}
+      .txt {{ align-self:center; text-align:center; font-size:{QA_PX}px; font-weight:800; line-height:1.28; color:#fff; word-break:keep-all;
+             -webkit-text-stroke:8px #111; paint-order:stroke fill; text-shadow:0 3px 12px rgba(0,0,0,.6); }}
       .card {{ position:absolute; inset:0; background:#000; display:flex; flex-direction:column; justify-content:center; padding-left:260px; gap:26px; }}
       .card .ln {{ font-size:72px; font-weight:700; letter-spacing:-0.01em; }}
       .card .ln:first-child {{ color:{ACCENT}; }}
@@ -128,8 +128,8 @@ HTML = f"""<!doctype html>
       .hud .rec {{ position:absolute; left:56px; top:48px; font-size:34px; font-weight:700; line-height:1; letter-spacing:.08em; display:flex; align-items:center; gap:14px; }}
       .hud .rec b {{ width:22px; height:22px; border-radius:50%; background:#e53935; }}
       .hud .vc {{ position:absolute; right:56px; top:44px; padding:6px 16px; background:rgba(0,0,0,.6); font-size:28px; font-weight:700; }}
-      .cap {{ position:absolute; left:90px; right:90px; bottom:64px; text-align:center; font-size:62px; font-weight:800; line-height:1.28; word-break:keep-all;
-             -webkit-text-stroke:9px #111; paint-order:stroke fill; text-shadow:0 3px 12px rgba(0,0,0,.6); }}
+      .cap {{ position:absolute; left:90px; right:90px; bottom:64px; text-align:center; font-size:{QA_PX}px; font-weight:800; line-height:1.28; word-break:keep-all;
+             -webkit-text-stroke:8px #111; paint-order:stroke fill; text-shadow:0 3px 12px rgba(0,0,0,.6); }}
       .cap.mid {{ bottom:auto; top:50%; transform:translateY(-50%); }}
       .pin {{ position:absolute; top:32px; display:flex; align-items:center; gap:8px; padding:8px 20px 8px 14px; background:rgba(7,63,76,.88); border-radius:999px; font-size:34px; font-weight:800; }}
       .pin svg {{ width:34px; height:34px; color:#6fd3d9; }}
