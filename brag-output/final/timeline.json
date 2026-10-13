@@ -2,7 +2,7 @@
   "_설명": "배마중 소개영상 최종 조립 장면표. 모든 시각은 촬영분(배마중_소개영상.mp4) 기준 절대 초. 자막·구간을 여기서 고친 뒤 `python build.py`를 다시 돌린다. 촬영분은 composition/assets/live/footage.mp4 (1920×1080 30fps H.264, 음량 -16 LUFS 정규화).",
   "fps": 30,
   "footage": { "file": "assets/live/footage.mp4", "end": 91.0, "fade_start": 90.0 },
-  "outro": { "duration": 6.0 },
+  "outro": { "duration": 8.0 },
   "music": { "file": "assets/music/happy-beats-loop100.mp3", "level": 0.18, "level_outro": 0.35 },
   "phone_number_text": "070-5276-7121",
 
@@ -28,9 +28,9 @@
       { "t": 67.6, "who": "tools", "gap": 0.6, "steps": [
         "받아쓰기 확정 · CLOVA Speech",
         "범위 판정 · 입항 / 어종 / 방문 시각",
-        "get_arrival_forecast · E-UM 선박 위치",
+        "get_arrival_forecast · 구룡포항_선박 실시간 위치 정보_전체",
         "get_species_estimate · 10월 위판 실적 4년",
-        "recommend_visit_time · 교통센서 실측" ] },
+        "recommend_visit_time · 시간대별/차종별 교통량 통계" ] },
       { "t": 71.4, "who": "ai", "sents": [
         { "t": 71.4, "text": "지금 자망선 세 척이 들어오고 있어요." },
         { "t": 74.6, "text": "첫 배 남진호가 4시 25분쯤 도착하고, 붉은대게 가능성이 높아요." },

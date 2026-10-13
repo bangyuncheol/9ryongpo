@@ -3,10 +3,10 @@
 실제 촬영분 한 개(footage.mp4, 할아버지 머리는 백발 처리본)를 바닥에 깔고, 그 위에
   · 자막(촬영 음성 기준 절대 초). '배마중'은 워드마크 그림으로(timeline 의 wordmark 표시)
   · 앱 설명 구간: 그래픽 오른쪽(청년은 왼쪽) + 살짝 줌인/줌아웃. 폰 화면은 실제 앱(버전 4) 캡처(assets/app/*.png)
-      API 그래픽은 두 묶음 — E-UM 6종 · 외부 API 4종(OpenAI·카카오·웹 푸시·OpenStreetMap). 화면마다 쓰는 API 에 신호가 간다
+      API 그래픽은 두 묶음 — E-UM 6종(pohang-eum.kr/data 이름 그대로) · 외부 API 4종(OpenAI·카카오·웹 푸시·OpenStreetMap). 폰 높이를 채우고 화면마다 쓰는 API 에 신호가 간다
   · 전화 구간:   그래픽 왼쪽(할아버지는 오른쪽) + 줌인(끝에 줌아웃 없음)
-      모바일 웹에서 쓴 API 묶음 + ClawOps 070 · NAVER CLOVA Speech gRPC · Gemini TTS
-  · 1:30 부터 1초 페이드아웃 → 아웃트로(앱 아이콘 + 워드마크, 아래에 E-UM 디지털 트윈 포항 로고)
+      E-UM 6종 + 전화 외부 API 4종(OpenAI · ClawOps 070 · NAVER CLOVA Speech gRPC · Gemini TTS). 통화 카드 높이를 채운다
+  · 1:30 부터 1초 페이드아웃 → 아웃트로(앱 아이콘 + 워드마크 · WEB/APP QR·전화번호, 아래에 E-UM 디지털 트윈 포항 로고)
 를 얹는다. 시각·자막·통화 대사는 timeline.json 에서만 고친다. 이 파일은 레이아웃·모션만 가진다.
 아이콘은 각 서비스 사이트의 파비콘(assets/icons/), 브랜드 그림은 웹 앱의 것(assets/brand/ = src/web/public/).
 
@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import subprocess
 import sys
@@ -27,7 +28,7 @@ sys.stdout.reconfigure(encoding="utf-8")
 HERE = Path(__file__).resolve().parent
 COMP = HERE / "composition"
 OUT = COMP / "index.html"
-FONT_SRC = Path(r"C:/Windows/Fonts/NotoSansKR-VF.ttf")
+FONT_SRC = Path(os.environ.get("NOTO_KR_TTF", r"C:/Windows/Fonts/NotoSansKR-VF.ttf"))   # 맥은 구글 폰트 NotoSansKR[wght].ttf 경로를 넘긴다
 FONT_SUB = COMP / "assets" / "fonts" / "NotoSansKR-subset.ttf"
 W, H = 1920, 1080
 BAND = 864            # 사람이 있는 쪽 폭(px). 나머지 1056px 이 그래픽
@@ -120,18 +121,28 @@ def call_tags() -> tuple[str, str, list[tuple[str, str, float, float]]]:
 
 # ---------------------------------------------------------------- 데이터 흐름 그래픽
 # 앱 구간(오른쪽 패널): API 묶음 두 장 → 배마중 서버 → 폰
-NODE_X, NODE_W = 896, 300
-HUB = (1246, 440, 190, 112)                    # 배마중 서버 허브 (left, top, w, h)
+NODE_X, NODE_W = 880, 352
+HUB = (1266, 552, 186, 116)                    # 배마중 서버 허브 (left, top, w, h)
 PHONE_LEFT, PHONE_TOP = 1486, 186
-ROW_H, HEAD_H, PAD_V = 27, 44, 10
-# (id, 머리 아이콘, 머리 글, 부제, [(아이콘 또는 None, 줄 글)])
-EUM_ROWS = ["선박 위치", "어선 명부", "위판장", "교통 센서", "교통량", "혼잡율"]
-GROUPS_B = [
-    ("eum", "assets/icons/eum.png", "E-UM 디지털 트윈 포항", "API 6종", [(None, r) for r in EUM_ROWS]),
-    ("ext", None, "외부 API", "4종", [("assets/icons/openai.png", "OpenAI"), ("assets/icons/kakao.png", "카카오 로컬·길찾기"),
-                                     ("bell", "웹 푸시 (VAPID)"), ("assets/icons/osm.png", "OpenStreetMap")]),
+ROW_H, HEAD_H, PAD_V = 70, 52, 10              # 두 묶음(10줄)이 폰 높이(864px)를 채우게
+# (id, 머리 아이콘, 머리 글, 부제, [(아이콘 또는 None, 줄 글, 쓰임)])
+# E-UM 줄 글은 pohang-eum.kr/data 의 API 이름 그대로(서버 eum.py 가 부르는 6종, 10/13 확인)
+EUM_ROWS = [
+    ("구룡포항_선박 실시간 위치 정보_전체", "배 위치·속도 → 입항 예보"),
+    ("구룡포항_선박 기본정보_전체", "어선명·어업방법 → 어종 추정"),
+    ("구룡포 수산물 위탁판매장 정보", "위판장 위치"),
+    ("전체 교통감시 장비 정보 목록", "위판장 앞 교통센서"),
+    ("시간대별/차종별 교통량 통계", "센서별 시간당 통행량"),
+    ("시간대별 교통 혼잡율", "혼잡 지수"),
 ]
-TOP_B, GAP_B = 224, 18
+EUM_GROUP = ("eum", "assets/icons/eum.png", "E-UM 디지털 트윈 포항", "API 6종 · pohang-eum.kr", [(None, r, u) for r, u in EUM_ROWS])
+GROUPS_B = [
+    EUM_GROUP,
+    ("ext", None, "외부 API", "4종", [("assets/icons/openai.png", "OpenAI", "질문창 대화 · 도구 호출"),
+                                     ("assets/icons/kakao.png", "카카오 로컬·모빌리티 길찾기", "출발지 → 위판장 소요 시간"),
+                                     ("bell", "웹 푸시 (VAPID)", "입항 알림"), ("assets/icons/osm.png", "OpenStreetMap", "지도 타일")]),
+]
+TOP_B, GAP_B = PHONE_TOP, 18
 
 
 def group_height(rows): return HEAD_H + PAD_V + len(rows) * ROW_H + PAD_V
@@ -149,7 +160,8 @@ def group_html(prefix, groups, left, w, top, gap):
     for gid, hic, name, sub, rows in groups:
         h = group_height(rows)
         head_ic = f'<img class="gi" src="{hic}" alt="">' if hic else '<span class="gi cloud"></span>'
-        lines = "".join(f'<li id="{prefix}-{gid}-{k}">{row_icon(ic)}<span>{escape(tx)}</span></li>' for k, (ic, tx) in enumerate(rows))
+        lines = "".join(f'<li id="{prefix}-{gid}-{k}">{row_icon(ic)}<span class="rt"><b>{escape(tx)}</b><small>{escape(use)}</small></span></li>'
+                        for k, (ic, tx, use) in enumerate(rows))
         out.append(f'<div id="{prefix}-{gid}" class="group" style="left:{left}px; top:{y}px; width:{w}px; height:{h}px;">'
                    f'<div class="gh">{head_ic}<span class="gt"><b>{escape(name)}</b><small>{escape(sub)}</small></span></div><ul>{lines}</ul></div>')
         pos[gid] = (y, h)
@@ -162,19 +174,20 @@ ANC_B = {gid: (NODE_X + NODE_W, y + h // 2) for gid, (y, h) in POS_B.items()}   
 HUB_L, HUB_R = (HUB[0], HUB[1] + HUB[3] // 2), (HUB[0] + HUB[2], HUB[1] + HUB[3] // 2)
 PHONE_A = (PHONE_LEFT, 600)
 
-# 전화 구간(왼쪽 패널): 통화 카드가 왼쪽 끝, 노드 열이 그 오른쪽
-CALL_LEFT, CALL_W = 16, 600
-NODE_X_F, NODE_W_F, TOP_F, GAP_F = 636, 404, 200, 14
+# 전화 구간(왼쪽 패널): 통화 카드가 왼쪽 끝, 묶음 두 장(E-UM 6종 · 전화 외부 API 4종)이 그 오른쪽. 통화 카드 높이를 채운다
+CALL_LEFT, CALL_W, CALL_TOP = 16, 600, 176
+NODE_X_F, NODE_W_F, TOP_F, GAP_F = 636, 404, CALL_TOP + 6, 18
 GROUPS_F = [
-    ("web", None, "모바일 웹에서 쓴 API", "E-UM 6종 + 외부 4종", [
-        ("assets/icons/eum.png", "E-UM 선박 위치·어선 명부·교통"), ("assets/icons/openai.png", "OpenAI · 범위 판정·도구 호출"),
-        ("assets/icons/kakao.png", "카카오"), ("bell", "웹 푸시"), ("assets/icons/osm.png", "OpenStreetMap")]),
-    ("claw", "assets/icons/clawops.svg", "ClawOps 070", "전화 연결 · 통화 음성", []),
-    ("clova", "assets/icons/clova.png", "NAVER CLOVA Speech gRPC", "실시간 받아쓰기 · 키워드 부스팅", []),
-    ("gemini", "assets/icons/gemini.png", "Gemini TTS", "문장 음성 합성", []),
+    EUM_GROUP,
+    ("ext", None, "외부 API", "전화 4종", [("assets/icons/openai.png", "OpenAI", "범위 판정 · 도구 호출"),
+                                        ("assets/icons/clawops.svg", "ClawOps 070", "전화 연결 · 통화 음성"),
+                                        ("assets/icons/clova.png", "NAVER CLOVA Speech gRPC", "실시간 받아쓰기 · 키워드 부스팅"),
+                                        ("assets/icons/gemini.png", "Gemini TTS", "문장 음성 합성")]),
 ]
 GROUPS_F_HTML, POS_F = group_html("gf", GROUPS_F, NODE_X_F, NODE_W_F, TOP_F, GAP_F)
-ANC_F = {gid: (NODE_X_F, y + h // 2) for gid, (y, h) in POS_F.items()}            # 노드 왼쪽 가장자리
+# 줄 왼쪽 가장자리. 신호는 쓰는 줄에서 나간다
+row_a = lambda gid, k: (NODE_X_F, POS_F[gid][0] + HEAD_H + PAD_V + k * ROW_H + ROW_H // 2)
+OPENAI_F, CLAW_F, CLOVA_F, GEMINI_F = (row_a("ext", k) for k in range(4))
 CALL_A = (CALL_LEFT + CALL_W, 560)                                                 # 통화 카드 오른쪽 가장자리
 
 
@@ -183,7 +196,7 @@ def svg_lines(pairs):
 
 
 LINES_B = svg_lines([(a, HUB_L) for a in ANC_B.values()] + [(HUB_R, PHONE_A)])
-LINES_F = svg_lines([(a, CALL_A) for a in ANC_F.values()])
+LINES_F = svg_lines([(row_a(g, k), CALL_A) for g, k in (("eum", 0), ("eum", 1), ("eum", 4), ("ext", 0), ("ext", 1), ("ext", 2), ("ext", 3))])
 
 bt = APP["beats"]
 # (절대 시각, 켜질 줄 id 들, 경로). 줄 id 는 "gb-<묶음>-<번호>"
@@ -200,17 +213,18 @@ FLOWS_B = [
     (bt["depart"] + 1.5, ["gb-ext-1"], TO_PHONE_EXT),                    # 카카오 길찾기
 ]
 cs = float(CALL["start"])
-FLOWS_F = [(cs + 0.5, ["gf-claw"], [(ANC_F["claw"], CALL_A)])]           # 전화 연결
+FLOWS_F = [(cs + 0.5, ["gf-ext-1"], [(CLAW_F, CALL_A)])]                 # 전화 연결
 for e in CALL["events"]:
     if e["who"] == "ai":
-        FLOWS_F.append((e["t"] - 0.6, ["gf-gemini"], [(ANC_F["gemini"], ANC_F["claw"]), (ANC_F["claw"], CALL_A)]))   # 음성 합성 → 통화
+        FLOWS_F.append((e["t"] - 0.6, ["gf-ext-3"], [(GEMINI_F, CLAW_F), (CLAW_F, CALL_A)]))   # 음성 합성 → 통화
     elif e["who"] == "user":
-        FLOWS_F.append((e["t"] - 0.1, ["gf-claw", "gf-clova"], [(CALL_A, ANC_F["claw"]), (ANC_F["claw"], ANC_F["clova"]), (ANC_F["clova"], CALL_A)]))  # 말 → 받아쓰기 → 글
+        FLOWS_F.append((e["t"] - 0.1, ["gf-ext-1", "gf-ext-2"], [(CALL_A, CLAW_F), (CLAW_F, CLOVA_F), (CLOVA_F, CALL_A)]))  # 말 → 받아쓰기 → 글
     else:
         gap = float(e.get("gap", 0.55))
-        FLOWS_F.append((e["t"] - 0.1, ["gf-web-1"], [(CALL_A, ANC_F["web"]), (ANC_F["web"], CALL_A)]))   # 판정·도구 호출(OpenAI)
-        for j, rid in enumerate(("gf-clova", "gf-web-1", "gf-web-0", "gf-web-0", "gf-web-0")):
-            src = ANC_F["clova"] if rid == "gf-clova" else ANC_F["web"]
+        FLOWS_F.append((e["t"] - 0.1, ["gf-ext-0"], [(CALL_A, OPENAI_F), (OPENAI_F, CALL_A)]))   # 판정·도구 호출(OpenAI)
+        # 도구 줄 순서: 받아쓰기 · 범위 판정 · 입항 예보(선박 위치) · 어종 추정(선박 기본정보) · 방문 시각(교통량)
+        for j, (rid, src) in enumerate((("gf-ext-2", CLOVA_F), ("gf-ext-0", OPENAI_F), ("gf-eum-0", row_a("eum", 0)),
+                                         ("gf-eum-1", row_a("eum", 1)), ("gf-eum-4", row_a("eum", 4)))):
             FLOWS_F.append((e["t"] + gap * j + 0.2, [rid], [(src, CALL_A)]))
 
 
@@ -291,15 +305,15 @@ HTML = f"""<!doctype html>
       #footage {{ position:absolute; top:0; left:0; width:{W}px; height:{H}px; object-fit:cover; background:#000; }}
       #fade {{ position:absolute; inset:0; background:#000; opacity:0; }}
 
-      /* 자막: 기본은 가운데, 분할 구간은 사람이 있는 쪽(left/right 864px 띠). 이름표 바탕은 워드마크 청록, 글자는 검정 */
+      /* 자막: 기본은 가운데, 분할 구간은 사람이 있는 쪽(left/right 864px 띠). 이름표 바탕은 워드마크 청록, 글자는 흰색. 워드마크는 배경 없이 흰 테두리 */
       .sub .band {{ position:absolute; left:0; right:0; bottom:72px; display:flex; justify-content:center; }}
       .sub.left .band {{ right:auto; width:{BAND}px; }}
       .sub.right .band {{ left:1100px; right:24px; }}
       .sub .band > span {{ display:inline-block; }}
-      .sub .who {{ background:var(--brand); color:#000; font-weight:800; font-size:26px; padding:8px 16px; border-radius:12px 0 0 12px; white-space:nowrap; }}
+      .sub .who {{ background:var(--brand); color:#fff; font-weight:800; font-size:26px; padding:8px 16px; border-radius:12px 0 0 12px; white-space:nowrap; }}
       .sub .say {{ background:rgba(14,26,33,0.82); color:#fff; font-weight:700; font-size:34px; line-height:1.3; padding:8px 22px; border-radius:0 12px 12px 0; max-width:1400px; }}
       .sub.left .say, .sub.right .say {{ max-width:{BAND - 160}px; font-size:30px; }}
-      .sub .wm {{ height:1.25em; vertical-align:-0.3em; margin:0 2px; background:#fff; border-radius:6px; padding:2px 6px; }}
+      .sub .wm {{ height:1.25em; vertical-align:-0.3em; margin:0 4px; filter:drop-shadow(1.5px 0 0 #fff) drop-shadow(-1.5px 0 0 #fff) drop-shadow(0 1.5px 0 #fff) drop-shadow(0 -1.5px 0 #fff); }}
 
       /* 브랜드 줄(아이콘 + 워드마크) */
       .brandrow {{ display:flex; align-items:center; justify-content:center; gap:12px; }}
@@ -325,7 +339,7 @@ HTML = f"""<!doctype html>
       /* 왼쪽 패널(전화 구간) */
       #brand2 {{ position:absolute; left:0; width:{PANEL}px; top:36px; }}
       #call-cap {{ position:absolute; left:0; width:{PANEL}px; top:104px; font-size:36px; font-weight:800; color:var(--brand); letter-spacing:-0.02em; {GLOW} }}
-      #call {{ position:absolute; left:{CALL_LEFT}px; top:176px; width:{CALL_W}px; height:874px; border-radius:36px; background:#fff; box-shadow:0 24px 50px rgba(7,63,76,0.18); overflow:hidden; }}
+      #call {{ position:absolute; left:{CALL_LEFT}px; top:{CALL_TOP}px; width:{CALL_W}px; height:874px; border-radius:36px; background:#fff; box-shadow:0 24px 50px rgba(7,63,76,0.18); overflow:hidden; }}
       #call .hd {{ height:120px; background:var(--mint); color:var(--ink); padding:22px 26px; display:flex; align-items:center; justify-content:space-between; }}
       #call .hd .nm {{ display:flex; align-items:center; gap:10px; }} #call .hd .nm img.bi {{ width:44px; height:44px; border-radius:11px; }} #call .hd .nm img.bw {{ height:34px; }}
       #call .hd .no {{ font-size:20px; color:var(--muted); margin-top:6px; font-variant-numeric:tabular-nums; font-weight:600; }}
@@ -347,30 +361,41 @@ HTML = f"""<!doctype html>
       /* 데이터 흐름 그래픽: API 묶음 카드 */
       .group {{ position:absolute; border-radius:18px; background:rgba(255,255,255,0.94); border:2px solid rgba(255,255,255,0); box-shadow:0 8px 20px rgba(7,63,76,0.16); padding:0 12px {PAD_V}px; overflow:hidden; }}
       .group .gh {{ height:{HEAD_H}px; display:flex; align-items:center; gap:10px; border-bottom:1px solid var(--line); margin-bottom:{PAD_V}px; }}
-      .group .gi {{ width:28px; height:28px; border-radius:7px; object-fit:contain; flex:0 0 28px; }}
+      .group .gi {{ width:32px; height:32px; border-radius:7px; object-fit:contain; flex:0 0 28px; }}
       .group .gi.cloud {{ background:var(--primary); border-radius:50%; width:14px; height:14px; flex:0 0 14px; margin:0 7px; }}
       .group .gt {{ display:flex; flex-direction:column; line-height:1.15; }}
-      .group .gt b {{ font-size:17px; color:var(--brand); }} .group .gt small {{ font-size:12px; color:var(--muted); }}
+      .group .gt b {{ font-size:20px; color:var(--brand); }} .group .gt small {{ font-size:14px; color:var(--muted); }}
       .group ul {{ list-style:none; display:flex; flex-direction:column; }}
-      .group li {{ height:{ROW_H}px; display:flex; align-items:center; gap:8px; padding:0 8px; border-radius:8px; font-size:15px; font-weight:600; color:var(--ink); }}
-      .group .ri {{ width:18px; height:18px; flex:0 0 18px; object-fit:contain; border-radius:4px; display:grid; place-items:center; color:var(--primary); }}
-      .group .ri.dot {{ width:7px; height:7px; flex:0 0 7px; margin:0 5.5px; border-radius:50%; background:var(--primary); }}
-      .group .ri.svg svg {{ width:18px; height:18px; }}
+      .group li {{ height:{ROW_H}px; display:flex; align-items:center; gap:10px; padding:0 8px; border-radius:10px; color:var(--ink); }}
+      .group li .rt {{ display:flex; flex-direction:column; gap:3px; line-height:1.2; white-space:nowrap; }}
+      .group li b {{ font-size:17px; font-weight:700; letter-spacing:-0.02em; }} .group li small {{ font-size:14px; font-weight:500; color:var(--muted); }}
+      .group .ri {{ width:24px; height:24px; flex:0 0 24px; object-fit:contain; border-radius:4px; display:grid; place-items:center; color:var(--primary); }}
+      .group .ri.dot {{ width:8px; height:8px; flex:0 0 8px; margin:0 8px; border-radius:50%; background:var(--primary); }}
+      .group .ri.svg svg {{ width:24px; height:24px; }}
       #hub {{ position:absolute; left:{HUB[0]}px; top:{HUB[1]}px; width:{HUB[2]}px; height:{HUB[3]}px; border-radius:18px; background:rgba(12,85,96,0.96);
               border:2px solid rgba(255,255,255,0); color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; box-shadow:0 10px 24px rgba(7,63,76,0.3); }}
       #hub .hb {{ display:flex; align-items:center; gap:8px; font-size:19px; font-weight:800; }} #hub .hb img {{ width:30px; height:30px; border-radius:8px; }}
-      #hub small {{ font-size:12px; color:#cfe3e1; text-align:center; line-height:1.25; }}
+      #hub small {{ font-size:14px; color:#cfe3e1; text-align:center; line-height:1.25; }}
       .wires {{ position:absolute; left:0; top:0; width:{W}px; height:{H}px; pointer-events:none; }}
       .wires line {{ stroke:rgba(255,255,255,0.75); stroke-width:2; stroke-dasharray:6 8; }}
       .dot {{ position:absolute; left:0; top:0; width:14px; height:14px; border-radius:50%; background:var(--sunrise); box-shadow:0 0 10px rgba(232,96,76,0.9), 0 0 2px #fff; opacity:0; }}
 
-      /* 아웃트로: 앱 아이콘 + 워드마크, 아래 띠에 E-UM 디지털 트윈 포항 로고 */
+      /* 아웃트로: 앱 아이콘 + 워드마크 · WEB/APP/전화 세 갈래(QR 둘 + 번호), 아래 띠에 E-UM 디지털 트윈 포항 로고 */
       #outro-bg {{ position:absolute; inset:0; background:var(--page); }}
-      #o-logo {{ position:absolute; left:0; right:0; top:300px; display:flex; align-items:center; justify-content:center; gap:28px; }}
-      #o-logo .bi {{ width:150px; height:150px; border-radius:36px; box-shadow:0 16px 40px rgba(7,63,76,0.25); }}
-      #o-logo .bw {{ height:132px; }}
-      #o-sub {{ position:absolute; left:0; right:0; top:520px; font-size:44px; font-weight:500; color:var(--muted); }}
-      #o-cta {{ position:absolute; left:0; right:0; top:605px; font-size:48px; font-weight:800; color:var(--coral); }}
+      #o-logo {{ position:absolute; left:0; right:0; top:56px; display:flex; align-items:center; justify-content:center; gap:24px; }}
+      #o-logo .bi {{ width:116px; height:116px; border-radius:28px; box-shadow:0 12px 30px rgba(7,63,76,0.25); }}
+      #o-logo .bw {{ height:100px; }}
+      #o-sub {{ position:absolute; left:0; right:0; top:196px; font-size:36px; font-weight:500; color:var(--muted); }}
+      #o-cta {{ position:absolute; left:0; right:0; top:256px; font-size:50px; font-weight:800; color:var(--coral); letter-spacing:-0.01em; }}
+      #o-ways {{ position:absolute; left:0; right:0; top:352px; display:flex; justify-content:center; gap:72px; }}
+      .way {{ width:340px; display:flex; flex-direction:column; align-items:center; gap:14px; }}
+      .way .k {{ font-size:36px; font-weight:800; color:var(--brand); letter-spacing:0.02em; }}
+      .way .box {{ width:340px; height:340px; border-radius:28px; background:#fff; box-shadow:0 12px 30px rgba(7,63,76,0.16); display:grid; place-items:center; }}
+      .way .box img {{ width:300px; height:300px; }}
+      .way .box.tel {{ background:var(--brand); color:#fff; align-content:center; gap:18px; }}
+      .way .box.tel svg {{ width:96px; height:96px; }}
+      .way .box.tel b {{ font-size:42px; font-weight:800; font-variant-numeric:tabular-nums; letter-spacing:-0.01em; }}
+      .way .v {{ font-size:28px; font-weight:700; color:var(--ink); }}
       #o-credit {{ position:absolute; left:0; right:0; bottom:0; height:150px; background:#10232b; display:flex; align-items:center; justify-content:center; }}
       #o-credit img {{ height:64px; }}
     </style>
@@ -392,7 +417,7 @@ HTML = f"""<!doctype html>
         <div id="cap5" class="cap center">언제 출발할지까지 한 줄로</div>
         <svg class="wires" id="wires-b" viewBox="0 0 {W} {H}" data-layout-ignore>{LINES_B}</svg>
         {GROUPS_B_HTML}
-        <div id="hub" data-layout-allow-overlap><div class="hb"><img src="{ICON}" alt="">배마중 서버</div><small>숫자는 룰이 계산<br>LLM은 문장만</small></div>
+        <div id="hub" data-layout-allow-overlap><div class="hb"><img src="{ICON}" alt="">배마중 서버</div><small>API 데이터 기반<br>정보제공 및 대화</small></div>
         {DOTS_B}
         <div id="phone">
           <div class="frame" data-layout-allow-overflow>
@@ -438,7 +463,12 @@ HTML = f"""<!doctype html>
         <div id="outro-bg"></div>
         <div id="o-logo"><img class="bi" src="{ICON}" alt=""><img class="bw" src="{WORDMARK}" alt="배마중"></div>
         <div id="o-sub" class="center">구룡포항 새벽 입항·어종 알림</div>
-        <div id="o-cta" class="center">폰 브라우저에서 바로. 전화로도.</div>
+        <div id="o-cta" class="center">WEB / APP / 전화 모두 가능합니다</div>
+        <div id="o-ways">
+          <div class="way"><span class="k">WEB</span><div class="box"><img src="assets/brand/qr-web.svg" alt="bmj.kr QR 코드"></div><span class="v">bmj.kr</span></div>
+          <div class="way"><span class="k">APP</span><div class="box"><img src="assets/brand/qr-apk.svg" alt="안드로이드 APK 내려받기 QR 코드"></div><span class="v">안드로이드 APK</span></div>
+          <div class="way"><span class="k">전화</span><div class="box tel">{PHONE_SVG}<b>{phone_no}</b></div><span class="v">말로 물어보기</span></div>
+        </div>
         <div id="o-credit"><img src="{DT_LOGO}" alt="E-UM 디지털 트윈 포항"></div>
       </section>
 
@@ -493,7 +523,7 @@ HTML = f"""<!doctype html>
         gsap.set(["#wires-b", "#wires-f"], {{ opacity: 0 }});
         gsap.set([".group", "#hub"], {{ opacity: 0, x: -20 }});
         gsap.set("#fade", {{ opacity: 0 }});
-        gsap.set(["#outro-bg", "#o-logo", "#o-sub", "#o-cta", "#o-credit"], {{ opacity: 0 }});
+        gsap.set(["#outro-bg", "#o-logo", "#o-sub", "#o-cta", ".way", "#o-credit"], {{ opacity: 0 }});
         document.querySelectorAll(".sub .band").forEach((b) => gsap.set(b, {{ opacity: 0, y: 16 }}));
 
         /* 자막: 시작에서 올라오고 끝에서 사라진다 */
@@ -555,9 +585,9 @@ HTML = f"""<!doctype html>
 
         /* 전화 구간 */
         tl.to("#wires-f", {{ opacity: 1, duration: 0.6 }}, {fmt(cs + 0.5)});
-        tl.to(["#gf-web", "#gf-claw", "#gf-clova", "#gf-gemini"], {{ opacity: 1, x: 0, duration: 0.4, ease: OUI, stagger: 0.08 }}, {fmt(cs + 0.3)});
+        tl.to(["#gf-eum", "#gf-ext"], {{ opacity: 1, x: 0, duration: 0.4, ease: OUI, stagger: 0.1 }}, {fmt(cs + 0.3)});
 {FLOW_JS_F}
-        tl.to(["#wires-f", "#gf-web", "#gf-claw", "#gf-clova", "#gf-gemini"], {{ opacity: 0, duration: 0.6 }}, {fmt(FADE_T - 0.6)});
+        tl.to(["#wires-f", "#gf-eum", "#gf-ext"], {{ opacity: 0, duration: 0.6 }}, {fmt(FADE_T - 0.6)});
         tl.to(["#brand2", "#call-cap"], {{ opacity: 1, duration: 0.4 }}, {fmt(cs + 0.2)});
         tl.to("#call", {{ y: 0, opacity: 1, duration: 0.6, ease: OUI }}, {fmt(cs + 0.4)});
         const timer = {{ s: 0 }};
@@ -572,7 +602,8 @@ HTML = f"""<!doctype html>
         tl.fromTo("#o-logo", {{ scale: 0.82 }}, {{ scale: 1, opacity: 1, duration: 0.5, ease: "back.out(1.4)" }}, {fmt(OUTRO_T + 0.4)});
         tl.fromTo("#o-sub", {{ y: 16 }}, {{ y: 0, opacity: 1, duration: 0.4, ease: OUI }}, {fmt(OUTRO_T + 0.8)});
         tl.fromTo("#o-cta", {{ y: 16 }}, {{ y: 0, opacity: 1, duration: 0.4, ease: OUI }}, {fmt(OUTRO_T + 1.1)});
-        tl.fromTo("#o-credit", {{ y: 20 }}, {{ y: 0, opacity: 1, duration: 0.45, ease: OUI }}, {fmt(OUTRO_T + 1.5)});
+        tl.fromTo(".way", {{ y: 24 }}, {{ y: 0, opacity: 1, duration: 0.45, ease: OUI, stagger: 0.15 }}, {fmt(OUTRO_T + 1.3)});
+        tl.fromTo("#o-credit", {{ y: 20 }}, {{ y: 0, opacity: 1, duration: 0.45, ease: OUI }}, {fmt(OUTRO_T + 1.9)});
 
         window.__timelines["main"] = tl;
         if (window.__hfForceTimelineRebind) window.__hfForceTimelineRebind();
@@ -594,7 +625,7 @@ def subset_font() -> None:
     extra = "0123456789:·~%.,!?→✓ ()tkm통화종료중"
     chars = {c for c in (set(text) | set(extra)) if not c.isspace()}
     if not FONT_SRC.exists():
-        print("폰트 원본 없음(윈도우가 아닌 듯): " + ("기존 서브셋 사용" if FONT_SUB.exists() else "시스템 폰트로 대체됨 — 렌더 글꼴이 달라질 수 있음"))
+        print("폰트 원본 없음(윈도우가 아니면 NOTO_KR_TTF 로 지정): " + ("기존 서브셋 사용" if FONT_SUB.exists() else "시스템 폰트로 대체됨 — 렌더 글꼴이 달라질 수 있음"))
         return
     glyphs = HERE / ".glyphs.txt"
     glyphs.write_text("".join(sorted(chars)), encoding="utf-8")
