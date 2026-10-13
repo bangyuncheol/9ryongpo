@@ -374,7 +374,7 @@ body:hover #hud { opacity: .8; }
   <h2 style="font-size:64px; margin-top:20px;">“오늘 붉은대게 들어오나? 몇 척이나? 몇 시에 가면 되나?”<br><span class="blue">네 가지</span>가 막혀 있었습니다</h2>
   <div class="pgrid">
     <div class="pcard"><span class="kn">1</span><div><b>뭐가 잡힐지 모른다</b><p>8월 1위 어종이 2년 연속 바뀜. 10월 살오징어 <em>1,473톤 → 44톤</em>, 3년 만에.</p></div></div>
-    <div class="pcard"><span class="kn">2</span><div><b>모르고 오면 사는 쪽이 손해</b><p>방어 84.6톤 들어오고 닷새 뒤, 위판장은 열렸는데 <em>방어만 0톤</em>. 도착해서야 압니다.</p></div></div>
+    <div class="pcard"><span class="kn">2</span><div><b>모르고 오면 사는 쪽이 손해</b><p>방어 84.6톤 들어오고 닷새 뒤 <em>방어만 0톤</em>. 청어 256톤 다음 보름이 <em>0톤</em>. 도착해서야 압니다.</p></div></div>
     <div class="pcard"><span class="kn">3</span><div><b>언제 가야 할지 모른다</b><p>배가 닿는 시각 · 경매 시각 · 위판장 앞길, <em>셋 다 가 봐야</em> 압니다. 지금은 감으로.</p></div></div>
     <div class="pcard"><span class="kn">4</span><div><b>앱과 웹이 낯설다</b><p>어가 인구 <em>48.2%</em>가 고령. AI 서비스를 써 본 농어민은 31.1%(일반 국민 59.4%).</p></div></div>
   </div>
@@ -437,9 +437,11 @@ body:hover #hud { opacity: .8; }
   <h2>위판장에 도착해서야 오늘 물건을 압니다</h2>
   <div class="pse">
     <div class="card ev">
-      <p class="lab">2025년 12월 구룡포 위판장 방어 위판량 (경매일별, 톤)</p>
-      <svg id="dailyChart" viewBox="0 0 1600 500" width="100%" style="margin-top:8px;" role="img" aria-label="2025년 12월 방어 일별 위판량. 12월 7일 84.6톤, 12일부터 14일까지 0톤"></svg>
-      <p class="line">횟집 김 사장이 잃는 것 — 새벽 운전과 빈손 · 나갈지 말지 정할 근거 · 트럭을 몇 대 부를지</p>
+      <p class="lab">2025년 12월 방어 위판량 (구룡포 위판장, 경매일별, 톤)</p>
+      <svg id="dailyChart" viewBox="0 0 1600 400" width="100%" style="margin-top:4px;" role="img" aria-label="2025년 12월 방어 일별 위판량. 12월 7일 84.6톤, 12일부터 14일까지 0톤"></svg>
+      <p class="lab" style="margin-top:18px;">2026년 6월 청어 위판량 (같은 위판장, 경매일별, 톤)</p>
+      <svg id="dailyChart2" viewBox="0 0 1600 400" width="100%" style="margin-top:4px;" role="img" aria-label="2026년 6월 청어 일별 위판량. 6월 5일 256.5톤, 13일부터 27일까지 0톤"></svg>
+      <p class="line" style="margin-top:16px; font-size:26px;">방어도 청어도 — 횟집 김 사장이 잃는 것: 새벽 운전과 빈손 · 나갈지 말지 정할 근거 · 트럭을 몇 대 부를지</p>
     </div>
     <div class="rs">
       <div class="card">
@@ -459,8 +461,8 @@ body:hover #hud { opacity: .8; }
       </div>
     </div>
   </div>
-  <div class="foot"><span class="src">같은 자료, 팀 집계. 12일·14일엔 다른 생선이 15톤 안팎 팔렸습니다. 김 사장은 가상 인물, 날짜와 물량은 실제 기록(위판장 전체 7일 98.8톤, 12일 14.7톤).</span><span class="pg"></span></div>
-  <aside class="notes">하루 단위로 보면 더 심합니다. 겨울 횟집에서 제일 많이 찾는 방어인데, 작년 12월 7일엔 84톤이 들어왔다가 닷새 뒤부터 0톤이었습니다. 위판장이 쉰 것도 아니에요. 이렇게 들쭉날쭉하면 손해는 사러 온 사람이 봅니다. 그래서 먼저 알립니다. 원하는 생선을 골라 두면 실었을 배가 보이는 순간 휴대폰으로, 화면이 낯분 분께는 배마중이 전화를 걸어 읽어 드립니다. 전화 문장을 미리 만들어 두고 바로 트는 건 저희 인터뷰브릿지가 AI 면접에서 쓰던 쿠션 설계입니다. 나갈지 말지, 트럭 몇 대를 배가 닿기 전에 정하는 게 효과입니다.</aside>
+  <div class="foot"><span class="src">해양수산부 「일자별 위탁판매현황」 구룡포수협 본소, 팀 집계. 방어 12·14일엔 다른 생선이 15톤 안팎 팔림(12일은 파고 3m 풍랑). 청어 13~27일은 파고 0.3~0.6m의 잔잔한 날에도 0톤(청어를 잡는 선망 선단이 들어오지 않음, 21·22일만 폭우·풍랑 휴장). 김 사장은 가상 인물, 날짜와 물량은 실제 기록.</span><span class="pg"></span></div>
+  <aside class="notes">하루 단위로 보면 더 심합니다. 겨울 횟집에서 제일 많이 찾는 방어인데, 작년 12월 7일엔 84톤이 들어왔다가 닷새 뒤부터 0톤이었습니다. 위판장이 쉰 것도 아니에요. 12일은 파고 3미터 풍랑이었지만 13일, 14일엔 다른 생선이 15톤씩 팔렸습니다. 청어도 같습니다. 올해 6월 5일 256톤이 들어왔는데 13일부터 보름 동안 0톤이었습니다. 바람도 잔잔했어요. 청어를 잡는 선망 선단이 안 들어온 겁니다. 이렇게 들쭉날쭉하면 손해는 사러 온 사람이 봅니다. 그래서 먼저 알립니다. 원하는 생선을 골라 두면 실었을 배가 보이는 순간 휴대폰으로, 화면이 낯분 분께는 배마중이 전화를 걸어 읽어 드립니다. 전화 문장을 미리 만들어 두고 바로 트는 건 저희 인터뷰브릿지가 AI 면접에서 쓰던 쿠션 설계입니다. 나갈지 말지, 트럭 몇 대를 배가 닿기 전에 정하는 게 효과입니다.</aside>
 </section>
 
 <!-- 9 문제 3 -->
@@ -873,26 +875,34 @@ body:hover #hud { opacity: .8; }
     img.src = el.dataset.shot;
   });
 
-  // 2025년 12월 방어 경매일별 위판량(톤). 해수부 일자별 위탁판매현황, 구룡포수협 본소(판매과 1계).
-  const dec = [['1',28.0],['2',9.2],['3',0],['5',50.6],['6',55.6],['7',84.6],['8',56.4],['9',79.4],['10',45.6],['11',18.0],['12',0],['13',0],['14',0],['15',0],['16',6.8],['17',0],['18',0],['19',0],['20',2.8],['21',15.6],['22',0],['23',31.2],['24',15.9],['25',0],['26',0],['27',0],['28',4.4],['29',0],['30',16.8],['31',0]];
-  const svg = document.getElementById('dailyChart');
-  const W = 1600, base = 440, top = 70, max = 100, x0 = 64, step = (W - x0 - 6) / dec.length, bw = step - 8;
-  const y = (v) => base - (v / max) * (base - top);
-  const zeroRed = ['12', '13', '14'];
-  let g = '';
-  [0, 50, 100].forEach((t) => { g += `<line x1="${x0}" x2="${W}" y1="${y(t)}" y2="${y(t)}" stroke="${t ? '#e4e7eb' : '#c4cad1'}" stroke-width="${t ? 1 : 2}"/><text x="${x0 - 14}" y="${y(t) + 7}" font-size="20" fill="#5b6168" text-anchor="end">${t}</text>`; });
-  dec.forEach(([d, v], k) => {
-    const x = x0 + 4 + k * step;
-    if (v > 0) g += `<rect x="${x}" y="${y(v)}" width="${bw}" height="${base - y(v)}" rx="4" fill="${d === '7' ? '#0072de' : '#d3d9e0'}"><title>12월 ${d}일 ${v}톤</title></rect>`;
-    else g += `<rect x="${x}" y="${base - 6}" width="${bw}" height="6" rx="3" fill="${zeroRed.includes(d) ? '#d32f2f' : '#c4cad1'}"><title>12월 ${d}일 0톤</title></rect>`;
-    if (['1', '7', '12', '14', '23', '31'].includes(d)) g += `<text x="${x + bw / 2}" y="${base + 34}" font-size="20" fill="#5b6168" text-anchor="middle">${d}일</text>`;
-  });
-  const cx = (k) => x0 + 4 + k * step + bw / 2;
-  g += `<text x="${cx(5)}" y="${y(84.6) - 16}" font-size="28" font-weight="800" fill="#0072de" text-anchor="middle">84.6톤</text>`;
-  const a = x0 + 4 + 10 * step, b = x0 + 4 + 12 * step + bw;
-  g += `<path d="M${a} ${base - 30} V${base - 44} H${b} V${base - 30}" stroke="#d32f2f" stroke-width="2" fill="none"/>`;
-  g += `<text x="${a}" y="${base - 92}" font-size="26" font-weight="800" fill="#d32f2f" text-anchor="start">위판장은 열렸는데 방어 0톤</text><line x1="${a + 4}" x2="${a + 4}" y1="${base - 84}" y2="${base - 46}" stroke="#d32f2f" stroke-width="2"/>`;
-  svg.innerHTML = g;
+  // 경매일별 위판량(톤) 막대. 해수부 일자별 위탁판매현황, 구룡포수협 본소(판매과 1계). 기록이 있는 날(위판장이 연 날)만.
+  function drawDaily(id, data, o) {
+    const svg = document.getElementById(id);
+    const W = 1600, base = 340, top = 56, x0 = 64, step = (W - x0 - 6) / data.length, bw = step - 8;
+    const y = (v) => base - (v / o.max) * (base - top);
+    const idx = (d) => data.findIndex(([k]) => k === d);
+    let g = '';
+    [0, o.max / 2, o.max].forEach((t) => { g += `<line x1="${x0}" x2="${W}" y1="${y(t)}" y2="${y(t)}" stroke="${t ? '#e4e7eb' : '#c4cad1'}" stroke-width="${t ? 1 : 2}"/><text x="${x0 - 14}" y="${y(t) + 7}" font-size="20" fill="#5b6168" text-anchor="end">${t}</text>`; });
+    data.forEach(([d, v], k) => {
+      const x = x0 + 4 + k * step;
+      if (v > 0) g += `<rect x="${x}" y="${y(v)}" width="${bw}" height="${base - y(v)}" rx="4" fill="${d === o.hl ? '#0072de' : '#d3d9e0'}"><title>${o.name} ${d}일 ${v}톤</title></rect>`;
+      else g += `<rect x="${x}" y="${base - 6}" width="${bw}" height="6" rx="3" fill="${o.red.includes(d) ? '#d32f2f' : '#c4cad1'}"><title>${o.name} ${d}일 0톤</title></rect>`;
+      if (o.labels.includes(d)) g += `<text x="${x + bw / 2}" y="${base + 34}" font-size="20" fill="#5b6168" text-anchor="middle">${d}일</text>`;
+    });
+    const cx = (k) => x0 + 4 + k * step + bw / 2;
+    const hv = data[idx(o.hl)][1];
+    g += `<text x="${cx(idx(o.hl))}" y="${y(hv) - 14}" font-size="28" font-weight="800" fill="#0072de" text-anchor="middle">${hv}톤</text>`;
+    const a = x0 + 4 + idx(o.from) * step, b = x0 + 4 + idx(o.to) * step + bw;
+    g += `<path d="M${a} ${base - 30} V${base - 44} H${b} V${base - 30}" stroke="#d32f2f" stroke-width="2" fill="none"/>`;
+    g += `<text x="${a}" y="${base - 92}" font-size="26" font-weight="800" fill="#d32f2f" text-anchor="${o.anchor || 'start'}">${o.note}</text><line x1="${a + 4}" x2="${a + 4}" y1="${base - 84}" y2="${base - 46}" stroke="#d32f2f" stroke-width="2"/>`;
+    svg.innerHTML = g;
+  }
+  // 2025년 12월 방어
+  drawDaily('dailyChart', [['1',28.0],['2',9.2],['3',0],['5',50.6],['6',55.6],['7',84.6],['8',56.4],['9',79.4],['10',45.6],['11',18.0],['12',0],['13',0],['14',0],['15',0],['16',6.8],['17',0],['18',0],['19',0],['20',2.8],['21',15.6],['22',0],['23',31.2],['24',15.9],['25',0],['26',0],['27',0],['28',4.4],['29',0],['30',16.8],['31',0]],
+    { name: '12월', max: 100, hl: '7', red: ['12', '13', '14'], from: '12', to: '14', labels: ['1', '7', '12', '14', '23', '31'], note: '위판장은 열렸는데 방어 0톤' });
+  // 2026년 6월 청어 (21·22일은 폭우·풍랑으로 위판장 휴장이라 막대 없음)
+  drawDaily('dailyChart2', [['1',143.1],['2',132.0],['3',0],['4',0],['5',256.5],['6',179.8],['7',0],['8',0],['9',0],['10',154.7],['11',8.4],['12',26.6],['13',0],['14',0],['15',0],['16',0],['17',0],['18',0],['19',0],['20',0],['23',0],['24',0],['25',0],['26',0],['27',0],['28',10.4],['29',0],['30',0]],
+    { name: '6월', max: 300, hl: '5', red: ['13','14','15','16','17','18','19','20','23','24','25','26','27'], from: '13', to: '27', labels: ['1', '5', '13', '20', '27', '30'], note: '바람 잔잔한 보름, 청어 0톤' });
 
   fit(); show(i);
 })();
