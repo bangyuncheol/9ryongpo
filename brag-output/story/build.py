@@ -3,9 +3,9 @@
 prep.py 가 이어 붙인 촬영분(footage.mp4)을 바닥에 깔고 그 위에
   · 자막: 원본 초(t/end) → 컷 시작 + (t - in). 한 번에 하나, 가운데. 말한 사람 이름표는 자막 왼쪽 위
   · 검은 카드: 한 글자씩 찍히는 타자기 문장(추적 60분 톤)
-  · 인터뷰 컷: 왼쪽 위 ● REC, 오른쪽 위 '음성변조'. 인터뷰 끝(summary)은 화면을 어둡게 하고 한 말을 글로 모아 보여 준다
+  · 인터뷰 컷: 왼쪽 위 ● REC, 오른쪽 위 '음성변조'
   · 4칸 오프닝의 위치 핀 + 장소 이름, 한가운데 캡션
-  · 인터뷰 질문(q): 말소리 없이 위쪽에 'Q. …' 글로(같은 질문 컷은 이어서 한 번)
+  · 인터뷰 질문(q): 말소리 없이 자막 블록 위쪽에 [인터뷰브릿지] 이름표 + 질문, 그 아래 [답한 사람] 이름표 + 답변(왼쪽 끝 맞춤)
 를 얹는다. 문장·시각은 timeline.json 에서만 고친다.
 
 글꼴: Noto Sans KR 에서 쓰는 글자만 추려 assets/fonts/NotoSansKR-subset.ttf 로 넣는다. 원본은 NOTO_KR_TTF(없으면 기존 서브셋 유지).
@@ -24,7 +24,7 @@ W, H = 1920, 1080
 ACCENT, BRAND = "#1a7f8a", "#073f4c"   # 서비스 색(src/web/src/v4/v4.css --color-primary · --color-brand)
 fmt = lambda x: f"{x:.3f}".rstrip("0").rstrip(".")
 
-clips, js, qruns, qrun = [], [], [], None
+clips, js = [], []
 t0 = 0.0
 PIN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z" fill="currentColor"/></svg>'
 for s in cfg["shots"]:
@@ -34,8 +34,12 @@ for s in cfg["shots"]:
         a = t0 + sub["t"] - s["in"]; b = min(t0 + d, t0 + sub["end"] - s["in"])
         who = sub.get("who")
         tag = f'<span class="who">{escape(who)}</span>' if who else ""
+        if s.get("q"):   # 우리 질문은 말소리 없이 글로: [인터뷰브릿지] 질문 → [답한 사람] 답변, 네 줄 왼쪽 끝 맞춤
+            tag = f'<span class="who">인터뷰브릿지</span><p class="txt qt">{escape(s["q"])}</p>' + tag
         clips.append(f'<div id="sub-{sid}-{j}" class="clip sub" data-start="{fmt(a)}" data-duration="{fmt(b - a)}" data-track-index="1">'
-                     f'<div class="blk">{tag}<p class="txt">{escape(sub["text"])}</p></div></div>')
+                     f'<div class="blk{" pair" if s.get("q") else ""}">{tag}<p class="txt">{escape(sub["text"])}</p></div></div>')
+        if s.get("fade_end") and b > t0 + d - s["fade_end"]:   # 영상 끝 페이드아웃에 걸친 자막도 함께 사라진다
+            js.append(f'tl.to("#sub-{sid}-{j}", {{ opacity: 0, duration: {fmt(s["fade_end"])}, ease: "none" }}, {fmt(t0 + d - s["fade_end"])});')
     if s.get("card"):
         lines = s["card"]; step = (d - 1.2) / len(lines)
         spans = "".join(f'<p class="ln">{"".join(f"<i>{escape(c)}</i>" for c in ln)}</p>' for ln in lines)
@@ -58,26 +62,8 @@ for s in cfg["shots"]:
                 right = 24 + (1 - k % 2) * W // 2
                 clips.append(f'<div id="pin-{sid}-{k}" class="clip pin" style="right:{right}px" data-start="{fmt(t0)}" data-duration="{fmt(d)}" data-track-index="{6 + k}">{PIN}{escape(c["pin"])}</div>')
                 js.append(f'tl.from("#pin-{sid}-{k}", {{ opacity: 0, y: -12, duration: 0.4, ease: "power2.out" }}, {fmt(t0 + 0.2 + k * 0.15)});')
-    if s.get("q"):   # 우리 질문은 말소리 없이 위쪽에 글로 — 같은 질문이 이어지는 컷은 한 덩어리로
-        if qrun and qrun["text"] == s["q"]:
-            qrun["end"] = t0 + d
-        else:
-            qrun = {"text": s["q"], "start": t0, "end": t0 + d}; qruns.append(qrun)
-    else:
-        qrun = None
-    if s.get("summary"):   # 인터뷰 끝: 말소리는 줄고 화면이 어두워지며 한 말을 글로 모아 보여 준다(뉴스식)
-        sm = s["summary"]
-        lines = "".join(f'<p class="sl">{escape(x)}</p>' for x in sm["lines"])
-        clips.append(f'<section id="sum-{sid}" class="clip sum" data-start="{fmt(t0)}" data-duration="{fmt(d)}" data-track-index="2">'
-                     f'<div class="scrim"></div><div class="blk"><span class="who">{escape(sm["who"])}</span>{lines}</div></section>')
-        js.append(f'tl.from("#sum-{sid} .scrim", {{ opacity: 0, duration: 0.8 }}, {fmt(t0)});')
-        js.append(f'tl.from("#sum-{sid} .who", {{ opacity: 0, duration: 0.3 }}, {fmt(t0 + 0.5)});')
-        js.append(f'tl.from("#sum-{sid} .sl", {{ opacity: 0, y: 12, duration: 0.35, stagger: 0.45 }}, {fmt(t0 + 0.7)});')
     t0 += d
 
-for k, q in enumerate(qruns):
-    clips.append(f'<div id="q-{k}" class="clip qband" data-start="{fmt(q["start"])}" data-duration="{fmt(q["end"] - q["start"])}" data-track-index="8"><b>Q.</b> {escape(q["text"])}</div>')
-    js.append(f'tl.from("#q-{k}", {{ opacity: 0, y: -14, duration: 0.4, ease: "power2.out" }}, {fmt(q["start"])});')
 FOOT = t0
 TOTAL = round(FOOT, 3)   # 로고 아웃트로 없이 떠나는 브이로그 페이드아웃으로 끝(10/13 오너)
 
@@ -99,6 +85,8 @@ HTML = f"""<!doctype html>
       .sub {{ position:absolute; left:90px; right:90px; bottom:64px; display:flex; justify-content:center; }}
       .blk {{ display:flex; flex-direction:column; align-items:flex-start; gap:12px; max-width:1600px; }}
       .who {{ display:inline-block; padding:6px 24px 8px; background:{BRAND}; color:#fff; font-size:38px; font-weight:800; line-height:1.2; box-shadow:8px 6px 0 {ACCENT}; }}
+      .pair .txt {{ align-self:flex-start; text-align:left; }}
+      .pair .qt {{ font-size:50px; margin-bottom:10px; }}
       .txt {{ align-self:center; text-align:center; font-size:62px; font-weight:800; line-height:1.28; color:#fff; word-break:keep-all;
              -webkit-text-stroke:9px #111; paint-order:stroke fill; text-shadow:0 3px 12px rgba(0,0,0,.6); }}
       .card {{ position:absolute; inset:0; background:#000; display:flex; flex-direction:column; justify-content:center; padding-left:260px; gap:26px; }}
@@ -114,14 +102,7 @@ HTML = f"""<!doctype html>
       .cap.mid {{ bottom:auto; top:50%; transform:translateY(-50%); }}
       .pin {{ position:absolute; top:32px; display:flex; align-items:center; gap:8px; padding:8px 20px 8px 14px; background:rgba(7,63,76,.88); border-radius:999px; font-size:34px; font-weight:800; }}
       .pin svg {{ width:34px; height:34px; color:#6fd3d9; }}
-      .qband {{ position:absolute; top:110px; left:50%; transform:translateX(-50%); width:max-content; max-width:1500px; padding:14px 30px; background:rgba(7,63,76,.9);
-               border-left:8px solid {ACCENT}; font-size:42px; font-weight:700; line-height:1.35; word-break:keep-all; text-align:center; }}
-      .qband b {{ color:#6fd3d9; margin-right:8px; }}
       .chip {{ position:absolute; top:36px; padding:10px 22px; background:{BRAND}; box-shadow:6px 5px 0 {ACCENT}; font-size:36px; font-weight:800; }}
-      .sum {{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }}
-      .sum .scrim {{ position:absolute; inset:0; background:rgba(0,0,0,.72); }}
-      .sum .blk {{ position:relative; gap:18px; }}
-      .sum .sl {{ font-size:44px; font-weight:700; line-height:1.35; word-break:keep-all; -webkit-text-stroke:6px #111; paint-order:stroke fill; }}
     </style>
   </head>
   <body>

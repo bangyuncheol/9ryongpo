@@ -1,7 +1,7 @@
 """timeline.json 의 컷을 원본에서 잘라 1920×1080 30fps 촬영분 하나(composition/assets/live/footage.mp4)로 잇는다.
 
 컷마다:
-  · fit  grid(4칸 cells: 왼쪽 위·오른쪽 위·왼쪽 아래·오른쪽 아래, 소리는 첫 칸. segs = [[시작, 끝], …] 원본 초) | cover(가로 꽉) | pillar(세로 영상 가운데 + 양옆은 같은 영상을 흐리게) | black(검은 화면, 원본 소리만 작게. src 없으면 무음)
+  · fit  grid(4칸 cells: 왼쪽 위·오른쪽 위·왼쪽 아래·오른쪽 아래, 소리는 네 칸을 섞음. segs = [[시작, 끝], …] 원본 초) | cover(가로 꽉) | pillar(세로 영상 가운데 + 양옆은 같은 영상을 흐리게) | black(검은 화면, 원본 소리만 작게. src 없으면 무음)
   · rotate ccw   폰을 눕혀 찍은 세로 파일을 가로로 세운다
   · mosaic       얼굴 모자이크(mediapipe blaze_face_short_range, 화면을 짧은 변의 절반 크기 조각으로 나눠 작은 얼굴도 잡는다).
                  잡은 자리를 앞뒤 1초 동안 가려 놓친 프레임(옆얼굴·처음 보이는 순간)도 가린다
@@ -102,17 +102,17 @@ def build_shot(i: int, s: dict) -> Path:
             ff("-f", "lavfi", "-i", f"color=black:s={W}x{H}:r={FPS}", "-f", "lavfi", "-i", "anullsrc=r=48000:cl=stereo", *fix, *ENC, out)
         return out
 
-    if s["fit"] == "grid":   # 4칸: 위 두 칸 방문 인사, 아래 두 칸 경매장 분위기 — 소리는 첫 칸(왼쪽 위)만
+    if s["fit"] == "grid":   # 4칸: 위 두 칸 방문 인사, 아래 두 칸 경매장 분위기 — 소리는 네 칸 모두 섞는다
         cw, ch, g = W // 2 - 2, H // 2 - 2, ""
-        srcs = []
+        srcs, used = [], []
         for k, c in enumerate(s["cells"]):
             src = SRC_DIR / c["src"]
             if c.get("mosaic"):   # 얼굴 모자이크 칸: 구간만 잘라 모자이크한 뒤 그 파일을 쓴다(구간은 하나)
                 (a0, b0), = c["segs"]
                 cut = TMP / f"{i:02d}_{s['id']}_cell{k}.mp4"; src = cut.with_name(cut.stem + "_m.mp4")
-                ff("-ss", a0, "-t", b0 - a0, "-i", SRC_DIR / c["src"], "-c:v", "libx264", "-crf", "14", "-an", cut)
+                ff("-ss", a0, "-t", b0 - a0, "-i", SRC_DIR / c["src"], "-c:v", "libx264", "-crf", "14", "-c:a", "aac", "-b:a", "256k", cut)
                 mosaic(cut, src); c = {**c, "segs": [[0, b0 - a0]]}
-            srcs.append(src)
+            srcs.append(src); used.append(c)
             rot = "transpose=2," if c.get("rotate") == "ccw" else ""
             g += "".join(f"[{k}:v]trim={a}:{b},setpts=PTS-STARTPTS[c{k}s{j}];" for j, (a, b) in enumerate(c["segs"]))
             g += "".join(f"[c{k}s{j}]" for j in range(len(c["segs"]))) + \
@@ -122,9 +122,10 @@ def build_shot(i: int, s: dict) -> Path:
             g = g[:-3] + f"[pre{k}];[pre{k}]split[m{k}][q{k}];[q{k}]crop={bw}:{bh}:{x}:{y},scale={bw // 12}:{bh // 12},scale={bw}:{bh}:flags=neighbor[p{k}];" \
                          f"[m{k}][p{k}]overlay={x}:{y}:enable='between(t,{a0},{a1})'[v]"
         g += ";"
-        segs = s["cells"][0]["segs"]
-        g += "".join(f"[0:a]atrim={a}:{b},asetpts=PTS-STARTPTS[a{j}];" for j, (a, b) in enumerate(segs))
-        g += "".join(f"[a{j}]" for j in range(len(segs))) + f"concat=n={len(segs)}:v=0:a=1,loudnorm=I=-16:TP=-1.5:LRA=11,aresample=48000,apad,atrim=0:{dur}[a]"
+        for k, c in enumerate(used):   # 네 칸 소리를 모두 섞는다(10/13 오너)
+            g += "".join(f"[{k}:a]atrim={a}:{b},asetpts=PTS-STARTPTS[a{k}s{j}];" for j, (a, b) in enumerate(c["segs"]))
+            g += "".join(f"[a{k}s{j}]" for j in range(len(c["segs"]))) + f"concat=n={len(c['segs'])}:v=0:a=1,aresample=48000[a{k}];"
+        g += "".join(f"[a{k}]" for k in range(len(used))) + f"amix=inputs={len(used)}:duration=longest,loudnorm=I=-16:TP=-1.5:LRA=11,aresample=48000,apad,atrim=0:{dur}[a]"
         ff(*[x for src in srcs for x in ("-i", src)], "-filter_complex", g, "-map", "[v]", "-map", "[a]", *fix, *ENC, out)
         return out
 
