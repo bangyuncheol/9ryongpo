@@ -402,7 +402,8 @@ if WEB_DIST.is_dir():
 
     @app.get("/sw.js", include_in_schema=False)
     def service_worker() -> FileResponse:
-        """서비스 워커는 캐시하지 않는다(Cloudflare 기본 4시간 캐시 때문에 배포 뒤에도 옛 알림 아이콘이 남았다, 10/13)."""
+        """서비스 워커는 캐시하지 않는다(Cloudflare 기본 4시간 캐시 때문에 배포 뒤에도 옛 알림 아이콘이 남았다, 10/13).
+        화면은 /sw.js?v=N 으로 등록한다(WaitFish SW_URL) — 쿼리는 무시하고 같은 파일."""
         return FileResponse(WEB_DIST / "sw.js", media_type="text/javascript", headers={"Cache-Control": "no-cache, no-store, must-revalidate"})
 
     @app.get("/demo", include_in_schema=False)

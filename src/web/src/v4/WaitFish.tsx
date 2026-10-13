@@ -11,6 +11,9 @@ import { phoneDisplay, phoneOnlyDigits, phoneValid } from '../phone'
 const KEY = 'wipan_sub_species'
 const PHONE_KEY = 'wipan_call_phone'
 
+// 서비스 워커 주소. sw.js 를 바꾸면 v 를 올린다 — 주소가 바뀌어야 Cloudflare 에 남은 옛 사본을 피하고,
+// 이미 신청한 브라우저도 같은 등록(푸시 구독 유지)에서 새 스크립트로 바뀐다(10/13: 옛 알림 아이콘이 남았음)
+const SW_URL = '/sw.js?v=2'
 const supported = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window
 const read = (k: string) => { try { return localStorage.getItem(k) } catch { return null } }
 const write = (k: string, v: string | null) => { try { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v) } catch { /* 표시만 못 함 */ } }
@@ -70,7 +73,9 @@ export default function WaitFish({ phoneEnabled, onChange, showMore = false, one
     if (!supported()) return
     navigator.serviceWorker.getRegistration()
       .then(async (reg) => {
-        reg?.update().catch(console.error) // 예전에 신청한 브라우저도 새 서비스 워커(새 알림 아이콘)로 바로 바꾼다(10/13)
+        // 예전에 신청한 브라우저도 새 서비스 워커(새 알림 아이콘)로 바로 바꾼다(10/13)
+        if (reg && !(reg.active ?? reg.waiting ?? reg.installing)?.scriptURL.endsWith(SW_URL)) navigator.serviceWorker.register(SW_URL).catch(console.error)
+        else reg?.update().catch(console.error)
         setPushOn(!!(reg && (await reg.pushManager.getSubscription())))
       })
       .catch(console.error)
@@ -79,7 +84,7 @@ export default function WaitFish({ phoneEnabled, onChange, showMore = false, one
   const subscribePush = async (sp: string[] | null) => {
     const perm = await Notification.requestPermission()
     if (perm !== 'granted') throw new Error('알림이 차단돼 있습니다. 크롬 설정 › 사이트 설정 › 알림에서 허용해 주세요.')
-    const reg = await navigator.serviceWorker.register('/sw.js')
+    const reg = await navigator.serviceWorker.register(SW_URL)
     await navigator.serviceWorker.ready
     const { publicKey } = await api.pushKey()
     const sub = (await reg.pushManager.getSubscription())
