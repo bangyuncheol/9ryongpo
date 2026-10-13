@@ -1,11 +1,10 @@
 """timeline.json + assets/live/shots.json → composition/index.html (배마중 취재영상, 가로 1920×1080).
 
 prep.py 가 이어 붙인 촬영분(footage.mp4)을 바닥에 깔고 그 위에
-  · 자막: 원본 초(t/end) → 컷 시작 + (t - in). 인터뷰는 말한 사람 표시(Q = 우리 팀)
+  · 자막: 원본 초(t/end) → 컷 시작 + (t - in). 한 번에 하나, 가운데. 말한 사람 이름표는 자막 왼쪽 위
   · 검은 카드: 한 글자씩 찍히는 타자기 문장(추적 60분 톤)
-  · 인터뷰 컷: 왼쪽 위 ● REC, 오른쪽 위 누구인지, 왼쪽 아래 '음성변조' 표시
-  · 몽타주 캡션·두 번째 방문 표시·데이터 한 줄(실제 위판 실적)
-  · 아웃트로: 앱 아이콘 + 워드마크 + 한 줄 설명 + 주소
+  · 인터뷰 컷: 왼쪽 위 ● REC, 오른쪽 위 '음성변조'. 인터뷰 끝(summary)은 화면을 어둡게 하고 한 말을 글로 모아 보여 준다
+  · 오프닝 분할 화면의 '첫 번째 방문'·'두 번째 방문' 표시, 몽타주 캡션
 를 얹는다. 문장·시각은 timeline.json 에서만 고친다.
 
 글꼴: Noto Sans KR 에서 쓰는 글자만 추려 assets/fonts/NotoSansKR-subset.ttf 로 넣는다. 원본은 NOTO_KR_TTF(없으면 기존 서브셋 유지).
@@ -21,7 +20,7 @@ COMP = HERE / "composition"
 cfg = json.loads((HERE / "timeline.json").read_text(encoding="utf-8"))
 real = {s["id"]: s["dur"] for s in json.loads((COMP / "assets/live/shots.json").read_text(encoding="utf-8"))}
 W, H = 1920, 1080
-CORAL, BRAND = "#e8604c", "#073f4c"
+ACCENT, BRAND = "#1a7f8a", "#073f4c"   # 서비스 색(src/web/src/v4/v4.css --color-primary · --color-brand)
 fmt = lambda x: f"{x:.3f}".rstrip("0").rstrip(".")
 
 clips, js = [], []
@@ -34,7 +33,7 @@ for s in cfg["shots"]:
         who = sub.get("who")
         tag = f'<span class="who">{escape(who)}</span>' if who else ""
         clips.append(f'<div id="sub-{sid}-{j}" class="clip sub" data-start="{fmt(a)}" data-duration="{fmt(b - a)}" data-track-index="1">'
-                     f'{tag}<p class="txt">{escape(sub["text"])}</p></div>')
+                     f'<div class="blk">{tag}<p class="txt">{escape(sub["text"])}</p></div></div>')
     if s.get("card"):
         lines = s["card"]; step = (d - 1.2) / len(lines)
         spans = "".join(f'<p class="ln">{"".join(f"<i>{escape(c)}</i>" for c in ln)}</p>' for ln in lines)
@@ -51,19 +50,22 @@ for s in cfg["shots"]:
         cl = s.get("caption_len", d)
         clips.append(f'<div id="cap-{sid}" class="clip cap" data-start="{fmt(t0)}" data-duration="{fmt(cl)}" data-track-index="4">{escape(s["caption"])}</div>')
         js.append(f'tl.from("#cap-{sid}", {{ opacity: 0, y: 14, duration: 0.4, ease: "power2.out" }}, {fmt(t0)});')
-    if s.get("chip"):
-        a = t0 + d - 3.2
-        clips.append(f'<div id="chip-{sid}" class="clip chip" data-start="{fmt(a)}" data-duration="{fmt(t0 + d - a)}" data-track-index="4">{escape(s["chip"])}</div>')
-        js.append(f'tl.from("#chip-{sid}", {{ opacity: 0, x: -24, duration: 0.4, ease: "power2.out" }}, {fmt(a)});')
-    if s.get("data"):
-        a = t0 + 1.5
-        clips.append(f'<div id="data-{sid}" class="clip data" data-start="{fmt(a)}" data-duration="{fmt(min(3.0, t0 + d - a))}" data-track-index="5">{escape(s["data"])}</div>')
-        js.append(f'tl.from("#data-{sid}", {{ opacity: 0, y: 10, duration: 0.35 }}, {fmt(a)});')
+    if s["fit"] == "split":   # 반씩 나란한 두 방문 — 어느 쪽이 몇 번째 방문인지
+        for k, side in enumerate(("left", "right")):
+            clips.append(f'<div id="chip-{sid}-{k}" class="clip chip" style="left:{56 + k * W // 2}px" data-start="{fmt(t0)}" data-duration="{fmt(d)}" data-track-index="{4 + k}">{escape(s[side]["label"])}</div>')
+            js.append(f'tl.from("#chip-{sid}-{k}", {{ opacity: 0, x: -24, duration: 0.4, ease: "power2.out" }}, {fmt(t0 + 0.2 + k * 0.15)});')
+    if s.get("summary"):   # 인터뷰 끝: 말소리는 줄고 화면이 어두워지며 한 말을 글로 모아 보여 준다(뉴스식)
+        sm = s["summary"]
+        lines = "".join(f'<p class="sl">{escape(x)}</p>' for x in sm["lines"])
+        clips.append(f'<section id="sum-{sid}" class="clip sum" data-start="{fmt(t0)}" data-duration="{fmt(d)}" data-track-index="2">'
+                     f'<div class="scrim"></div><div class="blk"><span class="who">{escape(sm["who"])}</span>{lines}</div></section>')
+        js.append(f'tl.from("#sum-{sid} .scrim", {{ opacity: 0, duration: 0.8 }}, {fmt(t0)});')
+        js.append(f'tl.from("#sum-{sid} .who", {{ opacity: 0, duration: 0.3 }}, {fmt(t0 + 0.5)});')
+        js.append(f'tl.from("#sum-{sid} .sl", {{ opacity: 0, y: 12, duration: 0.35, stagger: 0.45 }}, {fmt(t0 + 0.7)});')
     t0 += d
 
 FOOT = t0
-O = cfg["outro"]
-TOTAL = round(FOOT + O["duration"], 3)
+TOTAL = round(FOOT, 3)   # 로고 아웃트로 없이 떠나는 브이로그 페이드아웃으로 끝(10/13 오너)
 
 HTML = f"""<!doctype html>
 <html lang="ko" data-resolution="landscape">
@@ -79,14 +81,15 @@ HTML = f"""<!doctype html>
                    font-family:"Noto Sans KR",sans-serif; }}
       #root {{ position:relative; width:{W}px; height:{H}px; }}
       #footage {{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }}
-      /* 자막: 시사 프로그램식 — 검은 기울어진 이름표(빨간 그림자) + 굵은 흰 글자에 검은 테두리, 가운데 아래 (10/13 오너 참고 이미지·가운데 정렬) */
-      .sub {{ position:absolute; left:90px; right:90px; bottom:64px; display:flex; flex-direction:column; align-items:center; text-align:center; gap:14px; }}
-      .who {{ display:inline-block; padding:6px 30px 8px; background:#151515; color:#fff; font-size:44px; font-weight:900; transform:skewX(-10deg); box-shadow:10px 8px 0 #d6312b; }}
-      .txt {{ max-width:1600px; font-size:62px; font-weight:800; line-height:1.28; color:#fff; word-break:keep-all;
+      /* 자막: 시사 프로그램식 — 가운데 아래, 이름표는 자막 왼쪽 위(서비스 청록) + 굵은 흰 글자에 검은 테두리 (10/13 오너) */
+      .sub {{ position:absolute; left:90px; right:90px; bottom:64px; display:flex; justify-content:center; }}
+      .blk {{ display:flex; flex-direction:column; align-items:flex-start; gap:12px; max-width:1600px; }}
+      .who {{ display:inline-block; padding:6px 24px 8px; background:{BRAND}; color:#fff; font-size:38px; font-weight:800; line-height:1.2; box-shadow:8px 6px 0 {ACCENT}; }}
+      .txt {{ align-self:center; text-align:center; font-size:62px; font-weight:800; line-height:1.28; color:#fff; word-break:keep-all;
              -webkit-text-stroke:9px #111; paint-order:stroke fill; text-shadow:0 3px 12px rgba(0,0,0,.6); }}
       .card {{ position:absolute; inset:0; background:#000; display:flex; flex-direction:column; justify-content:center; padding-left:260px; gap:26px; }}
       .card .ln {{ font-size:72px; font-weight:700; letter-spacing:-0.01em; }}
-      .card .ln:first-child {{ color:{CORAL}; }}
+      .card .ln:first-child {{ color:{ACCENT}; }}
       .card i {{ font-style:normal; opacity:0; }}
       .hud {{ position:absolute; inset:0; }}
       .hud .rec {{ position:absolute; left:56px; top:48px; font-size:34px; font-weight:700; line-height:1; letter-spacing:.08em; display:flex; align-items:center; gap:14px; }}
@@ -94,14 +97,11 @@ HTML = f"""<!doctype html>
       .hud .vc {{ position:absolute; right:56px; top:44px; padding:6px 16px; background:rgba(0,0,0,.6); font-size:28px; font-weight:700; }}
       .cap {{ position:absolute; left:90px; right:90px; bottom:64px; text-align:center; font-size:62px; font-weight:800; line-height:1.28; word-break:keep-all;
              -webkit-text-stroke:9px #111; paint-order:stroke fill; text-shadow:0 3px 12px rgba(0,0,0,.6); }}
-      .chip {{ position:absolute; left:56px; top:56px; padding:12px 24px; background:{CORAL}; font-size:36px; font-weight:800; }}
-      .data {{ position:absolute; left:50%; top:40px; transform:translateX(-50%); padding:10px 24px; background:{CORAL}; font-size:34px; font-weight:800; white-space:nowrap; }}
-      #outro {{ position:absolute; inset:0; background:#f6f8f8; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:30px; }}
-      #o-logo {{ display:flex; align-items:center; gap:28px; }}
-      #o-logo img.ic {{ height:150px; border-radius:34px; }}
-      #o-logo img.wm {{ height:110px; }}
-      #o-sub {{ font-size:46px; font-weight:700; color:{BRAND}; }}
-      #o-url {{ font-size:40px; font-weight:800; color:{CORAL}; letter-spacing:.02em; }}
+      .chip {{ position:absolute; top:48px; padding:10px 22px; background:{BRAND}; box-shadow:6px 5px 0 {ACCENT}; font-size:36px; font-weight:800; }}
+      .sum {{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }}
+      .sum .scrim {{ position:absolute; inset:0; background:rgba(0,0,0,.72); }}
+      .sum .blk {{ position:relative; gap:18px; }}
+      .sum .sl {{ font-size:44px; font-weight:700; line-height:1.35; word-break:keep-all; -webkit-text-stroke:6px #111; paint-order:stroke fill; }}
     </style>
   </head>
   <body>
@@ -110,11 +110,6 @@ HTML = f"""<!doctype html>
       <video id="footage" src="assets/live/footage.mp4" playsinline muted data-media-start="{fmt(2 / 30)}" data-start="0" data-duration="{fmt(FOOT)}" data-track-index="0"></video>
       <audio id="footage-audio" src="assets/live/footage.m4a" data-start="0" data-duration="{fmt(FOOT)}" data-track-index="9"></audio>
       {chr(10).join("      " + c for c in clips).lstrip()}
-      <section id="outro" class="clip" data-start="{fmt(FOOT)}" data-duration="{fmt(O['duration'])}" data-track-index="6">
-        <div id="o-logo"><img class="ic" src="assets/brand/icon.png" alt="" /><img class="wm" src="assets/brand/wordmark.png" alt="배마중" /></div>
-        <div id="o-sub">{escape(O['line'])}</div>
-        <div id="o-url">{escape(O['url'])}</div>
-      </section>
     </div>
     <script>
       // timeline.json 에서 생성됨 — 직접 고치지 말고 build.py 를 다시 돌린다.
@@ -122,9 +117,6 @@ HTML = f"""<!doctype html>
       document.fonts.ready.then(() => {{
         const tl = gsap.timeline({{ paused: true }});
         {(chr(10) + "        ").join(js)}
-        tl.from("#o-logo", {{ opacity: 0, scale: 0.85, duration: 0.5, ease: "back.out(1.4)" }}, {fmt(FOOT + 0.3)});
-        tl.from("#o-sub", {{ opacity: 0, y: 16, duration: 0.4 }}, {fmt(FOOT + 0.8)});
-        tl.from("#o-url", {{ opacity: 0, y: 16, duration: 0.4 }}, {fmt(FOOT + 1.1)});
         tl.to({{}}, {{ duration: 0.01 }}, {fmt(TOTAL - 0.01)});
         window.__timelines["main"] = tl;
         if (window.__hfForceTimelineRebind) window.__hfForceTimelineRebind();
@@ -134,7 +126,7 @@ HTML = f"""<!doctype html>
 </html>
 """
 (COMP / "index.html").write_text(HTML, encoding="utf-8")
-print(f"index.html 생성 — 총 {TOTAL:.1f}초 (촬영분 {FOOT:.1f}초 + 아웃트로 {O['duration']:g}초)")
+print(f"index.html 생성 — 총 {TOTAL:.1f}초")
 
 # 글꼴 서브셋(final/build.py 와 같은 방식)
 src = Path(os.environ.get("NOTO_KR_TTF", r"C:/Windows/Fonts/NotoSansKR-VF.ttf"))

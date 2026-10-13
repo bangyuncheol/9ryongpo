@@ -12,14 +12,15 @@
                    font-family:"Noto Sans KR",sans-serif; }
       #root { position:relative; width:1920px; height:1080px; }
       #footage { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
-      /* 자막: 시사 프로그램식 — 검은 기울어진 이름표(빨간 그림자) + 굵은 흰 글자에 검은 테두리, 가운데 아래 (10/13 오너 참고 이미지·가운데 정렬) */
-      .sub { position:absolute; left:90px; right:90px; bottom:64px; display:flex; flex-direction:column; align-items:center; text-align:center; gap:14px; }
-      .who { display:inline-block; padding:6px 30px 8px; background:#151515; color:#fff; font-size:44px; font-weight:900; transform:skewX(-10deg); box-shadow:10px 8px 0 #d6312b; }
-      .txt { max-width:1600px; font-size:62px; font-weight:800; line-height:1.28; color:#fff; word-break:keep-all;
+      /* 자막: 시사 프로그램식 — 가운데 아래, 이름표는 자막 왼쪽 위(서비스 청록) + 굵은 흰 글자에 검은 테두리 (10/13 오너) */
+      .sub { position:absolute; left:90px; right:90px; bottom:64px; display:flex; justify-content:center; }
+      .blk { display:flex; flex-direction:column; align-items:flex-start; gap:12px; max-width:1600px; }
+      .who { display:inline-block; padding:6px 24px 8px; background:#073f4c; color:#fff; font-size:38px; font-weight:800; line-height:1.2; box-shadow:8px 6px 0 #1a7f8a; }
+      .txt { align-self:center; text-align:center; font-size:62px; font-weight:800; line-height:1.28; color:#fff; word-break:keep-all;
              -webkit-text-stroke:9px #111; paint-order:stroke fill; text-shadow:0 3px 12px rgba(0,0,0,.6); }
       .card { position:absolute; inset:0; background:#000; display:flex; flex-direction:column; justify-content:center; padding-left:260px; gap:26px; }
       .card .ln { font-size:72px; font-weight:700; letter-spacing:-0.01em; }
-      .card .ln:first-child { color:#e8604c; }
+      .card .ln:first-child { color:#1a7f8a; }
       .card i { font-style:normal; opacity:0; }
       .hud { position:absolute; inset:0; }
       .hud .rec { position:absolute; left:56px; top:48px; font-size:34px; font-weight:700; line-height:1; letter-spacing:.08em; display:flex; align-items:center; gap:14px; }
@@ -27,95 +28,91 @@
       .hud .vc { position:absolute; right:56px; top:44px; padding:6px 16px; background:rgba(0,0,0,.6); font-size:28px; font-weight:700; }
       .cap { position:absolute; left:90px; right:90px; bottom:64px; text-align:center; font-size:62px; font-weight:800; line-height:1.28; word-break:keep-all;
              -webkit-text-stroke:9px #111; paint-order:stroke fill; text-shadow:0 3px 12px rgba(0,0,0,.6); }
-      .chip { position:absolute; left:56px; top:56px; padding:12px 24px; background:#e8604c; font-size:36px; font-weight:800; }
-      .data { position:absolute; left:50%; top:40px; transform:translateX(-50%); padding:10px 24px; background:#e8604c; font-size:34px; font-weight:800; white-space:nowrap; }
-      #outro { position:absolute; inset:0; background:#f6f8f8; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:30px; }
-      #o-logo { display:flex; align-items:center; gap:28px; }
-      #o-logo img.ic { height:150px; border-radius:34px; }
-      #o-logo img.wm { height:110px; }
-      #o-sub { font-size:46px; font-weight:700; color:#073f4c; }
-      #o-url { font-size:40px; font-weight:800; color:#e8604c; letter-spacing:.02em; }
+      .chip { position:absolute; top:48px; padding:10px 22px; background:#073f4c; box-shadow:6px 5px 0 #1a7f8a; font-size:36px; font-weight:800; }
+      .sum { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
+      .sum .scrim { position:absolute; inset:0; background:rgba(0,0,0,.72); }
+      .sum .blk { position:relative; gap:18px; }
+      .sum .sl { font-size:44px; font-weight:700; line-height:1.35; word-break:keep-all; -webkit-text-stroke:6px #111; paint-order:stroke fill; }
     </style>
   </head>
   <body>
-    <div id="root" data-composition-id="main" data-start="0" data-duration="111.4" data-width="1920" data-height="1080">
+    <div id="root" data-composition-id="main" data-start="0" data-duration="106" data-width="1920" data-height="1080">
       <!-- 렌더러가 영상을 2프레임 늦게 찍어(완성본을 촬영분과 프레임 비교해 확인) 영상만 2프레임 앞에서 시작하고, 소리는 따로 정시에 깐다 -->
-      <video id="footage" src="assets/live/footage.mp4" playsinline muted data-media-start="0.067" data-start="0" data-duration="105.9" data-track-index="0"></video>
-      <audio id="footage-audio" src="assets/live/footage.m4a" data-start="0" data-duration="105.9" data-track-index="9"></audio>
-      <section id="card-cold" class="clip card" data-start="0" data-duration="5" data-track-index="2"><p class="ln"><i>경</i><i>북</i><i> </i><i>포</i><i>항</i><i>,</i><i> </i><i>구</i><i>룡</i><i>포</i><i>항</i><i>.</i></p><p class="ln"><i>새</i><i>벽</i><i>의</i><i> </i><i>수</i><i>협</i><i> </i><i>위</i><i>판</i><i>장</i><i>.</i></p></section>
-      <div id="sub-v1a-0" class="clip sub" data-start="5" data-duration="5" data-track-index="1"><p class="txt">안녕하세요. 저희는 지금 구룡포 수협 위판장에 왔습니다.</p></div>
-      <div id="sub-v1b-0" class="clip sub" data-start="10" data-duration="2.5" data-track-index="1"><p class="txt">여기서 저희가 문제점을 한번 찾아보도록 하겠습니다.</p></div>
-      <div id="cap-mont1" class="clip cap" data-start="12.5" data-duration="5.4" data-track-index="4">“새벽 경매. 오늘은 뭐가, 얼마나 들어올까?”</div>
-      <div id="sub-v2-0" class="clip sub" data-start="17.9" data-duration="4.4" data-track-index="1"><p class="txt">안녕하세요. 저희는 구룡포 수협 위판장에 왔습니다.</p></div>
-      <div id="chip-v2" class="clip chip" data-start="19.1" data-duration="3.2" data-track-index="4">두 번째 방문 — 이번엔 직접 물어보기로 했다</div>
-      <section id="card-q1" class="clip card" data-start="27.3" data-duration="3" data-track-index="2"><p class="ln"><i>의</i><i>문</i><i> </i><i>1</i><i>.</i></p><p class="ln"><i>들</i><i>어</i><i>오</i><i>는</i><i> </i><i>양</i><i>은</i><i> </i><i>매</i><i>일</i><i> </i><i>같</i><i>을</i><i>까</i><i>?</i></p></section>
-      <div id="sub-i2a-0" class="clip sub" data-start="30.3" data-duration="3" data-track-index="1"><span class="who">인터뷰브릿지</span><p class="txt">통계도 보니까 매일매일도 다르고..</p></div>
-      <div id="hud-i2a" class="clip hud" data-start="30.3" data-duration="3" data-track-index="3"><span class="rec"><b></b>REC</span><span class="vc">음성변조</span></div>
-      <div id="sub-i2b-0" class="clip sub" data-start="33.3" data-duration="3.4" data-track-index="1"><span class="who">경매 참여 상인</span><p class="txt">잡는 게 다른데 당연히 다를 수밖에 없어.</p></div>
-      <div id="sub-i2b-1" class="clip sub" data-start="36.7" data-duration="1.6" data-track-index="1"><span class="who">인터뷰브릿지</span><p class="txt">차이가 그렇게 많이 나요?</p></div>
-      <div id="sub-i2b-2" class="clip sub" data-start="38.3" data-duration="1" data-track-index="1"><span class="who">경매 참여 상인</span><p class="txt">차이가 나지.</p></div>
-      <div id="hud-i2b" class="clip hud" data-start="33.3" data-duration="6" data-track-index="3"><span class="rec"><b></b>REC</span><span class="vc">음성변조</span></div>
-      <div id="data-i2b" class="clip data" data-start="34.8" data-duration="3" data-track-index="5">실제로 하루 위판량 0t ~ 61t · 2025년 10월 구룡포수협</div>
-      <div id="sub-i2c-0" class="clip sub" data-start="39.3" data-duration="3" data-track-index="1"><span class="who">경매 참여 상인</span><p class="txt">이게 공산품처럼 찍어내는 게 아니잖아.</p></div>
-      <div id="hud-i2c" class="clip hud" data-start="39.3" data-duration="3" data-track-index="3"><span class="rec"><b></b>REC</span><span class="vc">음성변조</span></div>
-      <div id="sub-i2d-0" class="clip sub" data-start="42.3" data-duration="5" data-track-index="1"><span class="who">경매 참여 상인</span><p class="txt">40개 잡는 배가 있고, 어떤 배는 10개밖에 잡는 배가 없거든.</p></div>
-      <div id="sub-i2d-1" class="clip sub" data-start="47.3" data-duration="4.5" data-track-index="1"><span class="who">경매 참여 상인</span><p class="txt">농사로 치면, 내 밭이 비옥한가… 그런 차이도 있고.</p></div>
-      <div id="sub-i2d-2" class="clip sub" data-start="51.8" data-duration="3" data-track-index="1"><span class="who">경매 참여 상인</span><p class="txt">변수가 여러 가지가 있지.</p></div>
-      <div id="hud-i2d" class="clip hud" data-start="42.3" data-duration="12.5" data-track-index="3"><span class="rec"><b></b>REC</span><span class="vc">음성변조</span></div>
-      <section id="card-q2" class="clip card" data-start="54.8" data-duration="3" data-track-index="2"><p class="ln"><i>의</i><i>문</i><i> </i><i>2</i><i>.</i></p><p class="ln"><i>그</i><i>럼</i><i> </i><i>배</i><i>는</i><i> </i><i>언</i><i>제</i><i> </i><i>들</i><i>어</i><i>오</i><i>나</i><i>?</i></p></section>
-      <div id="sub-s1a-0" class="clip sub" data-start="57.8" data-duration="4" data-track-index="1"><span class="who">인터뷰브릿지</span><p class="txt">맨날 어획량이 다르잖아요. 그게 나가는 배가 좀 달라서 그런가요?</p></div>
-      <div id="hud-s1a" class="clip hud" data-start="57.8" data-duration="4" data-track-index="3"><span class="rec"><b></b>REC</span><span class="vc">음성변조</span></div>
-      <div id="sub-s1b-0" class="clip sub" data-start="61.8" data-duration="5.8" data-track-index="1"><span class="who">수협 판매과 직원</span><p class="txt">여기 와도 되고, 딴 데로 갈 수도 있고, 그런 것도 있고.</p></div>
-      <div id="sub-s1b-1" class="clip sub" data-start="67.6" data-duration="3.7" data-track-index="1"><span class="who">수협 판매과 직원</span><p class="txt">이제 조업량에 따라서…</p></div>
-      <div id="sub-s1b-2" class="clip sub" data-start="71.3" data-duration="2.5" data-track-index="1"><span class="who">인터뷰브릿지</span><p class="txt">그럼 조업이 다 안 되면 안 들어오기도 하나요?</p></div>
-      <div id="sub-s1b-3" class="clip sub" data-start="73.8" data-duration="1" data-track-index="1"><span class="who">수협 판매과 직원</span><p class="txt">그렇죠.</p></div>
-      <div id="hud-s1b" class="clip hud" data-start="61.8" data-duration="13" data-track-index="3"><span class="rec"><b></b>REC</span><span class="vc">음성변조</span></div>
-      <div id="sub-s1c-0" class="clip sub" data-start="74.8" data-duration="5" data-track-index="1"><span class="who">인터뷰브릿지</span><p class="txt">그러면 들어오는 배들은 어느 정도 채우고 들어간다고 생각하시겠네요.</p></div>
-      <div id="sub-s1c-1" class="clip sub" data-start="79.8" data-duration="2.5" data-track-index="1"><span class="who">수협 판매과 직원</span><p class="txt">그렇죠.</p></div>
-      <div id="hud-s1c" class="clip hud" data-start="74.8" data-duration="7.5" data-track-index="3"><span class="rec"><b></b>REC</span><span class="vc">음성변조</span></div>
-      <section id="card-end" class="clip card" data-start="82.3" data-duration="5.5" data-track-index="2"><p class="ln"><i>양</i><i>은</i><i> </i><i>매</i><i>일</i><i> </i><i>다</i><i>르</i><i>고</i><i>,</i></p><p class="ln"><i>배</i><i>는</i><i> </i><i>다</i><i> </i><i>채</i><i>워</i><i>야</i><i> </i><i>들</i><i>어</i><i>온</i><i>다</i><i>.</i></p><p class="ln"><i>새</i><i>벽</i><i>까</i><i>지</i><i>,</i><i> </i><i>아</i><i>무</i><i>도</i><i> </i><i>모</i><i>른</i><i>다</i><i>.</i></p></section>
-      <div id="sub-leave-0" class="clip sub" data-start="87.8" data-duration="5.5" data-track-index="1"><p class="txt">시장 상인분들하고 경매하시는 분들, 중매인들 이야기를 들으면서</p></div>
-      <div id="sub-leave-1" class="clip sub" data-start="93.3" data-duration="3.6" data-track-index="1"><p class="txt">이 시장이 어떤지 알 수 있었던 것 같고요.</p></div>
-      <div id="sub-leave-2" class="clip sub" data-start="96.9" data-duration="3.5" data-track-index="1"><p class="txt">인터넷에 나와 있지 않은 사실을 많이 알 수 있어서</p></div>
-      <div id="sub-leave-3" class="clip sub" data-start="100.4" data-duration="5.5" data-track-index="1"><p class="txt">저희가 문제 상황을 잡고, 솔루션을 구축하는 데 큰 도움이 됐던 것 같습니다.</p></div>
-      <section id="outro" class="clip" data-start="105.9" data-duration="5.5" data-track-index="6">
-        <div id="o-logo"><img class="ic" src="assets/brand/icon.png" alt="" /><img class="wm" src="assets/brand/wordmark.png" alt="배마중" /></div>
-        <div id="o-sub">구룡포항 새벽 입항·어종 알림</div>
-        <div id="o-url">bmj.kr</div>
-      </section>
+      <video id="footage" src="assets/live/footage.mp4" playsinline muted data-media-start="0.067" data-start="0" data-duration="106" data-track-index="0"></video>
+      <audio id="footage-audio" src="assets/live/footage.m4a" data-start="0" data-duration="106" data-track-index="9"></audio>
+      <div id="sub-open-0" class="clip sub" data-start="0" data-duration="5" data-track-index="1"><div class="blk"><p class="txt">안녕하세요. 저희는 지금 구룡포 수협 위판장에 왔습니다.</p></div></div>
+      <div id="sub-open-1" class="clip sub" data-start="5" data-duration="2.5" data-track-index="1"><div class="blk"><p class="txt">여기서 저희가 문제점을 한번 찾아보도록 하겠습니다.</p></div></div>
+      <div id="chip-open-0" class="clip chip" style="left:56px" data-start="0" data-duration="7.5" data-track-index="4">첫 번째 방문</div>
+      <div id="chip-open-1" class="clip chip" style="left:1016px" data-start="0" data-duration="7.5" data-track-index="5">두 번째 방문</div>
+      <div id="cap-mont1" class="clip cap" data-start="7.5" data-duration="5.4" data-track-index="4">(새벽 경매, 오늘은 뭐가 들어올까?)</div>
+      <section id="card-q1" class="clip card" data-start="12.9" data-duration="3" data-track-index="2"><p class="ln"><i>의</i><i>문</i><i> </i><i>1</i><i>.</i></p><p class="ln"><i>들</i><i>어</i><i>오</i><i>는</i><i> </i><i>양</i><i>은</i><i> </i><i>매</i><i>일</i><i> </i><i>같</i><i>을</i><i>까</i><i>?</i></p></section>
+      <div id="sub-i2a-0" class="clip sub" data-start="15.9" data-duration="3" data-track-index="1"><div class="blk"><span class="who">인터뷰브릿지</span><p class="txt">통계도 보니까 매일매일도 다르고..</p></div></div>
+      <div id="hud-i2a" class="clip hud" data-start="15.9" data-duration="3" data-track-index="3"><span class="rec"><b></b>REC</span><span class="vc">음성변조</span></div>
+      <div id="sub-i2b-0" class="clip sub" data-start="18.9" data-duration="3.4" data-track-index="1"><div class="blk"><span class="who">경매 참여 상인</span><p class="txt">잡는 게 다른데 당연히 다를 수밖에 없어.</p></div></div>
+      <div id="sub-i2b-1" class="clip sub" data-start="22.3" data-duration="1.6" data-track-index="1"><div class="blk"><span class="who">인터뷰브릿지</span><p class="txt">차이가 그렇게 많이 나요?</p></div></div>
+      <div id="sub-i2b-2" class="clip sub" data-start="23.9" data-duration="1" data-track-index="1"><div class="blk"><span class="who">경매 참여 상인</span><p class="txt">차이가 나지.</p></div></div>
+      <div id="hud-i2b" class="clip hud" data-start="18.9" data-duration="6" data-track-index="3"><span class="rec"><b></b>REC</span><span class="vc">음성변조</span></div>
+      <div id="sub-i2c-0" class="clip sub" data-start="24.9" data-duration="3" data-track-index="1"><div class="blk"><span class="who">경매 참여 상인</span><p class="txt">이게 공산품처럼 찍어내는 게 아니잖아.</p></div></div>
+      <div id="hud-i2c" class="clip hud" data-start="24.9" data-duration="3" data-track-index="3"><span class="rec"><b></b>REC</span><span class="vc">음성변조</span></div>
+      <div id="sub-i2d-0" class="clip sub" data-start="27.9" data-duration="5" data-track-index="1"><div class="blk"><span class="who">경매 참여 상인</span><p class="txt">40개 잡는 배가 있고, 어떤 배는 10개밖에 잡는 배가 없거든.</p></div></div>
+      <div id="sub-i2d-1" class="clip sub" data-start="32.9" data-duration="4.5" data-track-index="1"><div class="blk"><span class="who">경매 참여 상인</span><p class="txt">농사로 치면, 내 밭이 비옥한가… 그런 차이도 있고.</p></div></div>
+      <div id="sub-i2d-2" class="clip sub" data-start="37.4" data-duration="3" data-track-index="1"><div class="blk"><span class="who">경매 참여 상인</span><p class="txt">변수가 여러 가지가 있지.</p></div></div>
+      <div id="hud-i2d" class="clip hud" data-start="27.9" data-duration="12.5" data-track-index="3"><span class="rec"><b></b>REC</span><span class="vc">음성변조</span></div>
+      <div id="hud-i2sum" class="clip hud" data-start="40.4" data-duration="8" data-track-index="3"><span class="rec"><b></b>REC</span><span class="vc">음성변조</span></div>
+      <section id="sum-i2sum" class="clip sum" data-start="40.4" data-duration="8" data-track-index="2"><div class="scrim"></div><div class="blk"><span class="who">경매 참여 상인</span><p class="sl">양식은 일정하지만, 잡는 건 다를 수밖에 없어.</p><p class="sl">날씨도, 시간대도… 변수가 여러 가지가 있지.</p><p class="sl">40개 잡는 배가 있고, 10개밖에 못 잡는 배도 있어.</p><p class="sl">배마다 장비가 다르고, 바다에도 각자 구역이 있어.</p><p class="sl">물량을 못 채우면 바다에 있으면서 계속 작업을 하지.</p></div></section>
+      <section id="card-q2" class="clip card" data-start="48.4" data-duration="3" data-track-index="2"><p class="ln"><i>의</i><i>문</i><i> </i><i>2</i><i>.</i></p><p class="ln"><i>그</i><i>럼</i><i> </i><i>배</i><i>는</i><i> </i><i>언</i><i>제</i><i> </i><i>들</i><i>어</i><i>오</i><i>나</i><i>?</i></p></section>
+      <div id="sub-s1a-0" class="clip sub" data-start="51.4" data-duration="4" data-track-index="1"><div class="blk"><span class="who">인터뷰브릿지</span><p class="txt">맨날 어획량이 다르잖아요. 그게 나가는 배가 좀 달라서 그런가요?</p></div></div>
+      <div id="hud-s1a" class="clip hud" data-start="51.4" data-duration="4" data-track-index="3"><span class="rec"><b></b>REC</span><span class="vc">음성변조</span></div>
+      <div id="sub-s1b-0" class="clip sub" data-start="55.4" data-duration="5.8" data-track-index="1"><div class="blk"><span class="who">수협 판매과 직원</span><p class="txt">여기 와도 되고, 딴 데로 갈 수도 있고, 그런 것도 있고.</p></div></div>
+      <div id="sub-s1b-1" class="clip sub" data-start="61.2" data-duration="3.7" data-track-index="1"><div class="blk"><span class="who">수협 판매과 직원</span><p class="txt">이제 조업량에 따라서…</p></div></div>
+      <div id="sub-s1b-2" class="clip sub" data-start="64.9" data-duration="2.5" data-track-index="1"><div class="blk"><span class="who">인터뷰브릿지</span><p class="txt">그럼 조업이 다 안 되면 안 들어오기도 하나요?</p></div></div>
+      <div id="sub-s1b-3" class="clip sub" data-start="67.4" data-duration="1" data-track-index="1"><div class="blk"><span class="who">수협 판매과 직원</span><p class="txt">그렇죠.</p></div></div>
+      <div id="hud-s1b" class="clip hud" data-start="55.4" data-duration="13" data-track-index="3"><span class="rec"><b></b>REC</span><span class="vc">음성변조</span></div>
+      <div id="sub-s1c-0" class="clip sub" data-start="68.4" data-duration="5" data-track-index="1"><div class="blk"><span class="who">인터뷰브릿지</span><p class="txt">그러면 들어오는 배들은 어느 정도 채우고 들어간다고 생각하시겠네요.</p></div></div>
+      <div id="sub-s1c-1" class="clip sub" data-start="73.4" data-duration="2.5" data-track-index="1"><div class="blk"><span class="who">수협 판매과 직원</span><p class="txt">그렇죠.</p></div></div>
+      <div id="hud-s1c" class="clip hud" data-start="68.4" data-duration="7.5" data-track-index="3"><span class="rec"><b></b>REC</span><span class="vc">음성변조</span></div>
+      <div id="hud-s1sum" class="clip hud" data-start="75.9" data-duration="6.5" data-track-index="3"><span class="rec"><b></b>REC</span><span class="vc">음성변조</span></div>
+      <section id="sum-s1sum" class="clip sum" data-start="75.9" data-duration="6.5" data-track-index="2"><div class="scrim"></div><div class="blk"><span class="who">수협 판매과 직원</span><p class="sl">배는 조업량에 따라 여기로 올 수도, 다른 데로 갈 수도 있어요.</p><p class="sl">조업이 다 안 되면 안 들어오기도 하죠.</p><p class="sl">들어오는 배들은 어느 정도 채우고 들어와요.</p></div></section>
+      <section id="card-end" class="clip card" data-start="82.4" data-duration="5.5" data-track-index="2"><p class="ln"><i>양</i><i>은</i><i> </i><i>매</i><i>일</i><i> </i><i>다</i><i>르</i><i>고</i><i>,</i></p><p class="ln"><i>배</i><i>는</i><i> </i><i>다</i><i> </i><i>채</i><i>워</i><i>야</i><i> </i><i>들</i><i>어</i><i>온</i><i>다</i><i>.</i></p><p class="ln"><i>새</i><i>벽</i><i>까</i><i>지</i><i>,</i><i> </i><i>아</i><i>무</i><i>도</i><i> </i><i>모</i><i>른</i><i>다</i><i>.</i></p></section>
+      <div id="sub-leave-0" class="clip sub" data-start="87.9" data-duration="5.5" data-track-index="1"><div class="blk"><p class="txt">시장 상인분들하고 경매하시는 분들, 중매인들 이야기를 들으면서</p></div></div>
+      <div id="sub-leave-1" class="clip sub" data-start="93.4" data-duration="3.6" data-track-index="1"><div class="blk"><p class="txt">이 시장이 어떤지 알 수 있었던 것 같고요.</p></div></div>
+      <div id="sub-leave-2" class="clip sub" data-start="97" data-duration="3.5" data-track-index="1"><div class="blk"><p class="txt">인터넷에 나와 있지 않은 사실을 많이 알 수 있어서</p></div></div>
+      <div id="sub-leave-3" class="clip sub" data-start="100.5" data-duration="5.5" data-track-index="1"><div class="blk"><p class="txt">저희가 문제 상황을 잡고, 솔루션을 구축하는 데 큰 도움이 됐던 것 같습니다.</p></div></div>
     </div>
     <script>
       // timeline.json 에서 생성됨 — 직접 고치지 말고 build.py 를 다시 돌린다.
       window.__timelines = window.__timelines || {};
       document.fonts.ready.then(() => {
         const tl = gsap.timeline({ paused: true });
-        tl.to("#card-cold .ln:nth-child(1) i", { opacity: 1, duration: 0.01, stagger: 0.07 }, 0.3);
-        tl.to("#card-cold .ln:nth-child(2) i", { opacity: 1, duration: 0.01, stagger: 0.07 }, 2.2);
-        tl.to("#card-cold", { opacity: 0, duration: 0.3 }, 4.65);
-        tl.from("#cap-mont1", { opacity: 0, y: 14, duration: 0.4, ease: "power2.out" }, 12.5);
-        tl.from("#chip-v2", { opacity: 0, x: -24, duration: 0.4, ease: "power2.out" }, 19.1);
-        tl.to("#card-q1 .ln:nth-child(1) i", { opacity: 1, duration: 0.01, stagger: 0.07 }, 27.6);
-        tl.to("#card-q1 .ln:nth-child(2) i", { opacity: 1, duration: 0.01, stagger: 0.036 }, 28.5);
-        tl.to("#card-q1", { opacity: 0, duration: 0.3 }, 29.95);
-        tl.to("#hud-i2a .rec b", { opacity: 0.15, duration: 0.5, repeat: 5, yoyo: true, ease: "steps(1)" }, 30.3);
-        tl.to("#hud-i2b .rec b", { opacity: 0.15, duration: 0.5, repeat: 11, yoyo: true, ease: "steps(1)" }, 33.3);
-        tl.from("#data-i2b", { opacity: 0, y: 10, duration: 0.35 }, 34.8);
-        tl.to("#hud-i2c .rec b", { opacity: 0.15, duration: 0.5, repeat: 5, yoyo: true, ease: "steps(1)" }, 39.3);
-        tl.to("#hud-i2d .rec b", { opacity: 0.15, duration: 0.5, repeat: 24, yoyo: true, ease: "steps(1)" }, 42.3);
-        tl.to("#card-q2 .ln:nth-child(1) i", { opacity: 1, duration: 0.01, stagger: 0.07 }, 55.1);
-        tl.to("#card-q2 .ln:nth-child(2) i", { opacity: 1, duration: 0.01, stagger: 0.039 }, 56);
-        tl.to("#card-q2", { opacity: 0, duration: 0.3 }, 57.45);
-        tl.to("#hud-s1a .rec b", { opacity: 0.15, duration: 0.5, repeat: 7, yoyo: true, ease: "steps(1)" }, 57.8);
-        tl.to("#hud-s1b .rec b", { opacity: 0.15, duration: 0.5, repeat: 25, yoyo: true, ease: "steps(1)" }, 61.8);
-        tl.to("#hud-s1c .rec b", { opacity: 0.15, duration: 0.5, repeat: 14, yoyo: true, ease: "steps(1)" }, 74.8);
-        tl.to("#card-end .ln:nth-child(1) i", { opacity: 1, duration: 0.01, stagger: 0.07 }, 82.6);
-        tl.to("#card-end .ln:nth-child(2) i", { opacity: 1, duration: 0.01, stagger: 0.061 }, 84.033);
-        tl.to("#card-end .ln:nth-child(3) i", { opacity: 1, duration: 0.01, stagger: 0.061 }, 85.467);
-        tl.to("#card-end", { opacity: 0, duration: 0.3 }, 87.45);
-        tl.from("#o-logo", { opacity: 0, scale: 0.85, duration: 0.5, ease: "back.out(1.4)" }, 106.2);
-        tl.from("#o-sub", { opacity: 0, y: 16, duration: 0.4 }, 106.7);
-        tl.from("#o-url", { opacity: 0, y: 16, duration: 0.4 }, 107);
-        tl.to({}, { duration: 0.01 }, 111.39);
+        tl.from("#chip-open-0", { opacity: 0, x: -24, duration: 0.4, ease: "power2.out" }, 0.2);
+        tl.from("#chip-open-1", { opacity: 0, x: -24, duration: 0.4, ease: "power2.out" }, 0.35);
+        tl.from("#cap-mont1", { opacity: 0, y: 14, duration: 0.4, ease: "power2.out" }, 7.5);
+        tl.to("#card-q1 .ln:nth-child(1) i", { opacity: 1, duration: 0.01, stagger: 0.07 }, 13.2);
+        tl.to("#card-q1 .ln:nth-child(2) i", { opacity: 1, duration: 0.01, stagger: 0.036 }, 14.1);
+        tl.to("#card-q1", { opacity: 0, duration: 0.3 }, 15.55);
+        tl.to("#hud-i2a .rec b", { opacity: 0.15, duration: 0.5, repeat: 5, yoyo: true, ease: "steps(1)" }, 15.9);
+        tl.to("#hud-i2b .rec b", { opacity: 0.15, duration: 0.5, repeat: 11, yoyo: true, ease: "steps(1)" }, 18.9);
+        tl.to("#hud-i2c .rec b", { opacity: 0.15, duration: 0.5, repeat: 5, yoyo: true, ease: "steps(1)" }, 24.9);
+        tl.to("#hud-i2d .rec b", { opacity: 0.15, duration: 0.5, repeat: 24, yoyo: true, ease: "steps(1)" }, 27.9);
+        tl.to("#hud-i2sum .rec b", { opacity: 0.15, duration: 0.5, repeat: 15, yoyo: true, ease: "steps(1)" }, 40.4);
+        tl.from("#sum-i2sum .scrim", { opacity: 0, duration: 0.8 }, 40.4);
+        tl.from("#sum-i2sum .who", { opacity: 0, duration: 0.3 }, 40.9);
+        tl.from("#sum-i2sum .sl", { opacity: 0, y: 12, duration: 0.35, stagger: 0.45 }, 41.1);
+        tl.to("#card-q2 .ln:nth-child(1) i", { opacity: 1, duration: 0.01, stagger: 0.07 }, 48.7);
+        tl.to("#card-q2 .ln:nth-child(2) i", { opacity: 1, duration: 0.01, stagger: 0.039 }, 49.6);
+        tl.to("#card-q2", { opacity: 0, duration: 0.3 }, 51.05);
+        tl.to("#hud-s1a .rec b", { opacity: 0.15, duration: 0.5, repeat: 7, yoyo: true, ease: "steps(1)" }, 51.4);
+        tl.to("#hud-s1b .rec b", { opacity: 0.15, duration: 0.5, repeat: 25, yoyo: true, ease: "steps(1)" }, 55.4);
+        tl.to("#hud-s1c .rec b", { opacity: 0.15, duration: 0.5, repeat: 14, yoyo: true, ease: "steps(1)" }, 68.4);
+        tl.to("#hud-s1sum .rec b", { opacity: 0.15, duration: 0.5, repeat: 12, yoyo: true, ease: "steps(1)" }, 75.9);
+        tl.from("#sum-s1sum .scrim", { opacity: 0, duration: 0.8 }, 75.9);
+        tl.from("#sum-s1sum .who", { opacity: 0, duration: 0.3 }, 76.4);
+        tl.from("#sum-s1sum .sl", { opacity: 0, y: 12, duration: 0.35, stagger: 0.45 }, 76.6);
+        tl.to("#card-end .ln:nth-child(1) i", { opacity: 1, duration: 0.01, stagger: 0.07 }, 82.7);
+        tl.to("#card-end .ln:nth-child(2) i", { opacity: 1, duration: 0.01, stagger: 0.061 }, 84.133);
+        tl.to("#card-end .ln:nth-child(3) i", { opacity: 1, duration: 0.01, stagger: 0.061 }, 85.567);
+        tl.to("#card-end", { opacity: 0, duration: 0.3 }, 87.55);
+        tl.to({}, { duration: 0.01 }, 105.99);
         window.__timelines["main"] = tl;
         if (window.__hfForceTimelineRebind) window.__hfForceTimelineRebind();
       });

@@ -1,13 +1,15 @@
 """timeline.json 의 컷을 원본에서 잘라 1920×1080 30fps 촬영분 하나(composition/assets/live/footage.mp4)로 잇는다.
 
 컷마다:
-  · fit  cover(가로 꽉) | pillar(세로 영상 가운데 + 양옆은 같은 영상을 흐리게) | black(검은 화면, 원본 소리만 작게. src 없으면 무음)
+  · fit  split(두 영상을 반씩 나란히, 소리는 왼쪽. left/right.segs = [[시작, 끝], …] 원본 초) | cover(가로 꽉) | pillar(세로 영상 가운데 + 양옆은 같은 영상을 흐리게) | black(검은 화면, 원본 소리만 작게. src 없으면 무음)
   · rotate ccw   폰을 눕혀 찍은 세로 파일을 가로로 세운다
   · mosaic       얼굴 모자이크(mediapipe blaze_face_short_range, 화면을 짧은 변의 절반 크기 조각으로 나눠 작은 얼굴도 잡는다).
                  잡은 자리를 앞뒤 1초 동안 가려 놓친 프레임(옆얼굴·처음 보이는 순간)도 가린다
   · hide         [[x, y, w, h, 시작초, 끝초], …] 완성 화면(1920×1080) 좌표로 상호명 간판 등을 모자이크(컷 안 시각)
   · blur         화면 전체를 흐리게(인터뷰이·간판까지 알아볼 수 없게, 10/13 오너)
   · voice        음성변조(음높이 0.85배, 빠르기는 그대로)
+  · afade_out 초  컷 시작부터 그 초 동안 소리를 줄여 없앤다(인터뷰 끝 정리 자막 구간 — 말은 끊고 글로 보여 준다)
+  · fade_end 초   컷 끝 그 초 동안 화면·소리를 검게 페이드(영상 마무리)
   · grade doc    인터뷰 톤(채도·밝기 낮추고 푸른 기)
 실제 길이는 composition/assets/live/shots.json 에 적어 build.py 가 자막 시각을 맞춘다.
 
@@ -100,6 +102,17 @@ def build_shot(i: int, s: dict) -> Path:
             ff("-f", "lavfi", "-i", f"color=black:s={W}x{H}:r={FPS}", "-f", "lavfi", "-i", "anullsrc=r=48000:cl=stereo", *fix, *ENC, out)
         return out
 
+    if s["fit"] == "split":   # 두 방문 브이로그를 반씩 동시에 — 소리는 왼쪽(첫 방문)만
+        L, R = s["left"], s["right"]; hw = W // 2 - 4
+        def side(k, segs, tag):
+            parts_ = "".join(f"[{k}:v]trim={a}:{b},setpts=PTS-STARTPTS[{tag}{j}];" for j, (a, b) in enumerate(segs))
+            return parts_ + "".join(f"[{tag}{j}]" for j in range(len(segs))) + f"concat=n={len(segs)}:v=1:a=0,scale={hw}:{H}:force_original_aspect_ratio=increase,crop={hw}:{H},setsar=1[{tag}];"
+        aud = "".join(f"[0:a]atrim={a}:{b},asetpts=PTS-STARTPTS[a{j}];" for j, (a, b) in enumerate(L["segs"]))
+        aud += "".join(f"[a{j}]" for j in range(len(L["segs"]))) + f"concat=n={len(L['segs'])}:v=0:a=1,loudnorm=I=-16:TP=-1.5:LRA=11,aresample=48000,apad,atrim=0:{dur}[a]"
+        graph = side(0, L["segs"], "l") + side(1, R["segs"], "r") + f"[l]pad={W // 2 + 4}:{H}:0:0:black[lp];[lp][r]hstack[v];" + aud
+        ff("-i", SRC_DIR / L["src"], "-i", SRC_DIR / R["src"], "-filter_complex", graph, "-map", "[v]", "-map", "[a]", *fix, *ENC, out)
+        return out
+
     raw = TMP / f"{i:02d}_{s['id']}_raw.mp4"
     ff("-ss", s["in"], "-t", dur + 0.5, "-i", SRC_DIR / s["src"], "-c:v", "libx264", "-crf", "14", "-c:a", "aac", "-b:a", "256k", raw)
     if s.get("mosaic"):
@@ -118,6 +131,12 @@ def build_shot(i: int, s: dict) -> Path:
              f"[m{k}][p{k}]overlay={x}:{y}:enable='between(t,{a0},{a1})'[v]"
     af = "asetrate=48000*0.85,aresample=48000,atempo=1.17647," if s.get("voice") else ""
     af += f"loudnorm=I=-16:TP=-1.5:LRA=11,aresample=48000,apad,atrim=0:{dur},afade=t=in:d=0.08"
+    if s.get("afade_out"):
+        af += f",afade=t=out:st=0:d={s['afade_out']}"
+    if s.get("fade_end"):
+        fe = s["fade_end"]
+        vf = vf[:-3] + f",fade=t=out:st={dur - fe}:d={fe}[v]"
+        af += f",afade=t=out:st={dur - fe}:d={fe}"
     ff("-i", raw, "-filter_complex", vf, "-map", "[v]", "-map", "0:a", "-af", af, *fix, *ENC, out)
     return out
 
