@@ -283,7 +283,7 @@ function Next({ today, list, idle, selected, onSelect }: {
           {sp.top ? <>{sp.top.name} {likelihood(sp.top.share)} <span className="text-small font-medium text-muted">추정 {Math.round(sp.top.share * 100)}%</span></>
             : sp.categoryOnly ? <span className="text-ink">이 업종은 해마다 잡는 생선이 달라요</span> : null}
         </p>
-        <p className="mt-1.5 text-small text-muted">{shortBiz(first.biz)}선{first.gt ? ` ${Math.round(first.gt)}t` : ''} · 위판장까지 {first.d_km.toFixed(1)}km · 예측(신뢰도 {first.confidence ?? '보통'})</p>
+        <p className="mt-1.5 text-small text-muted">{shortBiz(first.biz)}선{first.gt ? ` ${Math.round(first.gt)}t` : ''} · 위판장까지 {first.d_km.toFixed(1)}km</p>{/* '예측(신뢰도 …)'은 뺐다(10/13 오너: 어종 추정의 신뢰도로 읽힘) */}
       </button>
     </section>
   )
