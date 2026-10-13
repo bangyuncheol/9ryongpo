@@ -108,14 +108,15 @@ ul.dots li::before { content: ""; position: absolute; left: 4px; top: .65em; wid
 .tech .num { flex: none; text-align: center; padding-left: 22px; border-left: 1px solid #263a55; min-width: 150px; }
 .tech .num b { font-size: 40px; color: #fff; margin: 0; line-height: 1; }
 .tech .num small { display: block; font-size: 16px; color: var(--night-muted); margin-top: 6px; line-height: 1.3; }
-.svcs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; margin-top: 24px; flex: 1; min-height: 0; }
-.svc { background: var(--night-2); border-radius: 24px; padding: 26px 28px; display: flex; flex-direction: column; }
+.svcs { display: grid; grid-template-columns: repeat(5, 1fr); gap: 18px; margin-top: 24px; flex: 1; min-height: 0; }
+.svc { background: var(--night-2); border-radius: 24px; padding: 24px 24px; display: flex; flex-direction: column; }
 .svc .st { display: inline-flex; align-self: flex-start; padding: 5px 12px; border-radius: 999px; font-size: 16px; font-weight: 800; background: #1f3a5c; color: var(--night-blue); }
 .svc .st.live { background: #173d2e; color: #7fd6a4; }
-.svc b.h { display: block; font-size: 27px; font-weight: 800; line-height: 1.3; margin-top: 14px; letter-spacing: -.02em; }
-.svc p { font-size: 20px; line-height: 1.5; color: var(--night-muted); margin-top: 10px; }
+.svc .st.talk { background: #3d2f17; color: #f0c36a; }
+.svc b.h { display: block; font-size: 24px; font-weight: 800; line-height: 1.3; margin-top: 14px; letter-spacing: -.02em; }
+.svc p { font-size: 18px; line-height: 1.5; color: var(--night-muted); margin-top: 10px; }
 .svc p em { font-style: normal; color: var(--night-ink); font-weight: 700; }
-.svc .who { margin-top: auto; padding-top: 14px; font-size: 18px; color: var(--night-muted); border-top: 1px solid #263a55; line-height: 1.4; }
+.svc .who { margin-top: auto; padding-top: 12px; font-size: 16px; color: var(--night-muted); border-top: 1px solid #263a55; line-height: 1.4; }
 .members { display: flex; flex-direction: column; gap: 28px; }
 .members .member { flex: 1; padding: 32px 40px; }
 .members .member .av { width: 88px; height: 88px; font-size: 34px; }
@@ -667,11 +668,12 @@ body:hover #hud { opacity: .8; }
   <div class="svcs">
     <div class="svc"><span class="st live">정식 운영 · 2026.07~</span><b class="h">AI 모의면접<br>인터뷰브릿지</b><p>대학·전형·학과별 평가기준과 학생 서류를 반영한 실시간 음성 모의면접. <em>65개 대학 16,501행</em> 전형 데이터, 면접 유형 11종.</p><p class="who">국내 한 사립고등학교와 제휴, 학교 단위 제공</p></div>
     <div class="svc"><span class="st">PoC · 2026.09~</span><b class="h">AI 구술생애사<br>기록</b><p>어르신이 태블릿 앞에서 AI 경청자와 대화하면 <em>1인칭 회고록과 육성 오디오</em>로 엮습니다. 느린 발화와 긴 침묵을 기다리고, 방언·지명을 보정합니다.</p><p class="who">RISE 리빙랩 프로젝트 · 어르신 20명 본 실증</p></div>
-    <div class="svc"><span class="st">PoC · 2026.10~</span><b class="h">AI 음성<br>안전 안내</b><p>디지털 트윈의 침수 예측·방파제 안전경보·대기질 데이터를 해석해 <em>고령 주민에게 전화 받듯 말로</em> 위험과 행동 요령을 안내합니다.</p><p class="who">국내 연구기관과 디지털 트윈 연계 PoC</p></div>
     <div class="svc"><span class="st">PoC · 2026.09~</span><b class="h">AI 조별 토론<br>퍼실리테이터</b><p>한 교실에서 <em>여러 조가 동시에</em> 토론할 때 각 조의 흐름을 따라가며 필요한 순간에 음성으로 개입합니다. 2026년 11월 수업에 첫 적용.</p><p class="who">국내 고등교육기관 교수-학습 모델 개발 사업 · AI 도구 공급</p></div>
+    <div class="svc"><span class="st talk">협업시기 논의 중</span><b class="h">방송 발화<br>확인 대상 자동 선별</b><p>과거 방송 발화와 공개 심의 사례를 대조해 <em>사람이 확인할 구간을 미리 좁히는</em> 12주 공동 실증. 판정을 대신하지 않고 확인 범위만 줄입니다.</p><p class="who">현대홈쇼핑 · 2026 용인 오픈이노베이션 교류회</p></div>
+    <div class="svc"><span class="st talk">협업시기 논의 중</span><b class="h">크로스보더 셀러<br>온보딩 대화</b><p>셀러가 대화로 제품과 판매 계획을 설명하면 <em>HS 코드 후보 · 외국어 품명 · 인보이스 초안</em>을 담당자가 확인만 하면 되게 미리 준비하는 12주 공동 실증.</p><p class="who">한진 · SURF 2026 인천 스타트업위크 OI 밋업</p></div>
   </div>
   <div class="foot"><span class="src"></span><span class="pg"></span></div>
-  <aside class="notes">저희 인터뷰브릿지는 포항공대 컴퓨터공학과 학생 창업팀입니다. 사람과 AI가 자연스럽게 대화하는 실시간 음성 대화 엔진과, 그 대화를 기준에 따라 판정하고 근거를 보여 주는 평가 엔진을 직접 만들어 운영하고 있습니다. 끼어들면 20~40밀리초 안에 AI 말을 끊고, 말이 끝났다고 판단하면 65밀리초 안에 답을 시작합니다. 이 기술 위에서 서비스 넷을 돌리고 있습니다. 대입 AI 모의면접 인터뷰브릿지는 7월부터 정식 운영 중이고 사립고와 제휴했습니다. 어르신 구술생애사 기록은 리빙랩 과제로 어르신 스무 분과 실증하고, 디지털 트윈 데이터를 말로 풀어 주는 음성 안전 안내, 대학 수업의 조별 토론 퍼실리테이터는 PoC 중입니다. 배마중의 070 전화는 바로 이 대화 엔진 위에 있습니다. 12월엔 빈손으로 돌아왔던 김 사장님이, 이번엔 3시 10분에 압니다. 감사합니다.<br><br>출처: 인터뷰브릿지 기업소개자료(SURF 2026 인천 스타트업위크 OI 밋업, 2026.10) — 핵심 기술 수치(20~40ms·65ms)와 서비스 현황은 이 자료 기준</aside>
+  <aside class="notes">저희 인터뷰브릿지는 포항공대 컴퓨터공학과 학생 창업팀입니다. 사람과 AI가 자연스럽게 대화하는 실시간 음성 대화 엔진과, 그 대화를 기준에 따라 판정하고 근거를 보여 주는 평가 엔진을 직접 만들어 운영하고 있습니다. 끼어들면 20~40밀리초 안에 AI 말을 끊고, 말이 끝났다고 판단하면 65밀리초 안에 답을 시작합니다. 이 기술 위에서 서비스를 돌리고 있습니다. 대입 AI 모의면접 인터뷰브릿지는 7월부터 정식 운영 중이고 사립고와 제휴했습니다. 어르신 구술생애사 기록은 리빙랩 과제로 어르신 스무 분과 실증하고, 대학 수업의 조별 토론 퍼실리테이터는 PoC 중입니다. 현대홈쇼핑과는 방송 발화 확인 구간 자동 선별, 한진과는 크로스보더 셀러 온보딩 대화 공동 실증을 제안해 협업 시기를 논의하고 있습니다. 배마중의 070 전화는 바로 이 대화 엔진 위에 있습니다. 12월엔 빈손으로 돌아왔던 김 사장님이, 이번엔 3시 10분에 압니다. 감사합니다.<br><br>출처: 인터뷰브릿지 기업소개자료(SURF 2026 인천 스타트업위크 OI 밋업, 2026.10) — 핵심 기술 수치(20~40ms·65ms)와 서비스 현황<br>협업 사례는 협업제안서(현대홈쇼핑, 2026 용인 오픈이노베이션 교류회)와 협업제안서(한진, SURF 2026 인천 스타트업위크)</aside>
 </section>
 
 </div>
