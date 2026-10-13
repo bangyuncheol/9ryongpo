@@ -104,7 +104,15 @@ def build_shot(i: int, s: dict) -> Path:
 
     if s["fit"] == "grid":   # 4칸: 위 두 칸 방문 인사, 아래 두 칸 경매장 분위기 — 소리는 첫 칸(왼쪽 위)만
         cw, ch, g = W // 2 - 2, H // 2 - 2, ""
+        srcs = []
         for k, c in enumerate(s["cells"]):
+            src = SRC_DIR / c["src"]
+            if c.get("mosaic"):   # 얼굴 모자이크 칸: 구간만 잘라 모자이크한 뒤 그 파일을 쓴다(구간은 하나)
+                (a0, b0), = c["segs"]
+                cut = TMP / f"{i:02d}_{s['id']}_cell{k}.mp4"; src = cut.with_name(cut.stem + "_m.mp4")
+                ff("-ss", a0, "-t", b0 - a0, "-i", SRC_DIR / c["src"], "-c:v", "libx264", "-crf", "14", "-an", cut)
+                mosaic(cut, src); c = {**c, "segs": [[0, b0 - a0]]}
+            srcs.append(src)
             rot = "transpose=2," if c.get("rotate") == "ccw" else ""
             g += "".join(f"[{k}:v]trim={a}:{b},setpts=PTS-STARTPTS[c{k}s{j}];" for j, (a, b) in enumerate(c["segs"]))
             g += "".join(f"[c{k}s{j}]" for j in range(len(c["segs"]))) + \
@@ -117,7 +125,7 @@ def build_shot(i: int, s: dict) -> Path:
         segs = s["cells"][0]["segs"]
         g += "".join(f"[0:a]atrim={a}:{b},asetpts=PTS-STARTPTS[a{j}];" for j, (a, b) in enumerate(segs))
         g += "".join(f"[a{j}]" for j in range(len(segs))) + f"concat=n={len(segs)}:v=0:a=1,loudnorm=I=-16:TP=-1.5:LRA=11,aresample=48000,apad,atrim=0:{dur}[a]"
-        ff(*[x for c in s["cells"] for x in ("-i", SRC_DIR / c["src"])], "-filter_complex", g, "-map", "[v]", "-map", "[a]", *fix, *ENC, out)
+        ff(*[x for src in srcs for x in ("-i", src)], "-filter_complex", g, "-map", "[v]", "-map", "[a]", *fix, *ENC, out)
         return out
 
     raw = TMP / f"{i:02d}_{s['id']}_raw.mp4"
@@ -137,7 +145,7 @@ def build_shot(i: int, s: dict) -> Path:
         vf = vf[:-3] + f"[pre{k}];[pre{k}]split[m{k}][c{k}];[c{k}]crop={bw}:{bh}:{x}:{y},scale={bw // 24}:{bh // 24},scale={bw}:{bh}:flags=neighbor[p{k}];" \
              f"[m{k}][p{k}]overlay={x}:{y}:enable='between(t,{a0},{a1})'[v]"
     af = "asetrate=48000*0.85,aresample=48000,atempo=1.17647," if s.get("voice") else ""
-    af += f"loudnorm=I=-16:TP=-1.5:LRA=11,aresample=48000,apad,atrim=0:{dur},afade=t=in:d=0.08"
+    af += f"loudnorm=I=-16:TP=-1.5:LRA=11,aresample=48000,apad,atrim=0:{dur},afade=t=in:d=0.08,afade=t=out:st={dur - 0.08}:d=0.08"
     if s.get("afade_out"):
         af += f",afade=t=out:st=0:d={s['afade_out']}"
     if s.get("fade_end"):
