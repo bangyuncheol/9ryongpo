@@ -6,7 +6,7 @@
 <title>배마중 발표</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
 <style>
-/* 9판(10/13 오후): 시연 7장(시연 전에·시연①~⑥)을 빼고 '기대효과' 한 장으로(시연은 bmj.kr에서 직접) → 14장.
+/* 9판(10/13 오후): 출처 줄은 화면에서 빼고 발표 메모 끝에 '출처:'로(별도 파일 배마중_발표_노트.md). 시연 7장(시연 전에·시연①~⑥)을 빼고 '기대효과' 한 장으로(시연은 bmj.kr에서 직접) → 14장.
    8판(10/13 낮): 경매는 06:00 고정이라 '언제 가야 할지 모른다'를 '들어와야 안다'(돌아오는 배를 가장 먼저 · 원하는 어종이 오는 날만 일어남)로 고침. 6장 문제 요약 → 7~10장 문제별(근거 · 배마중은 이렇게 · 기대효과, 인터뷰브릿지 기술 칩), 훅·'그래서' 장은 접음.
    7판(10/13 오전): 표지가 첫 장(QR 셋), 소개 영상 둘째(화면 전체, PDF 엔 주요 장면 6컷), 현장 3명(핀), '지금 돌아가나'·'대회 끝나고' 뺌(21장), 현장(문제 찾기) → 위판장 취재 영상 → 훅 순. 전화 장에 인터뷰브릿지 기술 두 줄.
    6판(10/13 새벽, APK 한 줄 추가). 글은 제목 + 그림 + 한 줄만. 설명은 발표 메모(N 키)에.
@@ -30,7 +30,7 @@ p, li { text-wrap: pretty; }
 .num, td, .big { font-variant-numeric: tabular-nums; }
 
 #stage { position: absolute; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: center; }
-.slide { position: absolute; inset: 0; background: var(--page); padding: 92px 120px 128px; display: none; flex-direction: column; overflow: hidden; }
+.slide { position: absolute; inset: 0; background: var(--page); padding: 92px 120px 96px; display: none; flex-direction: column; overflow: hidden; }
 .slide.on { display: flex; }
 .slide.dark { background: var(--night); color: var(--night-ink); }
 .slide.center { justify-content: center; }
@@ -88,10 +88,28 @@ ul.dots li::before { content: ""; position: absolute; left: 4px; top: .65em; wid
 .ecard p.d { font-size: 22px; line-height: 1.5; color: var(--muted); margin-top: 12px; }
 .ecard p.d em { font-style: normal; color: var(--ink); font-weight: 700; }
 /* 팀 소개(마지막 장): 두 사람 카드. 이력은 인터뷰브릿지 IR·UGRP 자료에서 */
-.team { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 40px; }
+.team { display: grid; grid-template-columns: 1fr 1.15fr; gap: 28px; margin-top: 36px; flex: 1; min-height: 0; }
+.org { background: var(--night-2); border-radius: 30px; padding: 40px 44px; display: flex; flex-direction: column; }
+.org .logo { align-self: flex-start; background: #fff; border-radius: 16px; padding: 14px 22px; }
+.org .logo img { height: 44px; display: block; }
+.org .what { font-size: 30px; font-weight: 800; line-height: 1.35; margin-top: 26px; }
+.org ul.dots { margin-top: 22px; }
+.org li { font-size: 23px; line-height: 1.5; color: var(--night-ink); }
+.org li + li { margin-top: 10px; }
+.org li b { color: #fff; }
+.org .pick { margin-top: auto; padding-top: 22px; border-top: 1px solid #263a55; font-size: 22px; line-height: 1.5; color: var(--night-muted); }
+.org .pick b { color: var(--night-blue); }
+.members { display: flex; flex-direction: column; gap: 28px; }
+.members .member { flex: 1; padding: 32px 40px; }
+.members .member .av { width: 88px; height: 88px; font-size: 34px; }
+.members .member .nm { font-size: 38px; }
+.members .member ul.dots { margin-top: 18px; }
+.members .member li { font-size: 23px; }
+.members .member li + li { margin-top: 8px; }
 .member { background: var(--night-2); border-radius: 30px; padding: 40px 44px; display: flex; flex-direction: column; }
 .member .top { display: flex; align-items: center; gap: 22px; }
-.member .av { width: 92px; height: 92px; border-radius: 50%; background: var(--night-blue); color: var(--night); display: grid; place-items: center; font-size: 40px; font-weight: 800; flex: none; }
+.member .av { width: 92px; height: 92px; border-radius: 50%; background: var(--night-blue); color: var(--night); display: grid; place-items: center; font-size: 40px; font-weight: 800; flex: none; overflow: hidden; }
+.member .av img { width: 100%; height: 100%; object-fit: cover; object-position: center top; display: block; }
 .member .nm { font-size: 44px; font-weight: 800; line-height: 1.1; }
 .member .rl { font-size: 24px; color: var(--night-blue); font-weight: 800; margin-top: 8px; }
 .member .rl small { color: var(--night-muted); font-weight: 600; margin-left: 10px; }
@@ -401,8 +419,8 @@ body:hover #hud { opacity: .8; }
     <div class="pcard"><span class="kn">3</span><div><b>들어와야 안다</b><p>경매는 <em>06:00으로 정해져</em> 있습니다. 그 경매에 어떤 배가 무엇을 싣고 돌아오는지는 위판장에 가서 배를 봐야 압니다.</p></div></div>
     <div class="pcard"><span class="kn">4</span><div><b>앱과 웹이 낯설다</b><p>어가 인구 <em>48.2%</em>가 고령. AI 서비스를 써 본 농어민은 31.1%(일반 국민 59.4%).</p></div></div>
   </div>
-  <div class="foot"><span class="src">구룡포 어선 202척은 E-UM 어선 기본정보<br>위판 수치는 해양수산부 「일자별 위탁판매현황」 구룡포수협 본소 2022.1~2026.8 팀 집계<br>고령 48.2%는 국가데이터처 「2025 농림어업총조사(잠정)」<br>AI 경험률은 과기정통부·NIA 「2025 디지털정보격차 실태조사」</span><span class="pg"></span></div>
-  <aside class="notes">새벽 4시, 횟집 사장님 머릿속엔 이 질문이 있습니다. 오늘 붉은대게 들어오나, 몇 척이나, 나가야 하나 말아야 하나. 구룡포 배가 202척인데 아는 선장 몇 명한테 물어선 모릅니다. 위판장에서 들은 얘기를 데이터로 확인해 보니 네 가지로 정리됐습니다. 뭐가 잡힐지 모르고, 모르고 오면 사는 쪽이 손해를 보고, 경매 시각은 정해져 있는데 그 전에 누가 돌아오는지는 들어와야 알고, 그리고 쓰는 분들께 앱과 웹이 낯섭니다. 하나씩 보겠습니다.</aside>
+  <div class="foot"><span class="src"></span><span class="pg"></span></div>
+  <aside class="notes">새벽 4시, 횟집 사장님 머릿속엔 이 질문이 있습니다. 오늘 붉은대게 들어오나, 몇 척이나, 나가야 하나 말아야 하나. 구룡포 배가 202척인데 아는 선장 몇 명한테 물어선 모릅니다. 위판장에서 들은 얘기를 데이터로 확인해 보니 네 가지로 정리됐습니다. 뭐가 잡힐지 모르고, 모르고 오면 사는 쪽이 손해를 보고, 경매 시각은 정해져 있는데 그 전에 누가 돌아오는지는 들어와야 알고, 그리고 쓰는 분들께 앱과 웹이 낯섭니다. 하나씩 보겠습니다.<br><br>출처: 구룡포 어선 202척은 E-UM 어선 기본정보<br>위판 수치는 해양수산부 「일자별 위탁판매현황」 구룡포수협 본소 2022.1~2026.8 팀 집계<br>고령 48.2%는 국가데이터처 「2025 농림어업총조사(잠정)」<br>AI 경험률은 과기정통부·NIA 「2025 디지털정보격차 실태조사」</aside>
 </section>
 
 <!-- 7 문제 1 -->
@@ -450,8 +468,8 @@ body:hover #hud { opacity: .8; }
       </div>
     </div>
   </div>
-  <div class="foot"><span class="src">해양수산부 「일자별 위탁판매현황」 구룡포수협 본소 2022.1~2026.8, 팀 집계<br>어종 추정 백테스트: 연안자망·연안통발·근해채낚기 12/12, 근해자망 0/4</span><span class="pg"></span></div>
-  <aside class="notes">해수부 위판 실적 56개월치를 직접 받아서 봤습니다. 8월 1위가 3년 내내 살오징어였다가, 작년엔 붉은대게, 올해는 청어로 바뀌었습니다. 10월 살오징어는 3년 만에 1,473톤에서 44톤이 됐습니다. 그래서 배마중은 '올해는 뭐가 잡힌다'가 아니라 '오늘 이 배가 뭘 싣고 몇 시에 온다'를 냅니다. 배 위치와 명부로 도착 시각을, 업종과 같은 달 실적으로 어종 가능성을 냅니다. 숫자는 전부 규칙이 내고 AI는 문장만 씁니다. 나가기 전에 오늘 물건을 아는 게 효과고, 예보 오차와 어종 적중률을 재서 보여 드리겠습니다.</aside>
+  <div class="foot"><span class="src"></span><span class="pg"></span></div>
+  <aside class="notes">해수부 위판 실적 56개월치를 직접 받아서 봤습니다. 8월 1위가 3년 내내 살오징어였다가, 작년엔 붉은대게, 올해는 청어로 바뀌었습니다. 10월 살오징어는 3년 만에 1,473톤에서 44톤이 됐습니다. 그래서 배마중은 '올해는 뭐가 잡힌다'가 아니라 '오늘 이 배가 뭘 싣고 몇 시에 온다'를 냅니다. 배 위치와 명부로 도착 시각을, 업종과 같은 달 실적으로 어종 가능성을 냅니다. 숫자는 전부 규칙이 내고 AI는 문장만 씁니다. 나가기 전에 오늘 물건을 아는 게 효과고, 예보 오차와 어종 적중률을 재서 보여 드리겠습니다.<br><br>출처: 해양수산부 「일자별 위탁판매현황」 구룡포수협 본소 2022.1~2026.8, 팀 집계<br>어종 추정 백테스트: 연안자망·연안통발·근해채낚기 12/12, 근해자망 0/4</aside>
 </section>
 
 <!-- 8 문제 2 -->
@@ -484,8 +502,8 @@ body:hover #hud { opacity: .8; }
       </div>
     </div>
   </div>
-  <div class="foot"><span class="src">해양수산부 「일자별 위탁판매현황」 구룡포수협 본소, 팀 집계<br>방어 12·14일엔 다른 생선이 15톤 안팎 팔림(12일은 파고 3m 풍랑)<br>청어 13~27일은 파고 0.3~0.6m의 잔잔한 날에도 0톤(청어를 잡는 선망 선단이 들어오지 않음, 21·22일만 폭우·풍랑 휴장)<br>김 사장은 가상 인물, 날짜와 물량은 실제 기록</span><span class="pg"></span></div>
-  <aside class="notes">하루 단위로 보면 더 심합니다. 겨울 횟집에서 제일 많이 찾는 방어인데, 작년 12월 7일엔 84톤이 들어왔다가 닷새 뒤부터 0톤이었습니다. 위판장이 쉰 것도 아니에요. 12일은 파고 3미터 풍랑이었지만 13일, 14일엔 다른 생선이 15톤씩 팔렸습니다. 청어도 같습니다. 올해 6월 5일 256톤이 들어왔는데 13일부터 보름 동안 0톤이었습니다. 바람도 잔잔했어요. 청어를 잡는 선망 선단이 안 들어온 겁니다. 이렇게 들쭉날쭉하면 손해는 사러 온 사람이 봅니다. 그래서 먼저 알립니다. 원하는 생선을 골라 두면 실었을 배가 보이는 순간 휴대폰으로, 화면이 낯분 분께는 배마중이 전화를 걸어 읽어 드립니다. 전화 문장을 미리 만들어 두고 바로 트는 건 저희 인터뷰브릿지가 AI 면접에서 쓰던 쿠션 설계입니다. 나갈지 말지, 트럭 몇 대를 배가 닿기 전에 정하는 게 효과입니다.</aside>
+  <div class="foot"><span class="src"></span><span class="pg"></span></div>
+  <aside class="notes">하루 단위로 보면 더 심합니다. 겨울 횟집에서 제일 많이 찾는 방어인데, 작년 12월 7일엔 84톤이 들어왔다가 닷새 뒤부터 0톤이었습니다. 위판장이 쉰 것도 아니에요. 12일은 파고 3미터 풍랑이었지만 13일, 14일엔 다른 생선이 15톤씩 팔렸습니다. 청어도 같습니다. 올해 6월 5일 256톤이 들어왔는데 13일부터 보름 동안 0톤이었습니다. 바람도 잔잔했어요. 청어를 잡는 선망 선단이 안 들어온 겁니다. 이렇게 들쭉날쭉하면 손해는 사러 온 사람이 봅니다. 그래서 먼저 알립니다. 원하는 생선을 골라 두면 실었을 배가 보이는 순간 휴대폰으로, 화면이 낯분 분께는 배마중이 전화를 걸어 읽어 드립니다. 전화 문장을 미리 만들어 두고 바로 트는 건 저희 인터뷰브릿지가 AI 면접에서 쓰던 쿠션 설계입니다. 나갈지 말지, 트럭 몇 대를 배가 닿기 전에 정하는 게 효과입니다.<br><br>출처: 해양수산부 「일자별 위탁판매현황」 구룡포수협 본소, 팀 집계<br>방어 12·14일엔 다른 생선이 15톤 안팎 팔림(12일은 파고 3m 풍랑)<br>청어 13~27일은 파고 0.3~0.6m의 잔잔한 날에도 0톤(청어를 잡는 선망 선단이 들어오지 않음, 21·22일만 폭우·풍랑 휴장)<br>김 사장은 가상 인물, 날짜와 물량은 실제 기록</aside>
 </section>
 
 <!-- 9 문제 3 -->
@@ -525,8 +543,8 @@ body:hover #hud { opacity: .8; }
       </div>
     </div>
   </div>
-  <div class="foot"><span class="src">도로 색은 E-UM 교통량·혼잡율(여유 ≤30대 · 보통 ≤100대 · 붐빔)<br>출발 시각은 카카오모빌리티 길찾기, 60km 밖은 계산하지 않음<br>경매 06:00과 30분 전 도착은 수협 확인 전</span><span class="pg"></span></div>
-  <aside class="notes">세 번째입니다. 경매는 6시로 정해져 있어요. 그건 다 압니다. 모르는 건 그 전에 어떤 배가 조업을 마치고 무엇을 싣고 돌아오느냐예요. 지금은 위판장에 가서 배를 봐야 압니다. 배마중은 선박 위치로 조업을 마치고 위판장으로 향하는 배를 누구보다 먼저 잡습니다. 무엇을 실었을지, 몇 시에 닿을지를 경매 전에 알리고, 6시 경매에 맞춰 내 위치에서 출발 시각을 거꾸로 셉니다. 원하는 생선을 실은 배가 돌아오는 날만 알리니까, 그날만 일어나면 됩니다. 경매 전에 나갈지를 정하는 게 효과입니다.</aside>
+  <div class="foot"><span class="src"></span><span class="pg"></span></div>
+  <aside class="notes">세 번째입니다. 경매는 6시로 정해져 있어요. 그건 다 압니다. 모르는 건 그 전에 어떤 배가 조업을 마치고 무엇을 싣고 돌아오느냐예요. 지금은 위판장에 가서 배를 봐야 압니다. 배마중은 선박 위치로 조업을 마치고 위판장으로 향하는 배를 누구보다 먼저 잡습니다. 무엇을 실었을지, 몇 시에 닿을지를 경매 전에 알리고, 6시 경매에 맞춰 내 위치에서 출발 시각을 거꾸로 셉니다. 원하는 생선을 실은 배가 돌아오는 날만 알리니까, 그날만 일어나면 됩니다. 경매 전에 나갈지를 정하는 게 효과입니다.<br><br>출처: 도로 색은 E-UM 교통량·혼잡율(여유 ≤30대 · 보통 ≤100대 · 붐빔)<br>출발 시각은 카카오모빌리티 길찾기, 60km 밖은 계산하지 않음<br>경매 06:00과 30분 전 도착은 수협 확인 전</aside>
 </section>
 
 <!-- 10 문제 4 -->
@@ -565,8 +583,8 @@ body:hover #hud { opacity: .8; }
       </div>
     </div>
   </div>
-  <div class="foot"><span class="src">국가데이터처 「2025년 농림어업총조사 결과(잠정)」<br>과기정통부·NIA 「2025 디지털정보격차 실태조사」<br>전화: ClawOps 070 · CLOVA·OpenAI 받아쓰기 · Gemini 음성 합성<br>배 이름 5/5는 10/11 실통화 6건(OpenAI 1/5)</span><span class="pg"></span></div>
-  <aside class="notes">네 번째는 쓰는 사람 얘기입니다. 어가 인구 둘 중 한 명이 고령이고, 농어민 중에 AI 서비스를 써 본 사람은 31%, 일반 국민의 절반쯤입니다. 그래서 화면만 만들지 않고 전화를 붙였습니다. 글로 묻든 말로 묻든 같은 엔진이 같은 숫자를 냅니다. 여기 저희 인터뷰브릿지 기술이 들어갑니다. 말을 언제 받고 언제 끊을지는 AI 면접용으로 직접 만든 턴테이킹 설계를 전화에 맞게 옮겨서 잡고, 어르신 구술생애사 과제에서 쓰는 키워드 핫부스팅으로 구룡포 지명과 어촌 말, 그날 배 이름을 알아듣습니다. 실제 통화에서 배 이름을 다섯 번 다 맞혔습니다. 앱 설치도 글자 입력도 없이 전화 한 통이면 되는 게 효과입니다.</aside>
+  <div class="foot"><span class="src"></span><span class="pg"></span></div>
+  <aside class="notes">네 번째는 쓰는 사람 얘기입니다. 어가 인구 둘 중 한 명이 고령이고, 농어민 중에 AI 서비스를 써 본 사람은 31%, 일반 국민의 절반쯤입니다. 그래서 화면만 만들지 않고 전화를 붙였습니다. 글로 묻든 말로 묻든 같은 엔진이 같은 숫자를 냅니다. 여기 저희 인터뷰브릿지 기술이 들어갑니다. 말을 언제 받고 언제 끊을지는 AI 면접용으로 직접 만든 턴테이킹 설계를 전화에 맞게 옮겨서 잡고, 어르신 구술생애사 과제에서 쓰는 키워드 핫부스팅으로 구룡포 지명과 어촌 말, 그날 배 이름을 알아듣습니다. 실제 통화에서 배 이름을 다섯 번 다 맞혔습니다. 앱 설치도 글자 입력도 없이 전화 한 통이면 되는 게 효과입니다.<br><br>출처: 국가데이터처 「2025년 농림어업총조사 결과(잠정)」<br>과기정통부·NIA 「2025 디지털정보격차 실태조사」<br>전화: ClawOps 070 · CLOVA·OpenAI 받아쓰기 · Gemini 음성 합성<br>배 이름 5/5는 10/11 실통화 6건(OpenAI 1/5)</aside>
 </section>
 
 <!-- 11 기대효과 -->
@@ -581,8 +599,8 @@ body:hover #hud { opacity: .8; }
     <div class="ecard"><p class="lab"><span class="kn">5</span>물어보기</p><b class="h">글로 물으면 표의 숫자를 그대로 옮깁니다</b><p class="d">AI가 도구 7개(입항 예보 · 어종 · 교통 · 출발 시각 …)에서 찾은 숫자만 씁니다. <em>조회 기록이 답 아래 남고</em>, 엉뚱한 질문은 정해진 한마디로 거절합니다.</p></div>
     <div class="ecard"><p class="lab"><span class="kn">6</span>전화</p><b class="h">앱도 글자도 없이 전화 한 통이면 됩니다</b><p class="d">알림을 전화로 받고 궁금한 건 말로 묻습니다. <em>화면과 같은 엔진, 같은 숫자</em>. 구룡포 지명·어촌 말·그날 배 이름을 알아듣습니다(실통화 배 이름 5/5).</p></div>
   </div>
-  <div class="foot"><span class="src">배 위치만 시뮬레이션(E-UM 선박 위치가 2025-04-27에 멈춰 같은 형식으로 재생, 하루 넘게 멈추면 예보 대신 '낼 수 없습니다'를 띄움)<br>나머지는 실데이터: E-UM 어선 기본정보 202척 · 위판장 위치 · 교통센서·교통량·혼잡율(실측) · 해수부 위판 실적 56개월 · 카카오모빌리티 길찾기<br>경매 06:00과 30분 전 도착은 수협 확인 전 · 화면·전화는 bmj.kr(VM 1대)에서 운영 중</span><span class="pg"></span></div>
-  <aside class="notes">시연은 이 뒤에 bmj.kr에서 직접 보여 드리겠습니다. 그 전에 사장님의 새벽이 어떻게 바뀌는지 한 장으로 정리했습니다. 돌아오는 배를 누구보다 먼저 알고, 원하는 생선이 오는 날만 일어나고, 무엇을 실었을지 가능성으로 알고, 경매 전에 나갈지를 정하고, 글로든 말로든 같은 숫자를 받습니다. 배 위치 API가 작년 4월에 멈춰 있어서 배 움직임만 같은 형식으로 시뮬레이션하고, 나머지는 전부 실데이터입니다. 위치가 들어오면 스위치 하나로 바뀌고, 멈추면 엉터리 예보 대신 '못 냅니다'가 뜹니다.</aside>
+  <div class="foot"><span class="src"></span><span class="pg"></span></div>
+  <aside class="notes">시연은 이 뒤에 bmj.kr에서 직접 보여 드리겠습니다. 그 전에 사장님의 새벽이 어떻게 바뀌는지 한 장으로 정리했습니다. 돌아오는 배를 누구보다 먼저 알고, 원하는 생선이 오는 날만 일어나고, 무엇을 실었을지 가능성으로 알고, 경매 전에 나갈지를 정하고, 글로든 말로든 같은 숫자를 받습니다. 배 위치 API가 작년 4월에 멈춰 있어서 배 움직임만 같은 형식으로 시뮬레이션하고, 나머지는 전부 실데이터입니다. 위치가 들어오면 스위치 하나로 바뀌고, 멈추면 엉터리 예보 대신 '못 냅니다'가 뜹니다.<br><br>출처: 배 위치만 시뮬레이션(E-UM 선박 위치가 2025-04-27에 멈춰 같은 형식으로 재생, 하루 넘게 멈추면 예보 대신 &#x27;낼 수 없습니다&#x27;를 띄움)<br>나머지는 실데이터: E-UM 어선 기본정보 202척 · 위판장 위치 · 교통센서·교통량·혼잡율(실측) · 해수부 위판 실적 56개월 · 카카오모빌리티 길찾기<br>경매 06:00과 30분 전 도착은 수협 확인 전 · 화면·전화는 bmj.kr(VM 1대)에서 운영 중</aside>
 </section>
 
 <!-- 12 원칙 -->
@@ -596,8 +614,8 @@ body:hover #hud { opacity: .8; }
     <span class="k">가격</span><p>예측은 접었습니다. 4년 중 3년이 3분의 1만 맞았습니다. 과거 실적만 답합니다.</p>
     <span class="k">질문 범위</span><p>엉뚱한 질문은 바로 거절. 앞 대화를 꾸며 넣어도 안 넘어갑니다.</p>
   </div>
-  <div class="foot"><span class="src">가격 시험: 그해 8월 붉은대게 kg당 가격 25~75% 범위에 그해 10월 거래 중량이 든 비율<br>2022 37% · 2023 65% · 2024 32% · 2025 35%</span><span class="pg"></span></div>
-  <aside class="notes">새벽에 돈이 걸린 결정을 돕는 거라 숫자가 틀리면 안 됩니다. 그래서 숫자는 전부 규칙이 내고 AI는 문장만 씁니다. 가격도 해 봤는데, 3분의 1 남짓밖에 안 맞았습니다. 예측은 접고 과거 실적만 답합니다.</aside>
+  <div class="foot"><span class="src"></span><span class="pg"></span></div>
+  <aside class="notes">새벽에 돈이 걸린 결정을 돕는 거라 숫자가 틀리면 안 됩니다. 그래서 숫자는 전부 규칙이 내고 AI는 문장만 씁니다. 가격도 해 봤는데, 3분의 1 남짓밖에 안 맞았습니다. 예측은 접고 과거 실적만 답합니다.<br><br>출처: 가격 시험: 그해 8월 붉은대게 kg당 가격 25~75% 범위에 그해 10월 거래 중량이 든 비율<br>2022 37% · 2023 65% · 2024 32% · 2025 35%</aside>
 </section>
 
 <!-- 13 구조 -->
@@ -623,33 +641,42 @@ body:hover #hud { opacity: .8; }
 </section>
 
 <!-- 14 팀 -->
-<section class="slide dark center">
+<section class="slide dark">
   <p class="kicker">팀 인터뷰브릿지</p>
-  <h2 style="margin-top:14px;">사람처럼 말을 주고받는 음성 AI를 만드는 두 사람</h2>
-  <p class="lead" style="margin-top:14px;">포항공과대학교 컴퓨터공학과. 실시간 음성 AI 모의면접 「인터뷰브릿지」를 2026년 7월부터 정식 운영하며, 같은 대화 엔진을 어르신 구술생애사 기록과 배마중으로 넓히고 있습니다.</p>
+  <h2 style="margin-top:14px;">사람처럼 말을 주고받는 음성 AI를 만드는 팀, 그리고 이번 프로젝트의 두 사람</h2>
   <div class="team">
-    <div class="member">
-      <div class="top"><div class="av">권</div><div><p class="nm">권인석</p><p class="rl">기획 · 발표<small>인터뷰브릿지 대표 · 사업 총괄</small></p></div></div>
+    <div class="org">
+      <div class="logo"><img src="design-preview/interviewbridge-logo-kor.png" alt="인터뷰브릿지"></div>
+      <p class="what">포항공과대학교 컴퓨터공학과 학생 창업팀.<br>실시간 음성 AI 모의면접 「인터뷰브릿지」를 만들어 2026년 7월부터 정식 운영합니다.</p>
       <ul class="dots">
-        <li>실시간 음성 AI 모의면접 <b>「인터뷰브릿지」 창업</b> — 기획부터 2026년 7월 정식 출시, 결제·운영까지</li>
-        <li><b>창업 지원사업 5건 선정</b> — 포항 강소특구 이노테크, POSTECH RISE 리빙랩(어르신 구술생애사), KT&amp;G AI 상상그라운드, 서울대 대학연대 창업 캠프, 용인 오픈이노베이션</li>
-        <li>POSTECH '미래형 교수-학습 모델 개발 지원 사업' <b>AI 도구 공급업체 선정</b>, 투자 검토용 IR 피칭</li>
-        <li>AFPK · 투자자산운용사</li>
+        <li><b>자체 대화 엔진</b> — 끼어들기와 말 끝을 판단하는 턴테이킹 설계, 쿠션 음성, 키워드 핫부스팅. 배마중 070 전화에 그대로 썼습니다.</li>
+        <li><b>기준 기반 평가 엔진</b> — 대학이 공개한 평가기준으로 질문을 만들고 같은 기준으로 채점합니다.</li>
+        <li><b>같은 엔진의 확장</b> — 어르신 구술생애사 기록(POSTECH RISE 리빙랩), 고령 주민 음성 안전 안내, 조별 토론 퍼실리테이터.</li>
+        <li><b>창업 지원사업 선정</b> — 포항 강소특구 이노테크, KT&amp;G AI 상상그라운드, 서울대 대학연대 창업 캠프, 용인 오픈이노베이션. POSTECH '미래형 교수-학습 모델 개발 지원 사업' AI 도구 공급업체.</li>
       </ul>
-      <p class="bm"><b>배마중에서</b> 문제 정의와 현장 조사(구사모 · 과메기조합 · 참전전우회 · 새벽 위판장), 데이터 검증, 발표</p>
+      <p class="pick"><b>배마중은</b> 이 팀의 대화 엔진을 새벽 위판장에 옮긴 첫 지역 서비스입니다.</p>
     </div>
-    <div class="member">
-      <div class="top"><div class="av">방</div><div><p class="nm">방윤철</p><p class="rl">개발 · 디자인<small>인터뷰브릿지 CTO · AI 개발·기술 총괄</small></p></div></div>
-      <ul class="dots">
-        <li><b>프론트엔드 · 모바일 앱 개발</b> 경험으로 실시간 음성 AI 서비스를 구현</li>
-        <li>사업화 기획과 <b>입시 데이터 분석</b>, 학교·교육청 B2B 확장 설계</li>
-        <li>화면 설계부터 배포·운영까지 혼자 끝내는 풀스택</li>
-      </ul>
-      <p class="bm"><b>배마중에서</b> 서버 · 지도 화면 · 웹 푸시 · 070 전화 · 안드로이드 APK 구현, 브랜드(아이콘 · 워드마크)와 영상 디자인</p>
+    <div class="members">
+      <div class="member">
+        <div class="top"><div class="av"><img src="사진/권인석.jpg" alt="권인석"></div><div><p class="nm">권인석</p><p class="rl">기획 · 발표<small>인터뷰브릿지 대표</small></p></div></div>
+        <ul class="dots">
+          <li><b>문제 정의와 현장 조사</b> — 구사모 · 과메기조합 · 참전전우회 미팅, 새벽 위판장 인터뷰에서 '들어와야 안다'는 문제를 잡음</li>
+          <li><b>데이터 검증</b> — 해수부 위판 실적 56개월 집계, 어종 추정 백테스트, 방어 · 청어 일별 변동 분석</li>
+          <li><b>발표자료 · 소개 영상 기획, 발표</b></li>
+        </ul>
+      </div>
+      <div class="member">
+        <div class="top"><div class="av"><img src="사진/방윤철.jpg" alt="방윤철"></div><div><p class="nm">방윤철</p><p class="rl">개발 · 디자인<small>인터뷰브릿지 CTO</small></p></div></div>
+        <ul class="dots">
+          <li><b>서버와 규칙</b> — E-UM · 해수부 · 카카오 연동, 입항 판정과 도착 시각 · 어종 추정 규칙, bmj.kr 배포 · 운영</li>
+          <li><b>화면과 알림</b> — 지도 화면(버전 4), 웹 푸시, 안드로이드 APK, 070 전화(ClawOps · CLOVA · Gemini) 연결</li>
+          <li><b>브랜드와 영상</b> — 아이콘 · 워드마크, 소개 영상 · 취재 영상 조립</li>
+        </ul>
+      </div>
     </div>
   </div>
   <div class="foot"><span class="src"></span><span class="pg"></span></div>
-  <aside class="notes">저희는 포항공대 컴퓨터공학과 둘입니다. 저 권인석은 실시간 음성 AI 모의면접 인터뷰브릿지를 창업해 올해 7월 정식 출시했고, 이노테크·RISE 리빙랩·AI 상상그라운드 같은 창업 지원사업에 선정돼 운영하고 있습니다. 배마중에서는 문제를 찾고 현장을 다니고 데이터를 검증하고 오늘 발표를 맡았습니다. 방윤철은 인터뷰브릿지 기술 총괄이고, 배마중의 서버와 화면, 푸시, 전화, APK, 브랜드와 영상까지 혼자 만들었습니다. 12월엔 빈손으로 돌아왔던 김 사장님이, 이번엔 3시 10분에 압니다. 감사합니다.</aside>
+  <aside class="notes">저희는 포항공대 컴퓨터공학과 학생 창업팀 인터뷰브릿지입니다. 실시간 음성 AI 모의면접을 만들어 올해 7월부터 정식 운영하고 있고, 사람처럼 말을 주고받는 대화 엔진과 기준으로 채점하는 평가 엔진이 핵심입니다. 그 대화 엔진을 어르신 구술생애사 기록, 음성 안전 안내로 넓히고 있는데, 배마중은 그걸 새벽 위판장에 옮긴 첫 지역 서비스입니다. 이번 프로젝트에서 저 권인석은 현장을 다니며 문제를 잡고 데이터를 검증하고 발표를 맡았고, 방윤철은 서버와 규칙, 화면과 알림, 전화, APK, 브랜드와 영상까지 만들었습니다. 12월엔 빈손으로 돌아왔던 김 사장님이, 이번엔 3시 10분에 압니다. 감사합니다.</aside>
 </section>
 
 </div>
