@@ -16,8 +16,11 @@
       .sub { position:absolute; left:90px; right:90px; bottom:64px; display:flex; justify-content:center; }
       .blk { display:flex; flex-direction:column; align-items:flex-start; gap:12px; max-width:1600px; }
       .who { display:inline-block; padding:6px 24px 8px; background:#073f4c; color:#fff; font-size:38px; font-weight:800; line-height:1.2; box-shadow:8px 6px 0 #1a7f8a; }
-      .pair .txt { align-self:flex-start; text-align:left; }
-      .pair .qt { font-size:50px; margin-bottom:10px; }
+      /* 인터뷰: 질문(위, 아래 끝 고정)과 답변(아래, 위 끝 고정)을 같은 왼쪽 끝에 — 글씨 크기 같게 */
+      .qbox, .ans { position:absolute; display:flex; flex-direction:column; align-items:flex-start; gap:10px; max-width:1600px; }
+      .qbox { bottom:288px; }
+      .ans { top:808px; }
+      .qbox .txt, .ans .txt { align-self:flex-start; text-align:left; font-size:56px; }
       .txt { align-self:center; text-align:center; font-size:62px; font-weight:800; line-height:1.28; color:#fff; word-break:keep-all;
              -webkit-text-stroke:9px #111; paint-order:stroke fill; text-shadow:0 3px 12px rgba(0,0,0,.6); }
       .card { position:absolute; inset:0; background:#000; display:flex; flex-direction:column; justify-content:center; padding-left:260px; gap:26px; }
@@ -41,38 +44,46 @@
       <!-- 렌더러가 영상을 2프레임 늦게 찍어(완성본을 촬영분과 프레임 비교해 확인) 영상만 2프레임 앞에서 시작하고, 소리는 따로 정시에 깐다 -->
       <video id="footage" src="assets/live/footage.mp4" playsinline muted data-media-start="0.067" data-start="0" data-duration="66.199" data-track-index="0"></video>
       <audio id="footage-audio" src="assets/live/footage.m4a" data-start="0" data-duration="66.199" data-track-index="9"></audio>
+      <div id="q-0" class="clip qbox" style="left:390px" data-start="10.5" data-duration="8.833" data-track-index="8"><span class="who">인터뷰브릿지</span><p class="txt">통계도 보니까 어획량이 매일매일 다르던데요?</p></div>
+      <div id="q-1" class="clip qbox" style="left:160px" data-start="19.333" data-duration="6.733" data-track-index="8"><span class="who">인터뷰브릿지</span><p class="txt">물량이 안 채워지는 경우도 있다고 하는데, 바다에 계속 사시는 거예요?</p></div>
+      <div id="q-2" class="clip qbox" style="left:191px" data-start="29.066" data-duration="5.333" data-track-index="8"><span class="who">인터뷰브릿지</span><p class="txt">맨날 어획량이 다르잖아요. 그게 나가는 배가 달라서 그런가요?</p></div>
+      <div id="q-3" class="clip qbox" style="left:396px" data-start="34.399" data-duration="8.2" data-track-index="8"><span class="who">인터뷰브릿지</span><p class="txt">그럼 조업이 잘 안 되면 안 들어오기도 하나요?</p></div>
       <div id="cap-open" class="clip cap mid" data-start="0" data-duration="7.5" data-track-index="4">구룡포 수협 위판장 도착</div>
       <div id="pin-open-0" class="clip pin" style="right:984px" data-start="0" data-duration="7.5" data-track-index="6"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z" fill="currentColor"/></svg>활어 위판장</div>
       <div id="pin-open-1" class="clip pin" style="right:24px" data-start="0" data-duration="7.5" data-track-index="7"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z" fill="currentColor"/></svg>구룡포 수협 위판장</div>
       <section id="card-q1" class="clip card" data-start="7.5" data-duration="3" data-track-index="2"><p class="ln"><i>의</i><i>문</i><i> </i><i>1</i><i>.</i></p><p class="ln"><i>들</i><i>어</i><i>오</i><i>는</i><i> </i><i>양</i><i>은</i><i> </i><i>매</i><i>일</i><i> </i><i>같</i><i>을</i><i>까</i><i>?</i></p></section>
-      <div id="sub-m1a-0" class="clip sub" data-start="10.5" data-duration="1.5" data-track-index="1"><div class="blk pair"><span class="who">인터뷰브릿지</span><p class="txt qt">통계도 보니까 어획량이 매일매일 다르고..</p><span class="who">경매 중매상</span><p class="txt">당연히 다를 수밖에,</p></div></div>
+      <div id="sub-m1a-0" class="clip ans" style="left:390px" data-start="10.5" data-duration="1.5" data-track-index="1"><span class="who">경매 중매상</span><p class="txt">당연히 다를 수밖에,</p></div>
       <div id="hud-m1a" class="clip hud" data-start="10.5" data-duration="1.5" data-track-index="3"><span class="rec"><b></b>REC</span><span class="vc">음성변조</span></div>
-      <div id="sub-m1b-0" class="clip sub" data-start="12" data-duration="3.9" data-track-index="1"><div class="blk pair"><span class="who">인터뷰브릿지</span><p class="txt qt">통계도 보니까 어획량이 매일매일 다르고..</p><span class="who">경매 중매상</span><p class="txt">차이가 나지. 기상도 있고, 물때도 있고,</p></div></div>
-      <div id="sub-m1b-1" class="clip sub" data-start="15.9" data-duration="3.433" data-track-index="1"><div class="blk pair"><span class="who">인터뷰브릿지</span><p class="txt qt">통계도 보니까 어획량이 매일매일 다르고..</p><span class="who">경매 중매상</span><p class="txt">잡는 시간대도 있고, 차이가 많이 나지.</p></div></div>
+      <div id="sub-m1b-0" class="clip ans" style="left:390px" data-start="12" data-duration="3.9" data-track-index="1"><span class="who">경매 중매상</span><p class="txt">차이가 나지. 기상도 있고, 물때도 있고,</p></div>
+      <div id="sub-m1b-1" class="clip ans" style="left:390px" data-start="15.9" data-duration="3.433" data-track-index="1"><span class="who">경매 중매상</span><p class="txt">잡는 시간대도 있고, 차이가 많이 나지.</p></div>
       <div id="hud-m1b" class="clip hud" data-start="12" data-duration="7.333" data-track-index="3"><span class="rec"><b></b>REC</span><span class="vc">음성변조</span></div>
-      <div id="sub-m2-0" class="clip sub" data-start="19.333" data-duration="3.25" data-track-index="1"><div class="blk pair"><span class="who">인터뷰브릿지</span><p class="txt qt">물량이 안 채워지는 경우도 있다고 하는데, 바다에 계속 사시는 거예요?</p><span class="who">경매 중매상</span><p class="txt">바다에 있으면서 계속 작업을 하지.</p></div></div>
-      <div id="sub-m2-1" class="clip sub" data-start="22.583" data-duration="3.483" data-track-index="1"><div class="blk pair"><span class="who">인터뷰브릿지</span><p class="txt qt">물량이 안 채워지는 경우도 있다고 하는데, 바다에 계속 사시는 거예요?</p><span class="who">경매 중매상</span><p class="txt">좀 더 어획량을 올리기 위해서..</p></div></div>
+      <div id="sub-m2-0" class="clip ans" style="left:160px" data-start="19.333" data-duration="3.25" data-track-index="1"><span class="who">경매 중매상</span><p class="txt">바다에 있으면서 계속 작업을 하지.</p></div>
+      <div id="sub-m2-1" class="clip ans" style="left:160px" data-start="22.583" data-duration="3.483" data-track-index="1"><span class="who">경매 중매상</span><p class="txt">좀 더 어획량을 올리기 위해서..</p></div>
       <div id="hud-m2" class="clip hud" data-start="19.333" data-duration="6.733" data-track-index="3"><span class="rec"><b></b>REC</span><span class="vc">음성변조</span></div>
       <section id="card-q2" class="clip card" data-start="26.066" data-duration="3" data-track-index="2"><p class="ln"><i>의</i><i>문</i><i> </i><i>2</i><i>.</i></p><p class="ln"><i>그</i><i>럼</i><i> </i><i>배</i><i>는</i><i> </i><i>언</i><i>제</i><i> </i><i>들</i><i>어</i><i>오</i><i>나</i><i>?</i></p></section>
-      <div id="sub-p1a-0" class="clip sub" data-start="29.066" data-duration="2.2" data-track-index="1"><div class="blk pair"><span class="who">인터뷰브릿지</span><p class="txt qt">맨날 어획량이 다르잖아요. 그게 나가는 배가 달라서 그런가요?</p><span class="who">수협 판매과 직원</span><p class="txt">입항하는 배에 따라서 다르죠,</p></div></div>
+      <div id="sub-p1a-0" class="clip ans" style="left:191px" data-start="29.066" data-duration="2.2" data-track-index="1"><span class="who">수협 판매과 직원</span><p class="txt">입항하는 배에 따라서 다르죠,</p></div>
       <div id="hud-p1a" class="clip hud" data-start="29.066" data-duration="2.2" data-track-index="3"><span class="rec"><b></b>REC</span><span class="vc">음성변조</span></div>
-      <div id="sub-p1b-0" class="clip sub" data-start="31.266" data-duration="3.133" data-track-index="1"><div class="blk pair"><span class="who">인터뷰브릿지</span><p class="txt qt">맨날 어획량이 다르잖아요. 그게 나가는 배가 달라서 그런가요?</p><span class="who">수협 판매과 직원</span><p class="txt">그런 것도 있고, 조업량에 따라서...</p></div></div>
+      <div id="sub-p1b-0" class="clip ans" style="left:191px" data-start="31.266" data-duration="3.133" data-track-index="1"><span class="who">수협 판매과 직원</span><p class="txt">그런 것도 있고, 조업량에 따라서...</p></div>
       <div id="hud-p1b" class="clip hud" data-start="31.266" data-duration="3.133" data-track-index="3"><span class="rec"><b></b>REC</span><span class="vc">음성변조</span></div>
-      <div id="sub-p2-0" class="clip sub" data-start="34.399" data-duration="0.9" data-track-index="1"><div class="blk pair"><span class="who">인터뷰브릿지</span><p class="txt qt">그럼 조업이 잘 안 되면 안 들어오기도 하나요?</p><span class="who">수협 판매과 직원</span><p class="txt">그렇죠,</p></div></div>
-      <div id="sub-p2-1" class="clip sub" data-start="35.299" data-duration="3" data-track-index="1"><div class="blk pair"><span class="who">인터뷰브릿지</span><p class="txt qt">그럼 조업이 잘 안 되면 안 들어오기도 하나요?</p><span class="who">수협 판매과 직원</span><p class="txt">조업이 안 되면 들어오면 손해니까,</p></div></div>
-      <div id="sub-p2-2" class="clip sub" data-start="38.299" data-duration="4.3" data-track-index="1"><div class="blk pair"><span class="who">인터뷰브릿지</span><p class="txt qt">그럼 조업이 잘 안 되면 안 들어오기도 하나요?</p><span class="who">수협 판매과 직원</span><p class="txt">기름값도 손해니까...</p></div></div>
+      <div id="sub-p2-0" class="clip ans" style="left:396px" data-start="34.399" data-duration="0.9" data-track-index="1"><span class="who">수협 판매과 직원</span><p class="txt">그렇죠,</p></div>
+      <div id="sub-p2-1" class="clip ans" style="left:396px" data-start="35.299" data-duration="3" data-track-index="1"><span class="who">수협 판매과 직원</span><p class="txt">조업이 안 되면 들어오면 손해니까,</p></div>
+      <div id="sub-p2-2" class="clip ans" style="left:396px" data-start="38.299" data-duration="4.3" data-track-index="1"><span class="who">수협 판매과 직원</span><p class="txt">기름값도 손해니까...</p></div>
       <div id="hud-p2" class="clip hud" data-start="34.399" data-duration="8.2" data-track-index="3"><span class="rec"><b></b>REC</span><span class="vc">음성변조</span></div>
       <section id="card-end" class="clip card" data-start="42.599" data-duration="5.5" data-track-index="2"><p class="ln"><i>양</i><i>은</i><i> </i><i>매</i><i>일</i><i> </i><i>다</i><i>르</i><i>고</i><i>,</i></p><p class="ln"><i>배</i><i>는</i><i> </i><i>다</i><i> </i><i>채</i><i>워</i><i>야</i><i> </i><i>들</i><i>어</i><i>온</i><i>다</i><i>.</i></p><p class="ln"><i>새</i><i>벽</i><i>까</i><i>지</i><i>,</i><i> </i><i>아</i><i>무</i><i>도</i><i> </i><i>모</i><i>른</i><i>다</i><i>.</i></p></section>
-      <div id="sub-leave-0" class="clip sub" data-start="48.099" data-duration="5.5" data-track-index="1"><div class="blk"><p class="txt">시장 상인분들하고 경매하시는 분들, 중매인들 이야기를 들으면서</p></div></div>
+      <div id="sub-leave-0" class="clip sub" data-start="48.099" data-duration="5.5" data-track-index="1"><div class="blk"><p class="txt">시장 상인분들하고 경매하시는 분들,<br>중매인들 이야기를 들으면서</p></div></div>
       <div id="sub-leave-1" class="clip sub" data-start="53.599" data-duration="3.6" data-track-index="1"><div class="blk"><p class="txt">이 시장이 어떤지 알 수 있었던 것 같고요.</p></div></div>
       <div id="sub-leave-2" class="clip sub" data-start="57.199" data-duration="3.5" data-track-index="1"><div class="blk"><p class="txt">인터넷에 나와 있지 않은 사실을 많이 알 수 있어서</p></div></div>
-      <div id="sub-leave-3" class="clip sub" data-start="60.699" data-duration="5.5" data-track-index="1"><div class="blk"><p class="txt">저희가 문제 상황을 잡고, 솔루션을 구축하는 데 큰 도움이 됐던 것 같습니다.</p></div></div>
+      <div id="sub-leave-3" class="clip sub" data-start="60.699" data-duration="5.5" data-track-index="1"><div class="blk"><p class="txt">저희가 문제 상황을 잡고,<br>솔루션을 구축하는 데 큰 도움이 됐던 것 같습니다.</p></div></div>
     </div>
     <script>
       // timeline.json 에서 생성됨 — 직접 고치지 말고 build.py 를 다시 돌린다.
       window.__timelines = window.__timelines || {};
       document.fonts.ready.then(() => {
         const tl = gsap.timeline({ paused: true });
+        tl.from("#q-0", { opacity: 0, y: 10, duration: 0.35 }, 10.5);
+        tl.from("#q-1", { opacity: 0, y: 10, duration: 0.35 }, 19.333);
+        tl.from("#q-2", { opacity: 0, y: 10, duration: 0.35 }, 29.066);
+        tl.from("#q-3", { opacity: 0, y: 10, duration: 0.35 }, 34.399);
         tl.from("#cap-open", { opacity: 0, y: 14, duration: 0.4, ease: "power2.out" }, 0);
         tl.from("#pin-open-0", { opacity: 0, y: -12, duration: 0.4, ease: "power2.out" }, 0.2);
         tl.from("#pin-open-1", { opacity: 0, y: -12, duration: 0.4, ease: "power2.out" }, 0.35);

@@ -5,7 +5,7 @@ prep.py 가 이어 붙인 촬영분(footage.mp4)을 바닥에 깔고 그 위에
   · 검은 카드: 한 글자씩 찍히는 타자기 문장(추적 60분 톤)
   · 인터뷰 컷: 왼쪽 위 ● REC, 오른쪽 위 '음성변조'
   · 4칸 오프닝의 위치 핀 + 장소 이름, 한가운데 캡션
-  · 인터뷰 질문(q): 말소리 없이 자막 블록 위쪽에 [인터뷰브릿지] 이름표 + 질문, 그 아래 [답한 사람] 이름표 + 답변(왼쪽 끝 맞춤)
+  · 인터뷰 질문(q): 말소리 없이 [인터뷰브릿지] 이름표 + 질문을 고정해 두고, 그 아래 [답한 사람] 이름표 + 답변만 바뀐다(왼쪽 끝 맞춤)
 를 얹는다. 문장·시각은 timeline.json 에서만 고친다.
 
 글꼴: Noto Sans KR 에서 쓰는 글자만 추려 assets/fonts/NotoSansKR-subset.ttf 로 넣는다. 원본은 NOTO_KR_TTF(없으면 기존 서브셋 유지).
@@ -27,6 +27,32 @@ fmt = lambda x: f"{x:.3f}".rstrip("0").rstrip(".")
 clips, js = [], []
 t0 = 0.0
 PIN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z" fill="currentColor"/></svg>'
+QA_PX, QA_MAX = 56, 1600
+
+
+def text_w(t: str, px: int) -> float:
+    """글자 폭 어림(Noto Sans KR: 한글 1em, 영숫자 0.58em, 빈칸 0.26em, 문장부호 0.32em)."""
+    return px * sum(1.0 if ord(ch) > 0x2e80 else 0.26 if ch == " " else 0.58 if ch.isalnum() else 0.32 for ch in t)
+
+
+# 질문 하나에 이어지는 답변 컷들을 한 덩어리로 — 그 안에서는 질문 자리를 고정하고 답변만 바뀐다(10/13 오너).
+# 왼쪽 끝은 덩어리 안 가장 긴 줄이 화면 가운데 오도록 한 번만 정한다
+runs, starts, acc = [], {}, 0.0
+for s in cfg["shots"]:
+    starts[s["id"]] = acc
+    if s.get("q"):
+        if runs and runs[-1]["q"] == s["q"] and runs[-1]["end"] == acc:
+            runs[-1]["end"] = acc + real[s["id"]]; runs[-1]["texts"] += [x["text"] for x in s["subs"]]
+        else:
+            runs.append({"q": s["q"], "start": acc, "end": acc + real[s["id"]], "texts": [x["text"] for x in s["subs"]]})
+    acc += real[s["id"]]
+for k, r in enumerate(runs):
+    r["left"] = round((W - min(QA_MAX, max(text_w(x, QA_PX) for x in [r["q"], *r["texts"]]))) / 2)
+    clips.append(f'<div id="q-{k}" class="clip qbox" style="left:{r["left"]}px" data-start="{fmt(r["start"])}" data-duration="{fmt(r["end"] - r["start"])}" data-track-index="8">'
+                 f'<span class="who">인터뷰브릿지</span><p class="txt">{escape(r["q"])}</p></div>')
+    js.append(f'tl.from("#q-{k}", {{ opacity: 0, y: 10, duration: 0.35 }}, {fmt(r["start"])});')
+run_of = lambda t: next(r for r in runs if r["start"] <= t < r["end"])
+
 for s in cfg["shots"]:
     d = real[s["id"]]
     sid = s["id"]
@@ -34,10 +60,12 @@ for s in cfg["shots"]:
         a = t0 + sub["t"] - s["in"]; b = min(t0 + d, t0 + sub["end"] - s["in"])
         who = sub.get("who")
         tag = f'<span class="who">{escape(who)}</span>' if who else ""
-        if s.get("q"):   # 우리 질문은 말소리 없이 글로: [인터뷰브릿지] 질문 → [답한 사람] 답변, 네 줄 왼쪽 끝 맞춤
-            tag = f'<span class="who">인터뷰브릿지</span><p class="txt qt">{escape(s["q"])}</p>' + tag
-        clips.append(f'<div id="sub-{sid}-{j}" class="clip sub" data-start="{fmt(a)}" data-duration="{fmt(b - a)}" data-track-index="1">'
-                     f'<div class="blk{" pair" if s.get("q") else ""}">{tag}<p class="txt">{escape(sub["text"])}</p></div></div>')
+        if s.get("q"):   # 답변: 질문 아래, 질문과 같은 왼쪽 끝
+            clips.append(f'<div id="sub-{sid}-{j}" class="clip ans" style="left:{run_of(t0)["left"]}px" data-start="{fmt(a)}" data-duration="{fmt(b - a)}" data-track-index="1">'
+                         f'{tag}<p class="txt">{escape(sub["text"])}</p></div>')
+        else:            # 그 밖의 자막: 가운데, 쉼표 뒤에서 줄바꿈
+            clips.append(f'<div id="sub-{sid}-{j}" class="clip sub" data-start="{fmt(a)}" data-duration="{fmt(b - a)}" data-track-index="1">'
+                         f'<div class="blk">{tag}<p class="txt">{escape(sub["text"]).replace(", ", ",<br>")}</p></div></div>')
         if s.get("fade_end") and b > t0 + d - s["fade_end"]:   # 영상 끝 페이드아웃에 걸친 자막도 함께 사라진다
             js.append(f'tl.to("#sub-{sid}-{j}", {{ opacity: 0, duration: {fmt(s["fade_end"])}, ease: "none" }}, {fmt(t0 + d - s["fade_end"])});')
     if s.get("card"):
@@ -85,8 +113,11 @@ HTML = f"""<!doctype html>
       .sub {{ position:absolute; left:90px; right:90px; bottom:64px; display:flex; justify-content:center; }}
       .blk {{ display:flex; flex-direction:column; align-items:flex-start; gap:12px; max-width:1600px; }}
       .who {{ display:inline-block; padding:6px 24px 8px; background:{BRAND}; color:#fff; font-size:38px; font-weight:800; line-height:1.2; box-shadow:8px 6px 0 {ACCENT}; }}
-      .pair .txt {{ align-self:flex-start; text-align:left; }}
-      .pair .qt {{ font-size:50px; margin-bottom:10px; }}
+      /* 인터뷰: 질문(위, 아래 끝 고정)과 답변(아래, 위 끝 고정)을 같은 왼쪽 끝에 — 글씨 크기 같게 */
+      .qbox, .ans {{ position:absolute; display:flex; flex-direction:column; align-items:flex-start; gap:10px; max-width:{QA_MAX}px; }}
+      .qbox {{ bottom:288px; }}
+      .ans {{ top:808px; }}
+      .qbox .txt, .ans .txt {{ align-self:flex-start; text-align:left; font-size:{QA_PX}px; }}
       .txt {{ align-self:center; text-align:center; font-size:62px; font-weight:800; line-height:1.28; color:#fff; word-break:keep-all;
              -webkit-text-stroke:9px #111; paint-order:stroke fill; text-shadow:0 3px 12px rgba(0,0,0,.6); }}
       .card {{ position:absolute; inset:0; background:#000; display:flex; flex-direction:column; justify-content:center; padding-left:260px; gap:26px; }}
