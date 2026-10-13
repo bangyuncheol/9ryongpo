@@ -307,6 +307,7 @@ body:hover #hud { opacity: .8; }
   #hud, #notes-panel { display: none !important; }
   .slide.full .vwrap { display: none; }
   .slide.full .stills { display: flex; }
+  .slide.full .foot { display: flex; }
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
 </style>
@@ -415,16 +416,28 @@ body:hover #hud { opacity: .8; }
 </section>
 
 <!-- 5 위판장 취재 영상 -->
-<section class="slide dark center">
+<section class="slide dark center full">
+  <div class="stills">
+    <p class="kicker">새벽 구룡포 위판장 취재 영상 · 주요 장면 (발표에서는 영상이 화면 전체로 재생됩니다)</p>
+    <div class="grid">
+      <figure><img src="shots/story-1.jpg" alt="구룡포 수협 위판장 도착. 활어 위판장과 수협 위판장 네 컷"><figcaption>구룡포 수협 위판장 도착<small>0:03</small></figcaption></figure>
+      <figure><img src="shots/story-2.jpg" alt="경매 중매상 인터뷰. 어획량이 매일 다른 이유"><figcaption>경매 중매상: “차이가 나지. 기상도 있고, 물때도 있고”<small>0:14</small></figcaption></figure>
+      <figure><img src="shots/story-3.jpg" alt="경매 중매상 인터뷰. 물량이 안 채워지면 바다에 계속 머문다"><figcaption>“물량이 안 채워지면 바다에 계속 사시는 거예요?” — “좀 더 어획량을 올리기 위해서”<small>0:25</small></figcaption></figure>
+      <figure><img src="shots/story-4.jpg" alt="수협 판매과 직원 인터뷰. 입항하는 배에 따라 다르다"><figcaption>수협 판매과 직원: “입항하는 배에 따라서 다르죠”<small>0:36</small></figcaption></figure>
+      <figure><img src="shots/story-5.jpg" alt="정리 카드. 양은 매일 다르고, 배는 다 채워야 들어온다. 새벽까지 아무도 모른다"><figcaption>양은 매일 다르고, 배는 다 채워야 들어온다. 새벽까지 아무도 모른다.<small>0:47</small></figcaption></figure>
+      <figure><img src="shots/story-6.jpg" alt="돌아오는 차 안. 현장에서 들은 이야기가 문제 정의에 도움이 됐다"><figcaption>“인터넷에 나와 있지 않은 사실을 많이 알 수 있어서”<small>0:58</small></figcaption></figure>
+    </div>
+  </div>
   <div class="vwrap">
     <video controls playsinline preload="metadata">
+      <source src="../brag-output/배마중_문제인식영상.mp4" type="video/mp4">
       <source src="영상/위판장_인터뷰.mp4" type="video/mp4">
       <source src="../brag-output/배마중_취재영상.mp4" type="video/mp4">
     </video>
-    <div class="vph">새벽 구룡포 위판장 취재 영상<small>03_발표/영상/위판장_인터뷰.mp4 (또는 brag-output/story 렌더 결과 배마중_취재영상.mp4)를 넣으면 여기서 재생됩니다</small></div>
+    <div class="vph">새벽 구룡포 위판장 취재 영상<small>brag-output/배마중_문제인식영상.mp4 를 넣으면 여기서 재생됩니다</small></div>
   </div>
   <div class="foot"><span class="src"></span><span class="pg"></span></div>
-  <aside class="notes">(새벽 구룡포 위판장 취재 영상 재생. 스페이스로 재생·정지, → 로 다음 장.)</aside>
+  <aside class="notes">(새벽 구룡포 위판장 취재 영상 재생, 1분 6초. 스페이스로 재생·정지, → 로 다음 장. PDF에는 주요 장면 6컷.)</aside>
 </section>
 
 <!-- 6 문제 요약 -->
@@ -442,12 +455,12 @@ body:hover #hud { opacity: .8; }
 
 <!-- 7 문제 1 -->
 <section class="slide">
-  <p class="kicker"><span class="kn">1</span>어떤 수산물이 얼마나 잡힐지 모른다 · 해마다</p>
-  <h2>8월 1위 어종이 2년 연속 바뀌었습니다</h2>
+  <p class="kicker"><span class="kn">1</span>어떤 수산물이 얼마나 잡힐지 모른다</p>
+  <h2>해마다 1위 어종이 바뀌고, 하루 사이에도 0톤이 됩니다</h2>
   <div class="pse">
-    <div class="card ev">
-      <p class="lab">구룡포 위판장 8월 위판금액 1위 어종과 비중</p>
-      <svg viewBox="0 0 960 520" width="100%" style="margin-top:12px;" role="img" aria-label="8월 1위 어종: 2022 살오징어 82%, 2023 살오징어 73%, 2024 살오징어 85%, 2025 붉은대게 33%, 2026 청어 86%">
+    <div class="card ev" style="justify-content:flex-start; gap:6px;">
+      <div style="display:flex; gap:28px; align-items:center;">
+        <div style="flex:1.1;"><p class="lab">8월 위판금액 1위 어종 (구룡포 위판장)</p><svg viewBox="0 0 960 520" width="100%" style="margin-top:12px;" role="img" aria-label="8월 1위 어종: 2022 살오징어 82%, 2023 살오징어 73%, 2024 살오징어 85%, 2025 붉은대게 33%, 2026 청어 86%">
         <line x1="30" y1="440" x2="940" y2="440" stroke="#c4cad1" stroke-width="2"/>
         <g fill="#d3d9e0">
           <rect x="70" y="161" width="120" height="279" rx="4"/><rect x="250" y="192" width="120" height="248" rx="4"/><rect x="430" y="151" width="120" height="289" rx="4"/>
@@ -464,66 +477,37 @@ body:hover #hud { opacity: .8; }
         <g text-anchor="middle" font-size="24" font-weight="700" fill="#111418">
           <text x="130" y="478">2022</text><text x="310" y="478">2023</text><text x="490" y="478">2024</text><text x="670" y="478">2025</text><text x="850" y="478">2026</text>
         </g>
-      </svg>
-      <p class="line">10월 살오징어 <span class="red">1,473톤 → 44톤</span>, 3년 만에</p>
+      </svg></div>
+        <div style="flex:.9; padding-left:24px; border-left:1px solid var(--line);"><p class="lab">10월 살오징어 위판량</p><p style="margin-top:10px;"><span class="big" style="font-size:88px;">1,473</span><span class="h3">톤</span></p><p style="margin-top:4px;"><span class="h3 red">→ 44톤</span><span class="b26 mut">　3년 만에</span></p></div>
+      </div>
+      <p class="lab" style="margin-top:14px;">2026년 6월 청어 위판량 (같은 위판장, 경매일별, 톤)</p>
+      <svg id="dailyChart2" viewBox="0 0 1600 400" width="100%" style="margin-top:2px;" role="img" aria-label="2026년 6월 청어 일별 위판량. 6월 5일 256.5톤, 13일부터 27일까지 0톤"></svg>
+      <p class="line" style="margin-top:10px; font-size:25px;">방어도 같습니다(2025년 12월 84.6톤 → 닷새 뒤 0톤). 사는 쪽은 그날 배를 봐야 압니다.</p>
     </div>
     <div class="rs">
       <div class="card">
-        <p class="lab">배마중은 이렇게 — 입항 예보 + 어종 추정</p>
+        <p class="lab">배마중은 이렇게 — 입항 예보 + 어종 추정 + 먼저 알림</p>
         <ul class="dots">
           <li><b>조업을 마치고 돌아오는 배</b>를 E-UM 선박 위치·어선 명부로 가장 먼저 잡고 도착 시각을 예보합니다(남은 거리 ÷ 속도).</li>
-          <li><b>무엇을 실었을지</b>는 그 배의 업종 × 같은 달 4년 위판 실적으로 가능성을 냅니다(자망선 → 붉은대게 79%).</li>
-          <li>숫자는 규칙이 내고, AI는 문장만 씁니다. 1위가 바뀌는 업종은 말하지 않습니다.</li>
+          <li><b>무엇을 실었을지</b>는 그 배의 업종 × 같은 달 4년 위판 실적으로 가능성을 냅니다(자망선 → 붉은대게 79%). 숫자는 규칙이, 문장은 AI가 씁니다.</li>
+          <li><b>원하는 생선을 골라 두면</b> 실었을 배가 돌아오는 순간 휴대폰 알림이 오고, 화면이 낯선 분께는 배마중이 전화를 겁니다 <span class="ib">인터뷰브릿지 기술</span> — 고정 발화를 미리 합성해 바로 트는 쿠션 설계.</li>
         </ul>
       </div>
       <div class="card eff">
         <p class="lab">기대효과</p>
         <ul class="dots">
-          <li>나가기 전에 <b>오늘 무엇이 얼마나 오는지</b> 압니다. 어종이 바뀌는 해에도 그날 배로 판단합니다.</li>
-          <li>잴 지표: 예보 도착 시각 오차 · 어종 적중률(위판 실적과 대조).</li>
+          <li>나가기 전에 <b>오늘 무엇이 얼마나 오는지</b> 압니다. 어종이 바뀌는 해에도, 0톤인 날에도 그날 배로 판단합니다.</li>
+          <li><b>원하는 생선이 오는 날만 일어납니다.</b> 나갈지 말지, 트럭 몇 대를 배가 닿기 전에 정합니다.</li>
+          <li>잴 지표: 예보 도착 시각 오차 · 어종 적중률 · 알림 뒤 방문율.</li>
         </ul>
       </div>
     </div>
   </div>
   <div class="foot"><span class="src"></span><span class="pg"></span></div>
-  <aside class="notes">해수부 위판 실적 56개월치를 직접 받아서 봤습니다. 8월 1위가 3년 내내 살오징어였다가, 작년엔 붉은대게, 올해는 청어로 바뀌었습니다. 10월 살오징어는 3년 만에 1,473톤에서 44톤이 됐습니다. 그래서 배마중은 '올해는 뭐가 잡힌다'가 아니라 '오늘 이 배가 뭘 싣고 몇 시에 온다'를 냅니다. 배 위치와 명부로 도착 시각을, 업종과 같은 달 실적으로 어종 가능성을 냅니다. 숫자는 전부 규칙이 내고 AI는 문장만 씁니다. 나가기 전에 오늘 물건을 아는 게 효과고, 예보 오차와 어종 적중률을 재서 보여 드리겠습니다.<br><br>출처: 해양수산부 「일자별 위탁판매현황」 구룡포수협 본소 2022.1~2026.8, 팀 집계<br>어종 추정 백테스트: 연안자망·연안통발·근해채낚기 12/12, 근해자망 0/4</aside>
+  <aside class="notes">첫 번째 문제입니다. 해수부 위판 실적 56개월치를 직접 받아서 봤습니다. 8월 1위가 3년 내내 살오징어였다가 작년엔 붉은대게, 올해는 청어로 바뀌었고, 10월 살오징어는 3년 만에 1,473톤에서 44톤이 됐습니다. 하루 단위로 보면 더 심합니다. 올해 6월 청어는 5일에 256톤이 들어왔는데 13일부터 보름 동안 0톤이었습니다. 바람도 잔잔했어요. 청어를 잡는 선망 선단이 안 들어온 겁니다. 방어도 작년 12월 84톤 들어오고 닷새 뒤부터 0톤이었습니다. 그래서 배마중은 '올해는 뭐가 잡힌다'가 아니라 '오늘 이 배가 뭘 싣고 몇 시에 온다'를 냅니다. 배 위치와 명부로 돌아오는 배를 가장 먼저 잡아 도착 시각을, 업종과 같은 달 실적으로 어종 가능성을 내고, 원하는 생선을 골라 두면 실었을 배가 돌아오는 순간 알립니다. 화면이 낯선 분께는 전화를 거는데, 문장을 미리 만들어 두고 바로 트는 건 저희 인터뷰브릿지가 AI 면접에서 쓰던 쿠션 설계입니다. 나가기 전에 오늘 물건을 알고, 원하는 생선이 오는 날만 일어나는 게 효과입니다.<br><br>출처: 해양수산부 「일자별 위탁판매현황」 구룡포수협 본소 2022.1~2026.8, 팀 집계<br>어종 추정 백테스트: 연안자망·연안통발·근해채낚기 12/12, 근해자망 0/4<br>청어 13~27일은 파고 0.3~0.6m의 잔잔한 날에도 0톤(청어를 잡는 선망 선단이 들어오지 않음, 21·22일만 폭우·풍랑 휴장) · 방어 12일은 파고 3m 풍랑, 13·14일엔 다른 생선이 15톤 안팎 팔림</aside>
 </section>
 
 <!-- 8 문제 2 -->
-<section class="slide">
-  <p class="kicker"><span class="kn">1</span>어떤 수산물이 얼마나 잡힐지 모른다 · 하루하루</p>
-  <h2>경매시간이 되어서야 오늘 물건을 알 수 있습니다</h2>
-  <div class="pse">
-    <div class="card ev">
-      <p class="lab">2025년 12월 방어 위판량 (구룡포 위판장, 경매일별, 톤)</p>
-      <svg id="dailyChart" viewBox="0 0 1600 400" width="100%" style="margin-top:4px;" role="img" aria-label="2025년 12월 방어 일별 위판량. 12월 7일 84.6톤, 12일부터 14일까지 0톤"></svg>
-      <p class="lab" style="margin-top:18px;">2026년 6월 청어 위판량 (같은 위판장, 경매일별, 톤)</p>
-      <svg id="dailyChart2" viewBox="0 0 1600 400" width="100%" style="margin-top:4px;" role="img" aria-label="2026년 6월 청어 일별 위판량. 6월 5일 256.5톤, 13일부터 27일까지 0톤"></svg>
-      <p class="line" style="margin-top:16px; font-size:26px;">방어도 청어도 — 횟집 김 사장이 잃는 것: 새벽 운전과 빈손 · 나갈지 말지 정할 근거 · 트럭을 몇 대 부를지</p>
-    </div>
-    <div class="rs">
-      <div class="card">
-        <p class="lab">배마중은 이렇게 — 먼저 알림</p>
-        <ul class="dots">
-          <li><b>원하는 생선을 골라 두면</b>, 그걸 실었을 배가 돌아오는 순간 휴대폰 알림이 옵니다(웹 푸시, 안드로이드 APK). <b>그날만 일어나면 됩니다.</b></li>
-          <li>화면이 낯선 분께는 <b>배마중이 전화를 걸어</b> 읽어 드립니다(070). 알림 문장은 규칙이 숫자를 채우고 AI가 다듬습니다.</li>
-          <li>전화 문장은 미리 합성해 두고 바로 틉니다 <span class="ib">인터뷰브릿지 기술</span> — 고정 발화를 미리 만들어 재생하는 쿠션 설계.</li>
-        </ul>
-      </div>
-      <div class="card eff">
-        <p class="lab">기대효과</p>
-        <ul class="dots">
-          <li><b>원하는 생선이 오는 날만 일어납니다.</b> 나갈지 말지, 트럭 몇 대를 배가 닿기 전에 정합니다. 헛걸음과 빈손이 줄어듭니다.</li>
-          <li>잴 지표: 알림 뒤 방문율 · 알림이 간 시각과 실제 입항 시각의 차이.</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-  <div class="foot"><span class="src"></span><span class="pg"></span></div>
-  <aside class="notes">하루 단위로 보면 더 심합니다. 겨울 횟집에서 제일 많이 찾는 방어인데, 작년 12월 7일엔 84톤이 들어왔다가 닷새 뒤부터 0톤이었습니다. 위판장이 쉰 것도 아니에요. 12일은 파고 3미터 풍랑이었지만 13일, 14일엔 다른 생선이 15톤씩 팔렸습니다. 청어도 같습니다. 올해 6월 5일 256톤이 들어왔는데 13일부터 보름 동안 0톤이었습니다. 바람도 잔잔했어요. 청어를 잡는 선망 선단이 안 들어온 겁니다. 이렇게 들쭉날쭉하면 손해는 사러 온 사람이 봅니다. 그래서 먼저 알립니다. 원하는 생선을 골라 두면 실었을 배가 보이는 순간 휴대폰으로, 화면이 낯분 분께는 배마중이 전화를 걸어 읽어 드립니다. 전화 문장을 미리 만들어 두고 바로 트는 건 저희 인터뷰브릿지가 AI 면접에서 쓰던 쿠션 설계입니다. 나갈지 말지, 트럭 몇 대를 배가 닿기 전에 정하는 게 효과입니다.<br><br>출처: 해양수산부 「일자별 위탁판매현황」 구룡포수협 본소, 팀 집계<br>방어 12·14일엔 다른 생선이 15톤 안팎 팔림(12일은 파고 3m 풍랑)<br>청어 13~27일은 파고 0.3~0.6m의 잔잔한 날에도 0톤(청어를 잡는 선망 선단이 들어오지 않음, 21·22일만 폭우·풍랑 휴장)<br>김 사장은 가상 인물, 날짜와 물량은 실제 기록</aside>
-</section>
-
-<!-- 9 문제 3 -->
 <section class="slide">
   <p class="kicker"><span class="kn">2</span>경매시간이 되어서야 안다</p>
   <h2>경매는 6시로 정해져 있습니다. 그 전에 누가 돌아오는지는 아무도 모릅니다</h2>
@@ -564,7 +548,7 @@ body:hover #hud { opacity: .8; }
   <aside class="notes">두 번째입니다. 경매는 6시로 정해져 있어요. 그건 다 압니다. 모르는 건 그 전에 어떤 배가 조업을 마치고 무엇을 싣고 돌아오느냐예요. 지금은 위판장에 가서 배를 봐야 압니다. 배마중은 선박 위치로 조업을 마치고 위판장으로 향하는 배를 누구보다 먼저 잡습니다. 무엇을 실었을지, 몇 시에 닿을지를 경매 전에 알리고, 6시 경매에 맞춰 내 위치에서 출발 시각을 거꾸로 셉니다. 원하는 생선을 실은 배가 돌아오는 날만 알리니까, 그날만 일어나면 됩니다. 경매 전에 나갈지를 정하는 게 효과입니다.<br><br>출처: 도로 색은 E-UM 교통량·혼잡율(여유 ≤30대 · 보통 ≤100대 · 붐빔)<br>출발 시각은 카카오모빌리티 길찾기, 60km 밖은 계산하지 않음<br>경매 06:00과 30분 전 도착은 수협 확인 전</aside>
 </section>
 
-<!-- 10 문제 4 -->
+<!-- 9 문제 3 -->
 <section class="slide">
   <p class="kicker"><span class="kn">3</span>앱과 웹이 낯설다</p>
   <h2>어가 인구 둘 중 한 명이 고령입니다</h2>
@@ -604,7 +588,7 @@ body:hover #hud { opacity: .8; }
   <aside class="notes">세 번째는 쓰는 사람 얘기입니다. 어가 인구 둘 중 한 명이 고령이고, 농어민 중에 AI 서비스를 써 본 사람은 31%, 일반 국민의 절반쯤입니다. 그래서 화면만 만들지 않고 전화를 붙였습니다. 글로 묻든 말로 묻든 같은 엔진이 같은 숫자를 냅니다. 여기 저희 인터뷰브릿지 기술이 들어갑니다. 말을 언제 받고 언제 끊을지는 AI 면접용으로 직접 만든 턴테이킹 설계를 전화에 맞게 옮겨서 잡고, 어르신 구술생애사 과제에서 쓰는 키워드 핫부스팅으로 구룡포 지명과 어촌 말, 그날 배 이름을 알아듣습니다. 실제 통화에서 배 이름을 다섯 번 다 맞혔습니다. 앱 설치도 글자 입력도 없이 전화 한 통이면 되는 게 효과입니다.<br><br>출처: 국가데이터처 「2025년 농림어업총조사 결과(잠정)」<br>과기정통부·NIA 「2025 디지털정보격차 실태조사」<br>전화: ClawOps 070 · CLOVA·OpenAI 받아쓰기 · Gemini 음성 합성<br>배 이름 5/5는 10/11 실통화 6건(OpenAI 1/5)</aside>
 </section>
 
-<!-- 11 기대효과 -->
+<!-- 10 기대효과 -->
 <section class="slide">
   <p class="kicker">기대효과</p>
   <h2>김 사장님의 새벽이 이렇게 바뀝니다</h2>
@@ -620,7 +604,7 @@ body:hover #hud { opacity: .8; }
   <aside class="notes">시연은 이 뒤에 bmj.kr에서 직접 보여 드리겠습니다. 그 전에 사장님의 새벽이 어떻게 바뀌는지 한 장으로 정리했습니다. 돌아오는 배를 누구보다 먼저 알고, 원하는 생선이 오는 날만 일어나고, 무엇을 실었을지 가능성으로 알고, 경매 전에 나갈지를 정하고, 글로든 말로든 같은 숫자를 받습니다. 배 위치 API가 작년 4월에 멈춰 있어서 배 움직임만 같은 형식으로 시뮬레이션하고, 나머지는 전부 실데이터입니다. 위치가 들어오면 스위치 하나로 바뀌고, 멈추면 엉터리 예보 대신 '못 냅니다'가 뜹니다.<br><br>출처: 배 위치만 시뮬레이션(E-UM 선박 위치가 2025-04-27에 멈춰 같은 형식으로 재생, 하루 넘게 멈추면 예보 대신 &#x27;낼 수 없습니다&#x27;를 띄움)<br>나머지는 실데이터: E-UM 어선 기본정보 202척 · 위판장 위치 · 교통센서·교통량·혼잡율(실측) · 해수부 위판 실적 56개월 · 카카오모빌리티 길찾기<br>경매 06:00과 30분 전 도착은 수협 확인 전 · 화면·전화는 bmj.kr(VM 1대)에서 운영 중</aside>
 </section>
 
-<!-- 12 원칙 -->
+<!-- 11 원칙 -->
 <section class="slide dark center">
   <p class="kicker">숫자는 누가 내나</p>
   <h2 style="font-size:84px;">숫자는 규칙이 내고, AI는 문장만 씁니다</h2>
@@ -635,7 +619,7 @@ body:hover #hud { opacity: .8; }
   <aside class="notes">새벽에 돈이 걸린 결정을 돕는 거라 숫자가 틀리면 안 됩니다. 그래서 숫자는 전부 규칙이 내고 AI는 문장만 씁니다. 가격도 해 봤는데, 3분의 1 남짓밖에 안 맞았습니다. 예측은 접고 과거 실적만 답합니다.<br><br>출처: 가격 시험: 그해 8월 붉은대게 kg당 가격 25~75% 범위에 그해 10월 거래 중량이 든 비율<br>2022 37% · 2023 65% · 2024 32% · 2025 35%</aside>
 </section>
 
-<!-- 13 구조 -->
+<!-- 12 구조 -->
 <section class="slide">
   <p class="kicker">구조</p>
   <h2>데이터 받고, 규칙으로 계산하고, 말로 바꿔 보냅니다</h2>
@@ -657,7 +641,7 @@ body:hover #hud { opacity: .8; }
   <aside class="notes">구조는 단순합니다. 받고, 계산하고, 문장으로 바꿔서, 폰이랑 전화로 보냅니다. 서버 한 대에서 전부 돕니다.</aside>
 </section>
 
-<!-- 14 팀 -->
+<!-- 13 팀 -->
 <section class="slide dark">
   <div style="display:flex; align-items:center; gap:22px;"><div style="background:#fff; border-radius:16px; padding:12px 20px;"><img src="design-preview/interviewbridge-logo-kor.png" alt="인터뷰브릿지" style="height:40px; display:block;"></div><p class="kicker" style="margin:0;">팀 인터뷰브릿지 · 포항공과대학교 컴퓨터공학과</p></div>
   <h2 style="margin-top:22px;">사람처럼 말을 주고받는 음성 AI를 만드는 팀</h2>
@@ -754,9 +738,6 @@ body:hover #hud { opacity: .8; }
     g += `<text x="${a}" y="${base - 92}" font-size="26" font-weight="800" fill="#d32f2f" text-anchor="${o.anchor || 'start'}">${o.note}</text><line x1="${a + 4}" x2="${a + 4}" y1="${base - 84}" y2="${base - 46}" stroke="#d32f2f" stroke-width="2"/>`;
     svg.innerHTML = g;
   }
-  // 2025년 12월 방어
-  drawDaily('dailyChart', [['1',28.0],['2',9.2],['3',0],['5',50.6],['6',55.6],['7',84.6],['8',56.4],['9',79.4],['10',45.6],['11',18.0],['12',0],['13',0],['14',0],['15',0],['16',6.8],['17',0],['18',0],['19',0],['20',2.8],['21',15.6],['22',0],['23',31.2],['24',15.9],['25',0],['26',0],['27',0],['28',4.4],['29',0],['30',16.8],['31',0]],
-    { name: '12월', max: 100, hl: '7', red: ['12', '13', '14'], from: '12', to: '14', labels: ['1', '7', '12', '14', '23', '31'], note: '위판장은 열렸는데 방어 0톤' });
   // 2026년 6월 청어 (21·22일은 폭우·풍랑으로 위판장 휴장이라 막대 없음)
   drawDaily('dailyChart2', [['1',143.1],['2',132.0],['3',0],['4',0],['5',256.5],['6',179.8],['7',0],['8',0],['9',0],['10',154.7],['11',8.4],['12',26.6],['13',0],['14',0],['15',0],['16',0],['17',0],['18',0],['19',0],['20',0],['23',0],['24',0],['25',0],['26',0],['27',0],['28',10.4],['29',0],['30',0]],
     { name: '6월', max: 300, hl: '5', red: ['13','14','15','16','17','18','19','20','23','24','25','26','27'], from: '13', to: '27', labels: ['1', '5', '13', '20', '27', '30'], note: '바람 잔잔한 보름, 청어 0톤' });
