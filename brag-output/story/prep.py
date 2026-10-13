@@ -1,7 +1,7 @@
 """timeline.json 의 컷을 원본에서 잘라 1920×1080 30fps 촬영분 하나(composition/assets/live/footage.mp4)로 잇는다.
 
 컷마다:
-  · fit  split(두 영상을 반씩 나란히, 소리는 왼쪽. left/right.segs = [[시작, 끝], …] 원본 초) | cover(가로 꽉) | pillar(세로 영상 가운데 + 양옆은 같은 영상을 흐리게) | black(검은 화면, 원본 소리만 작게. src 없으면 무음)
+  · fit  grid(4칸 cells: 왼쪽 위·오른쪽 위·왼쪽 아래·오른쪽 아래, 소리는 첫 칸. segs = [[시작, 끝], …] 원본 초) | cover(가로 꽉) | pillar(세로 영상 가운데 + 양옆은 같은 영상을 흐리게) | black(검은 화면, 원본 소리만 작게. src 없으면 무음)
   · rotate ccw   폰을 눕혀 찍은 세로 파일을 가로로 세운다
   · mosaic       얼굴 모자이크(mediapipe blaze_face_short_range, 화면을 짧은 변의 절반 크기 조각으로 나눠 작은 얼굴도 잡는다).
                  잡은 자리를 앞뒤 1초 동안 가려 놓친 프레임(옆얼굴·처음 보이는 순간)도 가린다
@@ -102,15 +102,22 @@ def build_shot(i: int, s: dict) -> Path:
             ff("-f", "lavfi", "-i", f"color=black:s={W}x{H}:r={FPS}", "-f", "lavfi", "-i", "anullsrc=r=48000:cl=stereo", *fix, *ENC, out)
         return out
 
-    if s["fit"] == "split":   # 두 방문 브이로그를 반씩 동시에 — 소리는 왼쪽(첫 방문)만
-        L, R = s["left"], s["right"]; hw = W // 2 - 4
-        def side(k, segs, tag):
-            parts_ = "".join(f"[{k}:v]trim={a}:{b},setpts=PTS-STARTPTS[{tag}{j}];" for j, (a, b) in enumerate(segs))
-            return parts_ + "".join(f"[{tag}{j}]" for j in range(len(segs))) + f"concat=n={len(segs)}:v=1:a=0,scale={hw}:{H}:force_original_aspect_ratio=increase,crop={hw}:{H},setsar=1[{tag}];"
-        aud = "".join(f"[0:a]atrim={a}:{b},asetpts=PTS-STARTPTS[a{j}];" for j, (a, b) in enumerate(L["segs"]))
-        aud += "".join(f"[a{j}]" for j in range(len(L["segs"]))) + f"concat=n={len(L['segs'])}:v=0:a=1,loudnorm=I=-16:TP=-1.5:LRA=11,aresample=48000,apad,atrim=0:{dur}[a]"
-        graph = side(0, L["segs"], "l") + side(1, R["segs"], "r") + f"[l]pad={W // 2 + 4}:{H}:0:0:black[lp];[lp][r]hstack[v];" + aud
-        ff("-i", SRC_DIR / L["src"], "-i", SRC_DIR / R["src"], "-filter_complex", graph, "-map", "[v]", "-map", "[a]", *fix, *ENC, out)
+    if s["fit"] == "grid":   # 4칸: 위 두 칸 방문 인사, 아래 두 칸 경매장 분위기 — 소리는 첫 칸(왼쪽 위)만
+        cw, ch, g = W // 2 - 2, H // 2 - 2, ""
+        for k, c in enumerate(s["cells"]):
+            rot = "transpose=2," if c.get("rotate") == "ccw" else ""
+            g += "".join(f"[{k}:v]trim={a}:{b},setpts=PTS-STARTPTS[c{k}s{j}];" for j, (a, b) in enumerate(c["segs"]))
+            g += "".join(f"[c{k}s{j}]" for j in range(len(c["segs"]))) + \
+                 f"concat=n={len(c['segs'])}:v=1:a=0,{rot}scale={cw}:{ch}:force_original_aspect_ratio=increase,crop={cw}:{ch},setsar=1[c{k}];"
+        g += "[c0][c1][c2][c3]xstack=inputs=4:layout=0_0|w0+4_0|0_h0+4|w0+4_h0+4:fill=black[v]"
+        for k, (x, y, bw, bh, a0, a1) in enumerate(s.get("hide", [])):   # 상호명 간판 모자이크(완성 화면 좌표)
+            g = g[:-3] + f"[pre{k}];[pre{k}]split[m{k}][q{k}];[q{k}]crop={bw}:{bh}:{x}:{y},scale={bw // 12}:{bh // 12},scale={bw}:{bh}:flags=neighbor[p{k}];" \
+                         f"[m{k}][p{k}]overlay={x}:{y}:enable='between(t,{a0},{a1})'[v]"
+        g += ";"
+        segs = s["cells"][0]["segs"]
+        g += "".join(f"[0:a]atrim={a}:{b},asetpts=PTS-STARTPTS[a{j}];" for j, (a, b) in enumerate(segs))
+        g += "".join(f"[a{j}]" for j in range(len(segs))) + f"concat=n={len(segs)}:v=0:a=1,loudnorm=I=-16:TP=-1.5:LRA=11,aresample=48000,apad,atrim=0:{dur}[a]"
+        ff(*[x for c in s["cells"] for x in ("-i", SRC_DIR / c["src"])], "-filter_complex", g, "-map", "[v]", "-map", "[a]", *fix, *ENC, out)
         return out
 
     raw = TMP / f"{i:02d}_{s['id']}_raw.mp4"

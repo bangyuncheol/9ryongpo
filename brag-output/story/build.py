@@ -4,7 +4,7 @@ prep.py 가 이어 붙인 촬영분(footage.mp4)을 바닥에 깔고 그 위에
   · 자막: 원본 초(t/end) → 컷 시작 + (t - in). 한 번에 하나, 가운데. 말한 사람 이름표는 자막 왼쪽 위
   · 검은 카드: 한 글자씩 찍히는 타자기 문장(추적 60분 톤)
   · 인터뷰 컷: 왼쪽 위 ● REC, 오른쪽 위 '음성변조'. 인터뷰 끝(summary)은 화면을 어둡게 하고 한 말을 글로 모아 보여 준다
-  · 오프닝 분할 화면의 '첫 번째 방문'·'두 번째 방문' 표시, 몽타주 캡션
+  · 4칸 오프닝의 '첫 번째 방문'·'두 번째 방문' 표시, 한가운데 캡션
 를 얹는다. 문장·시각은 timeline.json 에서만 고친다.
 
 글꼴: Noto Sans KR 에서 쓰는 글자만 추려 assets/fonts/NotoSansKR-subset.ttf 로 넣는다. 원본은 NOTO_KR_TTF(없으면 기존 서브셋 유지).
@@ -48,12 +48,13 @@ for s in cfg["shots"]:
     if s.get("caption"):
         # 캡션은 그 컷부터 caption_len 초 — 앞뒤 컷 자막과 겹치지 않게(자막은 한 번에 하나)
         cl = s.get("caption_len", d)
-        clips.append(f'<div id="cap-{sid}" class="clip cap" data-start="{fmt(t0)}" data-duration="{fmt(cl)}" data-track-index="4">{escape(s["caption"])}</div>')
+        clips.append(f'<div id="cap-{sid}" class="clip cap{" mid" if s["fit"] == "grid" else ""}" data-start="{fmt(t0)}" data-duration="{fmt(cl)}" data-track-index="4">{escape(s["caption"])}</div>')
         js.append(f'tl.from("#cap-{sid}", {{ opacity: 0, y: 14, duration: 0.4, ease: "power2.out" }}, {fmt(t0)});')
-    if s["fit"] == "split":   # 반씩 나란한 두 방문 — 어느 쪽이 몇 번째 방문인지
-        for k, side in enumerate(("left", "right")):
-            clips.append(f'<div id="chip-{sid}-{k}" class="clip chip" style="left:{56 + k * W // 2}px" data-start="{fmt(t0)}" data-duration="{fmt(d)}" data-track-index="{4 + k}">{escape(s[side]["label"])}</div>')
-            js.append(f'tl.from("#chip-{sid}-{k}", {{ opacity: 0, x: -24, duration: 0.4, ease: "power2.out" }}, {fmt(t0 + 0.2 + k * 0.15)});')
+    if s["fit"] == "grid":   # 4칸 오프닝 — 위 두 칸에 몇 번째 방문인지
+        for k, c in enumerate(s["cells"]):
+            if c.get("label"):
+                clips.append(f'<div id="chip-{sid}-{k}" class="clip chip" style="left:{40 + (k % 2) * W // 2}px" data-start="{fmt(t0)}" data-duration="{fmt(d)}" data-track-index="{6 + k}">{escape(c["label"])}</div>')
+                js.append(f'tl.from("#chip-{sid}-{k}", {{ opacity: 0, x: -24, duration: 0.4, ease: "power2.out" }}, {fmt(t0 + 0.2 + k * 0.15)});')
     if s.get("summary"):   # 인터뷰 끝: 말소리는 줄고 화면이 어두워지며 한 말을 글로 모아 보여 준다(뉴스식)
         sm = s["summary"]
         lines = "".join(f'<p class="sl">{escape(x)}</p>' for x in sm["lines"])
@@ -97,7 +98,8 @@ HTML = f"""<!doctype html>
       .hud .vc {{ position:absolute; right:56px; top:44px; padding:6px 16px; background:rgba(0,0,0,.6); font-size:28px; font-weight:700; }}
       .cap {{ position:absolute; left:90px; right:90px; bottom:64px; text-align:center; font-size:62px; font-weight:800; line-height:1.28; word-break:keep-all;
              -webkit-text-stroke:9px #111; paint-order:stroke fill; text-shadow:0 3px 12px rgba(0,0,0,.6); }}
-      .chip {{ position:absolute; top:48px; padding:10px 22px; background:{BRAND}; box-shadow:6px 5px 0 {ACCENT}; font-size:36px; font-weight:800; }}
+      .cap.mid {{ bottom:auto; top:50%; transform:translateY(-50%); }}
+      .chip {{ position:absolute; top:36px; padding:10px 22px; background:{BRAND}; box-shadow:6px 5px 0 {ACCENT}; font-size:36px; font-weight:800; }}
       .sum {{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }}
       .sum .scrim {{ position:absolute; inset:0; background:rgba(0,0,0,.72); }}
       .sum .blk {{ position:relative; gap:18px; }}
