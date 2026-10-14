@@ -81,16 +81,16 @@ def test_leaving_harbor_is_still_dropped():
 
 def test_key_ships_never_drop_out_until_docked(simulator):
     """대본 배가 출발 뒤 정박까지 1분 간격으로 늘 '입항 중' 또는 '입항'이다(입구에서 빠지던 문제, 10/11)."""
-    day = date(2026, 10, 13)
-    for tr in simulator.tracks(day):
-        if tr.ship_id not in FLEET or tr.depart is None:
-            continue
-        end = sim.arrival_time(tr, PLACE)
-        t = max(tr.depart + timedelta(minutes=12), end - timedelta(minutes=40))
+    midnight = at("00:00")
+    for sid in FLEET:
+        leg = simulator.plan(sid).legs[0]
+        assert leg.inbound
+        depart, end = midnight + timedelta(seconds=leg.depart_s), midnight + timedelta(seconds=leg.end_s)
+        t = max(depart + timedelta(minutes=12), end - timedelta(minutes=40))
         while t <= end + timedelta(minutes=2):
             out = arrival.judge(simulator.snapshot(t), simulator.snapshot(t - timedelta(minutes=10)), FLEET, t, PLACE)
             ids = {a["ship_id"] for a in out["arriving"] + out["arrived"]}
-            assert tr.ship_id in ids, (FLEET[tr.ship_id]["name"], t.strftime("%H:%M"))
+            assert sid in ids, (FLEET[sid]["name"], t.strftime("%H:%M"))
             t += timedelta(minutes=1)
 
 

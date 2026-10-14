@@ -15,7 +15,9 @@ import { loadKakao } from './kakaoLoader'
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type K = any
 
-const POLL_MS = 1000 // 배 위치 조회 주기(AppV4 의 ships 폴링과 같게). 이 시간 동안 이전 위치→새 위치로 미끄러지듯 옮긴다
+const POLL_MS = 1000 // 배 위치 조회 주기(AppV4 의 ships 폴링과 같게)
+// 위치는 서버에서 1분(가상) 단위로만 바뀐다(10/15). 새 위치가 오면 slideMs(= 가상 1분이 실제로 걸리는 시간, 1배속 60초·60배속 1초)
+// 동안 이전 위치→새 위치로 미끄러지듯 옮긴다. 같은 위치가 다시 오면(아직 1분이 안 지남) 미끄러지던 것을 그대로 잇는다
 const reduceMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
 // 항구 확대 범위: 위판장 주변 육지 + 항구 + 입구 바깥 접근로(harbor.py APPROACH[0])까지
 // 서쪽은 위판장 1km 안 교통 센서(병포리 교차로·행정복지센터)까지 들어오게(10/10)
@@ -48,10 +50,12 @@ type Props = {
   padBottom?: number
   /** 지도 위쪽을 덮는 투명 헤더 높이(px). 범례·조업 버튼·화살표를 그 아래로 내린다(버전 4, 10/13) */
   padTop?: number
+  /** 새 위치까지 미끄러지는 시간(ms). 서버 위치가 바뀌는 간격(가상 1분)이 실제로 걸리는 시간. 기본 POLL_MS */
+  slideMs?: number
 }
 
 // path: 이번 2초 동안 그릴 꺾은선(지금 그린 위치 → 지나친 모서리들 → 새 위치). route: 마지막으로 받은 남은 꺾이는 지점
-type Track = { o: K; el: HTMLElement; from: [number, number]; to: [number, number]; path: [number, number][]; route: [number, number][]; t0: number; status: Ship['status']; docked: boolean; heading: number; rot: number; dockAt: Ship | null }
+type Track = { o: K; el: HTMLElement; from: [number, number]; to: [number, number]; path: [number, number][]; route: [number, number][]; t0: number; dur: number; status: Ship['status']; docked: boolean; heading: number; rot: number; dockAt: Ship | null }
 
 const boatSvg = (fill: string) =>
   `<svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c2.8 3 4 6.4 4 10v7.5c0 1-.8 1.8-1.8 1.8H9.8c-1 0-1.8-.8-1.8-1.8V12c0-3.6 1.2-7 4-10z" fill="${fill}" stroke="#fff" stroke-width="1.6"/><circle cx="12" cy="12" r="1.8" fill="#fff"/></svg>`
@@ -83,7 +87,7 @@ function turnTo(t: Track, deg: number) {
 function paintBoat(el: HTMLElement, s: Ship, selected: boolean, t: Track) {
   const docked = isDocked(s)
   const hull = el.querySelector('[data-hull]') as HTMLElement
-  hull.innerHTML = boatSvg(docked ? 'var(--color-arrived)' : 'var(--color-arriving)')
+  hull.innerHTML = boatSvg(docked ? 'var(--color-arrived)' : s.status === '출항 중' ? 'var(--color-idle)' : 'var(--color-arriving)')
   // 정박한 배 방향은 서버가 자리마다 정한 값(부두와 나란히 / 뱃머리를 해안에, harbor.py)
   hull.style.transform = `rotate(${turnTo(t, s.course ?? 270)}deg) scale(${docked ? 0.8 : 1})`
   hull.style.filter = selected ? 'drop-shadow(0 0 3px var(--color-primary)) drop-shadow(0 0 2px var(--color-primary))' : ''
@@ -103,6 +107,7 @@ function infoText(s: Ship, a: Arrival | undefined) {
   const kind = `${shortBiz(s.biz)} ${s.gt ? `${Math.round(s.gt)}t` : ''}`.trim()
   if (isDocked(s)) return `${s.name} · ${kind} · 정박`
   if (s.status === '입항') return `${s.name} · ${kind} · 항구 안 · 부두로 이동 중`
+  if (s.status === '출항 중') return `${s.name} · ${kind} · 출항 중 · 조업 해역으로`
   if (a) return `${hhmm(a.eta)} 도착 예정 · ${s.name} · ${kind} · ${a.d_km.toFixed(1)}km`
   return `${s.name} · ${kind} · ${s.status}`
 }
@@ -330,14 +335,15 @@ export default function KakaoArrivalMap(p: Props) {
     if (el.parentElement) el.parentElement.style.pointerEvents = 'none'
   }, [ready, sensorFocus, p.trucks, p.truck])
 
-  // 들어오는 배·정박한 배: 배 모양. 위치는 2초 사이를 부드럽게 잇는다.
+  // 들어오는 배·정박한 배·나가는 배: 배 모양. 위치는 새 위치가 올 때마다 slideMs 동안 부드럽게 잇는다.
+  const slideMs = Math.max(POLL_MS, p.slideMs ?? POLL_MS)
   useEffect(() => {
     const kakao = k.current, m = map.current
     if (!ready || !kakao || !m) return
     const now = performance.now()
     const seen = new Set<number>()
     for (const s of p.ships) {
-      if (s.status !== '입항 중' && s.status !== '입항') continue
+      if (s.status !== '입항 중' && s.status !== '입항' && s.status !== '출항 중') continue
       seen.add(s.ship_id)
       const to: [number, number] = [s.lat, s.lon]
       let t = tracks.current.get(s.ship_id)
@@ -349,11 +355,13 @@ export default function KakaoArrivalMap(p: Props) {
         // 조업·대기(회색 배)에서 막 출발한 배는 회색 배가 있던 자리부터 이어 간다(300배에선 그새 1~2km 가 있어 순간이동해 보였다, 10/13)
         const idle = idleBoats.current.get(id)?.o.getPosition()
         const from: [number, number] = idle ? [idle.getLat(), idle.getLng()] : to
-        t = { o, el, from, to, path: [from, to], route: s.route ?? [], t0: now, status: s.status, docked: isDocked(s), heading: s.course ?? 270, rot: s.course ?? 270, dockAt: null }
+        t = { o, el, from, to, path: [from, to], route: s.route ?? [], t0: now, dur: slideMs, status: s.status, docked: isDocked(s), heading: s.course ?? 270, rot: s.course ?? 270, dockAt: null }
         tracks.current.set(id, t)
       } else if (t.dockAt && isDocked(s)) {
         // 이미 정박하러 가는 중: 새 위치(같은 자리)가 와도 시간을 다시 재지 않는다. 다시 재면 도착 직전마다
         // '남은 몇 m를 또 2초'가 반복돼 부두 앞에서 한참 머물렀다(300배 재생, 10/11)
+      } else if (t.to[0] === to[0] && t.to[1] === to[1] && (s.route ?? []).length === t.route.length) {
+        // 서버 위치가 아직 그대로(1분이 안 지남): 미끄러지던 것을 잇는다. 다시 재면 매초 남은 거리의 일부만 가서 끝내 닿지 못한다(10/15)
       } else {
         const here = lerpPos(t, now)
         const ahead = restOfPath(t, now) // 아직 못 그린 모서리(이전 2초 애니메이션이 덜 끝났을 때)
@@ -361,7 +369,7 @@ export default function KakaoArrivalMap(p: Props) {
         // 지난 2초 사이에 지나친 모서리 = 이전 남은 경로 중 새 남은 경로에 없는 앞부분(남은 경로는 항상 뒷부분이 같다)
         const passed = t.route.length >= next.length ? t.route.slice(0, t.route.length - next.length) : []
         const rewound = next.length > t.route.length // 남은 경로가 늘었다 = 시계를 되감았다 → 거꾸로 미끄러지지 않게 바로 옮긴다
-        t.from = rewound ? to : here; t.to = to; t.t0 = now
+        t.from = rewound ? to : here; t.to = to; t.t0 = now; t.dur = slideMs
         // 줄 세우기(10/13): 덜 그린 모서리 → 새로 지나친 모서리 → 새 위치 순서로 이어 그린다. 덜 그린 부분을 버리고
         // 지금 그린 위치에서 바로 가면 빠른 재생(300배)에서 방파제를 건너뛰어 보였다. 밀린 만큼 이번 2초에 조금 빨리 따라잡는다.
         t.path = rewound ? [to, to] : dedupe([here, ...ahead, ...passed, to])
@@ -379,7 +387,7 @@ export default function KakaoArrivalMap(p: Props) {
       if (!t.docked) setHeading(t, keep) // 움직이는 배는 그리는 위치의 진행 방향(애니메이션 루프가 매 프레임 갱신)
     }
     for (const [id, t] of tracks.current) if (!seen.has(id)) { t.o.setMap(null); tracks.current.delete(id) }
-  }, [ready, p.ships, p.selected, onSelect])
+  }, [ready, p.ships, p.selected, onSelect, slideMs])
 
   // 조업·대기 배: 회색 배 모양(10/11 오너: 점 → 배 모양, 들어오는·정박한 배와 같은 그림). 처음 화면 밖이라 지도를 옮기거나
   // 축소해야 보인다. 마우스를 올리면(폰은 누르면) 다른 배와 같은 정보 표지. 고르기(onSelect)는 입항 목록용이라 쓰지 않는다.
@@ -467,7 +475,7 @@ export default function KakaoArrivalMap(p: Props) {
         const pos = new kakao.maps.LatLng(la, lo)
         t.o.setPosition(pos)
         if (!t.docked) { const h = lerpHeading(t, now); if (h !== null && Math.abs(h - t.heading) > 0.5) setHeading(t, h) }
-        if (t.dockAt && now - t.t0 >= POLL_MS) { // 정박 지점에 닿았다 → 이제 뱃머리를 돌려 정박
+        if (t.dockAt && now - t.t0 >= t.dur) { // 정박 지점에 닿았다 → 이제 뱃머리를 돌려 정박
           const d = t.dockAt
           t.dockAt = null; t.docked = true
           const hull = t.el.querySelector('[data-hull]') as HTMLElement | null
@@ -616,7 +624,7 @@ function pathLength(pts: [number, number][]) {
 
 /** 지금 그리는 구간의 진행 방향(°, 북=0 동=90). 서버 침로는 2초 앞선 위치 기준이라 모서리 앞에서 미리 꺾여 보였다(10/11). */
 function lerpHeading(t: Track, now: number): number | null {
-  const f = reduceMotion() ? 1 : Math.min(1, (now - t.t0) / POLL_MS)
+  const f = reduceMotion() ? 1 : Math.min(1, (now - t.t0) / t.dur)
   const pts = t.path
   const seg = pts.slice(1).map((p, i) => Math.hypot(p[0] - pts[i][0], (p[1] - pts[i][1]) * 0.81))
   const total = seg.reduce((a, b) => a + b, 0)
@@ -641,7 +649,7 @@ function setHeading(t: Track, deg: number) {
 /** 지금 그리는 꺾은선에서 아직 지나지 않은 모서리들(지금 위치·끝점 제외). 새 위치가 오면 이 뒤에 줄 세운다. */
 function restOfPath(t: Track, now: number): [number, number][] {
   if (reduceMotion()) return []
-  const f = Math.min(1, (now - t.t0) / POLL_MS)
+  const f = Math.min(1, (now - t.t0) / t.dur)
   const pts = t.path
   const seg = pts.slice(1).map((p, i) => Math.hypot(p[0] - pts[i][0], (p[1] - pts[i][1]) * 0.81))
   let d = f * seg.reduce((a, b) => a + b, 0)
@@ -659,7 +667,7 @@ function dedupe(pts: [number, number][]): [number, number][] {
 
 function lerpPos(t: Track, now: number): [number, number] {
   if (reduceMotion()) return t.to
-  const f = Math.min(1, (now - t.t0) / POLL_MS)
+  const f = Math.min(1, (now - t.t0) / t.dur)
   // 꺾은선을 거리 비율로 따라간다(직선으로 이으면 빠른 재생에서 방파제·육지를 가로지른다, 10/11)
   const pts = t.path
   const seg = pts.slice(1).map((p, i) => Math.hypot(p[0] - pts[i][0], (p[1] - pts[i][1]) * 0.81))

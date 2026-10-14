@@ -205,6 +205,15 @@ def sim_seek(request: Request, t: str = Query(..., description="HH:MM")) -> dict
     return {**e.clock.state(), "feed": e.feed}
 
 
+@app.post("/api/sim/realtime")
+def sim_realtime(request: Request) -> dict:
+    """실제 시각·1배속으로 돌아온다(리허설 장면을 본 뒤 원위치, 10/15)."""
+    e = request.app.state.engine
+    e.clock.realtime()
+    e.reset_tick()
+    return {**e.clock.state(), "feed": e.feed}
+
+
 @app.post("/api/sim/feed")
 def sim_feed(request: Request, mode: str = Query(..., pattern="^(sim|live)$")) -> dict:
     e = request.app.state.engine

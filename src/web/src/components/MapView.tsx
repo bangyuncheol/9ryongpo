@@ -13,6 +13,7 @@ type Props = {
   fill?: boolean // 부모 높이를 꽉 채운다(카카오 지도·대체 지도 모두, 10/12)
   padBottom?: number // 버전 4: 아래를 덮는 시트 높이(px)
   padTop?: number // 버전 4: 위를 덮는 투명 헤더 높이(px, 10/13)
+  slideMs?: number // 새 위치까지 미끄러지는 시간(ms, 카카오 지도만, 10/15)
 }
 
 export default function MapView(props: Props) {

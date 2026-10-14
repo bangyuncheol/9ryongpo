@@ -7,6 +7,7 @@ import { hhmm } from '../api'
 const COLOR: Record<Ship['status'], string> = {
   '입항 중': 'var(--color-arriving)',
   '입항': 'var(--color-arrived)',
+  '출항 중': 'var(--color-idle)',
   '조업·대기': 'var(--color-idle)',
   '미갱신': 'var(--color-idle)',
 }

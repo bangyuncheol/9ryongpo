@@ -26,10 +26,13 @@ def judge(current: list[dict], previous: list[dict], fleet: dict[int, dict], now
         d = geo.haversine_km(p["lat"], p["lon"], *place)
         base = {"ship_id": sid, "name": info.get("name"), "biz": info.get("biz"), "gt": info.get("gt"),
                 "d_km": round(d, 2), "lat": p["lat"], "lon": p["lon"]}
-        if d <= ARRIVED_KM:
-            arrived.append({**base, "status": "입항"})
-            continue
         speed, course = p.get("speed") or 0.0, p.get("course")
+        if d <= ARRIVED_KM:
+            # 항구 안에서 2kn 이상으로 멀어지는 배는 출항 중이다. '입항'으로 세지 않는다(10/15: 종일 드나드는 시뮬레이터)
+            leaving = speed >= MIN_SPEED_KN and sid in prev_d and d > prev_d[sid]
+            if not leaving:
+                arrived.append({**base, "status": "입항"})
+            continue
         if d > MAX_KM or speed < MIN_SPEED_KN or course is None:
             continue
         if d > HARBOR_KM and geo.angle_diff(float(course), geo.bearing_deg(p["lat"], p["lon"], *place)) > MAX_HEADING_DIFF:

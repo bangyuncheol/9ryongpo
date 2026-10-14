@@ -5,7 +5,8 @@ import { Button } from './Card'
 
 /**
  * 데모 진행용. 주소에 ?admin=1 을 붙였을 때만 보인다. 토큰 없음(10/10 결정, 우리만 쓰는 데모 도구).
- * 누른 표시(10/11): 상태가 이어지는 버튼(재생 60·300배, 일시정지, 전화 켜기)은 지금 상태와 맞으면 계속 강조,
+ * 기본은 '실시간'(실제 시각·1배속, 10/15). 리허설은 03:00 → 재생 60배, 끝나면 '실시간'으로 원위치.
+ * 누른 표시(10/11): 상태가 이어지는 버튼(실시간, 재생 60·300배, 일시정지, 전화 켜기)은 지금 상태와 맞으면 계속 강조,
  * 한 번 실행하는 버튼(시각 이동, 시험 알림·전화, 데이터 전환)은 누른 뒤 1초 강조.
  */
 export default function AdminBar({ clock, feed, call }: { clock: Clock | null; feed: string | null; call?: CallState | null }) {
@@ -40,6 +41,7 @@ export default function AdminBar({ clock, feed, call }: { clock: Clock | null; f
   return (
     <div className="mx-[var(--spacing-side)] flex flex-wrap items-center gap-2 rounded-card border border-dashed border-line bg-card p-3 text-small">
       <span className="font-bold">진행</span>
+      {b('/api/sim/realtime', '실시간', !!c?.playing && c.speed === 1)}
       {b('/api/sim/seek?t=03:00', '03:00')}
       {b('/api/sim/seek?t=03:10', '03:10')}
       {b('/api/sim/play?speed=60', '재생 60배', !!c?.playing && c.speed === 60)}

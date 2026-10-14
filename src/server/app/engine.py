@@ -96,14 +96,17 @@ class Engine:
         status = {s["ship_id"]: s["status"] for s in judged["arriving"] + judged["arrived"]}
         idle = "미갱신" if notice else "조업·대기"
         routes = self.sim.routes(t) if self.feed == "sim" else {}
+        inbound = self.sim.inbound(t) if self.feed == "sim" else set()
         out = []
         for p in cur:
             info = self.fleet.get(p["ship_id"], {})
             out.append({"ship_id": p["ship_id"], "name": info.get("name"), "biz": info.get("biz"), "gt": info.get("gt"),
                         "lat": p["lat"], "lon": p["lon"], "course": p.get("course"), "speed": p.get("speed"),
                         # 지도 표시용: 항구 입구를 도는 동안은 방향이 위판장과 어긋나 입항 판정(예보·알림 정본)에서 빠진다.
-                        # 시뮬레이터상 부두로 가는 중이면 지도에선 '입항 중'으로 그린다(회색 조업 점으로 바뀌지 않게, 10/11)
-                        "status": status.get(p["ship_id"], "입항 중" if p["ship_id"] in routes else idle),
+                        # 시뮬레이터상 부두로 가는 중이면 지도에선 '입항 중'으로 그린다(회색 조업 점으로 바뀌지 않게, 10/11).
+                        # 부두에서 조업 해역으로 나가는 중이면 '출항 중'(10/15: 하루 종일 드나드는 배)
+                        "status": status.get(p["ship_id"], "입항 중" if p["ship_id"] in inbound
+                                             else "출항 중" if p["ship_id"] in routes else idle),
                         "route": routes.get(p["ship_id"], [])})
         return {"clock": self.clock.state(), "source": self.source_badge(), "ships": out, "notice": notice}
 

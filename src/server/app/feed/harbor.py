@@ -60,4 +60,5 @@ def _raft(b: Berth, row: int) -> Berth:
     return Berth(b.lat - 0.00004 * row, b.lon + 0.00005 * row, b.heading, b.via_north)
 
 
-SLOTS: tuple[Berth, ...] = tuple(_raft(b, row) for row in range(3) for b in _BASE)
+# 네 겹까지(10/15: 하루 종일 드나드는 시뮬레이터에서 아침 7~9시에 최대 36척이 동시에 정박)
+SLOTS: tuple[Berth, ...] = tuple(_raft(b, row) for row in range(4) for b in _BASE)

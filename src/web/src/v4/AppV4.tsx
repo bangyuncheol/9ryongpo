@@ -41,7 +41,7 @@ export default function AppV4() {
   const onContentHeight = useCallback((h: number) => setFit(h + HANDLE_H + TABS_H), [])
   const hs = snapHeights(useViewportHeight(), fit)
   // 1초마다(10/13 오너: /demo 를 띄우고 다른 창 /?admin=1 에서 재생하면 같이 움직여야 함. 2초면 300배속에서 10분씩 늦어 보였다).
-  // 배 위치 보간 시간은 KakaoArrivalMap POLL_MS 와 같다
+  // 배 위치는 서버에서 가상 1분 단위로 바뀐다(10/15). 지도는 그 1분이 실제로 걸리는 시간(1배속 60초, 60배속 1초) 동안 미끄러지듯 잇는다
   // /demo 안(FED)이면 부모 창이 같은 값을 두 화면에 함께 보내므로 직접 조회하지 않는다(10/13 오너: 폰·웹 시계를 같게)
   const feed = useParentFeed()
   const todayPoll = usePoll(api.today, FED ? 0 : 1000)
@@ -62,6 +62,7 @@ export default function AppV4() {
 
   const t = today.data
   const arriving = [...(t?.arriving ?? [])].sort(byEta)
+  const slideMs = t?.clock.playing ? Math.min(60_000, Math.max(1000, 60_000 / (t.clock.speed || 1))) : 1000
   const idle = (ships.data?.ships ?? []).filter((s) => s.status === '조업·대기').length
   const tr = traffic.data
   const truck = tr?.last_hour ? {
@@ -72,7 +73,7 @@ export default function AppV4() {
   const map = (
     <MapView place={place} ships={ships.data?.ships ?? []} arriving={t?.arriving ?? []}
       arrivedCount={t?.arrived.length ?? 0} truck={truck} trucks={trucks.data?.sensors ?? []} sensor={sensor}
-      notice={t?.notice ?? null} selected={selected} onSelect={onSelect} legendToggle fill padBottom={wide ? 0 : hs[snap]} padTop={wide ? 0 : HEADER_H} />
+      notice={t?.notice ?? null} selected={selected} onSelect={onSelect} legendToggle fill padBottom={wide ? 0 : hs[snap]} padTop={wide ? 0 : HEADER_H} slideMs={slideMs} />
   )
   // '생선 알림 받기'·질문창의 알림 준비: 알림 신청 칸으로. 폰은 알림 장으로 넘긴다
   const toWait = () => {
