@@ -1,6 +1,6 @@
 """01_설계/01_아키텍처.svg 생성기. 그림을 고칠 때는 이 파일을 고쳐 다시 만든다(손으로 SVG 좌표를 고치지 않는다).
 
-실행(저장소 루트, 맥·윈도우 공통):  python src/docs/make_architecture_svg.py 01_설계/01_아키텍처.svg
+실행(저장소 루트, 맥·윈도우 공통):  python 01_설계/make_architecture_svg.py 01_설계/01_아키텍처.svg
 """
 import sys
 from xml.sax.saxutils import escape as E

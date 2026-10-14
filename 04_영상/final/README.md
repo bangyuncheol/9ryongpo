@@ -1,6 +1,6 @@
 # 배마중 소개영상 최종 조립
 
-실제 촬영분 `brag-output/배마중_소개영상.mp4`(94초, 720p HEVC) 위에 demo 의 그래픽(앱 화면·통화 처리 화면·자막·아웃트로)을 얹는다. 가로 1920×1080, 총 99초(촬영분 91초 + 아웃트로 8초).
+실제 촬영분 `04_영상/배마중_소개영상.mp4`(94초, 720p HEVC) 위에 demo 의 그래픽(앱 화면·통화 처리 화면·자막·아웃트로)을 얹는다. 가로 1920×1080, 총 99초(촬영분 91초 + 아웃트로 8초).
 
 ## 구조
 
@@ -25,7 +25,7 @@
 ## 다시 만들기
 
 ```
-cd brag-output/final
+cd 04_영상/final
 python build.py                      # timeline.json → composition/index.html (+ 폰트 서브셋)
                                      # 맥: NOTO_KR_TTF=<구글 폰트 NotoSansKR[wght].ttf> python build.py
 cd composition

@@ -169,7 +169,7 @@ table.t th { font-size: var(--fs-label); color: var(--muted); font-weight: 600; 
 .rows p { padding: 22px 0; border-top: 1px solid var(--line); }
 .rows p:last-child { border-bottom: 1px solid var(--line); }
 
-/* 표지 브랜드: 눈 달린 어선 아이콘 + '배마중' 레터링(03_발표/design-preview/, 10/13 오너 승인 시안. 앱 헤더·파비콘·푸시 아이콘과 같은 그림) */
+/* 표지 브랜드: 눈 달린 어선 아이콘 + '배마중' 레터링(05_브랜드/, 10/13 오너 승인 시안. 앱 헤더·파비콘·푸시 아이콘과 같은 그림) */
 .lockup { display: flex; align-items: center; gap: 40px; margin-top: 28px; }
 .lockup img.ic { width: 176px; height: 176px; border-radius: 40px; flex: none; }
 .lockup img.wm { height: 150px; width: auto; }
@@ -181,7 +181,7 @@ table.t th { font-size: var(--fs-label); color: var(--muted); font-weight: 600; 
 .qrs .q b { font-size: 22px; font-weight: 800; color: var(--night-blue); letter-spacing: .03em; }
 .qrs .q small { font-size: 19px; color: var(--night-muted); margin-top: -4px; }
 
-/* 소개 영상 자리: 03_발표/영상/소개.mp4 (없으면 brag-output/final/ 렌더 결과)가 있으면 자동으로 재생 화면이 된다 */
+/* 소개 영상 자리: 04_영상/final/배마중_소개영상_최종.mp4 가 있으면 자동으로 재생 화면이 된다 */
 .vwrap { width: 1600px; aspect-ratio: 16 / 9; margin: 0 auto; background: #000; border-radius: 28px; overflow: hidden; position: relative; outline: 2px dashed #2b4466; }
 .vwrap video { width: 100%; height: 100%; display: none; background: #000; }
 .vwrap .vph { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; color: var(--night-muted); font-size: 34px; line-height: 1.6; }
@@ -356,7 +356,7 @@ body:hover #hud { opacity: .8; }
   <div class="body" style="margin:auto 0; align-items:center; gap:80px;">
     <div class="col">
       <p class="kicker">2026 디지털 트윈 구룡포 AI 해커톤 · 팀 인터뷰브릿지</p>
-      <h1 class="lockup"><img class="ic" src="design-preview/baemajung-icon.png" alt=""><img class="wm" src="design-preview/baemajung-wordmark.png" alt="배마중"></h1>
+      <h1 class="lockup"><img class="ic" src="../05_브랜드/baemajung-icon.png" alt=""><img class="wm" src="../05_브랜드/baemajung-wordmark.png" alt="배마중"></h1>
       <p style="font-size:44px; font-weight:650; margin-top:44px; line-height:1.4;">오늘 뭐가 몇 시에 들어오는지,<br>위판장 나가기 전에 알려 드립니다</p>
       <p class="b30" style="margin-top:36px; color:var(--night-muted);">지금 바로 bmj.kr 에서 확인해보세요.</p>
       <div class="qrs">
@@ -386,10 +386,9 @@ body:hover #hud { opacity: .8; }
   </div>
   <div class="vwrap" id="introWrap">
     <video id="introVideo" controls playsinline preload="metadata">
-      <source src="영상/소개.mp4" type="video/mp4">
-      <source src="../brag-output/final/배마중_소개영상_최종.mp4" type="video/mp4">
+      <source src="../04_영상/final/배마중_소개영상_최종.mp4" type="video/mp4">
     </video>
-    <div class="vph">소개 영상<small>03_발표/영상/소개.mp4 (또는 brag-output/final/ 렌더 결과)를 넣으면 여기서 재생됩니다</small></div>
+    <div class="vph">소개 영상<small>04_영상/final/배마중_소개영상_최종.mp4 를 넣으면 여기서 재생됩니다</small></div>
   </div>
   <div class="foot"><span class="src"></span><span class="pg"></span></div>
   <aside class="notes">(소개 영상 재생. 스페이스로 재생·정지, → 로 다음 장.)</aside>
@@ -430,11 +429,9 @@ body:hover #hud { opacity: .8; }
   </div>
   <div class="vwrap">
     <video controls playsinline preload="metadata">
-      <source src="../brag-output/배마중_문제인식영상.mp4" type="video/mp4">
-      <source src="영상/위판장_인터뷰.mp4" type="video/mp4">
-      <source src="../brag-output/배마중_취재영상.mp4" type="video/mp4">
+      <source src="../04_영상/배마중_문제인식영상.mp4" type="video/mp4">
     </video>
-    <div class="vph">새벽 구룡포 위판장 취재 영상<small>brag-output/배마중_문제인식영상.mp4 를 넣으면 여기서 재생됩니다</small></div>
+    <div class="vph">새벽 구룡포 위판장 취재 영상<small>04_영상/배마중_문제인식영상.mp4 를 넣으면 여기서 재생됩니다</small></div>
   </div>
   <div class="foot"><span class="src"></span><span class="pg"></span></div>
   <aside class="notes">(새벽 구룡포 위판장 취재 영상 재생, 1분 6초. 스페이스로 재생·정지, → 로 다음 장. PDF에는 주요 장면 6컷.)</aside>
@@ -638,7 +635,7 @@ body:hover #hud { opacity: .8; }
 
 <!-- 13 팀 -->
 <section class="slide dark">
-  <div style="display:flex; align-items:center; gap:22px;"><div style="background:#fff; border-radius:16px; padding:12px 20px;"><img src="design-preview/interviewbridge-logo-kor.png" alt="인터뷰브릿지" style="height:40px; display:block;"></div><p class="kicker" style="margin:0;">팀 인터뷰브릿지 · 포항공과대학교 컴퓨터공학과</p></div>
+  <div style="display:flex; align-items:center; gap:22px;"><div style="background:#fff; border-radius:16px; padding:12px 20px;"><img src="../05_브랜드/interviewbridge-logo-kor.png" alt="인터뷰브릿지" style="height:40px; display:block;"></div><p class="kicker" style="margin:0;">팀 인터뷰브릿지 · 포항공과대학교 컴퓨터공학과</p></div>
   <h2 style="margin-top:22px;">사람처럼 말을 주고받는 음성 AI를 만드는 팀</h2>
   <div class="techs">
     <div class="tech"><div><span class="en">CONVERSATION ENGINE</span><b>사람처럼 말을 주고받는 실시간 음성 대화</b><p>말 끝과 침묵, 맞장구, 끼어들기를 실시간으로 판단해 발화권을 조정합니다. 배마중 070 전화가 이 엔진 위에 있습니다.</p></div><div class="num"><b>20~40<span style="font-size:22px;">ms</span></b><small>끼어들면 AI 말을 끊는 시간</small></div></div>

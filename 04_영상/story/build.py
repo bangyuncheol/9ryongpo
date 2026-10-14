@@ -9,7 +9,7 @@ prep.py 가 이어 붙인 촬영분(footage.mp4)을 바닥에 깔고 그 위에
 를 얹는다. 문장·시각은 timeline.json 에서만 고친다.
 
 글꼴: Noto Sans KR 에서 쓰는 글자만 추려 assets/fonts/NotoSansKR-subset.ttf 로 넣는다. 원본은 NOTO_KR_TTF(없으면 기존 서브셋 유지).
-실행: python build.py  →  cd composition && npx --yes hyperframes@0.8.146 check && npx --yes hyperframes@0.8.146 render --quality looks --output ../배마중_취재영상.mp4
+실행: python build.py  →  cd composition && npx --yes hyperframes@0.8.146 check && npx --yes hyperframes@0.8.146 render --quality looks --output ../배마중_문제인식영상.mp4
 """
 import json, os, re, subprocess, sys
 from html import escape

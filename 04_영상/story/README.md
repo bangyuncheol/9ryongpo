@@ -17,10 +17,10 @@
 ## 다시 만들기
 
 ```
-cd brag-output/story
+cd 04_영상/story
 uv run --no-project --python 3.12 --with mediapipe --with opencv-python-headless python prep.py <원본 폴더> <blaze_face_short_range.tflite>
 python build.py                      # NOTO_KR_TTF=<NotoSansKR[wght].ttf> 를 주면 글꼴 서브셋 갱신
 cd composition
 npx --yes hyperframes@0.8.146 check
-npx --yes hyperframes@0.8.146 render --quality looks --output ../배마중_취재영상.mp4
+npx --yes hyperframes@0.8.146 render --quality looks --output ../배마중_문제인식영상.mp4
 ```

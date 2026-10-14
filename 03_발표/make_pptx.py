@@ -1,8 +1,8 @@
 """배마중_발표.pdf 의 쪽을 이미지로 떠서 PPT 로 만든다. 영상 장(2·5)은 영상을 바로 재생할 수 있게 넣는다.
 
 쓰는 법(윈도우·맥 공통):
-  uv run --with pymupdf,python-pptx python make_pptx.py [소개영상.mp4] [취재영상.mp4]
-- 기본 영상: brag-output/final/배마중_소개영상_최종.mp4(완성본, H.264 1080p), brag-output/배마중_문제인식영상.mp4. HEVC 파일을 주면 H.264 사본으로 바꿔 넣는다
+  uv run --with pymupdf,python-pptx python make_pptx.py [소개영상.mp4] [문제인식영상.mp4]
+- 기본 영상: 04_영상/final/배마중_소개영상_최종.mp4(완성본, H.264 1080p), 04_영상/배마중_문제인식영상.mp4. HEVC 파일을 주면 H.264 사본으로 바꿔 넣는다
 - 쪽 번호와 영상 장 번호는 배마중_발표.html 의 장 순서를 따른다(VIDEO_PAGES).
 - 각 장 노트에는 배마중_발표_노트.md 의 발표 메모와 출처가 들어간다.
 - 결과 03_발표/배마중_발표.pptx 는 영상이 들어 있어 100MB 를 넘으므로 git 에 올리지 않는다(.gitignore).
@@ -25,7 +25,7 @@ ROOT = HERE.parent
 PDF = HERE / "배마중_발표.pdf"
 NOTES = HERE / "배마중_발표_노트.md"
 OUT = HERE / "배마중_발표.pptx"
-VIDEO_PAGES = {2: ROOT / "brag-output" / "final" / "배마중_소개영상_최종.mp4", 5: ROOT / "brag-output" / "배마중_문제인식영상.mp4"}
+VIDEO_PAGES = {2: ROOT / "04_영상" / "final" / "배마중_소개영상_최종.mp4", 5: ROOT / "04_영상" / "배마중_문제인식영상.mp4"}
 W, H = Emu(12192000), Emu(6858000)  # 13.333 × 7.5 in (16:9)
 
 

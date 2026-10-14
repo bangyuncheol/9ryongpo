@@ -66,8 +66,9 @@ description: 미구현·보류·기술부채·진행 중 과제의 현재 상태
 - ClawOps SDK의 통화 종료 도구는 즉시 끊어 끝인사가 잘린다 → `service.py`가 끝인사 음성 길이만큼 기다렸다 끊는다.
 
 **소개영상 (10/12 밤)**
-- 최종 조립 파이프라인 `brag-output/final/`(README 참고). 렌더 결과 `brag-output/final/배마중_소개영상_최종.mp4`는 git 제외, OneDrive 에만 있음.
-- 10/13 수정 7건(이름표 흰 글자·워드마크 배경 제거·E-UM API 정식 이름·API 묶음 세로 채움·서버 문구·아웃트로 QR) 코드 반영(`40691bd`) → 10/13 오전 윈도우 PC에서 재렌더 완료(99초, 108.5MB). 렌더 프레임의 QR 두 개를 디코드해 확인(WEB → https://bmj.kr, APP → GitHub 릴리스 apk-v1.0.0). 영상은 git 제외라 윈도우 PC `brag-output/final/배마중_소개영상_최종.mp4`에만 있음 — 제출용으로 옮길 것.
+- 최종 조립 파이프라인 `04_영상/final/`(README 참고). 렌더 결과 `04_영상/final/배마중_소개영상_최종.mp4`는 git 제외, OneDrive 에만 있음.
+- **10/15 폴더 정리**: `brag-output/` → `04_영상/`, `03_발표/design-preview/` → `05_브랜드/`, `src/docs/make_architecture_svg.py` → `01_설계/`. git 밖 mp4(완성본 2개·촬영 원본 `배마중_소개영상.mp4`·`final/composition/assets/live/`)는 git이 옮겨 주지 않으니 **맥 클론에서는 pull 뒤 옛 `brag-output/`에 남은 파일을 `04_영상/` 같은 자리로 손으로 옮긴다**(윈도우 PC는 옮김). 1차 `/brag` 산출물·`demo/`·`02_수신자료/수상작/`·`배마중_발표_노트.md`(make_notes.py로 재생성)는 지웠다.
+- 10/13 수정 7건(이름표 흰 글자·워드마크 배경 제거·E-UM API 정식 이름·API 묶음 세로 채움·서버 문구·아웃트로 QR) 코드 반영(`40691bd`) → 10/13 오전 윈도우 PC에서 재렌더 완료(99초, 108.5MB). 렌더 프레임의 QR 두 개를 디코드해 확인(WEB → https://bmj.kr, APP → GitHub 릴리스 apk-v1.0.0). 영상은 git 제외라 윈도우 PC `04_영상/final/배마중_소개영상_최종.mp4`에만 있음 — 제출용으로 옮길 것.
 - 남은 일: 오너가 배경음악을 고르면 `timeline.json` `music.file` 교체(영상 97초보다 짧으면 ffmpeg acrossfade 로 100초로 이어 붙임) → `python build.py` → 렌더. 자막 문구 중 '기다리는 동안 생선을 고르고'·'몇 시에 출발하는데?'·'아, 근데 그래서'는 받아쓰기대로 넣었으니 귀로 한 번 확인.
 
 ## 미구현

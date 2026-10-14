@@ -118,7 +118,7 @@ export default function AppV4() {
 
 const HEADER_H = 52 // 폰 헤더 띠: 아이콘 + 워드마크 + 시각만(10/13 오너: 한 줄 소개를 빼고 지도 자리를 넓힘)
 
-/** 앱 아이콘(탭·홈 화면·푸시와 같은 그림)과 '배마중' 워드마크. 원본: 03_발표/design-preview/(10/13 오너) */
+/** 앱 아이콘(탭·홈 화면·푸시와 같은 그림)과 '배마중' 워드마크. 원본: 05_브랜드/(10/13 오너) */
 function Logo() {
   return (
     <span className="flex items-center gap-2">

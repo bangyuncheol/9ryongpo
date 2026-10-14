@@ -39,12 +39,11 @@ data/tts_cache/
 data/stt_clips/
 
 # 소개영상 원본·렌더 결과(용량 큼, OneDrive에만 둠)
-brag-output/*.mp4
-brag-output/**/assets/live/
-brag-output/final/*.mp4
-brag-output/demo/*.mp4
-brag-output/story/*.mp4
-brag-output/**/.*.hf-transaction-*/
+04_영상/*.mp4
+04_영상/**/assets/live/
+04_영상/final/*.mp4
+04_영상/story/*.mp4
+04_영상/**/.*.hf-transaction-*/
 
 # 안드로이드 APK(TWA): 서명 키·빌드 결과는 커밋 안 함 (키는 따로 보관)
 src/android/*.keystore
