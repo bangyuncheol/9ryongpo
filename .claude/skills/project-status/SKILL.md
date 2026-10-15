@@ -12,7 +12,12 @@ description: 미구현·보류·기술부채·진행 중 과제의 현재 상태
 ## 참고 파일 안내
 - 설계 정본: `01_설계/01_설계.md` (§10 일정, §4 모듈 구조). 실행 방법: 루트 `README.md` "실행 방법".
 
-## 진행 상황 (마지막 갱신 2026-10-09 밤)
+## 진행 상황 (마지막 갱신 2026-10-15 오전)
+
+### 2026-10-15 Railway 전환 (GCP VM 만료)
+- 루트 `Dockerfile`·`railway.toml`·`.dockerignore` 추가로 Railway 빌드·배포 성공(서비스 `9ryongpo`, `main` 푸시마다 자동 배포). 절차는 `deploy` 스킬.
+- **남은 일(대시보드에서 사람이 할 것)**: ① Variables에 `.env` 값 입력(지금은 비어 있어 E-UM·OpenAI·VAPID 없이 sim 모드로만 뜸, 푸시 불가) ② Settings > Networking에서 공개 도메인 생성(지금 Unexposed) ③ 카카오 개발자 콘솔 JavaScript SDK 도메인에 Railway 도메인 등록 ④ 구독을 재배포 뒤에도 남기려면 Volume을 `/app/db`에 마운트 ⑤ `bmj.kr` DNS를 Railway 도메인으로 옮길지 결정(안드로이드 TWA가 `bmj.kr`을 가리킴).
+
 
 **끝난 것**
 - 서버 뼈대 `src/server/` (uv, Python 3.12, FastAPI). 기동 시 위판장 좌표·어선 명부 202척·교통 센서 11대·위판 실적(`data/auction/`) 적재.
