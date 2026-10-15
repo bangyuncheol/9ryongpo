@@ -11,7 +11,16 @@ description: 배포 절차·환경 변수 목록·프로덕션 마이그레이�
 ## 참고 파일 안내
 - **`migrations.md`** — 프로덕션 적용 대기 중인 마이그레이션 목록
 
-## 배포 환경 (2026-10-09 결정, 설계 §1-9·§1-19)
+## 배포 환경 — Railway (2026-10-15 전환)
+- 대회 제공 GCP VM이 만료돼 Railway로 옮겼다. 프로젝트 `independent-perfection` > 서비스 `9ryongpo`(GitHub `bangyuncheol/9ryongpo` `main` 자동 배포).
+- 빌드: 루트 `Dockerfile`(1단계 Node 22로 `src/web` 빌드 → 2단계 Python 3.12 + uv로 `src/server` 설치, `data/auction/` CSV·`dist/` 포함). `railway.toml`이 Dockerfile 빌더와 `/api/health` 헬스체크를 지정한다. `.dockerignore`가 `.env`·문서·영상을 이미지에서 뺀다.
+- 실행: `uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 1`. `DB_PATH` 기본값은 이미지 안 `/app/db/app.db`.
+- 환경 변수: Railway 서비스 > Variables 에 `.env`의 값을 그대로 넣는다(아래 표). `VITE_KAKAO_MAP_KEY`는 빌드 인자로도 들어가므로 Variables에 넣으면 된다. 카카오 개발자 콘솔 JavaScript SDK 도메인에 Railway 도메인을 등록한다.
+- **DB 지속성**: 컨테이너 파일시스템은 재배포 때 초기화된다(위판 실적은 CSV에서 다시 적재되지만 푸시 구독은 사라짐). 구독을 남기려면 서비스에 Volume을 만들어 마운트 경로 `/app/db`로 붙인다.
+- 전화(`PHONE_ENABLED=1`)는 번호당 서버 하나만. Railway에서 켜려면 로컬·다른 서버에서 먼저 끈다.
+- 배포 절차: 로컬 테스트 통과 → `main` 푸시 → Railway가 자동 빌드·배포 → 대시보드 Deployments에서 성공 확인 → 화면 핵심 흐름 1회 확인. 되돌리기는 대시보드에서 이전 배포 Rollback.
+
+## (참고) 이전 배포 환경 — GCP VM (2026-10-09~10-15, 만료)
 - 대회 제공 GCP VM 1대(운영진이 만든 VM에 SSH 공개키로 접속). 프로젝트 권한이 아니라 Cloud Run은 못 쓴다.
 - VM에서 FastAPI 프로세스 1개를 systemd로 상시 실행. 화면은 FastAPI가 `src/web/dist`를 서빙. DB는 VM 디스크 `data/app.db`.
 - 파일: `src/deploy/setup_vm.sh`(첫 설치) · `update.sh`(갱신) · `wipan.service`(systemd) · `Caddyfile`(HTTPS). 모두 리눅스 VM 전용.

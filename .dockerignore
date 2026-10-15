@@ -1,0 +1,10 @@
+# 이미지에 넣는 것만 허용: 서버·화면 소스와 위판 실적 CSV. 비밀(.env)·문서·영상은 절대 들어가지 않는다.
+*
+!src/server
+!src/web
+!data/auction
+src/server/.venv
+src/server/**/__pycache__
+src/server/.pytest_cache
+src/web/node_modules
+src/web/dist
