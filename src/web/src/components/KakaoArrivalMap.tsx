@@ -57,6 +57,8 @@ type Props = {
 // path: 이번 2초 동안 그릴 꺾은선(지금 그린 위치 → 지나친 모서리들 → 새 위치). route: 마지막으로 받은 남은 꺾이는 지점
 type Track = { o: K; el: HTMLElement; from: [number, number]; to: [number, number]; path: [number, number][]; route: [number, number][]; t0: number; dur: number; status: Ship['status']; docked: boolean; heading: number; rot: number; dockAt: Ship | null }
 
+// 배 모양 크기는 상태·톤수와 무관하게 모두 같다(10/15 오너). 전에는 움직이는 배 1 · 정박 0.8 · 조업 0.75 로 달라 한 척만 커 보였다
+const BOAT_SCALE = 0.85
 const boatSvg = (fill: string) =>
   `<svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c2.8 3 4 6.4 4 10v7.5c0 1-.8 1.8-1.8 1.8H9.8c-1 0-1.8-.8-1.8-1.8V12c0-3.6 1.2-7 4-10z" fill="${fill}" stroke="#fff" stroke-width="1.6"/><circle cx="12" cy="12" r="1.8" fill="#fff"/></svg>`
 
@@ -89,7 +91,7 @@ function paintBoat(el: HTMLElement, s: Ship, selected: boolean, t: Track) {
   const hull = el.querySelector('[data-hull]') as HTMLElement
   hull.innerHTML = boatSvg(docked ? 'var(--color-arrived)' : s.status === '출항 중' ? 'var(--color-idle)' : 'var(--color-arriving)')
   // 정박한 배 방향은 서버가 자리마다 정한 값(부두와 나란히 / 뱃머리를 해안에, harbor.py)
-  hull.style.transform = `rotate(${turnTo(t, s.course ?? 270)}deg) scale(${docked ? 0.8 : 1})`
+  hull.style.transform = `rotate(${turnTo(t, s.course ?? 270)}deg) scale(${BOAT_SCALE})`
   hull.style.filter = selected ? 'drop-shadow(0 0 3px var(--color-primary)) drop-shadow(0 0 2px var(--color-primary))' : ''
   ;(el.firstChild as HTMLElement).className = docked ? '' : 'boat-bob'
   el.setAttribute('aria-label', `${s.name ?? '배'} ${s.status}`)
@@ -412,7 +414,7 @@ export default function KakaoArrivalMap(p: Props) {
       } else b.o.setPosition(pos)
       const hull = b.el.querySelector('[data-hull]') as HTMLElement
       hull.innerHTML = boatSvg('var(--color-idle)')
-      hull.style.transform = `rotate(${turnTo(b.t, s.course ?? b.t.heading)}deg) scale(0.75)`
+      hull.style.transform = `rotate(${turnTo(b.t, s.course ?? b.t.heading)}deg) scale(${BOAT_SCALE})`
       ;(b.el.firstChild as HTMLElement).className = ''
       b.el.setAttribute('aria-label', `${s.name ?? '어선'} 조업·대기`)
     }
@@ -643,7 +645,7 @@ function lerpHeading(t: Track, now: number): number | null {
 function setHeading(t: Track, deg: number) {
   const r = turnTo(t, deg)
   const hull = t.el.querySelector('[data-hull]') as HTMLElement | null
-  if (hull) hull.style.transform = `rotate(${r}deg) scale(1)`
+  if (hull) hull.style.transform = `rotate(${r}deg) scale(${BOAT_SCALE})`
 }
 
 /** 지금 그리는 꺾은선에서 아직 지나지 않은 모서리들(지금 위치·끝점 제외). 새 위치가 오면 이 뒤에 줄 세운다. */
